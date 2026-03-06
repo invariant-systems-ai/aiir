@@ -1,0 +1,53 @@
+# Contributing to AIIR
+
+Thank you for your interest in AIIR! We welcome contributions from the community.
+
+## Quick start
+
+```bash
+git clone https://github.com/invariant-systems-ai/aiir-action.git
+cd aiir-action
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+python -m pytest test_cli.py fuzz_cli.py -v
+```
+
+## Ways to contribute
+
+- **Bug reports** — [open an issue](https://github.com/invariant-systems-ai/aiir-action/issues/new?template=bug_report.yml)
+- **Feature requests** — [start a discussion](https://github.com/invariant-systems-ai/aiir-action/issues/new?template=feature_request.yml)
+- **Security vulnerabilities** — see [SECURITY.md](SECURITY.md) (do **not** open a public issue)
+- **Code contributions** — fork, branch, PR (see below)
+
+## Pull request process
+
+1. Fork the repo and create a feature branch from `main`
+2. Write tests for any new functionality
+3. Run the full test suite: `python -m pytest test_cli.py fuzz_cli.py -v`
+4. Ensure zero lint errors and all tests pass
+5. Open a PR with a clear description of the change
+
+### Commit messages
+
+Use clear, descriptive commit messages. Examples:
+- `fix: handle empty commit range gracefully`
+- `feat: add --format csv output option`
+- `test: add fuzz coverage for unicode filenames`
+
+## Code standards
+
+- **Zero runtime dependencies.** This is a hard rule. AIIR ships with nothing but the Python standard library.
+- **Test everything.** We maintain 285+ tests across unit and fuzz suites.
+- **Security-first.** All inputs are validated. All outputs are deterministic. See the [Threat Model](THREAT_MODEL.md).
+
+## Development setup
+
+AIIR requires Python 3.9+. Dev dependencies:
+
+```bash
+pip install -e ".[dev]"  # installs pytest, etc.
+```
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the [Apache License 2.0](LICENSE).

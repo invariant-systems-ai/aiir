@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 520" font-family="'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', Menlo, Monaco, 'Courier New', monospace" font-size="13">
+  <style>
+    .bg { fill: #0d1117; }
+    .titlebar { fill: #161b22; }
+    .btn-close { fill: #ff5f57; }
+    .btn-min { fill: #febc2e; }
+    .btn-max { fill: #28c840; }
+    .title { fill: #8b949e; font-size: 12px; }
+    .prompt { fill: #7ee787; }
+    .cmd { fill: #e6edf3; }
+    .flag { fill: #79c0ff; }
+    .comment { fill: #8b949e; }
+    .border { fill: #58a6ff; }
+    .label { fill: #8b949e; }
+    .value { fill: #e6edf3; }
+    .value-green { fill: #7ee787; }
+    .value-blue { fill: #79c0ff; }
+    .value-yellow { fill: #e3b341; }
+    .hash { fill: #d2a8ff; }
+    .dim { fill: #484f58; }
+    .note { fill: #8b949e; font-style: italic; }
+    .count { fill: #e6edf3; }
+    .pip { fill: #ffa657; }
+  </style>
+
+  <!-- Window chrome -->
+  <rect class="bg" width="820" height="520" rx="10"/>
+  <rect class="titlebar" width="820" height="36" rx="10"/>
+  <rect class="bg" y="26" width="820" height="10"/>
+  <circle class="btn-close" cx="20" cy="18" r="6"/>
+  <circle class="btn-min" cx="40" cy="18" r="6"/>
+  <circle class="btn-max" cx="60" cy="18" r="6"/>
+  <text class="title" x="410" y="22" text-anchor="middle">Terminal — aiir demo</text>
+
+  <!-- Line 1: pip install -->
+  <text y="62" x="16">
+    <tspan class="prompt">❯ </tspan><tspan class="pip">pip install</tspan><tspan class="cmd"> aiir</tspan>
+  </text>
+  <text y="80" x="16" class="comment">Successfully installed aiir-0.7.0</text>
+
+  <!-- Line 2: cd + aiir -->
+  <text y="108" x="16">
+    <tspan class="prompt">❯ </tspan><tspan class="cmd">cd your-repo</tspan>
+  </text>
+  <text y="130" x="16">
+    <tspan class="prompt">❯ </tspan><tspan class="cmd">aiir</tspan><tspan class="flag"> --pretty</tspan>
+  </text>
+
+  <!-- Receipt 1 -->
+  <text y="158" x="16" class="border">┌─ Receipt: g1-c4dec856a3f8b2c1d4e5f6a7b8c9d0e1</text>
+  <text y="178" x="16">
+    <tspan class="border">│  </tspan><tspan class="label">Commit:  </tspan><tspan class="value">c4dec85630</tspan>
+  </text>
+  <text y="198" x="16">
+    <tspan class="border">│  </tspan><tspan class="label">Subject: </tspan><tspan class="value">feat: add new auth middleware</tspan>
+  </text>
+  <text y="218" x="16">
+    <tspan class="border">│  </tspan><tspan class="label">Author:  </tspan><tspan class="value">Jane Dev &lt;jane@example.com&gt;</tspan>
+  </text>
+  <text y="238" x="16">
+    <tspan class="border">│  </tspan><tspan class="label">Files:   </tspan><tspan class="value-blue">4 changed</tspan>
+  </text>
+  <text y="258" x="16">
+    <tspan class="border">│  </tspan><tspan class="label">AI:      </tspan><tspan class="value-yellow">YES (copilot)</tspan>
+  </text>
+  <text y="278" x="16">
+    <tspan class="border">│  </tspan><tspan class="label">Hash:    </tspan><tspan class="hash">sha256:c4dec856a3f8b2c1d4e5f6a7b8c9…</tspan>
+  </text>
+  <text y="298" x="16">
+    <tspan class="border">│  </tspan><tspan class="label">Sigstore:</tspan><tspan class="value-green"> ✓ signed</tspan>
+  </text>
+  <text y="318" x="16">
+    <tspan class="border">│  </tspan><tspan class="label">Time:    </tspan><tspan class="value">2026-03-07T09:48:59Z</tspan>
+  </text>
+  <text y="338" x="16" class="border">└──────────────────────────────────────────</text>
+
+  <!-- Receipt 2 (dimmed, partial) -->
+  <text y="366" x="16" class="border">┌─ Receipt: g1-a91b0e3f7d2c8a4e6b5f1d9c3a7e82f0</text>
+  <text y="386" x="16">
+    <tspan class="border">│  </tspan><tspan class="label">Commit:  </tspan><tspan class="value">a91b0e3f7d</tspan>
+  </text>
+  <text y="406" x="16">
+    <tspan class="border">│  </tspan><tspan class="label">Subject: </tspan><tspan class="value">fix: resolve token refresh race condition</tspan>
+  </text>
+  <text y="426" x="16">
+    <tspan class="border">│  </tspan><tspan class="label">AI:      </tspan><tspan class="value-green">no</tspan>
+  </text>
+  <text y="446" x="16" class="dim">│  ...</text>
+  <text y="466" x="16" class="border">└──────────────────────────────────────────</text>
+
+  <!-- Footer -->
+  <text y="494" x="16" class="count">--- 2 receipt(s) generated</text>
+  <text y="494" x="340" class="prompt">▋</text>
+</svg>

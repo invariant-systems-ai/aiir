@@ -1,0 +1,134 @@
+name: "AIIR — AI Integrity Receipts"
+description: "Generate cryptographic receipts for every AI-generated code commit. Prove what your AI did."
+author: "Invariant Systems, Inc."
+
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  ai-only:
+    description: "Only receipt AI-authored commits (Copilot, ChatGPT, Claude, etc.)"
+    required: false
+    default: "false"
+  commit-range:
+    description: "Commit range to receipt (default: the commits in the current push/PR)"
+    required: false
+    default: ""
+  output-dir:
+    description: "Directory to write receipt JSON files (default: prints to log)"
+    required: false
+    default: ""
+  sign:
+    description: "Sign receipts with Sigstore keyless signing (requires id-token: write permission)"
+    required: false
+    default: "false"
+
+outputs:
+  receipt_count:
+    description: "Number of receipts generated"
+    value: ${{ steps.receipt.outputs.receipt_count }}
+  ai_commit_count:
+    description: "Number of AI-authored commits detected"
+    value: ${{ steps.receipt.outputs.ai_commit_count }}
+  receipts_json:
+    description: "JSON array of all generated receipts"
+    value: ${{ steps.receipt.outputs.receipts_json }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
+      with:
+        # Use Python 3.11+ (3.9 reached EOL Oct 2025).
+        # The CLI still supports 3.9 via requires-python, but the Action
+        # runner should use a supported, security-patched interpreter.
+        python-version: "3.11"
+
+    - name: Determine commit range
+      id: range
+      shell: bash
+      env:
+        INPUT_COMMIT_RANGE: ${{ inputs.commit-range }}
+        EVENT_NAME: ${{ github.event_name }}
+        PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        PUSH_BEFORE: ${{ github.event.before }}
+        PUSH_AFTER: ${{ github.event.after }}
+      run: |
+        # Use cryptographically random delimiter (not 15-bit $RANDOM)
+        # Fallback to Python if openssl is unavailable (self-hosted runners)
+        DELIM="ghadelimiter_$(openssl rand -hex 16 2>/dev/null || python3 -c 'import secrets; print(secrets.token_hex(16))')"
+        if [ -n "$INPUT_COMMIT_RANGE" ]; then
+          RANGE="$INPUT_COMMIT_RANGE"
+        elif [ "$EVENT_NAME" = "pull_request" ]; then
+          RANGE="${PR_BASE_SHA}..${PR_HEAD_SHA}"
+        elif [ "$EVENT_NAME" = "push" ]; then
+          # Detect first push (null SHA) and fall back to HEAD~1..HEAD
+          if [ "$PUSH_BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            RANGE="HEAD~1..HEAD"
+          else
+            RANGE="${PUSH_BEFORE}..${PUSH_AFTER}"
+          fi
+        else
+          RANGE="HEAD~1..HEAD"
+        fi
+        {
+          echo "range<<${DELIM}"
+          echo "$RANGE"
+          echo "${DELIM}"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Install Sigstore
+      if: inputs.sign == 'true'
+      shell: bash
+      # Pin to compatible range — upper bound prevents surprise major upgrades
+      run: pip install "sigstore>=4.0.0,<5.0.0"
+
+    - name: Generate receipts
+      id: receipt
+      shell: bash
+      env:
+        INPUT_AI_ONLY: ${{ inputs.ai-only }}
+        INPUT_OUTPUT_DIR: ${{ inputs.output-dir }}
+        INPUT_SIGN: ${{ inputs.sign }}
+        COMMIT_RANGE: ${{ steps.range.outputs.range }}
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        ARGS=("--range" "$COMMIT_RANGE" "--github-action")
+
+        if [ "$INPUT_AI_ONLY" = "true" ]; then
+          ARGS+=("--ai-only")
+        fi
+
+        if [ -n "$INPUT_OUTPUT_DIR" ]; then
+          ARGS+=("--output" "$INPUT_OUTPUT_DIR")
+        fi
+
+        if [ "$INPUT_SIGN" = "true" ]; then
+          # Signing requires file output; auto-set output-dir if not provided
+          if [ -z "$INPUT_OUTPUT_DIR" ]; then
+            ARGS+=("--output" ".aiir-receipts")
+          fi
+          ARGS+=("--sign")
+        fi
+
+        # Use -m aiir (module mode) with PYTHONPATH so that
+        # `from aiir import __version__` resolves correctly.  Running
+        # cli.py directly as a script puts aiir/ on sys.path[0], which
+        # makes the 'aiir' package unfindable → ModuleNotFoundError.
+        # -P flag (Python 3.11+) prevents CWD from being
+        # prepended to sys.path. Without it, a malicious repo that
+        # includes its own aiir/ package can shadow the action's code
+        # and achieve arbitrary code execution on the CI runner.
+        PYTHONPATH="$ACTION_PATH" python -P -m aiir "${ARGS[@]}"
+
+    - name: Upload receipt artifacts
+      if: inputs.output-dir != '' || inputs.sign == 'true'
+      uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
+      with:
+        name: aiir-receipts
+        path: |
+          ${{ inputs.output-dir || '.aiir-receipts' }}
+        retention-days: 90

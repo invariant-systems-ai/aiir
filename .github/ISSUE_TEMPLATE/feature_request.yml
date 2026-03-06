@@ -1,0 +1,45 @@
+name: Feature Request
+description: Suggest a feature for AIIR
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to make AIIR better? We'd love to hear it.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What problem does this solve? What's the use case?
+      placeholder: "I need to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How would this work? What would the API/CLI look like?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches you've thought about?
+
+  - type: dropdown
+    id: interface
+    attributes:
+      label: Which interface?
+      options:
+        - CLI
+        - GitHub Action
+        - MCP Tool
+        - Python API
+        - All / Other
+    validations:
+      required: true

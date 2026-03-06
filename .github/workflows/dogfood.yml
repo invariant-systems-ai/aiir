@@ -1,0 +1,30 @@
+# Dogfood: receipt every commit to this repo
+# SEC-05: Only trigger on push (not pull_request) to prevent execution of
+# untrusted code from forks.  PRs are tested after merge via push trigger.
+name: AI Commit Receipt
+on: [push]
+
+jobs:
+  receipt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - uses: ./  # Test the local action
+        id: receipt
+        with:
+          output-dir: .receipts/
+
+      - name: Show results
+        run: |
+          echo "Receipts generated: ${{ steps.receipt.outputs.receipt_count }}"
+          echo "AI-authored: ${{ steps.receipt.outputs.ai_commit_count }}"
+
+      - name: Upload receipts
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0
+        with:
+          name: receipts-${{ github.sha }}
+          path: .receipts/
+          retention-days: 90

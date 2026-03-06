@@ -1,0 +1,74 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aiir"
+version = "1.0.0"
+description = "AI Integrity Receipts — cryptographic receipts for AI-generated code commits"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.9"
+authors = [
+    { name = "Invariant Systems, Inc.", email = "hello@invariantsystems.io" },
+]
+keywords = [
+    "ai",
+    "receipts",
+    "audit",
+    "compliance",
+    "copilot",
+    "chatgpt",
+    "claude",
+    "git",
+    "cryptographic",
+    "integrity",
+    "mcp",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: Security :: Cryptography",
+    "Typing :: Typed",
+]
+
+# ZERO dependencies — Python standard library only
+dependencies = []
+
+[project.optional-dependencies]
+sign = ["sigstore>=4.0.0,<5.0.0"]
+dev = ["hypothesis>=6.0", "pytest>=7.0"]
+
+[project.urls]
+Homepage = "https://github.com/invariant-systems-ai/aiir-action"
+Documentation = "https://github.com/invariant-systems-ai/aiir-action#readme"
+Repository = "https://github.com/invariant-systems-ai/aiir-action"
+Issues = "https://github.com/invariant-systems-ai/aiir-action/issues"
+Changelog = "https://github.com/invariant-systems-ai/aiir-action/blob/main/CHANGELOG.md"
+
+[project.scripts]
+aiir = "aiir.cli:main"
+aiir-mcp-server = "aiir.mcp_server:main"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "aiir/**/*.py",
+    "aiir/py.typed",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "THREAT_MODEL.md",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["aiir"]

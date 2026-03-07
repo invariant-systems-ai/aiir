@@ -25,7 +25,24 @@ python -m pytest test_cli.py fuzz_cli.py -v
 2. Write tests for any new functionality
 3. Run the full test suite: `python -m pytest test_cli.py fuzz_cli.py -v`
 4. Ensure zero lint errors and all tests pass
-5. Open a PR with a clear description of the change
+5. **Sign off every commit** (see DCO below)
+6. Open a PR with a clear description of the change
+
+### Developer Certificate of Origin (DCO)
+
+All contributions must include a `Signed-off-by` line certifying the
+[Developer Certificate of Origin v1.1](https://developercertificate.org/):
+
+```
+Signed-off-by: Your Name <your@email.com>
+```
+
+Add it automatically with `git commit -s`. This certifies that you have
+the right to submit the contribution under the project's Apache-2.0
+license, and that Invariant Systems, Inc. may continue to distribute it
+(including under additional license terms for enterprise offerings).
+
+PRs with unsigned commits will not be merged.
 
 ### Commit messages
 
@@ -48,6 +65,14 @@ AIIR requires Python 3.9+. Dev dependencies:
 pip install -e ".[dev]"  # installs pytest, etc.
 ```
 
+## Trademarks
+
+"AIIR", "AI Integrity Receipts", and "Invariant Systems" are trademarks
+of Invariant Systems, Inc. See [TRADEMARK.md](TRADEMARK.md) for usage
+guidelines.
+
 ## License
 
-By contributing, you agree that your contributions will be licensed under the [Apache License 2.0](LICENSE).
+By contributing, you agree that your contributions will be licensed under
+the [Apache License 2.0](LICENSE), and you certify your contribution
+under the [Developer Certificate of Origin v1.1](https://developercertificate.org/).

@@ -64,6 +64,8 @@ include = [
     "aiir/**/*.py",
     "aiir/py.typed",
     "LICENSE",
+    "NOTICE",
+    "TRADEMARK.md",
     "README.md",
     "CHANGELOG.md",
     "SECURITY.md",

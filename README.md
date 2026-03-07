@@ -425,4 +425,12 @@ See [SECURITY.md](SECURITY.md) and [THREAT_MODEL.md](THREAT_MODEL.md).
 
 Built by [Invariant Systems, Inc.](https://invariantsystems.io)
 
-**License**: Apache-2.0
+**License**: Apache-2.0 — See [LICENSE](LICENSE)
+
+**Trademarks**: "AIIR", "AI Integrity Receipts", and "Invariant Systems"
+are trademarks of Invariant Systems, Inc. See [TRADEMARK.md](TRADEMARK.md).
+
+**Enterprise**: The AIIR open-source library is and will remain free under
+Apache-2.0. Invariant Systems may offer additional commercial products and
+services (hosted verification, enterprise dashboards, SLA-backed APIs)
+under separate terms.

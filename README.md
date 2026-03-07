@@ -46,9 +46,9 @@ AIIR answers that question. One command. Zero dependencies. Apache 2.0.
 └──────────────────────────────────────────
 ```
 
-Every commit gets a **content-addressed** cryptographic receipt. It says *what* was committed, *who* wrote it, and *whether AI was involved*. Change one character? The receipt breaks. That's integrity.
+Every commit gets a **content-addressed** receipt — a JSON object that records *what* was committed, *who* wrote it, and *whether AI was involved*. Change one character? The hash breaks. That's **integrity** (tamper detection).
 
-For **authenticity** (proving *who* generated it), enable Sigstore keyless signing — see [Sigstore signing](#sigstore-signing) below.
+For **authenticity** (proving *who* generated the receipt), enable Sigstore keyless signing — see [Sigstore signing](#sigstore-signing) below. Without signing, receipts prove internal consistency but not provenance — anyone who can run `aiir` on the same commit can produce an equivalent receipt.
 
 ---
 
@@ -127,7 +127,7 @@ Every push and PR gets a receipt. Uploaded as a build artifact automatically.
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/invariant-systems-ai/aiir-action
-    rev: v1.0.0
+    rev: v1.0.1
     hooks:
       - id: aiir
 ```
@@ -144,7 +144,7 @@ Runs **post-commit** (after your commit is created, since it needs the commit SH
 ```yaml
 # .gitlab-ci.yml
 include:
-  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir-action/v1.0.0/templates/gitlab-ci.yml'
+  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir-action/v1.0.1/templates/gitlab-ci.yml'
 ```
 
 Or copy the job directly — see [templates/gitlab-ci.yml](templates/gitlab-ci.yml) for the full template.
@@ -411,7 +411,7 @@ The server uses the same zero-dependency core as the CLI. No extra packages need
 
 See [THREAT_MODEL.md](THREAT_MODEL.md) for full STRIDE analysis, DREAD scoring, and attack trees.
 
-Homoglyph detection covers 28 Cyrillic/Greek confusables via NFKC normalization + a targeted confusable map. This is partial coverage (~0.4% of Unicode confusables.txt). Adversarial homoglyph evasion using rare scripts remains a known limitation — see S-02 in the threat model.
+Homoglyph detection covers 36 Cyrillic/Greek confusables via NFKC normalization + a targeted confusable map. This is partial coverage (~0.4% of Unicode confusables.txt). Adversarial homoglyph evasion using rare scripts remains a known limitation — see S-02 in the threat model.
 
 </details>
 
@@ -419,8 +419,8 @@ Homoglyph detection covers 28 Cyrillic/Greek confusables via NFKC normalization 
 
 ## Dogfood: This Repo Receipts Itself
 
-AIIR eats its own dogfood. Every commit in this repository has a
-cryptographic receipt in `.receipts/`.
+AIIR eats its own dogfood. Every commit to `main` gets a
+cryptographic receipt committed back to `.receipts/` automatically.
 
 **Verify it yourself:**
 
@@ -429,9 +429,10 @@ pip install aiir
 for f in .receipts/*.json; do aiir --verify "$f"; done
 ```
 
-The [dogfood CI workflow](.github/workflows/dogfood.yml) generates a receipt
-for every push, and a [pre-commit hook](.pre-commit-config.yaml) receipts
-every local commit.
+The [dogfood CI workflow](.github/workflows/dogfood.yml) generates receipts
+on every push to `main` and commits them back to the repo. Locally, the
+[pre-commit hook](.pre-commit-config.yaml) receipts every commit at
+`post-commit` stage.
 
 ---
 

@@ -157,6 +157,17 @@ class TestValidateRef(unittest.TestCase):
             cli._validate_ref("origin/main..HEAD"), "origin/main..HEAD"
         )
 
+    def test_allows_triple_dot_range(self):
+        self.assertEqual(
+            cli._validate_ref("main...HEAD"), "main...HEAD"
+        )
+
+    def test_rejects_path_traversal(self):
+        with self.assertRaises(ValueError):
+            cli._validate_ref("../../etc/passwd")
+        with self.assertRaises(ValueError):
+            cli._validate_ref("foo/../bar")
+
     def test_allows_sha(self):
         sha = "a3f8b2c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9"
         self.assertEqual(cli._validate_ref(sha), sha)
@@ -865,18 +876,25 @@ class TestRedTeamHardeningRound3(unittest.TestCase):
     # --- R3-06: Filename collision ---
 
     def test_write_receipt_unique_filenames(self):
-        """R3-06: Two receipts for same commit in same second should not collide."""
+        """R3-06: Two different receipts for same commit should get different files.
+        Same receipt written twice should be idempotent (deterministic filename)."""
         with tempfile.TemporaryDirectory() as tmpdir:
             original_cwd = os.getcwd()
             try:
                 os.chdir(tmpdir)
-                receipt = {"type": "test", "commit": {"sha": "deadbeefcafe"}, "receipt_id": "g1-test"}
-                path1 = cli.write_receipt(receipt, output_dir=os.path.join(tmpdir, "out"))
-                path2 = cli.write_receipt(receipt, output_dir=os.path.join(tmpdir, "out"))
-                self.assertNotEqual(path1, path2)  # Different filenames
-                # Both files should exist
+                receipt1 = {"type": "test", "commit": {"sha": "deadbeefcafe"},
+                            "receipt_id": "g1-test1", "content_hash": "sha256:aaa111"}
+                receipt2 = {"type": "test", "commit": {"sha": "deadbeefcafe"},
+                            "receipt_id": "g1-test2", "content_hash": "sha256:bbb222"}
+                out = os.path.join(tmpdir, "out")
+                path1 = cli.write_receipt(receipt1, output_dir=out)
+                path2 = cli.write_receipt(receipt2, output_dir=out)
+                self.assertNotEqual(path1, path2)  # Different content_hash → different files
                 self.assertTrue(os.path.exists(path1))
                 self.assertTrue(os.path.exists(path2))
+                # Same receipt again → idempotent (same path returned)
+                path1_again = cli.write_receipt(receipt1, output_dir=out)
+                self.assertEqual(path1, path1_again)
             finally:
                 os.chdir(original_cwd)
 
@@ -1455,16 +1473,22 @@ class TestRedTeamHardeningRound4(unittest.TestCase):
 
     def test_bundle_file_permissions(self):
         """R4-10: Bundle files should have explicit 0o644 permissions."""
-        with tempfile.TemporaryDirectory() as td:
-            receipt = os.path.join(td, "receipt.json")
-            Path(receipt).write_text('{"type": "test"}')
+        # Save and set a known umask so the test is deterministic
+        # regardless of the user's environment (e.g., umask 0027 → 0o640).
+        old_umask = os.umask(0o022)
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                receipt = os.path.join(td, "receipt.json")
+                Path(receipt).write_text('{"type": "test"}')
 
-            with patch("aiir.cli.sign_receipt", return_value='{"bundle": "test"}'):
-                bundle_path = cli.sign_receipt_file(receipt)
+                with patch("aiir.cli.sign_receipt", return_value='{"bundle": "test"}'):
+                    bundle_path = cli.sign_receipt_file(receipt)
 
-            mode = os.stat(bundle_path).st_mode & 0o777
-            self.assertEqual(mode, 0o644,
-                             f"Bundle should be 0o644, got {oct(mode)}")
+                mode = os.stat(bundle_path).st_mode & 0o777
+                self.assertEqual(mode, 0o644,
+                                 f"Bundle should be 0o644, got {oct(mode)}")
+        finally:
+            os.umask(old_umask)
 
 
 class TestRedTeamRound4Integration(unittest.TestCase):
@@ -1513,10 +1537,10 @@ class TestRedTeamRound4Integration(unittest.TestCase):
                     cli.sign_receipt_file(receipt_path)
 
     def test_verify_round_trip_with_version_bump(self):
-        """Receipts generated with v0.4.3 should still verify."""
+        """Receipts generated with current version should still verify."""
         receipt = cli.generate_receipt("HEAD", cwd=self.tmpdir)
         self.assertIsNotNone(receipt)
-        self.assertEqual(receipt["version"], "1.0.0")
+        self.assertEqual(receipt["version"], cli.CLI_VERSION)
         result = cli.verify_receipt(receipt)
         self.assertTrue(result["valid"])
 
@@ -1725,9 +1749,10 @@ class TestRedTeamHardeningRound5(unittest.TestCase):
 class TestRedTeamRound5Integration(unittest.TestCase):
     """Integration tests for Round 5 hardening."""
 
-    def test_version_bumped_to_045(self):
-        """CLI version should be 1.0.0."""
-        self.assertEqual(cli.CLI_VERSION, "1.0.0")
+    def test_version_is_semver(self):
+        """CLI version should be a valid semver string."""
+        import re
+        self.assertRegex(cli.CLI_VERSION, r'^\d+\.\d+\.\d+$')
 
     def test_key_injection_full_scenario(self):
         """Full scenario: crafted key must not inject extra outputs."""
@@ -2102,9 +2127,10 @@ class TestRedTeamRound7Integration(unittest.TestCase):
         finally:
             shutil.rmtree(testdir, ignore_errors=True)
 
-    def test_version_bumped_to_045(self):
-        """CLI_VERSION must be 1.0.0."""
-        self.assertEqual(cli.CLI_VERSION, "1.0.0")
+    def test_version_is_semver(self):
+        """CLI_VERSION must be a valid semver string."""
+        import re
+        self.assertRegex(cli.CLI_VERSION, r'^\d+\.\d+\.\d+$')
 
 
 # ===== Red-team round 4+5 tests =====
@@ -5819,6 +5845,8 @@ class TestRound19NoRawEmojiInTerminalPaths(unittest.TestCase):
             # Detect _EMOJI / _BOX dict blocks
             stripped = line.strip()
             if stripped.startswith("_EMOJI") or stripped.startswith("_BOX"):
+                in_safe_zone = True
+            if stripped.startswith("_CONFUSABLE") or stripped.startswith("_DASH"):
                 in_safe_zone = True
             if stripped.startswith("}") and in_safe_zone:
                 in_safe_zone = False

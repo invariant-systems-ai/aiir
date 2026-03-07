@@ -1,7 +1,7 @@
 # Threat Model — AIIR (AI Integrity Receipts)
 
 **Document version**: 3.0.0
-**CLI version**: 1.0.0
+**CLI version**: 1.0.1
 **Date**: 2025-07-15 (updated 2026-03-07)
 **Methodology**: STRIDE-per-element · DREAD risk scoring · Attack trees
 **Author**: Invariant Systems Security Team (supplemented by Hypothesis property-based fuzzing)
@@ -91,7 +91,7 @@ AI authorship signals, hashes the diff, and produces a JSON receipt whose
 | ID | Element | Threat | Mitigation | Status |
 |----|---------|--------|------------|--------|
 | S-01 | `detect_ai_signals` | Attacker inserts zero-width Unicode (ZWJ, ZWNJ) into "Copilot" to evade detection | R3-09: Strip `Cf` category chars before matching | ✅ Mitigated |
-| S-02 | `detect_ai_signals` | Attacker uses visually-identical homoglyphs (Cyrillic "С" for Latin "C") | R7-03: Confusable character map + NFKC normalization; 28 Cyrillic/Greek mappings | ✅ Partially mitigated |
+| S-02 | `detect_ai_signals` | Attacker uses visually-identical homoglyphs (Cyrillic "С" for Latin "C") | R7-03: Confusable character map + NFKC normalization; 36 Cyrillic/Greek mappings | ✅ Partially mitigated |
 | S-03 | Sigstore signing | Stolen OIDC token used to sign receipts under victim's identity | Ambient credential detection; short-lived tokens (10 min); identity policy in verification | ✅ Mitigated (defense in depth) |
 | S-04 | `verify_receipt` | Forged receipt with matching content_hash but different semantics | SHA-256 content addressing; no known preimage attacks | ✅ Mitigated |
 
@@ -498,5 +498,6 @@ inputs per test run**.
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 3.1.0 | 2026-03-07 | v1.0.1 patch — 8 uppercase Cyrillic confusables (36 total), amazon-q signal (31 total), Windows encoding fixes |
 | 3.0.0 | 2026-03-07 | v1.0.0 release — 142 security controls, 502 tests, 52 fuzz tests; comprehensive STRIDE/DREAD analysis |
 

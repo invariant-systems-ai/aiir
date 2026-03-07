@@ -5,3 +5,4 @@ __pycache__/
 .hypothesis/
 dist/
 *.egg-info/
+.test-receipts/

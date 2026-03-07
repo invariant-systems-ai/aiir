@@ -4,12 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] — 2026-03-07
+
+### Fixed
+
+- **Windows encoding**: All file writes (`write_receipt`, `set_github_output`, `set_github_summary`, `sign_receipt_file`) now use explicit `encoding="utf-8"` with `errors="replace"` — fixes `UnicodeEncodeError` on Windows `cp1252` terminals.
+- **Trailer normalization**: `_normalize_for_detection()` applied to git trailer matching — fixes false negatives when commit metadata contains combining marks or zero-width characters.
+- **Homoglyph detection**: Added 8 uppercase Cyrillic confusables (А, Е, О, С, Р, І, У, Х) — 28 → 36 mappings.
+- **AI signal coverage**: Added `"amazon-q"` pattern to `AI_SIGNALS` — 30 → 31 patterns. Amazon Q commits via bot username now detected.
+- **Git subprocess safety**: `--no-optional-locks` added to `hash-object` call; `_GIT_SAFE_ENV` blocks `GIT_TERMINAL_PROMPT` and `GIT_ASKPASS` on all git subprocesses — prevents 300s auth hang in CI.
+- **Error sanitization**: Signing error messages stripped via `_strip_terminal_escapes()` and truncated to 200 chars — prevents terminal escape injection via crafted Sigstore errors.
+- **MCP Windows compatibility**: UTF-8 stdio `reconfigure()` in MCP server for Windows interop.
+
+### Added
+
+- **CI package smoke test**: Wheel build + install + entry point verification in CI matrix.
+- **Dogfood commit-back**: `dogfood.yml` now commits receipts back to `.receipts/` automatically.
+- **PyPI Trusted Publisher**: `publish.yml` workflow for OIDC-based publishing (no API tokens).
+
 ## [1.0.0] — 2026-03-07
 
 ### Added
 
 - **Cryptographic receipt generation** for git commits — content-addressed, tamper-evident audit trail.
-- **AI authorship detection** (heuristic_v1): 30 signal patterns covering Copilot, ChatGPT, Claude, Cursor, Aider, Amazon Q, CodeWhisperer, Devin, Gemini, Tabnine, and 13 bot author patterns.
+- **AI authorship detection** (heuristic_v1): 31 signal patterns covering Copilot, ChatGPT, Claude, Cursor, Aider, Amazon Q, CodeWhisperer, Devin, Gemini, Tabnine, and 13 bot author patterns.
 - **Sigstore keyless signing**: Opt-in cryptographic signing via `--sign`. Uses ambient OIDC in GitHub Actions; interactive browser flow locally.
 - **Signature verification**: `--verify-signature` with `--signer-identity` / `--signer-issuer` pinning.
 - **MCP server** (`aiir-mcp-server`): Zero-dependency stdio JSON-RPC server exposing `aiir_receipt` and `aiir_verify` as MCP tools for AI assistants.

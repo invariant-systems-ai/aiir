@@ -30,7 +30,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, NoReturn, Optional, Sequence, Tuple
 from urllib.parse import urlparse, urlunparse
 
 # Structured logging for observability/debuggability.
@@ -74,6 +74,7 @@ AI_SIGNALS = [
     # market share.  A tool claiming AI detection that misses these is an
     # immediate credibility problem at launch.
     "amazon q",
+    "amazon-q",
     "codewhisperer",
     "amazon codewhisperer",
     "co-authored-by: devin",
@@ -161,13 +162,21 @@ def _b(name: str) -> str:
 # Cyrillic/Greek letters visually identical to Latin — used to bypass AI detection.
 _CONFUSABLE_TO_ASCII = {
     "\u0430": "a",  # Cyrillic а → Latin a
+    "\u0410": "A",  # Cyrillic А → Latin A
     "\u0435": "e",  # Cyrillic е → Latin e
+    "\u0415": "E",  # Cyrillic Е → Latin E
     "\u043e": "o",  # Cyrillic о → Latin o
+    "\u041e": "O",  # Cyrillic О → Latin O
     "\u0441": "c",  # Cyrillic с → Latin c
+    "\u0421": "C",  # Cyrillic С → Latin C
     "\u0440": "p",  # Cyrillic р → Latin p
+    "\u0420": "P",  # Cyrillic Р → Latin P
     "\u0456": "i",  # Cyrillic і → Latin i
+    "\u0406": "I",  # Cyrillic І → Latin I
     "\u0443": "u",  # Cyrillic у → Latin u
+    "\u0423": "U",  # Cyrillic У → Latin U
     "\u0445": "x",  # Cyrillic х → Latin x
+    "\u0425": "X",  # Cyrillic Х → Latin X
     "\u04bb": "h",  # Cyrillic һ → Latin h
     "\u0455": "s",  # Cyrillic ѕ → Latin s
     "\u0458": "j",  # Cyrillic ј → Latin j
@@ -191,9 +200,24 @@ _CONFUSABLE_TO_ASCII = {
     "\u03b5": "e",  # Greek ε → close to e
 }
 
+# Unicode dash/hyphen variants that NFKC does NOT normalize to ASCII '-'.
+# These are the delimiter in "co-authored-by" — missing them is a detection bypass.
+_DASH_TO_ASCII = {
+    "\u2010": "-",  # Hyphen (‐)
+    "\u2011": "-",  # Non-breaking hyphen (‑)
+    "\u2013": "-",  # En dash (–)
+    "\u2014": "-",  # Em dash (—)
+    "\u2015": "-",  # Horizontal bar (―)
+    "\u2212": "-",  # Minus sign (−)
+    "\u00AD": "-",  # Soft hyphen
+    "\uFE58": "-",  # Small em dash (﹘)
+    "\uFE63": "-",  # Small hyphen-minus (﹣) — NFKC covers this but be explicit
+    "\uFF0D": "-",  # Fullwidth hyphen-minus (－) — NFKC covers this but be explicit
+}
+
 
 def _validate_ref(ref: str) -> str:
-    """Reject refs that look like git options (argument injection prevention)."""
+    """Reject refs that look like git options, path traversal, or shell metacharacters."""
     if ref.lstrip().startswith("-"):
         raise ValueError(f"Invalid git ref (looks like an option): {ref!r}")
     if "\x00" in ref:
@@ -202,6 +226,19 @@ def _validate_ref(ref: str) -> str:
         raise ValueError(f"Invalid git ref (contains newline/CR): {ref!r}")
     if len(ref) > 1024:
         raise ValueError(f"Git ref too long ({len(ref)} chars, max 1024)")
+    # Reject path traversal sequences — git rejects these too, but
+    # defense-in-depth means catching them before they reach the subprocess.
+    # IMPORTANT: '..' and '...' are valid git range operators (main..HEAD,
+    # main...HEAD), so only reject path-traversal patterns like '../' or '/../'.
+    if "/../" in ref or ref.startswith("../"):
+        raise ValueError(f"Invalid git ref (contains path traversal): {ref!r}")
+    # Reject shell metacharacters that have no place in a git ref.
+    _SHELL_METACHARS = set(";&|$`!><{}()")
+    found = _SHELL_METACHARS.intersection(ref)
+    if found:
+        raise ValueError(
+            f"Invalid git ref (contains shell metacharacters {found!r}): {ref!r}"
+        )
     return ref
 
 
@@ -286,16 +323,8 @@ class CommitInfo:
 # Default subprocess timeout (seconds) to prevent indefinite hangs
 GIT_TIMEOUT = 300
 
-# Defensive git environment overrides.
-# GIT_TERMINAL_PROMPT=0 — prevents git from hanging up to GIT_TIMEOUT when
-# a remote requires interactive authentication (credential prompt on stdin).
-# In CI (GitHub Actions, GitLab CI) no human is present; a 300 s hang is DoS.
-# GIT_ASKPASS= — disables external credential helpers for the same reason.
-# --no-optional-locks — prevents git from taking index locks for optional
-# operations (e.g., updating the index during status queries). In CI with
-# network filesystems or concurrent processes, these locks cause spurious
-# failures. VS Code, JetBrains, and most git UIs pass this flag for the same
-# reason.
+# Prevent auth hangs (GIT_TERMINAL_PROMPT) and credential helpers (GIT_ASKPASS)
+# in CI environments where no human is present.
 _GIT_SAFE_ENV: Dict[str, str] = {
     **os.environ,
     "GIT_TERMINAL_PROMPT": "0",
@@ -398,9 +427,6 @@ def _hash_diff_streaming(parent: str, sha: str, cwd: Optional[str] = None) -> st
     h = hashlib.sha256()
     # Track elapsed time to enforce timeout
     deadline = time.monotonic() + GIT_TIMEOUT
-    # Wrap read loop in try/finally to ensure process cleanup.
-    # If proc.stdout.read() raises an IOError (e.g., network filesystem
-    # failure), the subprocess would be leaked without kill/wait.
     try:
         while True:
             if time.monotonic() > deadline:
@@ -421,18 +447,8 @@ def _hash_diff_streaming(parent: str, sha: str, cwd: Optional[str] = None) -> st
         proc.wait()
         raise
     finally:
-        # Always close stdout pipe to release the file descriptor,
-        # even on timeout/error paths.  The previous code only closed on the
-        # normal completion path, leaking the fd on exceptions.
         proc.stdout.close()
-    # Guard final wait — if git hangs after stdout close (e.g.,
-    # stuck on a lock or cleanup), the unguarded wait would raise
-    # TimeoutExpired without killing the process, leaving a zombie.
-    # Track whether we killed the process for cleanup.  The read
-    # loop completed (stdout reached EOF), so the hash IS valid.  A timeout
-    # in the final wait is git hanging during its own cleanup (lock files,
-    # post-diff hooks), not a diff computation failure.  Only raise on
-    # non-zero returncode when git exited on its own.
+    # Final wait with timeout — kill if git hangs during cleanup.
     _killed_for_cleanup = False
     try:
         proc.wait(timeout=30)
@@ -446,11 +462,7 @@ def _hash_diff_streaming(parent: str, sha: str, cwd: Optional[str] = None) -> st
 
 
 def _strip_url_credentials(url: str) -> str:
-    """Remove embedded credentials from a git remote URL.
-
-    R3-03: Also strips query parameters and URL fragments that may contain
-    access tokens (e.g., ?access_token=ghp_XXX, ?private_token=glpat-XXX).
-    """
+    """Remove embedded credentials and query params from a git remote URL."""
     try:
         parsed = urlparse(url)
         needs_clean = False
@@ -590,6 +602,8 @@ def _normalize_for_detection(text: str) -> str:
     text = "".join(c for c in text if unicodedata.category(c) != "Cf")
     # NFKC collapses compatibility variants (e.g., fullwidth Ｃ→C)
     text = unicodedata.normalize("NFKC", text)
+    # Normalize Unicode dash/hyphen variants to ASCII '-'
+    text = "".join(_DASH_TO_ASCII.get(c, c) for c in text)
     # Resolve cross-script homoglyphs that NFKC doesn't cover
     text = "".join(_CONFUSABLE_TO_ASCII.get(c, c) for c in text)
     # Strip combining marks (Mn) and enclosing marks (Me) — variation
@@ -936,17 +950,19 @@ def write_receipt(
                 "(possible symlink attack)"
             )
         commit_sha = receipt.get("commit", {}).get("sha", "unknown")[:12]
-        # Sanitize SHA for safe filename usage — reject path
-        # separators and special chars.  CLI-generated receipts always have
-        # hex SHAs (validated by get_commit_info), but library callers could
-        # pass crafted receipts where sha contains '/' or '..' that would
-        # create a filename escaping the output directory.
         commit_sha = re.sub(r'[^a-zA-Z0-9_-]', '_', commit_sha)
-        # Add uuid to prevent filename collision/overwrite attacks.
-        filename = f"receipt_{commit_sha}_{int(time.time())}_{uuid.uuid4().hex[:8]}.json"
+        # Deterministic filename from content_hash — makes it easy to
+        # check if a receipt already exists for a given commit.
+        chash = receipt.get("content_hash", "")
+        chash_short = re.sub(r'[^a-fA-F0-9]', '', chash)[:16]
+        filename = f"receipt_{commit_sha}_{chash_short}.json"
         filepath = out_path / filename
-        # Use O_EXCL to fail rather than silently overwrite
+        # If this exact receipt already exists, return existing path
+        if filepath.exists():
+            return str(filepath)
         fd = os.open(str(filepath), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+        # os.open mode is masked by umask — force 0o644 after creation
+        os.fchmod(fd, 0o644)
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(receipt_json + "\n")
         return str(filepath)
@@ -966,19 +982,12 @@ def write_receipt(
 
 def set_github_output(key: str, value: str) -> None:
     """Set a GitHub Actions output variable."""
-    # Validate key — reject newlines, '=', and control chars to prevent
-    # injection of additional output entries via crafted key names.
-    # Also reject '<<' in keys — the Actions runner parses key<<DELIM as
-    # heredoc start, so a key containing '<<' creates format ambiguity.
+    # Reject newlines, '=', control chars, and '<<' in keys
     if not key or any(c in key for c in '\n\r=') or any(ord(c) < 0x20 for c in key) or '<<' in key:
         raise ValueError(
             f"Invalid GitHub output key (contains forbidden characters): {key!r}"
         )
-    # Cap value length — GitHub Actions limits GITHUB_OUTPUT to 8 MB
-    # total across all outputs. A pathologically long value could fill the file
-    # and cause all subsequent set_github_output calls to fail.
-    # Use byte count (not char count) — multi-byte UTF-8 characters
-    # could exceed the intended limit by up to 4x with char-based measurement.
+    # Cap value length — GitHub Actions limits GITHUB_OUTPUT to 8 MB total.
     _MAX_OUTPUT_VALUE_SIZE = 4 * 1024 * 1024  # 4 MB
     if len(value.encode("utf-8", errors="replace")) > _MAX_OUTPUT_VALUE_SIZE:
         raise ValueError(
@@ -987,9 +996,7 @@ def set_github_output(key: str, value: str) -> None:
     output_file = os.environ.get("GITHUB_OUTPUT")
     if output_file:
         with open(output_file, "a", encoding="utf-8") as f:
-            # Use heredoc for values with any control chars (not just \n)
-            # Also use heredoc when value contains "<<" to prevent the
-            # simple key=value format from being misinterpreted as a heredoc start.
+            # Use heredoc for values with control chars or '<<'
             needs_heredoc = (
                 "\n" in value or "\r" in value
                 or any(ord(c) < 0x20 for c in value)
@@ -1008,13 +1015,7 @@ MAX_SUMMARY_SIZE = 1024 * 1024
 
 def set_github_summary(markdown: str) -> None:
     """Append to the GitHub Actions step summary."""
-    # Enforce size cap to prevent DoS from pathological commit ranges.
-    # Truncation must be byte-aware, not char-based.  The previous
-    # code checked byte length but sliced by character count.  With multi-byte
-    # UTF-8 content (CJK, emoji) the "truncated" result could still exceed 1 MB
-    # by up to 3× (each CJK char = 3 bytes, so 1M chars ≈ 3 MB).  Now we
-    # encode, slice to the byte budget, and decode back (errors='ignore' drops
-    # any partial multi-byte sequence at the cut point).
+    # Byte-aware truncation for multi-byte safety.
     md_bytes = markdown.encode("utf-8", errors="replace")
     if len(md_bytes) > MAX_SUMMARY_SIZE:
         _SUFFIX = b"\n\n*(truncated \xe2\x80\x94 exceeded 1 MB limit)*"
@@ -1143,10 +1144,6 @@ def verify_receipt(receipt: Dict[str, Any]) -> Dict[str, Any]:
         id_ok = False
 
     valid = hash_ok and id_ok
-    # Guard against non-dict `commit` field — verify_receipt
-    # handles untrusted input (files from disk), so any nested field could
-    # be a string/list/int/None instead of a dict.  The .get().get() chain
-    # would crash with AttributeError on non-dict values.
     _commit_field = receipt.get("commit")
     result: Dict[str, Any] = {
         "valid": valid,
@@ -1154,10 +1151,14 @@ def verify_receipt(receipt: Dict[str, Any]) -> Dict[str, Any]:
         "content_hash_match": hash_ok,
         "receipt_id_match": id_ok,
         "commit_sha": _commit_field.get("sha", "unknown") if isinstance(_commit_field, dict) else "unknown",
+        "errors": [],
     }
-    # Only expose expected hashes on valid receipts. On failure, the
-    # expected values are a forgery oracle — an attacker can flip fields,
-    # call verify, read the expected hash, and forge a self-consistent receipt.
+    if not hash_ok:
+        result["errors"].append("content hash mismatch")
+    if not id_ok:
+        result["errors"].append("receipt_id mismatch")
+    # Only expose expected hashes on valid receipts — on failure they
+    # would be a forgery oracle.
     if valid:
         result["expected_content_hash"] = expected_hash
         result["expected_receipt_id"] = expected_id
@@ -1301,9 +1302,8 @@ def sign_receipt_file(receipt_path: str) -> str:
     bundle_json = sign_receipt(receipt_bytes)
 
     bundle_path = str(path) + ".sigstore"
-    # Use O_EXCL to prevent overwriting existing bundles,
-    # and explicit 0o644 permissions (not umask-dependent)
     fd = os.open(bundle_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+    os.fchmod(fd, 0o644)  # Force permissions regardless of umask
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         f.write(bundle_json)
     return bundle_path
@@ -1421,7 +1421,7 @@ def verify_receipt_signature(
 class _FriendlyParser(argparse.ArgumentParser):
     """ArgumentParser that suggests close matches for unrecognised flags."""
 
-    def error(self, message: str) -> None:  # noqa: D401 (argparse override)
+    def error(self, message: str) -> NoReturn:  # noqa: D401 (argparse override)
         if "unrecognized arguments:" in message:
             bad = message.split("unrecognized arguments:")[-1].strip().split()
             # Sanitise user tokens before echoing to stderr
@@ -1890,9 +1890,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # tamper-evident (content-addressed) but not tamper-proof (no signer).
     # Anyone who can re-run `aiir` on the same commit can fabricate a receipt.
     if not args.sign and not args.quiet and receipts:
+        print(file=sys.stderr)
         print(
             f"{_e('tip')} Tip: these receipts are unsigned. Add --sign for "
             "cryptographic proof (requires: pip install sigstore)",
+            file=sys.stderr,
+        )
+
+    # Privacy hint — receipts include author email and filenames by default
+    if not args.redact_files and not args.quiet and receipts:
+        print(
+            f"   {_e('hint')} Receipts include author emails and filenames. "
+            "Add --redact-files to omit file paths.",
             file=sys.stderr,
         )
 

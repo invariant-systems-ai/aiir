@@ -32,3 +32,34 @@ jobs:
 
       - name: Run fuzz tests
         run: python -m pytest fuzz_cli.py -v --tb=short
+
+  # Smoke test: install the wheel and verify entry points + packaging.
+  # Catches regressions that source-tree pytest misses (missing py.typed,
+  # broken entry_points, bad MANIFEST, etc.).
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Build and install wheel
+        run: pip install .
+
+      - name: Smoke test — CLI entry points
+        run: |
+          aiir --version
+          aiir-mcp-server --version
+
+      - name: Smoke test — receipt in a git repo
+        run: |
+          cd $(mktemp -d)
+          git init && git config user.email ci@test && git config user.name CI
+          echo hello > file.txt && git add . && git commit -m "init"
+          aiir --pretty
+          aiir -o .receipts/
+          aiir --verify .receipts/*.json
+
+      - name: Verify py.typed marker
+        run: python -c "from pathlib import Path; import aiir; p = Path(aiir.__file__).parent / 'py.typed'; assert p.exists(), f'py.typed missing at {p}'"

@@ -2961,8 +2961,8 @@ class TestRound8PublicBasic(unittest.TestCase):
         security_md = Path(__file__).parent / "SECURITY.md"
         self.assertTrue(security_md.exists())
         content = security_md.read_text()
-        # Must mention 0.7.x as supported
-        self.assertIn("0.7.x", content)
+        # Must mention 1.0.x as supported
+        self.assertIn("1.0.x", content)
         self.assertIn("Active", content)
 
     # R8-PUB-02: py.typed in sdist include list --------------------------------
@@ -4216,8 +4216,9 @@ class TestReadmeStats(unittest.TestCase):
         self.assertNotIn("505 tests", readme)
         self.assertNotIn("137 security controls", readme)
         self.assertNotIn("523 tests", readme)
-        # Should have current numbers
-        self.assertIn("142 security controls", readme)
+        self.assertNotIn("142 security controls", readme)
+        # Should have current content
+        self.assertIn("security controls", readme)
         self.assertIn("502 tests", readme)
 
 

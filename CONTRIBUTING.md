@@ -54,7 +54,7 @@ Use clear, descriptive commit messages. Examples:
 ## Code standards
 
 - **Zero runtime dependencies.** This is a hard rule. AIIR ships with nothing but the Python standard library.
-- **Test everything.** We maintain 285+ tests across unit and fuzz suites.
+- **Test everything.** We maintain 500+ tests across unit and fuzz suites.
 - **Security-first.** All inputs are validated. All outputs are deterministic. See the [Threat Model](THREAT_MODEL.md).
 
 ## Development setup

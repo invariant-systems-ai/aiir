@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aiir"
-version = "1.0.0"
+dynamic = ["version"]
 description = "AI Integrity Receipts — cryptographic receipts for AI-generated code commits"
 readme = "README.md"
 license = "Apache-2.0"
@@ -58,6 +58,9 @@ Changelog = "https://github.com/invariant-systems-ai/aiir-action/blob/main/CHANG
 [project.scripts]
 aiir = "aiir.cli:main"
 aiir-mcp-server = "aiir.mcp_server:main"
+
+[tool.hatch.version]
+path = "aiir/__init__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [

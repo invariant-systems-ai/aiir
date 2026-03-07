@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -127,10 +128,7 @@ def _sanitize_error(error: Exception) -> str:
     first_line = msg.split("\n")[0][:_MAX_ERROR_LEN]
 
     # Redact anything that looks like a filesystem path.
-    # Previous heuristic skipped lines starting with "git " — but errors
-    # from _run_git start with "git {subcmd} failed:" and could still leak.
-    import re as _re
-    first_line = _re.sub(r'/[\w./-]{5,}', '<path>', first_line)
+    first_line = re.sub(r'/[\w./-]{5,}', '<path>', first_line)
 
     return first_line
 

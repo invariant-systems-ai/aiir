@@ -2,7 +2,12 @@
 # Only trigger on push (not pull_request) to prevent execution of
 # untrusted code from forks.  PRs are tested after merge via push trigger.
 name: AI Commit Receipt
-on: [push]
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
 
 jobs:
   receipt:
@@ -21,6 +26,16 @@ jobs:
         run: |
           echo "Receipts generated: ${{ steps.receipt.outputs.receipt_count }}"
           echo "AI-authored: ${{ steps.receipt.outputs.ai_commit_count }}"
+
+      - name: Commit receipts back to repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .receipts/
+          # --no-verify skips pre-commit hooks to prevent infinite loops.
+          # Only commit if there are staged changes (new receipts).
+          git diff --cached --quiet || git commit --no-verify -m "chore: AIIR receipts for ${GITHUB_SHA::12} [skip ci]"
+          git push
 
       - name: Upload receipts
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # v4.6.0

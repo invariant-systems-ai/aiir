@@ -30,7 +30,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 from urllib.parse import urlparse, urlunparse
 
 # Structured logging for observability/debuggability.
@@ -312,6 +312,8 @@ def _run_git(args: List[str], cwd: Optional[str] = None) -> str:
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
+        encoding="utf-8",  # Explicit UTF-8 — git outputs UTF-8 but Windows defaults to cp1252
+        errors="replace",   # Replace undecodable bytes rather than crash
         check=False,
         timeout=GIT_TIMEOUT,  # Prevent indefinite hangs
         env=_GIT_SAFE_ENV,  # Prevent auth hangs
@@ -942,7 +944,7 @@ def write_receipt(
         filepath = out_path / filename
         # Use O_EXCL to fail rather than silently overwrite
         fd = os.open(str(filepath), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
-        with os.fdopen(fd, "w") as f:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(receipt_json + "\n")
         return str(filepath)
     elif jsonl:
@@ -981,7 +983,7 @@ def set_github_output(key: str, value: str) -> None:
         )
     output_file = os.environ.get("GITHUB_OUTPUT")
     if output_file:
-        with open(output_file, "a") as f:
+        with open(output_file, "a", encoding="utf-8") as f:
             # Use heredoc for values with any control chars (not just \n)
             # Also use heredoc when value contains "<<" to prevent the
             # simple key=value format from being misinterpreted as a heredoc start.
@@ -1017,7 +1019,7 @@ def set_github_summary(markdown: str) -> None:
         markdown = md_bytes[:budget].decode("utf-8", errors="ignore") + _SUFFIX.decode("utf-8")
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_file:
-        with open(summary_file, "a") as f:
+        with open(summary_file, "a", encoding="utf-8") as f:
             f.write(markdown + "\n")
 
 
@@ -1299,7 +1301,7 @@ def sign_receipt_file(receipt_path: str) -> str:
     # Use O_EXCL to prevent overwriting existing bundles,
     # and explicit 0o644 permissions (not umask-dependent)
     fd = os.open(bundle_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
-    with os.fdopen(fd, "w") as f:
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
         f.write(bundle_json)
     return bundle_path
 

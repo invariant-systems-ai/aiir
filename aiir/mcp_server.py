@@ -383,6 +383,18 @@ def serve_stdio() -> None:
     """Run the MCP server over stdin/stdout."""
     import time
     from collections import deque
+
+    # Ensure UTF-8 stdio — MCP protocol is JSON over stdio, which is UTF-8.
+    # On Windows, sys.stdin/stdout default to the console code page (cp1252),
+    # which corrupts non-ASCII JSON payloads (e.g., unicode in file paths or
+    # commit messages).  reconfigure() is available in Python 3.7+.
+    for stream in (sys.stdin, sys.stdout):
+        if hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8")
+            except (AttributeError, OSError):
+                pass  # Non-reconfigurable stream (e.g., pytest capture)
+
     # Cap maximum line length to prevent OOM from a single huge message.
     _MAX_MSG_SIZE = 10 * 1024 * 1024  # 10 MB
     # Use bounded deque instead of list — prevents unbounded growth

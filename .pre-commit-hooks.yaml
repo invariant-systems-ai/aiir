@@ -1,0 +1,28 @@
+# AIIR — AI Integrity Receipts
+# pre-commit hook: generates a receipt after every commit.
+#
+# Usage in .pre-commit-config.yaml:
+#
+#   - repo: https://github.com/invariant-systems-ai/aiir-action
+#     rev: v1.0.0
+#     hooks:
+#       - id: aiir
+#
+# This hook runs as a post-commit stage — it does not block commits,
+# it receipts them after they land.  Override `args` to customise:
+#
+#   - id: aiir
+#     args: ["--ai-only", "--output", ".receipts"]
+
+- id: aiir
+  name: AIIR — AI Integrity Receipt
+  entry: aiir
+  language: python
+  stages: [post-commit]
+  always_run: true
+  pass_filenames: false
+  args: ["--pretty"]
+  description: >
+    Generate a cryptographic receipt for the latest commit.
+    Detects AI authorship (Copilot, ChatGPT, Claude, Cursor, etc.)
+    and produces a tamper-evident audit trail.

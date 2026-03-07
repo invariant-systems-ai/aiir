@@ -94,7 +94,7 @@ AI_TRAILERS = [
     "copilot",
 ]
 
-# Safety limit: max commits to receipt in a single range (VULN-04: DoS prevention)
+# Safety limit: max commits to receipt in a single range (DoS prevention)
 MAX_RECEIPTS_PER_RANGE = 1000
 
 
@@ -193,7 +193,7 @@ _CONFUSABLE_TO_ASCII = {
 
 
 def _validate_ref(ref: str) -> str:
-    """Reject refs that look like git options (VULN-03: argument injection)."""
+    """Reject refs that look like git options (argument injection prevention)."""
     if ref.lstrip().startswith("-"):
         raise ValueError(f"Invalid git ref (looks like an option): {ref!r}")
     if "\x00" in ref:
@@ -206,7 +206,7 @@ def _validate_ref(ref: str) -> str:
 
 
 def _sanitize_md(text: str) -> str:
-    """Sanitize text for safe inclusion in GitHub Markdown (VULN-06).
+    """Sanitize text for safe inclusion in GitHub Markdown step summaries.
 
     Escapes: \\ & < > | ` [ ! * _ ~ :// and dangerous Unicode (bidi, Cc, etc.).
     """
@@ -235,7 +235,7 @@ def _sanitize_md(text: str) -> str:
     # this, a commit subject containing \| survives as \\| in the output,
     # and GFM interprets \\\\ as a literal backslash followed by | as a
     # pipe delimiter — breaking the summary table structure.  Similarly,
-    # \* \_ \~ would bypass the emphasis escaping added in R12-SEC-01.
+    # \* \_ \~ would bypass the emphasis escaping below.
     text = text.replace("\\", "\\\\")
     text = text.replace("|", "\\|")
     text = text.replace("`", "\\`")
@@ -342,7 +342,7 @@ def _sha256(data: str) -> str:
 def _canonical_json(obj: Any) -> str:
     """Deterministic JSON serialization (sorted keys, no whitespace).
 
-    D-07: Explicit depth limit instead of relying on Python's recursion limit.
+    Uses an explicit depth limit instead of relying on Python's recursion limit.
     Prevents stack overflow from deeply nested JSON structures.
     """
     _check_json_depth(obj, max_depth=64)
@@ -359,11 +359,11 @@ _MAX_JSON_DEPTH = 64
 def _check_json_depth(obj: Any, max_depth: int = _MAX_JSON_DEPTH) -> None:
     """Raise ValueError if a JSON structure exceeds max_depth nesting.
 
-    R10-R-01: Uses iterative stack-based traversal instead of recursion.
+    Uses iterative stack-based traversal instead of recursion.
     The recursive version added to Python's call stack alongside any caller
     frames (e.g., MCP server → handler → verify → canonical_json → check),
     making the 64-level limit fragile under deep call chains.
-    R11-PUB-01: Removed dead `_current` parameter from old recursive API.
+    Removed dead `_current` parameter from old recursive API.
     """
     stack = [(obj, 0)]
     while stack:
@@ -379,7 +379,7 @@ def _check_json_depth(obj: Any, max_depth: int = _MAX_JSON_DEPTH) -> None:
 
 
 def _hash_diff_streaming(parent: str, sha: str, cwd: Optional[str] = None) -> str:
-    """Stream-hash a git diff to avoid loading it all into memory (SEC-04).
+    """Stream-hash a git diff to avoid loading it all into memory.
 
     R3-02: stderr goes to DEVNULL to prevent bidirectional pipe deadlock.
     (If stdout and stderr are both PIPE and stderr fills the 64KB buffer,
@@ -446,7 +446,7 @@ def _hash_diff_streaming(parent: str, sha: str, cwd: Optional[str] = None) -> st
 
 
 def _strip_url_credentials(url: str) -> str:
-    """Remove embedded credentials from a git remote URL (SEC-08).
+    """Remove embedded credentials from a git remote URL.
 
     R3-03: Also strips query parameters and URL fragments that may contain
     access tokens (e.g., ?access_token=ghp_XXX, ?private_token=glpat-XXX).
@@ -527,13 +527,14 @@ def get_commit_info(
         # (works with both SHA-1 and SHA-256 repos)
         try:
             result = subprocess.run(
-                ["git", "hash-object", "-t", "tree", "--stdin"],
+                ["git", "--no-optional-locks", "hash-object", "-t", "tree", "--stdin"],
                 cwd=cwd or os.getcwd(),
                 input=b"",
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 check=True,
                 timeout=GIT_TIMEOUT,  # Prevent hang on corrupt git
+                env=_GIT_SAFE_ENV,    # Consistent with _run_git
             )
             parent = result.stdout.decode().strip()
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
@@ -545,7 +546,7 @@ def get_commit_info(
         ["diff", "--no-ext-diff", "--no-textconv", "--stat", parent, sha], cwd=cwd
     ).strip()
 
-    # Full diff for hashing — SEC-04: stream to avoid OOM on huge diffs
+    # Full diff for hashing — stream to avoid OOM on huge diffs
     diff_hash = _hash_diff_streaming(parent, sha, cwd=cwd)
 
     # Changed files
@@ -576,7 +577,7 @@ def get_commit_info(
 
 
 def _normalize_for_detection(text: str) -> str:
-    """Normalize text for AI signal detection (R12-TECH-02: shared helper).
+    """Normalize text for AI signal detection.
 
     Strips invisible/formatting characters, resolves Unicode homoglyphs,
     and removes combining marks to produce a canonical ASCII-ish string
@@ -625,10 +626,12 @@ def detect_ai_signals(
 
     # Check for AI-related trailers (git trailer format: Key: Value)
     # Only record trailer key, not value (avoids leaking internal tool names)
+    # S2: Normalize each line before matching to prevent Unicode homoglyph bypass
+    # (e.g., Cyrillic 'е' in "Generated-by:" evading detection).
     for line in message.split("\n"):
-        line_stripped = line.strip().lower()
+        line_normalized = _normalize_for_detection(line).strip().lower()
         for trailer in AI_TRAILERS:
-            if line_stripped.startswith(f"{trailer}:"):
+            if line_normalized.startswith(f"{trailer}:"):
                 signals.append(f"trailer:{trailer}")
 
     # Check author/committer for known AI bot patterns
@@ -671,7 +674,7 @@ def list_commits_in_range(
 ) -> List[str]:
     """List commit SHAs in a range (e.g., 'origin/main..HEAD').
 
-    Limited to max_count commits to prevent DoS (VULN-04).
+    Limited to max_count commits to prevent DoS.
     """
     if max_count < 1:
         raise ValueError(f"max_count must be positive, got {max_count}")
@@ -850,7 +853,7 @@ def format_receipt_pretty(receipt: Dict[str, Any]) -> str:
     # Sanitize ALL user-controlled or display fields
     # against terminal escape injection.
     subject = _strip_terminal_escapes(commit.get('subject', ''))
-    # Guard author sub-field type — extends R14-SEC-02 pattern to
+    # Guard author sub-field type — extends defensive pattern to
     # nested fields.  A crafted receipt with author as string/int/list/None
     # would crash the .get('name', '') call with AttributeError.
     author = commit.get('author', {})
@@ -1838,7 +1841,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             file=sys.stderr,
                         )
                 except Exception as e:
-                    print(f"{_e('error')} Signing failed: {e}", file=sys.stderr)
+                    err_msg = _strip_terminal_escapes(str(e))[:200]
+                    print(f"{_e('error')} Signing failed: {err_msg}", file=sys.stderr)
                     print(
                         f"   {_e('hint')} Check your internet connection and try again.",
                         file=sys.stderr,
@@ -1853,7 +1857,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     print(f"{_e('error')} {e}", file=sys.stderr)
                     return 1
             else:
-                # Collect for JSON array output (R20-UX-03)
+                # Collect for JSON array output
                 stdout_json_receipts.append(receipt)
 
     # Flush collected stdout JSON receipts — single receipt as

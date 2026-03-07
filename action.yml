@@ -65,9 +65,11 @@ runs:
         elif [ "$EVENT_NAME" = "pull_request" ]; then
           RANGE="${PR_BASE_SHA}..${PR_HEAD_SHA}"
         elif [ "$EVENT_NAME" = "push" ]; then
-          # Detect first push (null SHA) and fall back to HEAD~1..HEAD
+          # Detect first push (null SHA).  HEAD~1 fails on single-commit
+          # repos, so compare against the empty tree to receipt all files.
           if [ "$PUSH_BEFORE" = "0000000000000000000000000000000000000000" ]; then
-            RANGE="HEAD~1..HEAD"
+            EMPTY_TREE=$(git hash-object -t tree /dev/null)
+            RANGE="${EMPTY_TREE}..HEAD"
           else
             RANGE="${PUSH_BEFORE}..${PUSH_AFTER}"
           fi

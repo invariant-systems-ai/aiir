@@ -1,5 +1,5 @@
 # Dogfood: receipt every commit to this repo
-# SEC-05: Only trigger on push (not pull_request) to prevent execution of
+# Only trigger on push (not pull_request) to prevent execution of
 # untrusted code from forks.  PRs are tested after merge via push trigger.
 name: AI Commit Receipt
 on: [push]

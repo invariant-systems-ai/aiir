@@ -1,6 +1,5 @@
-# R4-01: CI test gate — runs the full test suite on every push and PR.
-# Without this, regressions can be merged undetected.
-# R6-01: Full matrix covering every declared classifier version.
+# CI test gate — runs the full test suite on every push and PR.
+# Full matrix covering every declared classifier version.
 name: Tests
 
 on:
@@ -23,7 +22,7 @@ jobs:
       - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip  # R6-02: Cache pip downloads to speed up CI
+          cache: pip
 
       - name: Install test dependencies
         run: pip install hypothesis pytest

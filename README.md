@@ -64,7 +64,7 @@ That's it. You just receipted your last commit. Zero dependencies. Python 3.9+.
 
 ---
 
-## Three Ways to Use AIIR
+## Five Ways to Use AIIR
 
 ### 🤖 MCP Tool — Let your AI do it
 
@@ -120,6 +120,34 @@ jobs:
 ```
 
 Every push and PR gets a receipt. Uploaded as a build artifact automatically.
+
+### 🪝 pre-commit Hook — Receipt every commit locally
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/invariant-systems-ai/aiir-action
+    rev: v1.0.0
+    hooks:
+      - id: aiir
+```
+
+Runs after every `git commit`. Customise with args:
+
+```yaml
+      - id: aiir
+        args: ["--ai-only", "--output", ".receipts"]
+```
+
+### 🦊 GitLab CI — Receipt merge requests and pushes
+
+```yaml
+# .gitlab-ci.yml
+include:
+  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir-action/v1.0.0/templates/gitlab-ci.yml'
+```
+
+Or copy the job directly — see [templates/gitlab-ci.yml](templates/gitlab-ci.yml) for the full template.
 
 ---
 

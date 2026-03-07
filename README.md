@@ -127,7 +127,7 @@ Every push and PR gets a receipt. Uploaded as a build artifact automatically.
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/invariant-systems-ai/aiir-action
-    rev: v1.0.1
+    rev: v1.0.0
     hooks:
       - id: aiir
 ```
@@ -144,7 +144,7 @@ Runs **post-commit** (after your commit is created, since it needs the commit SH
 ```yaml
 # .gitlab-ci.yml
 include:
-  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir-action/v1.0.1/templates/gitlab-ci.yml'
+  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir-action/v1.0.0/templates/gitlab-ci.yml'
 ```
 
 Or copy the job directly — see [templates/gitlab-ci.yml](templates/gitlab-ci.yml) for the full template.

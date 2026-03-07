@@ -1,7 +1,7 @@
 # Threat Model — AIIR (AI Integrity Receipts)
 
 **Document version**: 3.0.0
-**CLI version**: 1.0.1
+**CLI version**: 1.0.0
 **Date**: 2025-07-15 (updated 2026-03-07)
 **Methodology**: STRIDE-per-element · DREAD risk scoring · Attack trees
 **Author**: Invariant Systems Security Team (supplemented by Hypothesis property-based fuzzing)
@@ -498,6 +498,5 @@ inputs per test run**.
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 3.1.0 | 2026-03-07 | v1.0.1 patch — 8 uppercase Cyrillic confusables (36 total), amazon-q signal (31 total), Windows encoding fixes |
-| 3.0.0 | 2026-03-07 | v1.0.0 release — 142 security controls, 502 tests, 52 fuzz tests; comprehensive STRIDE/DREAD analysis |
+| 3.0.0 | 2026-03-07 | v1.0.0 release — 142 security controls, 504 tests, 52 fuzz tests; 36 confusable mappings, 31 AI signals; comprehensive STRIDE/DREAD analysis |
 

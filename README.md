@@ -417,6 +417,24 @@ Homoglyph detection covers 28 Cyrillic/Greek confusables via NFKC normalization 
 
 ---
 
+## Dogfood: This Repo Receipts Itself
+
+AIIR eats its own dogfood. Every commit in this repository has a
+cryptographic receipt in `.receipts/`.
+
+**Verify it yourself:**
+
+```bash
+pip install aiir
+for f in .receipts/*.json; do aiir --verify "$f"; done
+```
+
+The [dogfood CI workflow](.github/workflows/dogfood.yml) generates a receipt
+for every push, and a [pre-commit hook](.pre-commit-config.yaml) receipts
+every local commit.
+
+---
+
 ## Security
 
 Extensive [security controls](THREAT_MODEL.md). 502 tests. Zero dependencies.

@@ -4,7 +4,7 @@
 # Usage in .pre-commit-config.yaml:
 #
 #   - repo: https://github.com/invariant-systems-ai/aiir-action
-#     rev: v1.0.1
+#     rev: v1.0.0
 #     hooks:
 #       - id: aiir
 #

@@ -5,7 +5,7 @@
 # Option A: Include this template directly
 #
 #   include:
-#     - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir-action/v1.0.1/templates/gitlab-ci.yml'
+#     - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir-action/v1.0.0/templates/gitlab-ci.yml'
 #
 # Option B: Copy the job definition into your pipeline
 #
@@ -19,7 +19,7 @@
   image: python:3.11-slim
   variables:
     # Pin to specific version for reproducibility
-    AIIR_VERSION: "1.0.1"
+    AIIR_VERSION: "1.0.0"
   before_script:
     - pip install --quiet "aiir==${AIIR_VERSION}"
   artifacts:

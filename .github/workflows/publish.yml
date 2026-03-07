@@ -1,5 +1,5 @@
 # Publish to PyPI via Trusted Publishers (OIDC — no API tokens).
-# Triggered when you create a GitHub Release (e.g. v1.0.1).
+# Triggered when you create a GitHub Release (e.g. v1.0.0).
 name: Publish to PyPI
 
 on:

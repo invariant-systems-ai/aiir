@@ -191,3 +191,25 @@ jobs:
           done
           echo "::error::PyPI did not update to $TAG within 3 minutes"
           exit 1
+
+  # ── Step 5: Propagate version to website ───────────────────────────
+  update-website:
+    needs: verify
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    # Non-blocking: website has a 6-hour self-heal schedule as backup
+    continue-on-error: true
+    steps:
+      - name: Trigger website version bump
+        env:
+          GH_TOKEN: ${{ secrets.WEBSITE_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::WEBSITE_DISPATCH_TOKEN not set — website will self-heal within 6 hours"
+            exit 0
+          fi
+          TAG="${GITHUB_REF_NAME#v}"
+          gh api "repos/invariant-systems-ai/invariantsystems.io/dispatches" \
+            -f event_type=version-bump \
+            -f "client_payload[version]=$TAG"
+          echo "✅ Dispatched version-bump ($TAG) to invariantsystems.io"

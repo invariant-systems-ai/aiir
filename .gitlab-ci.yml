@@ -20,6 +20,7 @@ verify-component:
   stage: test
   image: python:3.11-slim
   script:
+    - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
     - pip install --quiet aiir
     - aiir --version
     - echo "✅ AIIR installed and runs"
@@ -34,6 +35,7 @@ test:
   stage: test
   image: python:3.11-slim
   script:
+    - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
     - pip install --quiet pytest hypothesis
     - pip install --quiet -e .
     - cd /tmp && git init test-repo && cd test-repo

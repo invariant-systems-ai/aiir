@@ -39,13 +39,16 @@ jobs:
 
       - name: Determine target tag
         id: target
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TAG: ${{ github.event.inputs.tag }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
+          if [ "$EVENT_NAME" = "push" ]; then
             # Triggered by a tag push — use the pushed tag
             TAG="${GITHUB_REF_NAME}"
-          elif [ -n "${{ github.event.inputs.tag }}" ]; then
+          elif [ -n "$INPUT_TAG" ]; then
             # Manual dispatch with explicit tag
-            TAG="${{ github.event.inputs.tag }}"
+            TAG="$INPUT_TAG"
           else
             # Scheduled run or dispatch without tag — find the latest semver tag
             TAG=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' \

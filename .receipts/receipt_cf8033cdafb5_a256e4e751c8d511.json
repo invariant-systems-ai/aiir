@@ -1,0 +1,45 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.6",
+  "commit": {
+    "sha": "cf8033cdafb5bcb4a2691bb28c914436c0a2a938",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T12:46:45-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T12:46:59-04:00"
+    },
+    "subject": "fix: public surface audit remediation",
+    "message_hash": "sha256:c9bc6391d6efda83d2ee0f7d26c34269554e69e3d17185b810b399cc8bb21664",
+    "diff_hash": "sha256:536a36acc425788673070fc65b4210d871952ef6d3cedcded8cbc1c293778753",
+    "files_changed": 2,
+    "files": [
+      ".pre-commit-hooks.yaml",
+      "README.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.6",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-e4e751c8d511bf670ef5a1b18c658d74",
+  "content_hash": "sha256:e4e751c8d511bf670ef5a1b18c658d7449f37d73b0617231019f12f662929482",
+  "timestamp": "2026-03-08T16:47:18Z",
+  "extensions": {}
+}

@@ -1,0 +1,45 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.6",
+  "commit": {
+    "sha": "df664af8996b15c368110154371f914aab592b97",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T12:25:57-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T12:26:06-04:00"
+    },
+    "subject": "fix(ci): use source install for self-test to avoid PyPI race",
+    "message_hash": "sha256:b4ba84d8acd7a1ecad0b76900db0e754ed8ac28900b9e3605792b79c5d7ac762",
+    "diff_hash": "sha256:32afe82be4996dfca56002e185d20a80d7e64a84224381d573945c988e78e5a3",
+    "files_changed": 2,
+    "files": [
+      ".gitlab-ci.yml",
+      "templates/receipt/template.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.6",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-20cfe4c4d9b14ad57ec041db81830d6a",
+  "content_hash": "sha256:20cfe4c4d9b14ad57ec041db81830d6a3ce3243b3ef4b5bb04fc20594a13c0ca",
+  "timestamp": "2026-03-08T16:26:24Z",
+  "extensions": {}
+}

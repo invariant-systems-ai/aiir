@@ -4,8 +4,8 @@
 
 [![PyPI](https://img.shields.io/pypi/v/aiir?color=blue)](https://pypi.org/project/aiir/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/invariant-systems-ai/aiir-action)
-[![AIIR Receipted](https://img.shields.io/badge/AIIR-Receipted%20✓-blue)](https://github.com/invariant-systems-ai/aiir-action)
+[![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/invariant-systems-ai/aiir)
+[![AIIR Receipted](https://img.shields.io/badge/AIIR-Receipted%20✓-blue)](https://github.com/invariant-systems-ai/aiir)
 
 <p align="center">
   <img src="docs/demo.svg" alt="AIIR terminal demo — pip install aiir && aiir --pretty" width="720">
@@ -116,7 +116,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: invariant-systems-ai/aiir-action@v1
+      - uses: invariant-systems-ai/aiir@v1
 ```
 
 Every push and PR gets a receipt. Uploaded as a build artifact automatically.
@@ -126,7 +126,7 @@ Every push and PR gets a receipt. Uploaded as a build artifact automatically.
 ```yaml
 # .pre-commit-config.yaml
 repos:
-  - repo: https://github.com/invariant-systems-ai/aiir-action
+  - repo: https://github.com/invariant-systems-ai/aiir
     rev: v1.0.0
     hooks:
       - id: aiir
@@ -144,7 +144,7 @@ Runs **post-commit** (after your commit is created, since it needs the commit SH
 ```yaml
 # .gitlab-ci.yml
 include:
-  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir-action/v1.0.0/templates/gitlab-ci.yml'
+  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.0/templates/gitlab-ci.yml'
 ```
 
 Or copy the job directly — see [templates/gitlab-ci.yml](templates/gitlab-ci.yml) for the full template.
@@ -261,7 +261,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: invariant-systems-ai/aiir-action@v1
+      - uses: invariant-systems-ai/aiir@v1
         id: receipt
         with:
           output-dir: .receipts/
@@ -295,7 +295,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: invariant-systems-ai/aiir-action@v1
+      - uses: invariant-systems-ai/aiir@v1
         id: receipt
 
       - name: Enforce receipt policy
@@ -326,7 +326,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: invariant-systems-ai/aiir-action@v1
+      - uses: invariant-systems-ai/aiir@v1
         with:
           output-dir: .receipts/
           sign: true
@@ -438,7 +438,7 @@ on every push to `main` and commits them back to the repo. Locally, the
 
 ## Security
 
-Extensive [security controls](THREAT_MODEL.md). 502 tests. Zero dependencies.
+Extensive [security controls](THREAT_MODEL.md). 504 tests. Zero dependencies.
 
 See [SECURITY.md](SECURITY.md) and [THREAT_MODEL.md](THREAT_MODEL.md).
 

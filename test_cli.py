@@ -651,7 +651,7 @@ class TestIntegrationWithGit(unittest.TestCase):
 # ---------------------------------------------------------------------------
 
 
-class TestRedTeamHardeningRound2(unittest.TestCase):
+class TestRedTeamHardeningR2(unittest.TestCase):
     """Tests for red-team findings HACK-02 through HACK-11."""
 
     def test_validate_ref_rejects_nul_byte(self):
@@ -811,7 +811,7 @@ class TestRedTeamIntegrationWithGit(unittest.TestCase):
 # ---------------------------------------------------------------------------
 
 
-class TestRedTeamHardeningRound3(unittest.TestCase):
+class TestRedTeamHardeningR3(unittest.TestCase):
     """Tests for vulnerabilities found in red-team round 3 (R3-XX)."""
 
     # --- R3-01: Path traversal prefix collision ---
@@ -986,7 +986,7 @@ class TestRedTeamHardeningRound3(unittest.TestCase):
             os.unlink(tmpfile)
 
 
-class TestRedTeamRound3Integration(unittest.TestCase):
+class TestRedTeamIntegration(unittest.TestCase):
     """Integration tests for round 3 red-team fixes with real git repos."""
 
     def setUp(self):
@@ -1324,7 +1324,7 @@ class TestSignCLIFlags(unittest.TestCase):
 # ---------------------------------------------------------------------------
 
 
-class TestRedTeamHardeningRound4(unittest.TestCase):
+class TestRedTeamHardeningR4(unittest.TestCase):
     """Tests for vulnerabilities found in red-team round 4 (R4-XX)."""
 
     # --- R4-01: verify_receipt_file array DoS ---
@@ -1491,7 +1491,7 @@ class TestRedTeamHardeningRound4(unittest.TestCase):
             os.umask(old_umask)
 
 
-class TestRedTeamRound4Integration(unittest.TestCase):
+class TestRedTeamIntegrationR4(unittest.TestCase):
     """Integration tests for round 4 red-team fixes with real git repos."""
 
     def setUp(self):
@@ -1550,7 +1550,7 @@ class TestRedTeamRound4Integration(unittest.TestCase):
 # ===================================================================
 
 
-class TestRedTeamHardeningRound5(unittest.TestCase):
+class TestRedTeamHardeningR5(unittest.TestCase):
     """Tests validating Round 5 security fixes."""
 
     # R5-04: set_github_output key injection --------------------------------
@@ -1746,7 +1746,7 @@ class TestRedTeamHardeningRound5(unittest.TestCase):
         self.assertFalse(hasattr(cli, "EMPTY_TREE_SHA"))
 
 
-class TestRedTeamRound5Integration(unittest.TestCase):
+class TestRedTeamIntegrationR5(unittest.TestCase):
     """Integration tests for Round 5 hardening."""
 
     def test_version_is_semver(self):
@@ -1779,7 +1779,7 @@ class TestRedTeamRound5Integration(unittest.TestCase):
 # ===================================================================
 
 
-class TestRedTeamHardeningRound7(unittest.TestCase):
+class TestRedTeamHardeningR7(unittest.TestCase):
     """Tests validating Round 7 hostile attack fixes.
 
     Three angles:
@@ -1992,7 +1992,7 @@ class TestRedTeamHardeningRound7(unittest.TestCase):
                         "proc.wait() must come between proc.kill() and raise")
 
 
-class TestRedTeamRound7Integration(unittest.TestCase):
+class TestRedTeamIntegrationR7(unittest.TestCase):
     """Integration tests for Round 7 hostile attack fixes."""
 
     @classmethod
@@ -2136,7 +2136,7 @@ class TestRedTeamRound7Integration(unittest.TestCase):
 # ===== Red-team round 4+5 tests =====
 
 
-class TestRedTeamRound4Fixes(unittest.TestCase):
+class TestRedTeamFixes(unittest.TestCase):
     """Tests for Round 4 findings."""
 
     def test_r4_03_python_m_aiir_main_exists(self):
@@ -2166,7 +2166,7 @@ class TestRedTeamRound4Fixes(unittest.TestCase):
                        "files_changed": 1, "files": ["f.txt"]},
             "ai_attestation": {"is_ai_authored": False, "signals_detected": [],
                                "signal_count": 0, "detection_method": "heuristic_v1"},
-            "provenance": {"repository": "", "tool": "https://github.com/invariant-systems-ai/aiir-action@1.0.0", "generator": "aiir.cli"},
+            "provenance": {"repository": "", "tool": f"https://github.com/invariant-systems-ai/aiir@{cli.CLI_VERSION}", "generator": "aiir.cli"},
             "schema": "aiir/commit_receipt.v1", "version": "1.0.0",
         }
         big_receipts = [fake_receipt] * 700  # ~700 receipts > 1MB
@@ -2175,7 +2175,7 @@ class TestRedTeamRound4Fixes(unittest.TestCase):
                            "Test payload should exceed 1 MB")
 
 
-class TestRedTeamRound5SignalEvasion(unittest.TestCase):
+class TestRedTeamSignalEvasion(unittest.TestCase):
     """Tests for R5-01/02/03 signal evasion fixes."""
 
     def test_r5_01_combining_mark_evasion_blocked(self):
@@ -2211,7 +2211,7 @@ class TestRedTeamRound5SignalEvasion(unittest.TestCase):
         self.assertTrue(len(signals) > 0)
 
 
-class TestRedTeamRound5ForgeryDefense(unittest.TestCase):
+class TestRedTeamForgeryDefense(unittest.TestCase):
     """Tests for R5-04 receipt forgery defense."""
 
     def test_r5_04_failed_verify_no_expected_hashes(self):
@@ -2256,7 +2256,7 @@ class TestRedTeamRound5ForgeryDefense(unittest.TestCase):
             shutil.rmtree(testdir, ignore_errors=True)
 
 
-class TestRedTeamRound5MCP(unittest.TestCase):
+class TestRedTeamMCP(unittest.TestCase):
     """Tests for R5-06/07 MCP server hardening."""
 
     def test_r5_08_verify_receipt_signature_rejects_symlinks(self):
@@ -2274,7 +2274,7 @@ class TestRedTeamRound5MCP(unittest.TestCase):
             self.assertIn("symlink", result.get("error", "").lower())
 
 
-class TestRedTeamRound5Summary(unittest.TestCase):
+class TestRedTeamSummary(unittest.TestCase):
     """Tests for R5-10 backtick breakout."""
 
     def test_r5_10_summary_uses_double_backtick_delimiters(self):
@@ -2297,7 +2297,7 @@ class TestRedTeamRound5Summary(unittest.TestCase):
 # ===================================================================
 
 
-class TestRound7PublicBasic(unittest.TestCase):
+class TestPublicBasic(unittest.TestCase):
     """R7 Front 1: Public/basic understanding — what a first-time user would trip over."""
 
     # R7-PUB-01: __main__.py crash guard ----------------------------------------
@@ -2368,7 +2368,7 @@ class TestRound7PublicBasic(unittest.TestCase):
         )
 
 
-class TestRound7TechnicalExpert(unittest.TestCase):
+class TestTechnicalExpert(unittest.TestCase):
     """R7 Front 2: Technical/expert rigor — code correctness under edge conditions."""
 
     # R7-TECH-02: verify_receipt rejects unknown types --------------------------
@@ -2535,7 +2535,7 @@ class TestRound7TechnicalExpert(unittest.TestCase):
         self.assertNotEqual(r1["timestamp"], r2["timestamp"])
 
 
-class TestRound7AcademicPhilosophical(unittest.TestCase):
+class TestAcademicPhilosophical(unittest.TestCase):
     """R7 Front 3: Academic/philosophical — formal correctness, specification gaps."""
 
     # R7-ACAD-01: Schema versioning forward-compatibility -----------------------
@@ -2652,7 +2652,7 @@ class TestRound7AcademicPhilosophical(unittest.TestCase):
         self.assertTrue(result["valid"], "verify_receipt must not require git")
 
 
-class TestRound7SecurityMalicious(unittest.TestCase):
+class TestSecurityMalicious(unittest.TestCase):
     """R7 Front 4: Security/malicious attacker edge — exploits, DoS, info leaks."""
 
     # R7-SEC-03: MCP rate limiting exists ---------------------------------------
@@ -2825,7 +2825,7 @@ class TestRound7SecurityMalicious(unittest.TestCase):
         self.assertNotIn("expected_receipt_id", result)
 
 
-class TestRound7IntegrationWithGit(unittest.TestCase):
+class TestIntegrationWithGitExtended(unittest.TestCase):
     """R7 integration tests requiring a real git repo — NEW scenarios only."""
 
     def setUp(self):
@@ -2977,7 +2977,7 @@ class TestRound7IntegrationWithGit(unittest.TestCase):
 # ===================================================================
 
 
-class TestRound8PublicBasic(unittest.TestCase):
+class TestPublicBasicR8(unittest.TestCase):
     """R8 Front 1: Public/basic — first-time user and packaging issues."""
 
     # R8-PUB-01: SECURITY.md version freshness --------------------------------
@@ -3034,7 +3034,7 @@ class TestRound8PublicBasic(unittest.TestCase):
             self.assertTrue(callable(getattr(mod, func_name)))
 
 
-class TestRound8TechnicalExpert(unittest.TestCase):
+class TestTechnicalExpertR8(unittest.TestCase):
     """R8 Front 2: Technical/expert — code correctness at the edge."""
 
     # R8-TECH-01 (HIGH): signals_detected terminal injection -------------------
@@ -3151,7 +3151,7 @@ class TestRound8TechnicalExpert(unittest.TestCase):
             cli._canonical_json({"value": float("inf")})
 
 
-class TestRound8AcademicPhilosophical(unittest.TestCase):
+class TestAcademicPhilosophicalR8(unittest.TestCase):
     """R8 Front 3: Academic/philosophical — semantic correctness and spec gaps."""
 
     # R8-ACAD-01: Version coupling in provenance.tool --------------------------
@@ -3238,7 +3238,7 @@ class TestRound8AcademicPhilosophical(unittest.TestCase):
         self.assertEqual(cli._canonical_json(a), cli._canonical_json(b))
 
 
-class TestRound8SecurityMalicious(unittest.TestCase):
+class TestSecurityMaliciousR8(unittest.TestCase):
     """R8 Front 4: Security/malicious attacker edge — new exploit vectors."""
 
     # R8-SEC-01: action.yml openssl fallback -----------------------------------
@@ -3416,7 +3416,7 @@ class TestRound8SecurityMalicious(unittest.TestCase):
                 self.assertTrue(result["valid"])
 
 
-class TestRound8IntegrationWithGit(unittest.TestCase):
+class TestIntegrationWithGitR8(unittest.TestCase):
     """R8 integration tests — NEW scenarios targeting Round 8 findings."""
 
     def setUp(self):
@@ -3540,7 +3540,7 @@ class TestRound8IntegrationWithGit(unittest.TestCase):
 # =========================================================================
 
 
-class TestRound9PathRedactionInVerifySignature(unittest.TestCase):
+class TestPathRedactionInVerifySignature(unittest.TestCase):
     """R9-TECH-01: verify_receipt_signature error path must redact filesystem paths."""
 
     def test_error_path_redacts_filesystem_paths(self):
@@ -3562,7 +3562,7 @@ class TestRound9PathRedactionInVerifySignature(unittest.TestCase):
         self.assertEqual(safe_error, "connection refused")
 
 
-class TestRound9StdoutClose(unittest.TestCase):
+class TestStdoutClose(unittest.TestCase):
     """R9-TECH-02: _hash_diff_streaming must close stdout pipe."""
 
     def test_hash_diff_streaming_closes_stdout(self):
@@ -3607,7 +3607,7 @@ class TestRound9StdoutClose(unittest.TestCase):
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
-class TestRound9CfStripping(unittest.TestCase):
+class TestCfStripping(unittest.TestCase):
     """R9-TECH-03: detect_ai_signals must strip Cf (format characters) from author fields."""
 
     def test_zwj_in_bot_name_detected(self):
@@ -3647,7 +3647,7 @@ class TestRound9CfStripping(unittest.TestCase):
         self.assertTrue(bot_found, f"ZWS (Cf) in bot name evaded detection: {signals}")
 
 
-class TestRound9TerminalEscapeSosDcs(unittest.TestCase):
+class TestTerminalEscapeSosDcs(unittest.TestCase):
     """R9-TECH-04: _strip_terminal_escapes must strip SOS and DCS sequences."""
 
     def test_sos_stripped(self):
@@ -3679,7 +3679,7 @@ class TestRound9TerminalEscapeSosDcs(unittest.TestCase):
         self.assertNotIn("APC payload", result)
 
 
-class TestRound9GitHubOutputValueCap(unittest.TestCase):
+class TestGitHubOutputValueCap(unittest.TestCase):
     """R9-SEC-02: set_github_output must reject values exceeding 4 MB."""
 
     def test_value_under_limit_accepted(self):
@@ -3718,7 +3718,7 @@ class TestRound9GitHubOutputValueCap(unittest.TestCase):
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
-class TestRound9McpSymlinkIntermediate(unittest.TestCase):
+class TestMcpSymlinkIntermediate(unittest.TestCase):
     """R9-SEC-03: _safe_verify_path must detect intermediate symlinks."""
 
     def test_intermediate_symlink_rejected(self):
@@ -3763,7 +3763,7 @@ class TestRound9McpSymlinkIntermediate(unittest.TestCase):
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
-class TestRound9SignReceiptSizeCap(unittest.TestCase):
+class TestSignReceiptSizeCap(unittest.TestCase):
     """R9-SEC-04: sign_receipt_file must reject files exceeding MAX_RECEIPT_FILE_SIZE."""
 
     def test_oversized_file_rejected(self):
@@ -4243,9 +4243,10 @@ class TestReadmeStats(unittest.TestCase):
         self.assertNotIn("137 security controls", readme)
         self.assertNotIn("523 tests", readme)
         self.assertNotIn("142 security controls", readme)
+        self.assertNotIn("502 tests", readme)
         # Should have current content
         self.assertIn("security controls", readme)
-        self.assertIn("502 tests", readme)
+        self.assertIn("504 tests", readme)
 
 
 class TestThreatModelR03Consistency(unittest.TestCase):
@@ -4268,7 +4269,7 @@ class TestThreatModelR03Consistency(unittest.TestCase):
 # ---------------------------------------------------------------------------
 
 
-class TestRound11SanitizeMdAmpersand(unittest.TestCase):
+class TestSanitizeMdAmpersand(unittest.TestCase):
     """R11-SEC-01: _sanitize_md must escape & to prevent HTML entity bypass."""
 
     def test_ampersand_escaped(self):
@@ -4298,7 +4299,7 @@ class TestRound11SanitizeMdAmpersand(unittest.TestCase):
         self.assertEqual(result, "&amp;amp;")
 
 
-class TestRound11UnterminatedC1Strings(unittest.TestCase):
+class TestUnterminatedC1Strings(unittest.TestCase):
     """R11-SEC-02: _strip_terminal_escapes must strip unterminated C1 strings."""
 
     def test_unterminated_dcs_stripped(self):
@@ -4331,7 +4332,7 @@ class TestRound11UnterminatedC1Strings(unittest.TestCase):
         self.assertIn("after", result)
 
 
-class TestRound11DelAndC1Controls(unittest.TestCase):
+class TestDelAndC1Controls(unittest.TestCase):
     """R11-SEC-03: _strip_terminal_escapes must strip DEL and 8-bit C1 controls."""
 
     def test_del_stripped(self):
@@ -4362,7 +4363,7 @@ class TestRound11DelAndC1Controls(unittest.TestCase):
         self.assertEqual(result, "okend")
 
 
-class TestRound11ByteCountCap(unittest.TestCase):
+class TestByteCountCap(unittest.TestCase):
     """R11-SEC-04: set_github_output value cap must use byte count."""
 
     def test_multibyte_value_byte_cap(self):
@@ -4391,7 +4392,7 @@ class TestRound11ByteCountCap(unittest.TestCase):
         self.assertIn("too large", str(ctx.exception))
 
 
-class TestRound11OverflowError(unittest.TestCase):
+class TestOverflowError(unittest.TestCase):
     """R11-TECH-01: format_receipt_pretty must catch OverflowError from inf."""
 
     def test_files_changed_infinity_coerced(self):
@@ -4429,7 +4430,7 @@ class TestRound11OverflowError(unittest.TestCase):
         self.assertIn("0 changed", output)
 
 
-class TestRound11DeadParameter(unittest.TestCase):
+class TestDeadParameter(unittest.TestCase):
     """R11-PUB-01: _check_json_depth must not have dead _current parameter."""
 
     def test_no_current_parameter(self):
@@ -4443,7 +4444,7 @@ class TestRound11DeadParameter(unittest.TestCase):
         cli._check_json_depth({"a": 1}, 64)  # Should not raise
 
 
-class TestRound12SanitizeMdEmphasis(unittest.TestCase):
+class TestSanitizeMdEmphasis(unittest.TestCase):
     """R12-SEC-01: _sanitize_md must escape GFM emphasis/strikethrough markers."""
 
     def test_asterisk_escaped(self):
@@ -4495,7 +4496,7 @@ class TestRound12SanitizeMdEmphasis(unittest.TestCase):
                 self.assertNotIn("_italic_", cleaned)
 
 
-class TestRound12ShaValidation(unittest.TestCase):
+class TestShaValidation(unittest.TestCase):
     """R12-SEC-03: get_commit_info must validate SHA format from git."""
 
     @patch("aiir.cli._run_git")
@@ -4551,7 +4552,7 @@ class TestRound12ShaValidation(unittest.TestCase):
         self.assertIn("Invalid commit SHA format", str(ctx.exception))
 
 
-class TestRound12McpParamsValidation(unittest.TestCase):
+class TestMcpParamsValidation(unittest.TestCase):
     """R12-SEC-02: MCP serve_stdio must handle non-dict params gracefully."""
 
     def test_string_params_treated_as_empty(self):
@@ -4577,7 +4578,7 @@ class TestRound12McpParamsValidation(unittest.TestCase):
         self.assertIn("tools", result)
 
 
-class TestRound12PipeCleanup(unittest.TestCase):
+class TestPipeCleanup(unittest.TestCase):
     """R12-TECH-01: _hash_diff_streaming must close stdout on all paths."""
 
     @patch("subprocess.Popen")
@@ -4614,7 +4615,7 @@ class TestRound12PipeCleanup(unittest.TestCase):
         mock_stdout.close.assert_called()
 
 
-class TestRound12NormalizeHelper(unittest.TestCase):
+class TestNormalizeHelper(unittest.TestCase):
     """R12-TECH-02: _normalize_for_detection must be consistent and correct."""
 
     def test_strips_zwj(self):
@@ -4655,7 +4656,7 @@ class TestRound12NormalizeHelper(unittest.TestCase):
         self.assertEqual(cli._normalize_for_detection(""), "")
 
 
-class TestRound13SanitizeMdBackslash(unittest.TestCase):
+class TestSanitizeMdBackslash(unittest.TestCase):
     """R13-SEC-02: _sanitize_md must escape backslashes to prevent GFM breakout."""
 
     def test_backslash_pipe_table_breakout(self):
@@ -4713,7 +4714,7 @@ class TestRound13SanitizeMdBackslash(unittest.TestCase):
         self.assertNotIn("~", cleaned)
 
 
-class TestRound13McpArgumentsValidation(unittest.TestCase):
+class TestMcpArgumentsValidation(unittest.TestCase):
     """R13-SEC-01: MCP handle_tools_call must validate arguments type."""
 
     def test_string_arguments_coerced(self):
@@ -4745,7 +4746,7 @@ class TestRound13McpArgumentsValidation(unittest.TestCase):
         self.assertTrue(result.get("isError", False))
 
 
-class TestRound13PrettySignalsGuard(unittest.TestCase):
+class TestPrettySignalsGuard(unittest.TestCase):
     """R13-TECH-01: format_receipt_pretty must handle non-list signals_detected."""
 
     def _make_receipt(self, signals):
@@ -4784,7 +4785,7 @@ class TestRound13PrettySignalsGuard(unittest.TestCase):
         self.assertIn("Receipt:", result)
 
 
-class TestRound13HashDiffWaitZombie(unittest.TestCase):
+class TestHashDiffWaitZombie(unittest.TestCase):
     """R13-TECH-02: _hash_diff_streaming must kill zombie on final wait timeout."""
 
     @patch("subprocess.Popen")
@@ -4823,7 +4824,7 @@ class TestRound13HashDiffWaitZombie(unittest.TestCase):
         mock_proc.kill.assert_called()
 
 
-class TestRound14VerifyNonDictCommit(unittest.TestCase):
+class TestVerifyNonDictCommit(unittest.TestCase):
     """R14-SEC-01: verify_receipt must not crash when commit field is non-dict."""
 
     def _make_receipt_with_commit(self, commit_val):
@@ -4872,7 +4873,7 @@ class TestRound14VerifyNonDictCommit(unittest.TestCase):
         self.assertEqual(result["commit_sha"], "unknown")
 
 
-class TestRound14PrettyAndSummaryGuard(unittest.TestCase):
+class TestPrettyAndSummaryGuard(unittest.TestCase):
     """R14-SEC-02: format_receipt_pretty/summary must handle non-dict nested fields."""
 
     def test_pretty_non_dict_commit(self):
@@ -4919,7 +4920,7 @@ class TestRound14PrettyAndSummaryGuard(unittest.TestCase):
         self.assertIn("AIIR Receipt Summary", result)
 
 
-class TestRound14HashDiffCleanupKill(unittest.TestCase):
+class TestHashDiffCleanupKill(unittest.TestCase):
     """R14-TECH-01: _hash_diff_streaming must return valid hash when killed for cleanup."""
 
     @patch("subprocess.Popen")
@@ -4947,7 +4948,7 @@ class TestRound14HashDiffCleanupKill(unittest.TestCase):
         mock_proc.kill.assert_called_once()
 
 
-class TestRound15PrettyAuthorGuard(unittest.TestCase):
+class TestPrettyAuthorGuard(unittest.TestCase):
     """R15-SEC-01: format_receipt_pretty must handle non-dict author field."""
 
     def _make_receipt(self, author_val):
@@ -4986,7 +4987,7 @@ class TestRound15PrettyAuthorGuard(unittest.TestCase):
         self.assertIn("Receipt", result)
 
 
-class TestRound15WriteReceiptShaSanitize(unittest.TestCase):
+class TestWriteReceiptShaSanitize(unittest.TestCase):
     """R15-SEC-02: write_receipt must sanitize SHA in filename."""
 
     def test_sha_with_slash_sanitized(self):
@@ -5032,7 +5033,7 @@ class TestRound15WriteReceiptShaSanitize(unittest.TestCase):
                 os.chdir(old_cwd)
 
 
-class TestRound16PrettyPlusOutput(unittest.TestCase):
+class TestPrettyPlusOutput(unittest.TestCase):
     """R16-UX-01: --pretty and --output must work together — print pretty
     to stdout AND write receipt file to disk."""
 
@@ -5121,7 +5122,7 @@ class TestRound16PrettyPlusOutput(unittest.TestCase):
             os.chdir(old_cwd)
 
 
-class TestRound16FriendlyPathError(unittest.TestCase):
+class TestFriendlyPathError(unittest.TestCase):
     """R16-UX-02: ValueError from write_receipt must produce a friendly
     one-line error, not a raw Python traceback."""
 
@@ -5181,7 +5182,7 @@ class TestRound16FriendlyPathError(unittest.TestCase):
             os.chdir(old_cwd)
 
 
-class TestRound16VerboseQuietMutualExclusion(unittest.TestCase):
+class TestVerboseQuietMutualExclusion(unittest.TestCase):
     """R16-UX-03: --verbose and --quiet must be mutually exclusive."""
 
     def test_verbose_and_quiet_rejected(self):
@@ -5208,7 +5209,7 @@ class TestRound16VerboseQuietMutualExclusion(unittest.TestCase):
             self.assertEqual(e.code, 0)
 
 
-class TestRound17FriendlyErrors(unittest.TestCase):
+class TestFriendlyErrors(unittest.TestCase):
     """R17-UX-01: All error messages must use emoji + actionable hint."""
 
     def test_not_a_git_repo_shows_emoji_and_hint(self):
@@ -5285,7 +5286,7 @@ class TestRound17FriendlyErrors(unittest.TestCase):
         self.assertIn("too long", stderr_text.lower(), "Should say it took too long")
 
 
-class TestRound17FriendlyNoReceipts(unittest.TestCase):
+class TestFriendlyNoReceipts(unittest.TestCase):
     """R17-UX-02: 'No commits' message should show 🤷 + 💡 hint."""
 
     def test_no_commits_ai_only_shows_hint(self):
@@ -5315,7 +5316,7 @@ class TestRound17FriendlyNoReceipts(unittest.TestCase):
         self.assertIn("git log", stderr_text, "Hint should mention git log")
 
 
-class TestRound17DidYouMean(unittest.TestCase):
+class TestDidYouMean(unittest.TestCase):
     """R17-UX-05: Misspelled flags should suggest closest match."""
 
     def test_prettty_suggests_pretty(self):
@@ -5347,7 +5348,7 @@ class TestRound17DidYouMean(unittest.TestCase):
         self.assertEqual(ctx.exception.code, 2)
 
 
-class TestRound17HelpEpilog(unittest.TestCase):
+class TestHelpEpilog(unittest.TestCase):
     """R17-UX-04: --help epilog should include usage examples."""
 
     def test_help_shows_examples(self):
@@ -5364,7 +5365,7 @@ class TestRound17HelpEpilog(unittest.TestCase):
         self.assertIn("-o .receipts", help_text, "Should show -o example")
 
 
-class TestRound17FriendlySummary(unittest.TestCase):
+class TestFriendlySummary(unittest.TestCase):
     """R17-UX-03: Post-generation summary should use ✅ emoji."""
 
     def test_summary_has_checkmark(self):
@@ -5422,7 +5423,7 @@ class TestRound17FriendlySummary(unittest.TestCase):
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
-class TestRound17FriendlyVerify(unittest.TestCase):
+class TestFriendlyVerify(unittest.TestCase):
     """R17-UX-06: Verify output should be friendlier."""
 
     def test_verify_pass_says_all_good(self):
@@ -5483,7 +5484,7 @@ class TestRound17FriendlyVerify(unittest.TestCase):
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
-class TestRound18TerminalEscapeInErrors(unittest.TestCase):
+class TestTerminalEscapeInErrors(unittest.TestCase):
     """R18-SEC-01 / R18-SEC-02: User input in error messages must be sanitised."""
 
     def test_friendly_parser_strips_escapes_from_bad_flag(self):
@@ -5540,7 +5541,7 @@ class TestRound18TerminalEscapeInErrors(unittest.TestCase):
                 self.assertNotIn("\x1b", str(e), "ANSI escape must be stripped from git error")
 
 
-class TestRound18ConsistentFriendlyErrors(unittest.TestCase):
+class TestConsistentFriendlyErrors(unittest.TestCase):
     """R18-PUB-01: Unrecognised flags should always show ❌, even without suggestions."""
 
     def test_no_match_still_shows_emoji(self):
@@ -5570,7 +5571,7 @@ class TestRound18ConsistentFriendlyErrors(unittest.TestCase):
         self.assertIn("--pretty", stderr_text, "Should suggest --pretty")
 
 
-class TestRound18VerifyArrayErrors(unittest.TestCase):
+class TestVerifyArrayErrors(unittest.TestCase):
     """R18-TECH-02: Verify on receipt arrays should show per-receipt detail."""
 
     def test_array_failure_shows_count(self):
@@ -5634,7 +5635,7 @@ class TestRound18VerifyArrayErrors(unittest.TestCase):
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
-class TestRound19EmojiHelper(unittest.TestCase):
+class TestEmojiHelper(unittest.TestCase):
     """R19-PUB-01: _e() returns emoji on UTF-8, ASCII fallback otherwise."""
 
     def test_e_returns_emoji_when_supported(self):
@@ -5688,7 +5689,7 @@ class TestRound19EmojiHelper(unittest.TestCase):
         self.assertTrue(cli._can_encode("\u2705\U0001f916"))
 
 
-class TestRound19BoxDrawHelper(unittest.TestCase):
+class TestBoxDrawHelper(unittest.TestCase):
     """R19-PUB-02: _b() returns box-drawing on capable terminals, ASCII otherwise."""
 
     def test_b_returns_boxdraw_when_supported(self):
@@ -5728,7 +5729,7 @@ class TestRound19BoxDrawHelper(unittest.TestCase):
                 self.fail(f"Fallback for {name!r} is not ASCII: {fallback!r}")
 
 
-class TestRound19AsciiFallbackIntegration(unittest.TestCase):
+class TestAsciiFallbackIntegration(unittest.TestCase):
     """Integration: full CLI output with _USE_EMOJI=False should be ASCII-safe."""
 
     def test_verify_fail_ascii_mode(self):
@@ -5828,7 +5829,7 @@ class TestRound19AsciiFallbackIntegration(unittest.TestCase):
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
-class TestRound19NoRawEmojiInTerminalPaths(unittest.TestCase):
+class TestNoRawEmojiInTerminalPaths(unittest.TestCase):
     """Regression: no raw emoji literals should appear in terminal-output code paths."""
 
     def test_no_raw_emoji_outside_emoji_dict(self):
@@ -5867,7 +5868,7 @@ class TestRound19NoRawEmojiInTerminalPaths(unittest.TestCase):
         self.assertEqual(violations, [], f"Raw emoji found outside safe zones:\n" + "\n".join(violations))
 
 
-class TestRound20MultiReceiptJsonArray(unittest.TestCase):
+class TestMultiReceiptJsonArray(unittest.TestCase):
     """R20-UX-03: Multiple receipts to stdout must be a valid JSON array."""
 
     def _make_receipt(self, sha_suffix="a"):
@@ -5894,7 +5895,7 @@ class TestRound20MultiReceiptJsonArray(unittest.TestCase):
             },
             "provenance": {
                 "repository": "",
-                "tool": "https://github.com/invariant-systems-ai/aiir-action@1.0.0",
+                "tool": f"https://github.com/invariant-systems-ai/aiir@{cli.CLI_VERSION}",
                 "generator": "aiir.cli",
             },
         }
@@ -5940,7 +5941,7 @@ class TestRound20MultiReceiptJsonArray(unittest.TestCase):
         self.assertEqual(data.get("type"), "aiir.commit_receipt")
 
 
-class TestRound20EmptyRepoMessage(unittest.TestCase):
+class TestEmptyRepoMessage(unittest.TestCase):
     """R20-UX-02: Empty repo (no commits) must show a friendly message."""
 
     @patch("aiir.cli.get_repo_root", return_value="/fake")
@@ -6000,7 +6001,7 @@ class TestRound20EmptyRepoMessage(unittest.TestCase):
         self.assertNotIn("No commits yet", err)
 
 
-class TestRound20ContextAwareVerifyTips(unittest.TestCase):
+class TestContextAwareVerifyTips(unittest.TestCase):
     """R20-UX-01: Verify failure tips must match the actual failure type."""
 
     def test_file_not_found_tip(self):
@@ -6123,7 +6124,7 @@ class TestRound20ContextAwareVerifyTips(unittest.TestCase):
             os.unlink(real_path)
 
 
-class TestRound20VerifyArrayPartialFailureTip(unittest.TestCase):
+class TestVerifyArrayPartialFailureTip(unittest.TestCase):
     """R20-UX-01: Array with partial failures still shows the tamper tip."""
 
     def test_array_partial_failure_tip(self):
@@ -6170,7 +6171,7 @@ class TestRound20VerifyArrayPartialFailureTip(unittest.TestCase):
         self.assertIn("changed after it was created", err)
 
 
-class TestRound21SummaryByteTruncation(unittest.TestCase):
+class TestSummaryByteTruncation(unittest.TestCase):
     """R21-SEC-01: set_github_summary must truncate by byte count, not char count."""
 
     def test_multibyte_truncation_under_limit(self):
@@ -6238,7 +6239,7 @@ class TestRound21SummaryByteTruncation(unittest.TestCase):
                 os.unlink(f.name)
 
 
-class TestRound21MissingAISignals(unittest.TestCase):
+class TestMissingAISignals(unittest.TestCase):
     """R21-PUB-01: AI detection must cover major AI coding tools."""
 
     def test_amazon_q_detected(self):
@@ -6274,7 +6275,7 @@ class TestRound21MissingAISignals(unittest.TestCase):
         self.assertTrue(any("codegen by gemini" in s for s in signals))
 
 
-class TestRound21MissingBotPatterns(unittest.TestCase):
+class TestMissingBotPatterns(unittest.TestCase):
     """R21-PUB-02: Bot author detection must include new AI tool bots."""
 
     def test_devin_bot_author(self):
@@ -6302,7 +6303,7 @@ class TestRound21MissingBotPatterns(unittest.TestCase):
         self.assertTrue(any("gemini" in s for s in signals))
 
 
-class TestRound21GitEnvHardening(unittest.TestCase):
+class TestGitEnvHardening(unittest.TestCase):
     """R21-SEC-02 / R21-TECH-01: _run_git defensive environment variables."""
 
     def test_git_terminal_prompt_disabled(self):
@@ -6338,7 +6339,7 @@ class TestRound21GitEnvHardening(unittest.TestCase):
         self.assertIn("_GIT_SAFE_ENV", src)
 
 
-class TestRound21AISignalCoverage(unittest.TestCase):
+class TestAISignalCoverage(unittest.TestCase):
     """R21-PUB-01: AI_SIGNALS list must include all major tools."""
 
     def test_ai_signals_count(self):

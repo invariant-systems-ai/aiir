@@ -5,7 +5,7 @@
 # Option A: Include this template directly
 #
 #   include:
-#     - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir-action/v1.0.0/templates/gitlab-ci.yml'
+#     - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.0/templates/gitlab-ci.yml'
 #
 # Option B: Copy the job definition into your pipeline
 #

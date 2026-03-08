@@ -5,8 +5,8 @@ Thank you for your interest in AIIR! We welcome contributions from the community
 ## Quick start
 
 ```bash
-git clone https://github.com/invariant-systems-ai/aiir-action.git
-cd aiir-action
+git clone https://github.com/invariant-systems-ai/aiir.git
+cd aiir
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 python -m pytest test_cli.py fuzz_cli.py -v
@@ -14,8 +14,8 @@ python -m pytest test_cli.py fuzz_cli.py -v
 
 ## Ways to contribute
 
-- **Bug reports** — [open an issue](https://github.com/invariant-systems-ai/aiir-action/issues/new?template=bug_report.yml)
-- **Feature requests** — [start a discussion](https://github.com/invariant-systems-ai/aiir-action/issues/new?template=feature_request.yml)
+- **Bug reports** — [open an issue](https://github.com/invariant-systems-ai/aiir/issues/new?template=bug_report.yml)
+- **Feature requests** — [start a discussion](https://github.com/invariant-systems-ai/aiir/issues/new?template=feature_request.yml)
 - **Security vulnerabilities** — see [SECURITY.md](SECURITY.md) (do **not** open a public issue)
 - **Code contributions** — fork, branch, PR (see below)
 

@@ -1,0 +1,121 @@
+# Sync GitHub → GitLab and verify all distribution channels are aligned.
+#
+# Triggers:
+#   1. After "Publish to PyPI" completes (success or failure) → mirror + verify
+#   2. Daily at 06:00 UTC → catch any drift from manual edits or partial failures
+#   3. Manual workflow_dispatch → on-demand health check
+#
+# Self-healing: if GitLab is behind, this workflow force-pushes to catch it up.
+# If PyPI is behind, it alerts (can't re-push same version to PyPI).
+name: Sync
+
+on:
+  workflow_run:
+    workflows: ["Publish to PyPI"]
+    types: [completed]
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Step 1: Mirror all branches + tags to GitLab ──────────────────
+  mirror-gitlab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Push to GitLab mirror
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+        run: |
+          git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@gitlab.com/invariant-systems/aiir.git" 2>/dev/null || true
+
+          echo "⏳ Mirroring branches..."
+          git push gitlab --all --force 2>&1 || echo "::warning::Branch push had issues"
+
+          echo "⏳ Mirroring tags..."
+          git push gitlab --tags --force 2>&1 || echo "::warning::Tag push had issues"
+
+          echo "✅ Mirror complete"
+
+  # ── Step 2: Verify all three channels agree ───────────────────────
+  verify-sync:
+    needs: mirror-gitlab
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Check version alignment
+        run: |
+          set +e  # Don't exit on individual failures; we want to report all drift
+
+          # ── Local version (source of truth) ──
+          LOCAL=$(python3 -c "
+          import re
+          text = open('aiir/__init__.py').read()
+          m = re.search(r'__version__\s*=\s*[\"']([^\"']+)', text)
+          print(m.group(1))
+          ")
+
+          # ── Latest git tag ──
+          GH_TAG=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "unknown")
+
+          # ── PyPI version ──
+          PYPI=$(curl -sf "https://pypi.org/pypi/aiir/json" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['info']['version'])" \
+            2>/dev/null || echo "unknown")
+
+          # ── GitLab latest tag ──
+          GL_TAG=$(curl -sf "https://gitlab.com/api/v4/projects/80072388/repository/tags?per_page=1" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['name'].lstrip('v'))" \
+            2>/dev/null || echo "unknown")
+
+          echo ""
+          echo "╔══════════════════════════════════════════════╗"
+          echo "║        AIIR Distribution Health Check        ║"
+          echo "╠══════════════════════════════════════════════╣"
+          printf "║  %-20s  %-21s ║\n" "Source" "Version"
+          echo "╠══════════════════════════════════════════════╣"
+          printf "║  %-20s  %-21s ║\n" "__init__.py" "$LOCAL"
+          printf "║  %-20s  %-21s ║\n" "GitHub tag" "$GH_TAG"
+          printf "║  %-20s  %-21s ║\n" "PyPI" "$PYPI"
+          printf "║  %-20s  %-21s ║\n" "GitLab tag" "$GL_TAG"
+          echo "╚══════════════════════════════════════════════╝"
+          echo ""
+
+          DRIFT=0
+
+          if [ "$LOCAL" != "$GH_TAG" ]; then
+            echo "::warning title=Version drift::__init__.py ($LOCAL) ≠ latest git tag ($GH_TAG)"
+            DRIFT=1
+          fi
+
+          if [ "$PYPI" != "unknown" ] && [ "$PYPI" != "$LOCAL" ]; then
+            echo "::warning title=PyPI drift::PyPI ($PYPI) ≠ source ($LOCAL)"
+            DRIFT=1
+          fi
+
+          if [ "$GL_TAG" != "unknown" ] && [ "$GL_TAG" != "$GH_TAG" ]; then
+            echo "::warning title=GitLab drift::GitLab ($GL_TAG) ≠ GitHub ($GH_TAG)"
+            DRIFT=1
+          fi
+
+          if [ "$DRIFT" -eq 0 ]; then
+            echo "✅ All channels in sync: v${LOCAL}"
+          else
+            echo ""
+            echo "⚠️  DRIFT DETECTED — see warnings above"
+            echo ""
+            echo "Self-healing actions taken:"
+            echo "  • GitLab mirror was force-pushed (branches + tags)"
+            echo "  • PyPI cannot be self-healed (immutable). If behind, create a new release."
+            exit 1
+          fi

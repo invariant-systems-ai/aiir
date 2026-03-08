@@ -27,10 +27,6 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           fetch-depth: 0
-          # persist-credentials: true (default) — needed because this
-          # workflow pushes receipts to the orphan 'receipts' branch.
-          # actions/checkout configures a global credential helper so
-          # the separate clone in the push step also authenticates.
 
       - uses: ./  # Test the local action
         id: receipt
@@ -46,6 +42,8 @@ jobs:
           echo "AI-authored: ${AI_COMMIT_COUNT}"
 
       - name: Push receipts to receipts branch
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Use a SEPARATE clone so we never switch branches on the main
           # checkout — that would break the composite action's Post Run step.
@@ -54,9 +52,15 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Plain HTTPS URL — the global credential helper (set by
-          # actions/checkout with persist-credentials: true) provides
-          # authentication.  No token embedded in the URL.
+          # Configure GLOBAL credential for github.com so the separate
+          # clone at /tmp also authenticates.  actions/checkout only sets
+          # the LOCAL git config in $GITHUB_WORKSPACE; the /tmp clone
+          # won't see it.  This uses the same AUTHORIZATION: basic format
+          # as actions/checkout, and the token never appears in any URL
+          # (safe from git error output leaks).
+          git config --global "http.https://github.com/.extraheader" \
+            "AUTHORIZATION: basic $(echo -n "x-access-token:${GH_TOKEN}" | base64)"
+
           REPO_URL="https://github.com/${GITHUB_REPOSITORY}.git"
 
           if git ls-remote --exit-code origin refs/heads/receipts >/dev/null 2>&1; then

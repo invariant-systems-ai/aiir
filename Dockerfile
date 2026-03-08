@@ -10,7 +10,7 @@
 #
 # Build:
 #   docker build -t invariantsystems/aiir .
-#   docker build -t invariantsystems/aiir:1.0.2 .
+#   docker build -t invariantsystems/aiir:1.0.9 --build-arg AIIR_VERSION=1.0.9 .
 
 FROM python:3.11-slim AS base
 
@@ -19,7 +19,8 @@ RUN groupadd --gid 1000 aiir && \
     useradd --uid 1000 --gid aiir --shell /bin/bash --create-home aiir
 
 # Install AIIR from PyPI (zero dependencies, tiny layer)
-ARG AIIR_VERSION=1.0.2
+# Default kept in sync with latest release; publish.yml overrides via --build-arg.
+ARG AIIR_VERSION=1.0.9
 RUN pip install --no-cache-dir "aiir==${AIIR_VERSION}" && \
     aiir --version
 

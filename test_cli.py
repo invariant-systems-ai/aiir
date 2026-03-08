@@ -4276,9 +4276,10 @@ class TestReadmeStats(unittest.TestCase):
         self.assertNotIn("502 tests", readme)
         self.assertNotIn("504 tests", readme)
         self.assertNotIn("517 tests", readme)
+        self.assertNotIn("518 tests", readme)
         # Should have current content
         self.assertIn("security controls", readme)
-        self.assertIn("518 tests", readme)
+        self.assertIn("532 tests", readme)
 
 
 class TestThreatModelR03Consistency(unittest.TestCase):
@@ -6824,3 +6825,194 @@ class TestExport(unittest.TestCase):
         self.assertEqual(rc, 0)
         bundle = json.loads(Path("bundle.json").read_text())
         self.assertEqual(bundle["namespace"], "acme-corp")
+
+
+# ---------------------------------------------------------------------------
+# Badge tests
+# ---------------------------------------------------------------------------
+
+
+class TestBadge(unittest.TestCase):
+    """Tests for the --badge command."""
+
+    def setUp(self):
+        self._tmp = tempfile.mkdtemp()
+        self._orig = os.getcwd()
+        os.chdir(self._tmp)
+        subprocess.run(["git", "init"], capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.email", "a@b"], capture_output=True)
+        subprocess.run(["git", "config", "user.name", "A"], capture_output=True)
+        Path("f.txt").write_text("x")
+        subprocess.run(["git", "add", "."], capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], capture_output=True)
+
+    def tearDown(self):
+        os.chdir(self._orig)
+        shutil.rmtree(self._tmp, ignore_errors=True)
+
+    def test_badge_outputs_markdown(self):
+        """--badge should print a shields.io Markdown snippet to stdout."""
+        import io
+        # Generate a receipt first (creates ledger).
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        stdout = io.StringIO()
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", stdout):
+            rc = cli.main(["--badge"])
+        self.assertEqual(rc, 0)
+        output = stdout.getvalue()
+        self.assertIn("img.shields.io/badge", output)
+        self.assertIn("invariant-systems-ai/aiir", output)
+
+    def test_badge_no_ledger_fails(self):
+        """--badge with no ledger should fail gracefully."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--badge"])
+        self.assertEqual(rc, 1)
+
+    def test_badge_url_structure(self):
+        """format_badge should return well-formed URL and markdown."""
+        index = {"receipt_count": 10, "ai_percentage": 25.0}
+        result = cli.format_badge(index)
+        self.assertIn("img.shields.io/badge", result["url"])
+        self.assertIn("25.0", result["url"])
+        self.assertTrue(result["markdown"].startswith("[!["))
+        self.assertIn("25.0", result["text"])
+
+    def test_badge_empty_index(self):
+        """format_badge with zero receipts should show 'no receipts'."""
+        index = {"receipt_count": 0, "ai_percentage": 0.0}
+        result = cli.format_badge(index)
+        self.assertIn("no_receipts", result["url"])
+        self.assertIn("lightgrey", result["url"])
+
+
+# ---------------------------------------------------------------------------
+# Stats tests
+# ---------------------------------------------------------------------------
+
+
+class TestStats(unittest.TestCase):
+    """Tests for the --stats command."""
+
+    def setUp(self):
+        self._tmp = tempfile.mkdtemp()
+        self._orig = os.getcwd()
+        os.chdir(self._tmp)
+        subprocess.run(["git", "init"], capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.email", "a@b"], capture_output=True)
+        subprocess.run(["git", "config", "user.name", "A"], capture_output=True)
+        Path("f.txt").write_text("x")
+        subprocess.run(["git", "add", "."], capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], capture_output=True)
+
+    def tearDown(self):
+        os.chdir(self._orig)
+        shutil.rmtree(self._tmp, ignore_errors=True)
+
+    def test_stats_output(self):
+        """--stats should print a summary dashboard to stderr."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        stderr = io.StringIO()
+        with patch("sys.stderr", stderr), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--stats"])
+        self.assertEqual(rc, 0)
+        output = stderr.getvalue()
+        self.assertIn("AIIR Ledger", output)
+        self.assertIn("1 receipt", output)
+        self.assertIn("AI-authored", output)
+
+    def test_stats_no_ledger_fails(self):
+        """--stats with no ledger should fail gracefully."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--stats"])
+        self.assertEqual(rc, 1)
+
+    def test_format_stats_includes_namespace(self):
+        """format_stats should include namespace when present in config."""
+        index = {"receipt_count": 5, "ai_commit_count": 1, "ai_percentage": 20.0,
+                 "unique_authors": 2, "first_receipt": "2026-01-01T00:00:00Z",
+                 "latest_timestamp": "2026-03-07T00:00:00Z"}
+        config = {"namespace": "acme-corp", "instance_id": "abc12345-xxxx"}
+        output = cli.format_stats(index, config=config)
+        self.assertIn("acme-corp", output)
+        self.assertIn("abc12345", output)
+        self.assertIn("5 receipts", output)
+        self.assertIn("20.0%", output)
+
+
+# ---------------------------------------------------------------------------
+# Check / policy gate tests
+# ---------------------------------------------------------------------------
+
+
+class TestCheck(unittest.TestCase):
+    """Tests for the --check / --max-ai-percent policy gate."""
+
+    def setUp(self):
+        self._tmp = tempfile.mkdtemp()
+        self._orig = os.getcwd()
+        os.chdir(self._tmp)
+        subprocess.run(["git", "init"], capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.email", "a@b"], capture_output=True)
+        subprocess.run(["git", "config", "user.name", "A"], capture_output=True)
+        Path("f.txt").write_text("x")
+        subprocess.run(["git", "add", "."], capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], capture_output=True)
+
+    def tearDown(self):
+        os.chdir(self._orig)
+        shutil.rmtree(self._tmp, ignore_errors=True)
+
+    def test_check_passes_within_threshold(self):
+        """--check --max-ai-percent 50 should pass when AI% is 0."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--check", "--max-ai-percent", "50"])
+        self.assertEqual(rc, 0)
+
+    def test_check_fails_above_threshold(self):
+        """check_policy should fail when AI% exceeds threshold."""
+        index = {"receipt_count": 10, "ai_commit_count": 8, "ai_percentage": 80.0}
+        passed, msg = cli.check_policy(index, max_ai_percent=50.0)
+        self.assertFalse(passed)
+        self.assertIn("FAIL", msg)
+        self.assertIn("80.0%", msg)
+
+    def test_check_passes_at_threshold(self):
+        """check_policy should pass when AI% equals threshold."""
+        index = {"receipt_count": 10, "ai_commit_count": 5, "ai_percentage": 50.0}
+        passed, msg = cli.check_policy(index, max_ai_percent=50.0)
+        self.assertTrue(passed)
+        self.assertIn("PASS", msg)
+
+    def test_check_no_ledger_fails(self):
+        """--check with no ledger should fail gracefully."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--check", "--max-ai-percent", "50"])
+        self.assertEqual(rc, 1)
+
+    def test_check_no_threshold_ok(self):
+        """--check without --max-ai-percent should just report status."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--check"])
+        self.assertEqual(rc, 0)
+
+    def test_max_ai_percent_implies_check(self):
+        """--max-ai-percent alone (without --check) should still run the gate."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--max-ai-percent", "90"])
+        self.assertEqual(rc, 0)

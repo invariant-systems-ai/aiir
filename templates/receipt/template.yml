@@ -27,7 +27,7 @@ spec:
       default: test
     version:
       description: "AIIR version to install (pin for reproducibility)"
-      default: "1.0.2"
+      default: "1.0.3"
     ai-only:
       description: "Only receipt AI-authored commits (skip human-only commits)"
       type: boolean

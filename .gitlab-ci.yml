@@ -34,6 +34,7 @@ verify-component:
 test:
   stage: test
   image: python:3.11-slim
+  timeout: 10 minutes
   script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
     - pip install --quiet pytest hypothesis
@@ -55,6 +56,7 @@ create-release:
     - echo "Publishing release $CI_COMMIT_TAG to CI/CD Catalog"
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+$/
+  allow_failure: false
   release:
     tag_name: $CI_COMMIT_TAG
     description: |

@@ -1185,7 +1185,7 @@ class TestSigstoreSigning(unittest.TestCase):
             receipt_path = os.path.join(tmpdir, "receipt_test.json")
             Path(receipt_path).write_text('{"type": "test"}', encoding="utf-8")
 
-            with patch("aiir.cli.sign_receipt", return_value=fake_bundle):
+            with patch("aiir._sign.sign_receipt", return_value=fake_bundle):
                 bundle_path = cli.sign_receipt_file(receipt_path)
 
             self.assertEqual(bundle_path, receipt_path + ".sigstore")
@@ -1444,7 +1444,7 @@ class TestRedTeamHardeningR4(unittest.TestCase):
             Path(receipt).write_text('{"type": "test"}')
             Path(bundle).write_text("EXISTING BUNDLE")
 
-            with patch("aiir.cli.sign_receipt", return_value='{"new": "bundle"}'):
+            with patch("aiir._sign.sign_receipt", return_value='{"new": "bundle"}'):
                 with self.assertRaises(FileExistsError):
                     cli.sign_receipt_file(receipt)
 
@@ -1511,7 +1511,7 @@ class TestRedTeamHardeningR4(unittest.TestCase):
                 receipt = os.path.join(td, "receipt.json")
                 Path(receipt).write_text('{"type": "test"}')
 
-                with patch("aiir.cli.sign_receipt", return_value='{"bundle": "test"}'):
+                with patch("aiir._sign.sign_receipt", return_value='{"bundle": "test"}'):
                     bundle_path = cli.sign_receipt_file(receipt)
 
                 mode = os.stat(bundle_path).st_mode & 0o777
@@ -1557,7 +1557,7 @@ class TestRedTeamIntegrationR4(unittest.TestCase):
             Path(receipt_path).write_text(receipt_json)
 
             fake_bundle = '{"mediaType": "test"}'
-            with patch("aiir.cli.sign_receipt", return_value=fake_bundle):
+            with patch("aiir._sign.sign_receipt", return_value=fake_bundle):
                 # First sign should succeed
                 bundle_path = cli.sign_receipt_file(receipt_path)
                 self.assertTrue(os.path.exists(bundle_path))
@@ -2556,10 +2556,10 @@ class TestTechnicalExpert(unittest.TestCase):
             subject="stable", body="stable", diff_stat="",
             diff_hash="sha256:" + "f" * 64,
         )
-        with patch("aiir.cli._run_git", return_value="\n"):
+        with patch("aiir._receipt._run_git", return_value="\n"):
             r1 = cli.build_commit_receipt(commit)
-        with patch("aiir.cli._run_git", return_value="\n"):
-            with patch("aiir.cli._now_rfc3339", return_value="2099-12-31T23:59:59Z"):
+        with patch("aiir._receipt._run_git", return_value="\n"):
+            with patch("aiir._receipt._now_rfc3339", return_value="2099-12-31T23:59:59Z"):
                 r2 = cli.build_commit_receipt(commit)
         self.assertEqual(r1["content_hash"], r2["content_hash"])
         self.assertNotEqual(r1["timestamp"], r2["timestamp"])
@@ -3211,13 +3211,13 @@ class TestAcademicPhilosophicalR8(unittest.TestCase):
             subject="version coupling", body="version coupling", diff_stat="",
             diff_hash="sha256:" + "1" * 64,
         )
-        with patch("aiir.cli._run_git", return_value="\n"):
+        with patch("aiir._receipt._run_git", return_value="\n"):
             receipt = cli.build_commit_receipt(commit)
         original_hash = receipt["content_hash"]
 
         # Simulate a different CLI version
-        with patch("aiir.cli.CLI_VERSION", "99.0.0"):
-            with patch("aiir.cli._run_git", return_value="\n"):
+        with patch("aiir._receipt.CLI_VERSION", "99.0.0"):
+            with patch("aiir._receipt._run_git", return_value="\n"):
                 receipt2 = cli.build_commit_receipt(commit)
         self.assertNotEqual(original_hash, receipt2["content_hash"],
                             "Different CLI versions must produce different hashes")
@@ -4139,19 +4139,19 @@ class TestStripUrlCredentialsSafeFallback(unittest.TestCase):
     def test_exception_returns_safe_placeholder(self):
         """If URL reconstruction fails, a safe placeholder is returned (not the original)."""
         # Monkeypatch urlunparse to raise
-        import aiir.cli as cli_mod
-        original = cli_mod.urlunparse
+        import aiir._core as _core_mod
+        original = _core_mod.urlunparse
 
         def broken_unparse(*args, **kwargs):
             raise RuntimeError("simulated failure")
 
-        cli_mod.urlunparse = broken_unparse
+        _core_mod.urlunparse = broken_unparse
         try:
             result = cli._strip_url_credentials("https://user:secret@host.com/repo")
             self.assertNotIn("secret", result)
             self.assertIn("redacted", result.lower())
         finally:
-            cli_mod.urlunparse = original
+            _core_mod.urlunparse = original
 
 
 class TestSafeVerifyPathNoDeadCode(unittest.TestCase):
@@ -4535,7 +4535,7 @@ class TestSanitizeMdEmphasis(unittest.TestCase):
 class TestShaValidation(unittest.TestCase):
     """R12-SEC-03: get_commit_info must validate SHA format from git."""
 
-    @patch("aiir.cli._run_git")
+    @patch("aiir._detect._run_git")
     def test_valid_sha1_accepted(self, mock_git):
         """A standard 40-hex SHA-1 should pass validation."""
         sha = "a" * 40
@@ -4547,11 +4547,11 @@ class TestShaValidation(unittest.TestCase):
             "stat\n",           # git diff --stat
             "",                 # git diff --name-only
         ]
-        with patch("aiir.cli._hash_diff_streaming", return_value="sha256:abc"):
+        with patch("aiir._detect._hash_diff_streaming", return_value="sha256:abc"):
             info = cli.get_commit_info("HEAD")
         self.assertEqual(info.sha, sha)
 
-    @patch("aiir.cli._run_git")
+    @patch("aiir._detect._run_git")
     def test_valid_sha256_accepted(self, mock_git):
         """A 64-hex SHA-256 hash should also pass validation."""
         sha = "b" * 64
@@ -4563,11 +4563,11 @@ class TestShaValidation(unittest.TestCase):
             "stat\n",
             "",
         ]
-        with patch("aiir.cli._hash_diff_streaming", return_value="sha256:abc"):
+        with patch("aiir._detect._hash_diff_streaming", return_value="sha256:abc"):
             info = cli.get_commit_info("HEAD")
         self.assertEqual(info.sha, sha)
 
-    @patch("aiir.cli._run_git")
+    @patch("aiir._detect._run_git")
     def test_malformed_sha_rejected(self, mock_git):
         """A non-hex SHA should raise ValueError."""
         sha = "ZZZZ_not_a_sha_at_all_padding_padding_pa"
@@ -4577,7 +4577,7 @@ class TestShaValidation(unittest.TestCase):
             cli.get_commit_info("HEAD")
         self.assertIn("Invalid commit SHA format", str(ctx.exception))
 
-    @patch("aiir.cli._run_git")
+    @patch("aiir._detect._run_git")
     def test_short_sha_rejected(self, mock_git):
         """A SHA shorter than 40 chars should raise ValueError."""
         sha = "abcdef1234"  # only 10 chars

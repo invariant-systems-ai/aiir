@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "receipt_count": 3,
+  "ai_commit_count": 0,
+  "latest_timestamp": "",
+  "commits": {
+    "abc123": {
+      "receipt_id": "g1-test",
+      "ai": false,
+      "line": 1
+    },
+    "abcdef1234567890abcdef1234567890aaaaaaaa": {
+      "receipt_id": "",
+      "ai": false,
+      "line": 2
+    },
+    "abcdef1234567890abcdef1234567890bbbbbbbb": {
+      "receipt_id": "",
+      "ai": false,
+      "line": 3
+    }
+  }
+}

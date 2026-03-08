@@ -290,6 +290,8 @@ class TestReceiptIntegrity(unittest.TestCase):
         self.assertIn("commit", receipt)
         self.assertIn("ai_attestation", receipt)
         self.assertIn("provenance", receipt)
+        self.assertIn("extensions", receipt)
+        self.assertIsInstance(receipt["extensions"], dict)
 
     def test_receipt_id_format(self):
         commit = self._make_dummy_commit()
@@ -958,6 +960,32 @@ class TestRedTeamHardeningR3(unittest.TestCase):
         # Verification should still pass (unknown keys ignored)
         result = cli.verify_receipt(receipt)
         self.assertTrue(result["valid"], "Unknown keys should not break verification")
+
+    def test_extensions_excluded_from_content_hash(self):
+        """Extensions field must not affect receipt_id or content_hash."""
+        commit = cli.CommitInfo(
+            sha="abc123", author_name="Test", author_email="test@test.com",
+            author_date="2026-01-01T00:00:00Z", committer_name="Test",
+            committer_email="test@test.com", committer_date="2026-01-01T00:00:00Z",
+            subject="test", body="test", diff_stat="", diff_hash="sha256:abc",
+        )
+        with patch("aiir.cli._run_git", return_value="https://github.com/org/repo.git\n"):
+            receipt = cli.build_commit_receipt(commit)
+        original_id = receipt["receipt_id"]
+        original_hash = receipt["content_hash"]
+
+        # Populate extensions with arbitrary downstream data
+        receipt["extensions"] = {
+            "custom_hash": "sha256:" + "a" * 64,
+            "scores": [0.1] * 15,
+            "chain_prev": "g1-" + "b" * 32,
+        }
+
+        # Verification must still pass — extensions are outside CORE_KEYS
+        result = cli.verify_receipt(receipt)
+        self.assertTrue(result["valid"], "Populated extensions must not break verification")
+        self.assertEqual(receipt["receipt_id"], original_id)
+        self.assertEqual(receipt["content_hash"], original_hash)
 
     # --- R3-12: Negative max_count ---
 
@@ -4244,9 +4272,11 @@ class TestReadmeStats(unittest.TestCase):
         self.assertNotIn("523 tests", readme)
         self.assertNotIn("142 security controls", readme)
         self.assertNotIn("502 tests", readme)
+        self.assertNotIn("504 tests", readme)
+        self.assertNotIn("517 tests", readme)
         # Should have current content
         self.assertIn("security controls", readme)
-        self.assertIn("504 tests", readme)
+        self.assertIn("518 tests", readme)
 
 
 class TestThreatModelR03Consistency(unittest.TestCase):
@@ -5065,14 +5095,15 @@ class TestPrettyPlusOutput(unittest.TestCase):
         old_cwd = os.getcwd()
         try:
             os.chdir(self.tmpdir)
-            from io import StringIO
-            captured = StringIO()
-            with patch("sys.stdout", captured):
+            import io
+            captured_err = io.StringIO()
+            with patch("sys.stderr", captured_err), \
+                 patch("sys.stdout", io.StringIO()):
                 rc = cli.main(["--pretty", "--output", out_dir])
             self.assertEqual(rc, 0)
-            # Pretty output should be on stdout
-            stdout_text = captured.getvalue()
-            self.assertIn("┌", stdout_text, "Pretty box-drawing should appear on stdout")
+            # Pretty output should be on stderr
+            stderr_text = captured_err.getvalue()
+            self.assertIn("┌", stderr_text, "Pretty box-drawing should appear on stderr")
             # File should also be written to disk
             files = list(Path(out_dir).glob("receipt_*.json"))
             self.assertGreaterEqual(len(files), 1, "Receipt file must be written when --output is set")
@@ -5084,20 +5115,24 @@ class TestPrettyPlusOutput(unittest.TestCase):
             os.chdir(old_cwd)
 
     def test_pretty_without_output_no_file(self):
-        """--pretty alone should print to stdout, no files created."""
+        """--pretty alone prints to stderr and writes to .aiir/ ledger."""
         old_cwd = os.getcwd()
         try:
             os.chdir(self.tmpdir)
-            from io import StringIO
-            captured = StringIO()
-            with patch("sys.stdout", captured):
+            import io
+            captured_err = io.StringIO()
+            with patch("sys.stderr", captured_err), \
+                 patch("sys.stdout", io.StringIO()):
                 rc = cli.main(["--pretty"])
             self.assertEqual(rc, 0)
-            stdout_text = captured.getvalue()
-            self.assertIn("┌", stdout_text)
-            # No files should be created in cwd
+            stderr_text = captured_err.getvalue()
+            self.assertIn("┌", stderr_text)
+            # Default mode creates .aiir/receipts.jsonl (ledger), not individual files
             receipt_files = list(Path(self.tmpdir).rglob("receipt_*.json"))
-            self.assertEqual(len(receipt_files), 0, "--pretty alone must not write files")
+            self.assertEqual(len(receipt_files), 0, "--pretty must not write individual receipt files")
+            # But the ledger should exist
+            ledger = Path(self.tmpdir) / ".aiir" / "receipts.jsonl"
+            self.assertTrue(ledger.exists(), "default mode should create .aiir/receipts.jsonl")
         finally:
             os.chdir(old_cwd)
 
@@ -5911,7 +5946,7 @@ class TestMultiReceiptJsonArray(unittest.TestCase):
         import io
         captured = io.StringIO()
         with patch("sys.stdout", captured), \
-             patch("sys.argv", ["aiir", "--range", "HEAD~2..HEAD", "--quiet"]):
+             patch("sys.argv", ["aiir", "--range", "HEAD~2..HEAD", "--quiet", "--json"]):
             cli.main()
 
         output = captured.getvalue()
@@ -5922,7 +5957,7 @@ class TestMultiReceiptJsonArray(unittest.TestCase):
     @patch("aiir.cli.get_repo_root", return_value="/fake")
     @patch("aiir.cli.generate_receipt")
     def test_single_receipt_stdout_is_json_object(self, mock_gen, mock_root):
-        """A single receipt to stdout must parse as a JSON dict (backward compat)."""
+        """A single receipt with --json must parse as a JSON dict."""
         r = self._make_receipt("a")
         r["receipt_id"] = "g1-test"
         r["content_hash"] = "sha256:test"
@@ -5932,7 +5967,7 @@ class TestMultiReceiptJsonArray(unittest.TestCase):
         import io
         captured = io.StringIO()
         with patch("sys.stdout", captured), \
-             patch("sys.argv", ["aiir", "--quiet"]):
+             patch("sys.argv", ["aiir", "--quiet", "--json"]):
             cli.main()
 
         output = captured.getvalue()
@@ -6356,3 +6391,184 @@ class TestAISignalCoverage(unittest.TestCase):
         ]
         for tool in required:
             self.assertIn(tool, cli.AI_SIGNALS, f"Missing AI signal: {tool}")
+
+
+# ---------------------------------------------------------------------------
+# Ledger tests
+# ---------------------------------------------------------------------------
+
+
+class TestLedgerAppend(unittest.TestCase):
+    """append_to_ledger: basic append, dedup, index creation."""
+
+    def setUp(self):
+        self.tmpdir = tempfile.mkdtemp()
+        self.old_cwd = os.getcwd()
+        os.chdir(self.tmpdir)
+
+    def tearDown(self):
+        os.chdir(self.old_cwd)
+        import shutil
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def _make_receipt(self, sha="abc123def456"):
+        return {
+            "type": "aiir.commit_receipt",
+            "schema": "aiir/commit_receipt.v1",
+            "version": "1.0.0",
+            "commit": {"sha": sha, "author": {"name": "T", "email": "t@t"}},
+            "ai_attestation": {"is_ai_authored": False, "signals_detected": []},
+            "provenance": {"repository": None, "tool": "test", "generator": "test"},
+            "receipt_id": f"g1-{sha[:32]}",
+            "content_hash": f"sha256:{sha}",
+            "timestamp": "2026-01-01T00:00:00Z",
+        }
+
+    def test_append_creates_dir_and_files(self):
+        """First call should create .aiir/, ledger, and index."""
+        r = self._make_receipt()
+        appended, skipped, path = cli.append_to_ledger([r])
+        self.assertEqual(appended, 1)
+        self.assertEqual(skipped, 0)
+        self.assertTrue(Path(path).exists())
+        self.assertTrue((Path(".aiir") / "index.json").exists())
+
+    def test_dedup_by_sha(self):
+        """Same commit SHA should be skipped on second append."""
+        r = self._make_receipt("aaa")
+        cli.append_to_ledger([r])
+        appended, skipped, _ = cli.append_to_ledger([r])
+        self.assertEqual(appended, 0)
+        self.assertEqual(skipped, 1)
+        # Ledger should have exactly 1 line
+        lines = Path(".aiir/receipts.jsonl").read_text().strip().split("\n")
+        self.assertEqual(len(lines), 1)
+
+    def test_index_counts(self):
+        """Index should track receipt_count and ai_commit_count."""
+        r1 = self._make_receipt("sha_human")
+        r2 = self._make_receipt("sha_ai")
+        r2["ai_attestation"]["is_ai_authored"] = True
+        cli.append_to_ledger([r1, r2])
+        idx = json.loads(Path(".aiir/index.json").read_text())
+        self.assertEqual(idx["receipt_count"], 2)
+        self.assertEqual(idx["ai_commit_count"], 1)
+        self.assertIn("sha_human", idx["commits"])
+        self.assertIn("sha_ai", idx["commits"])
+        self.assertFalse(idx["commits"]["sha_human"]["ai"])
+        self.assertTrue(idx["commits"]["sha_ai"]["ai"])
+
+    def test_incremental_append(self):
+        """Two separate appends should accumulate correctly."""
+        r1 = self._make_receipt("first")
+        r2 = self._make_receipt("second")
+        cli.append_to_ledger([r1])
+        cli.append_to_ledger([r2])
+        lines = Path(".aiir/receipts.jsonl").read_text().strip().split("\n")
+        self.assertEqual(len(lines), 2)
+        idx = json.loads(Path(".aiir/index.json").read_text())
+        self.assertEqual(idx["receipt_count"], 2)
+
+    def test_custom_ledger_dir(self):
+        """--ledger with a custom path should work."""
+        r = self._make_receipt()
+        custom = os.path.join(self.tmpdir, "custom-audit")
+        appended, _, path = cli.append_to_ledger([r], ledger_dir=custom)
+        self.assertEqual(appended, 1)
+        self.assertIn("custom-audit", path)
+        self.assertTrue(Path(custom, "receipts.jsonl").exists())
+
+    def test_path_traversal_blocked(self):
+        """Ledger dir outside cwd must raise ValueError."""
+        r = self._make_receipt()
+        with self.assertRaises(ValueError):
+            cli.append_to_ledger([r], ledger_dir="/tmp")
+
+    def test_ledger_file_permissions(self):
+        """Ledger and index should be 0o644."""
+        r = self._make_receipt()
+        cli.append_to_ledger([r])
+        ledger_mode = oct(os.stat(".aiir/receipts.jsonl").st_mode & 0o777)
+        index_mode = oct(os.stat(".aiir/index.json").st_mode & 0o777)
+        self.assertEqual(ledger_mode, "0o644")
+        self.assertEqual(index_mode, "0o644")
+
+    def test_empty_receipts_list(self):
+        """Appending empty list should be a no-op."""
+        appended, skipped, _ = cli.append_to_ledger([])
+        self.assertEqual(appended, 0)
+        self.assertEqual(skipped, 0)
+
+    def test_receipt_without_sha_skipped(self):
+        """Receipt with no commit.sha should be silently skipped."""
+        r = self._make_receipt()
+        del r["commit"]["sha"]
+        appended, skipped, _ = cli.append_to_ledger([r])
+        self.assertEqual(appended, 0)
+        self.assertEqual(skipped, 0)
+
+    def test_ledger_lines_are_valid_json(self):
+        """Each line in the ledger must parse as valid JSON."""
+        r1 = self._make_receipt("one")
+        r2 = self._make_receipt("two")
+        cli.append_to_ledger([r1, r2])
+        for line in Path(".aiir/receipts.jsonl").read_text().strip().split("\n"):
+            data = json.loads(line)
+            self.assertIn("commit", data)
+
+
+class TestLedgerDefaultMode(unittest.TestCase):
+    """CLI default mode should use the ledger."""
+
+    def setUp(self):
+        self.tmpdir = tempfile.mkdtemp()
+        self.old_cwd = os.getcwd()
+        os.chdir(self.tmpdir)
+        # Set up a minimal git repo
+        subprocess.run(["git", "init", self.tmpdir], capture_output=True, check=True)
+        subprocess.run(["git", "-C", self.tmpdir, "config", "user.email", "t@t"],
+                        capture_output=True, check=True)
+        subprocess.run(["git", "-C", self.tmpdir, "config", "user.name", "T"],
+                        capture_output=True, check=True)
+        Path(self.tmpdir, "f.txt").write_text("x\n")
+        subprocess.run(["git", "-C", self.tmpdir, "add", "."], capture_output=True, check=True)
+        subprocess.run(["git", "-C", self.tmpdir, "commit", "-m", "init"],
+                        capture_output=True, check=True)
+
+    def tearDown(self):
+        os.chdir(self.old_cwd)
+        import shutil
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def test_bare_aiir_writes_ledger(self):
+        """Running `aiir` with no flags should create .aiir/receipts.jsonl."""
+        import io
+        with patch("sys.stderr", io.StringIO()), \
+             patch("sys.stdout", io.StringIO()):
+            rc = cli.main([])
+        self.assertEqual(rc, 0)
+        self.assertTrue(Path(".aiir/receipts.jsonl").exists())
+        self.assertTrue(Path(".aiir/index.json").exists())
+
+    def test_json_flag_bypasses_ledger(self):
+        """Running `aiir --json` should NOT create .aiir/."""
+        import io
+        captured = io.StringIO()
+        with patch("sys.stderr", io.StringIO()), \
+             patch("sys.stdout", captured):
+            rc = cli.main(["--json"])
+        self.assertEqual(rc, 0)
+        self.assertFalse(Path(".aiir").exists())
+        # stdout should have JSON
+        data = json.loads(captured.getvalue())
+        self.assertEqual(data["type"], "aiir.commit_receipt")
+
+    def test_output_flag_bypasses_ledger(self):
+        """Running `aiir --output .receipts` should NOT create .aiir/."""
+        import io
+        with patch("sys.stderr", io.StringIO()), \
+             patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--output", ".receipts"])
+        self.assertEqual(rc, 0)
+        self.assertFalse(Path(".aiir").exists())
+        self.assertTrue(Path(".receipts").exists())

@@ -1,0 +1,40 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.0",
+  "commit": {
+    "sha": "4baee2d6b7abcb4f29fd866fdb0c39ad197e2e78",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:04:44-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:04:52-04:00"
+    },
+    "subject": "fix: update pypi-publish action pin to v1.13.0 (stale SHA)",
+    "message_hash": "sha256:91c204f29990865c20c363b2c915677bf446421f6441a8f8d4e2c1f4f4672e18",
+    "diff_hash": "sha256:320e25b2d2f5085099be71dc5288aa635d0ba8ea49253775cd0e876ee29506e8",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/publish.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "detection_method": "heuristic_v1"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.0",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-d0769216c1fc64850459c249d77a8fbe",
+  "content_hash": "sha256:d0769216c1fc64850459c249d77a8fbe4f1afc713fd0054daed313a4cda21a0c",
+  "timestamp": "2026-03-08T11:05:01Z",
+  "extensions": {}
+}

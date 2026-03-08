@@ -292,6 +292,105 @@ class TestSignCLIFlags(unittest.TestCase):
         self.assertEqual(ret, 1)
 
 
+class TestSignCIDetection(unittest.TestCase):
+    """Tests for CI environment detection when ambient OIDC credential is missing."""
+
+    def test_sign_in_github_actions_no_oidc_raises_clear_error(self):
+        """sign_receipt() in GitHub Actions without OIDC gives a targeted error."""
+        import types
+
+        mock_sigstore_sign = types.ModuleType("sigstore.sign")
+        mock_sigstore_sign.SigningContext = unittest.mock.MagicMock()
+
+        mock_sigstore_models = types.ModuleType("sigstore.models")
+        mock_sigstore_models.ClientTrustConfig = unittest.mock.MagicMock()
+
+        mock_sigstore_oidc = types.ModuleType("sigstore.oidc")
+        mock_sigstore_oidc.detect_credential = unittest.mock.MagicMock(return_value=None)
+        mock_sigstore_oidc.IdentityToken = unittest.mock.MagicMock()
+        mock_sigstore_oidc.Issuer = unittest.mock.MagicMock()
+
+        with patch.dict("sys.modules", {
+            "sigstore": types.ModuleType("sigstore"),
+            "sigstore.sign": mock_sigstore_sign,
+            "sigstore.models": mock_sigstore_models,
+            "sigstore.oidc": mock_sigstore_oidc,
+        }):
+            with patch.dict("os.environ", {"GITHUB_ACTIONS": "true", "CI": "true"}, clear=False):
+                with self.assertRaises(RuntimeError) as ctx:
+                    cli.sign_receipt(b'{"test": true}')
+                self.assertIn("id-token: write", str(ctx.exception))
+                self.assertIn("no ambient OIDC credential", str(ctx.exception))
+
+    def test_sign_in_github_actions_fork_pr_mentions_fork(self):
+        """sign_receipt() on a fork PR mentions fork limitation in error."""
+        import types
+
+        mock_sigstore_sign = types.ModuleType("sigstore.sign")
+        mock_sigstore_sign.SigningContext = unittest.mock.MagicMock()
+
+        mock_sigstore_models = types.ModuleType("sigstore.models")
+        mock_sigstore_models.ClientTrustConfig = unittest.mock.MagicMock()
+
+        mock_sigstore_oidc = types.ModuleType("sigstore.oidc")
+        mock_sigstore_oidc.detect_credential = unittest.mock.MagicMock(return_value=None)
+        mock_sigstore_oidc.IdentityToken = unittest.mock.MagicMock()
+        mock_sigstore_oidc.Issuer = unittest.mock.MagicMock()
+
+        with patch.dict("sys.modules", {
+            "sigstore": types.ModuleType("sigstore"),
+            "sigstore.sign": mock_sigstore_sign,
+            "sigstore.models": mock_sigstore_models,
+            "sigstore.oidc": mock_sigstore_oidc,
+        }):
+            with patch.dict("os.environ", {
+                "GITHUB_ACTIONS": "true",
+                "CI": "true",
+                "GITHUB_EVENT_NAME": "pull_request",
+            }, clear=False):
+                with self.assertRaises(RuntimeError) as ctx:
+                    cli.sign_receipt(b'{"test": true}')
+                self.assertIn("Fork PRs", str(ctx.exception))
+
+    def test_sign_in_generic_ci_no_oidc_raises_clear_error(self):
+        """sign_receipt() in generic CI without OIDC gives a clear error."""
+        import types
+
+        mock_sigstore_sign = types.ModuleType("sigstore.sign")
+        mock_sigstore_sign.SigningContext = unittest.mock.MagicMock()
+
+        mock_sigstore_models = types.ModuleType("sigstore.models")
+        mock_sigstore_models.ClientTrustConfig = unittest.mock.MagicMock()
+
+        mock_sigstore_oidc = types.ModuleType("sigstore.oidc")
+        mock_sigstore_oidc.detect_credential = unittest.mock.MagicMock(return_value=None)
+        mock_sigstore_oidc.IdentityToken = unittest.mock.MagicMock()
+        mock_sigstore_oidc.Issuer = unittest.mock.MagicMock()
+
+        with patch.dict("sys.modules", {
+            "sigstore": types.ModuleType("sigstore"),
+            "sigstore.sign": mock_sigstore_sign,
+            "sigstore.models": mock_sigstore_models,
+            "sigstore.oidc": mock_sigstore_oidc,
+        }):
+            with patch.dict("os.environ", {"CI": "true"}, clear=False):
+                # Remove GitHub-specific env vars
+                with patch.dict("os.environ", {
+                    "GITHUB_ACTIONS": "",
+                    "GITLAB_CI": "",
+                }, clear=False):
+                    env_backup = os.environ.copy()
+                    os.environ.pop("GITHUB_ACTIONS", None)
+                    os.environ.pop("GITLAB_CI", None)
+                    try:
+                        with self.assertRaises(RuntimeError) as ctx:
+                            cli.sign_receipt(b'{"test": true}')
+                        self.assertIn("no ambient OIDC credential", str(ctx.exception))
+                        self.assertIn("sign: false", str(ctx.exception))
+                    finally:
+                        os.environ.update(env_backup)
+
+
 # ---------------------------------------------------------------------------
 # Round 4 red-team hardening tests (R4-XX)
 # ---------------------------------------------------------------------------

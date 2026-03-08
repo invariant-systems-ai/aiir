@@ -1,6 +1,6 @@
 # AIIR Receipt — GitLab CI/CD Component
 
-Generate tamper-evident cryptographic receipts for every AI-generated commit in your GitLab CI/CD pipelines.
+Generate tamper-evident cryptographic receipts for every commit with declared AI involvement in your GitLab CI/CD pipelines.
 
 ## Quick start
 
@@ -75,7 +75,7 @@ include:
 
 - **Zero dependencies** — Python standard library only
 - **Apache 2.0** — free forever, no usage limits
-- **EU AI Act** — supports Article 13 compliance evidence
+- **EU AI Act** — supports transparency and provenance evidence
 - **564 tests** — 512 unit + 52 property-based fuzz tests
 
 Built by [Invariant Systems, Inc.](https://invariantsystems.io)

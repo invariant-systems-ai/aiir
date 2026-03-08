@@ -1,8 +1,8 @@
 # AIIR — AI Integrity Receipts for CircleCI
 # https://github.com/invariant-systems-ai/aiir  |  https://pypi.org/project/aiir/
 #
-# Generates tamper-evident cryptographic receipts for every AI-generated
-# commit. Supports compliance evidence for EU AI Act. Zero dependencies. Apache 2.0.
+# Generates tamper-evident cryptographic receipts for commits with declared
+# AI involvement. Supports compliance evidence for EU AI Act. Zero dependencies. Apache 2.0.
 #
 # ──────────────────────────────────────────────────────────────────────
 # QUICK START — save as .circleci/config.yml, or copy the job into
@@ -27,7 +27,7 @@ jobs:
     parameters:
       version:
         type: string
-        default: "1.0.2"
+        default: "1.0.7"
       ai-only:
         type: boolean
         default: false

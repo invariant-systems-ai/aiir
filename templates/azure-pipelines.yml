@@ -1,8 +1,8 @@
 # AIIR — AI Integrity Receipts for Azure Pipelines
 # https://github.com/invariant-systems-ai/aiir  |  https://pypi.org/project/aiir/
 #
-# Generates tamper-evident cryptographic receipts for every AI-generated
-# commit. Supports compliance evidence for EU AI Act. Zero dependencies. Apache 2.0.
+# Generates tamper-evident cryptographic receipts for commits with declared
+# AI involvement. Supports compliance evidence for EU AI Act. Zero dependencies. Apache 2.0.
 #
 # ──────────────────────────────────────────────────────────────────────
 # QUICK START — add this file as azure-pipelines.yml in your repo,
@@ -20,7 +20,7 @@ pr:
       - '*'
 
 variables:
-  AIIR_VERSION: '1.0.2'
+  AIIR_VERSION: '1.0.7'
 
 pool:
   vmImage: 'ubuntu-latest'

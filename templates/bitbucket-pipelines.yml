@@ -1,8 +1,8 @@
 # AIIR — AI Integrity Receipts for Bitbucket Pipelines
 # https://github.com/invariant-systems-ai/aiir  |  https://pypi.org/project/aiir/
 #
-# Generates tamper-evident cryptographic receipts for every AI-generated
-# commit. Supports compliance evidence for EU AI Act. Zero dependencies. Apache 2.0.
+# Generates tamper-evident cryptographic receipts for commits with declared
+# AI involvement. Supports compliance evidence for EU AI Act. Zero dependencies. Apache 2.0.
 #
 # ──────────────────────────────────────────────────────────────────────
 # QUICK START — add this to your bitbucket-pipelines.yml:
@@ -27,7 +27,7 @@ definitions:
         name: AIIR Receipt
         image: python:3.11-slim
         script:
-          - pip install --quiet "aiir==1.0.2"
+          - pip install --quiet "aiir==1.0.7"
           - |
             if [ -n "$BITBUCKET_COMMIT" ]; then
               # Receipt commits in the current push
@@ -51,7 +51,7 @@ pipelines:
           <<: *aiir-receipt
           name: AIIR Receipt (PR)
           script:
-            - pip install --quiet "aiir==1.0.2"
+            - pip install --quiet "aiir==1.0.7"
             - git fetch origin "$BITBUCKET_PR_DESTINATION_BRANCH" --depth=100
             - aiir --range "origin/${BITBUCKET_PR_DESTINATION_BRANCH}..${BITBUCKET_COMMIT}" --output .aiir-receipts/ --pretty
             - |

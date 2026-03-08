@@ -2,8 +2,14 @@
 # This triggers publish.yml (release: published) → PyPI upload,
 # which in turn triggers sync.yml → GitLab mirror + verification.
 #
-# The ENTIRE release pipeline is: tag push → release → publish → sync.
-# No manual steps.
+# The ENTIRE release pipeline (all triggered by a single tag push):
+#   tag push → release.yml (GitHub Release)
+#            → publish.yml (PyPI via Trusted Publishers)
+#            → sync.yml   (GitLab mirror + version alignment)
+#   tag push → update-major-tag.yml (move v1/v2/… floating tag)
+#
+# No manual steps.  Self-healing: weekly schedule in sync.yml and
+# update-major-tag.yml catches drift in PyPI, GitLab, and floating tags.
 name: Release
 
 on:

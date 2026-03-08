@@ -1082,7 +1082,7 @@ class TestPipeCleanup(unittest.TestCase):
         mock_proc.returncode = -9
         mock_popen.return_value = mock_proc
 
-        with patch("aiir.cli.GIT_TIMEOUT", 0):  # instant timeout
+        with patch("aiir._core.GIT_TIMEOUT", 0):  # instant timeout
             with self.assertRaises(RuntimeError):
                 cli._hash_diff_streaming("parent", "sha")
 

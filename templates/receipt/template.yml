@@ -2,7 +2,7 @@
 # https://gitlab.com/invariant-systems/aiir
 #
 # Generates tamper-evident cryptographic receipts for AI-generated commits.
-# EU AI Act ready. Zero dependencies. Apache 2.0.
+# Supports compliance evidence for EU AI Act. Zero dependencies. Apache 2.0.
 #
 # Usage:
 #   include:
@@ -20,7 +20,7 @@ spec:
   description: >
     Generate tamper-evident cryptographic receipts for every AI-generated commit.
     Detects Copilot, ChatGPT, Claude, Cursor, Amazon Q, Devin, Gemini, and 20+
-    other AI tools. EU AI Act Article 13 ready. Zero dependencies.
+    other AI tools. Supports compliance evidence for EU AI Act Article 13. Zero dependencies.
   inputs:
     stage:
       description: "Pipeline stage for the receipt job"

@@ -77,12 +77,20 @@ def detect_ai_signals(
     author_email: str = "",
     committer_name: str = "",
     committer_email: str = "",
-) -> List[str]:
-    """Detect AI authorship signals in commit metadata.
+) -> tuple:
+    """Detect AI authorship and automation/bot signals in commit metadata.
 
-    Returns a list of detected signal descriptions.
+    Returns a tuple of (ai_signals, bot_signals) where each is a list of
+    detected signal descriptions.
+
+    **AI signals** = declared AI coding assistance (Copilot, ChatGPT, etc.)
+    **Bot signals** = pure automation (Dependabot, Renovate, github-actions, etc.)
+
+    This distinction matters: ``is_ai_authored`` should only be True when
+    AI tooling was involved, not for every automated commit.
     """
-    signals = []
+    ai_signals = []
+    bot_signals = []
     # Use shared _normalize_for_detection helper for consistent
     # normalization across message body and author/committer fields.
     msg_clean = _normalize_for_detection(message)
@@ -93,7 +101,7 @@ def detect_ai_signals(
     # Check message body for AI signals
     for signal in AI_SIGNALS:
         if signal in msg_lower:
-            signals.append(f"message_match:{signal}")
+            ai_signals.append(f"message_match:{signal}")
 
     # Check for AI-related trailers (git trailer format: Key: Value)
     # Only record trailer key, not value (avoids leaking internal tool names)
@@ -103,25 +111,29 @@ def detect_ai_signals(
         line_normalized = _normalize_for_detection(line).strip().lower()
         for trailer in AI_TRAILERS:
             if line_normalized.startswith(f"{trailer}:"):
-                signals.append(f"trailer:{trailer}")
+                ai_signals.append(f"trailer:{trailer}")
 
-    # Check author/committer for known AI bot patterns
-    bot_patterns = [
+    # Check author/committer for known AI agent patterns
+    # These are AI-powered tools that act as commit authors.
+    ai_author_patterns = [
         "copilot",
-        "github-actions",
-        "dependabot",
-        "renovate",
-        "snyk-bot",
-        "deepsource",
         "coderabbit",
-        # Missing bot patterns for major AI tools.
-        # Use specific patterns to avoid false positives on human names.
         "devin[bot]",
         "devin-bot",
         "amazon-q",
         "tabnine",
         "gemini[bot]",
         "gemini-bot",
+    ]
+    # Pure automation bots — NOT AI.  These generate commits via
+    # dependency updates, CI pipelines, or static analysis, not via
+    # language model inference.
+    bot_patterns = [
+        "github-actions",
+        "dependabot",
+        "renovate",
+        "snyk-bot",
+        "deepsource",
     ]
     for name_field, label in [
         (author_name, "author_name"),
@@ -131,11 +143,14 @@ def detect_ai_signals(
     ]:
         # Use shared helper (consistent with message body path).
         clean_field = _normalize_for_detection(name_field or "").lower()
+        for pattern in ai_author_patterns:
+            if pattern in clean_field:
+                ai_signals.append(f"{label}_bot:{pattern}")
         for pattern in bot_patterns:
             if pattern in clean_field:
-                signals.append(f"{label}_bot:{pattern}")
+                bot_signals.append(f"{label}_bot:{pattern}")
 
-    return signals
+    return ai_signals, bot_signals
 
 
 def get_commit_info(
@@ -204,7 +219,7 @@ def get_commit_info(
     files_changed = [f for f in files_raw.split("\n") if f.strip()]
 
     # Detect AI signals
-    ai_signals = detect_ai_signals(body, a_name, a_email, c_name, c_email)
+    ai_signals, bot_signals = detect_ai_signals(body, a_name, a_email, c_name, c_email)
 
     return CommitInfo(
         sha=sha,
@@ -221,6 +236,8 @@ def get_commit_info(
         files_changed=files_changed,
         ai_signals_detected=ai_signals,
         is_ai_authored=len(ai_signals) > 0,
+        bot_signals_detected=bot_signals,
+        is_bot_authored=len(bot_signals) > 0,
     )
 
 

@@ -83,6 +83,7 @@ def _load_index(index_path: Path) -> Dict[str, Any]:
         "version": 1,
         "receipt_count": 0,
         "ai_commit_count": 0,
+        "bot_commit_count": 0,
         "ai_percentage": 0.0,
         "first_receipt": None,
         "latest_timestamp": None,
@@ -163,6 +164,7 @@ def append_to_ledger(
             appended += 1
 
             is_ai = receipt.get("ai_attestation", {}).get("is_ai_authored", False)
+            is_bot = receipt.get("ai_attestation", {}).get("is_bot_authored", False)
             rid = receipt.get("receipt_id", "")
             ts = receipt.get("timestamp", "")
 
@@ -170,11 +172,14 @@ def append_to_ledger(
             known_commits[sha] = {
                 "receipt_id": rid,
                 "ai": is_ai,
+                "bot": is_bot,
                 "author": author_email,
                 "line": index.get("receipt_count", 0) + appended,
             }
             if is_ai:
                 index["ai_commit_count"] = index.get("ai_commit_count", 0) + 1
+            if is_bot:
+                index["bot_commit_count"] = index.get("bot_commit_count", 0) + 1
             if index.get("first_receipt") is None:
                 index["first_receipt"] = ts
             index["latest_timestamp"] = ts

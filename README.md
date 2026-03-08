@@ -25,7 +25,7 @@ Your auditors will ask: *"Which code was AI-generated? Can you prove it?"*
 | Who asks | What they need |
 |----------|---------------|
 | **SOC 2 / ISO 27001 auditor** | Tamper-evident record of AI involvement per commit |
-| **EU AI Act compliance** | Transparency trail for AI-generated artifacts |
+| **EU AI Act compliance** | Supports Article 13 transparency evidence |
 | **Insurance underwriter** | Record of AI involvement per commit |
 | **Engineering leadership** | "We track all AI code" — with cryptographic receipts |
 
@@ -167,7 +167,7 @@ jobs:
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/invariant-systems-ai/aiir
-    rev: v1.0.2
+    rev: v1.0.4
     hooks:
       - id: aiir
 ```
@@ -206,7 +206,7 @@ All inputs are optional and typed:
 
 ```yaml
 include:
-  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.0/templates/gitlab-ci.yml'
+  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.4/templates/gitlab-ci.yml'
 ```
 
 **Self-hosted GitLab?** Mirror the repo and use `project:` instead:
@@ -214,7 +214,7 @@ include:
 ```yaml
 include:
   - project: 'your-group/aiir'
-    ref: 'v1.0.0'
+    ref: 'v1.0.4'
     file: '/templates/gitlab-ci.yml'
 ```
 
@@ -450,7 +450,11 @@ Each receipt is a content-addressed JSON document:
   "ai_attestation": {
     "is_ai_authored": true,
     "signals_detected": ["message_match:co-authored-by: copilot"],
-    "detection_method": "heuristic_v1"
+    "signal_count": 1,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "detection_method": "heuristic_v2"
   },
   "extensions": {}
 }
@@ -458,7 +462,11 @@ Each receipt is a content-addressed JSON document:
 
 **Content-addressed** = the `receipt_id` is derived from SHA-256 of the receipt's canonical JSON. Change any field → hash changes → receipt invalid.
 
-> **Note**: Unsigned receipts are *tamper-evident*, not *tamper-proof*. Anyone who can re-run `aiir` on the same commit can recreate a matching receipt. For cryptographic non-repudiation, enable Sigstore signing.
+> **`is_ai_authored`** = true when AI coding tools are detected (Copilot, ChatGPT, Claude, etc.).
+> **`is_bot_authored`** = true when automation/CI bots are detected (Dependabot, Renovate, etc.).
+> These are separate booleans — a Dependabot commit is *not* AI-authored. Inspect `signals_detected` / `bot_signals_detected` for details.
+
+> **Note**: Unsigned receipts are *tamper-evident*, not *tamper-proof*. Anyone who can re-run `aiir` on the same commit can recreate a matching receipt. For cryptographic non-repudiation, enable [Sigstore signing](#sigstore-signing).
 
 </details>
 
@@ -577,11 +585,19 @@ Each receipt gets an accompanying `.sigstore` bundle:
 Verify locally:
 
 ```bash
+# Basic: checks signature is valid (any signer)
 aiir --verify receipt.json --verify-signature
+
+# Recommended: pin to a specific CI identity for non-repudiation
 aiir --verify receipt.json --verify-signature \
   --signer-identity "https://github.com/myorg/myrepo/.github/workflows/aiir.yml@refs/heads/main" \
   --signer-issuer "https://token.actions.githubusercontent.com"
 ```
+
+> ⚠️ **Always use `--signer-identity` and `--signer-issuer` in production.**
+> Without identity pinning, verification accepts any valid Sigstore signature.
+> That proves *someone* signed it, but not *your CI* signed it.
+> Extensions fields are **not** part of the content hash and should not be treated as security-relevant.
 
 Install signing support: `pip install aiir[sign]`
 

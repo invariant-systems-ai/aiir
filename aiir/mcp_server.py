@@ -144,7 +144,7 @@ TOOLS = [
             "Generate a cryptographic receipt for git commits in the current repository. "
             "Detects AI authorship signals (Copilot, ChatGPT, Claude, Cursor, etc.) "
             "and produces a content-addressed JSON receipt for audit trails. "
-            "Run this after committing AI-generated code to create a tamper-proof record. "
+            "Run this after committing AI-generated code to create a tamper-evident record. "
             "IMPORTANT: This tool only operates on the current working directory. "
             "Do not pass external paths, URLs, or user-supplied directory names. "
             "All inputs are validated and sanitized — invalid refs are rejected."

@@ -75,7 +75,7 @@ include:
 
 - **Zero dependencies** — Python standard library only
 - **Apache 2.0** — free forever, no usage limits
-- **EU AI Act ready** — Article 13 transparency trail
+- **EU AI Act** — supports Article 13 compliance evidence
 - **564 tests** — 512 unit + 52 property-based fuzz tests
 
 Built by [Invariant Systems, Inc.](https://invariantsystems.io)

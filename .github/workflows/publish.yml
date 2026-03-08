@@ -1,71 +1,101 @@
-# Publish to PyPI via Trusted Publishers (OIDC — no API tokens).
-# Triggered when you create a GitHub Release (e.g. v1.0.0).
-name: Publish to PyPI
+# Publish to PyPI when a version tag is pushed.
+#
+# Single workflow handles the full pipeline:
+#   1. Verify tag matches __version__
+#   2. Create GitHub Release (with auto-generated notes)
+#   3. Build wheel + sdist
+#   4. Publish to PyPI via OIDC Trusted Publisher
+#   5. Verify PyPI has the version (retries 6×)
+#
+# NOTE: This is a single workflow instead of release→publish chaining
+# because GitHub Actions won't trigger workflows from events created
+# by the default GITHUB_TOKEN (to prevent infinite loops).
+name: Publish
 
 on:
-  release:
-    types: [published]
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
 
 permissions:
-  contents: read
+  contents: write  # For creating the GitHub Release
 
 jobs:
-  build:
+  # ── Gate: verify tag = code version ────────────────────────────────
+  preflight:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
-        with:
-          python-version: "3.12"
-
-      - name: Install build tools
-        run: pip install build
-
-      - name: Build sdist and wheel
-        run: python -m build
-
-      - name: Verify package version matches tag
+      - name: Verify tag matches package version
         run: |
           TAG="${GITHUB_REF_NAME#v}"
-          PKG=$(python -c "
+          PKG=$(python3 -c "
           import re
           text = open('aiir/__init__.py').read()
           m = re.search(r'__version__\s*=\s*[\"\\x27]([^\"\\x27]+)', text)
           print(m.group(1))
           ")
           if [ "$TAG" != "$PKG" ]; then
-            echo "::error::Tag ($TAG) != aiir/__init__.py version ($PKG)"
+            echo "::error::Tag ($TAG) ≠ aiir/__init__.py ($PKG). Aborting."
             exit 1
           fi
+          echo "✅ Tag matches: $TAG"
 
+  # ── Step 1: Create GitHub Release ──────────────────────────────────
+  release:
+    needs: preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            --verify-tag
+
+  # ── Step 2: Build sdist + wheel ────────────────────────────────────
+  build:
+    needs: preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
+        with:
+          python-version: "3.12"
+      - name: Build
+        run: pip install build && python -m build
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: dist
           path: dist/
 
+  # ── Step 3: Publish to PyPI ────────────────────────────────────────
   publish:
     needs: build
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
-      id-token: write  # Required for OIDC trusted publishing
+      contents: read
+      id-token: write  # Required for OIDC Trusted Publisher
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
         with:
           name: dist
           path: dist/
-
       - uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e  # v1.13.0
         # No API token needed — uses OIDC via Trusted Publisher config on PyPI
 
-  # ── Self-healing: verify PyPI actually has the version ────────────
+  # ── Step 4: Verify PyPI ────────────────────────────────────────────
   verify:
     needs: publish
     runs-on: ubuntu-latest
     steps:
       - name: Wait for PyPI index propagation
         run: sleep 30
-
       - name: Verify package on PyPI
         run: |
           TAG="${GITHUB_REF_NAME#v}"

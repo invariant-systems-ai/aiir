@@ -4279,9 +4279,10 @@ class TestReadmeStats(unittest.TestCase):
         self.assertNotIn("518 tests", readme)
         self.assertNotIn("532 tests", readme)
         self.assertNotIn("545 tests", readme)
+        self.assertNotIn("548 tests", readme)
         # Should have current content
         self.assertIn("security controls", readme)
-        self.assertIn("548 tests", readme)
+        self.assertIn("564 tests", readme)
 
 
 class TestThreatModelR03Consistency(unittest.TestCase):
@@ -7071,3 +7072,262 @@ class TestCheck(unittest.TestCase):
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             rc = cli.main(["--max-ai-percent", "90"])
         self.assertEqual(rc, 0)
+
+
+# ---------------------------------------------------------------------------
+# Cross-platform / OS-portability tests
+# ---------------------------------------------------------------------------
+
+
+class TestCrossPlatformFchmod(unittest.TestCase):
+    """Verify the _HAS_FCHMOD guard works on platforms without os.fchmod."""
+
+    def test_has_fchmod_is_bool(self):
+        """_HAS_FCHMOD should be a boolean."""
+        self.assertIsInstance(cli._HAS_FCHMOD, bool)
+
+    def test_write_receipt_without_fchmod(self):
+        """write_receipt should succeed when os.fchmod is unavailable."""
+        receipt = _make_test_receipt()
+        old_cwd = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            try:
+                os.chdir(tmpdir)
+                out = os.path.join(tmpdir, "out")
+                os.makedirs(out)
+                with patch.object(cli, "_HAS_FCHMOD", False):
+                    path = cli.write_receipt(receipt, output_dir=out)
+                self.assertTrue(Path(path).exists())
+                data = json.loads(Path(path).read_text())
+                self.assertEqual(data["receipt_id"], receipt["receipt_id"])
+            finally:
+                os.chdir(old_cwd)
+
+    def test_save_config_without_fchmod(self):
+        """_save_config should succeed when os.fchmod is unavailable."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cfg_path = Path(tmpdir) / "config.json"
+            config = {"instance_id": "test-id", "created": "2026-01-01T00:00:00Z"}
+            with patch.object(cli, "_HAS_FCHMOD", False):
+                cli._save_config(cfg_path, config)
+            self.assertTrue(cfg_path.exists())
+            data = json.loads(cfg_path.read_text())
+            self.assertEqual(data["instance_id"], "test-id")
+
+    def test_save_index_without_fchmod(self):
+        """_save_index should succeed when os.fchmod is unavailable."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            idx_path = Path(tmpdir) / "index.json"
+            index = {"version": 1, "receipt_count": 0, "ai_commit_count": 0,
+                     "ai_percentage": 0.0, "first_receipt": None,
+                     "latest_timestamp": None, "unique_authors": 0, "commits": {}}
+            with patch.object(cli, "_HAS_FCHMOD", False):
+                cli._save_index(idx_path, index)
+            self.assertTrue(idx_path.exists())
+            data = json.loads(idx_path.read_text())
+            self.assertEqual(data["version"], 1)
+
+    def test_ledger_append_without_fchmod(self):
+        """append_to_ledger should succeed when os.fchmod is unavailable."""
+        receipt = _make_test_receipt()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            old_cwd = os.getcwd()
+            try:
+                os.chdir(tmpdir)
+                with patch.object(cli, "_HAS_FCHMOD", False):
+                    appended, skipped, path = cli.append_to_ledger([receipt])
+                self.assertEqual(appended, 1)
+                self.assertTrue(Path(path).exists())
+            finally:
+                os.chdir(old_cwd)
+
+
+class TestCrossPlatformPaths(unittest.TestCase):
+    """Verify pathlib usage works across OS path conventions."""
+
+    def test_ledger_paths_use_pathlib(self):
+        """_ledger_paths should return Path objects, not strings."""
+        dir_path, ledger_path, index_path = cli._ledger_paths()
+        self.assertIsInstance(dir_path, Path)
+        self.assertIsInstance(ledger_path, Path)
+        self.assertIsInstance(index_path, Path)
+
+    def test_config_path_uses_pathlib(self):
+        """_config_path should return a Path object."""
+        result = cli._config_path()
+        self.assertIsInstance(result, Path)
+
+    def test_write_receipt_handles_trailing_separator(self):
+        """Output dir with trailing separator should work."""
+        receipt = _make_test_receipt()
+        old_cwd = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            try:
+                os.chdir(tmpdir)
+                out = os.path.join(tmpdir, "out")
+                os.makedirs(out)
+                # Add trailing separator (/ on POSIX, \\ on Windows)
+                dir_with_sep = out + os.sep
+                path = cli.write_receipt(receipt, output_dir=dir_with_sep)
+                self.assertTrue(Path(path).exists())
+            finally:
+                os.chdir(old_cwd)
+
+    def test_canonical_json_deterministic(self):
+        """Canonical JSON must be byte-identical across platforms."""
+        obj = {"z": 1, "a": 2, "m": {"b": 3, "a": 4}}
+        result1 = cli._canonical_json(obj)
+        result2 = cli._canonical_json(obj)
+        self.assertEqual(result1, result2)
+        # Keys must be sorted
+        self.assertIn('"a"', result1)
+        idx_a = result1.index('"a"')
+        idx_z = result1.index('"z"')
+        self.assertLess(idx_a, idx_z, "Keys should be sorted")
+        # No whitespace between separators
+        self.assertNotIn(": ", result1)
+        self.assertNotIn(", ", result1)
+
+    def test_receipt_id_deterministic_across_calls(self):
+        """Same input must produce same receipt_id every time."""
+        commit = cli.CommitInfo(
+            sha="abc123def456", author_name="Test", author_email="t@t.com",
+            author_date="2026-01-01T00:00:00Z", committer_name="Test",
+            committer_email="t@t.com", committer_date="2026-01-01T00:00:00Z",
+            subject="test", body="test\n",
+            diff_stat="1 file changed",
+            diff_hash="sha256:aaa",
+            files_changed=["f.py"], is_ai_authored=True,
+            ai_signals_detected=["copilot"],
+        )
+        with patch.object(cli, "_run_git", return_value="https://example.com/repo"):
+            r1 = cli.build_commit_receipt(commit)
+            r2 = cli.build_commit_receipt(commit)
+        self.assertEqual(r1["receipt_id"], r2["receipt_id"])
+        self.assertEqual(r1["content_hash"], r2["content_hash"])
+
+
+class TestCrossPlatformEncoding(unittest.TestCase):
+    """Verify UTF-8 handling across platforms."""
+
+    def test_ledger_writes_utf8(self):
+        """Ledger should handle non-ASCII author names."""
+        commit = cli.CommitInfo(
+            sha="utf8test123456", author_name="Ñoño 日本語",
+            author_email="intl@test.com",
+            author_date="2026-01-01T00:00:00Z", committer_name="Ñoño",
+            committer_email="intl@test.com",
+            committer_date="2026-01-01T00:00:00Z",
+            subject="intl: unicode test", body="intl: unicode test\n",
+            diff_stat="1 file changed",
+            diff_hash="sha256:bbb", files_changed=["ñ.py"],
+            is_ai_authored=False, ai_signals_detected=[],
+        )
+        with patch.object(cli, "_run_git", return_value="https://example.com/repo"):
+            receipt = cli.build_commit_receipt(commit)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            old_cwd = os.getcwd()
+            try:
+                os.chdir(tmpdir)
+                appended, _, path = cli.append_to_ledger([receipt])
+                self.assertEqual(appended, 1)
+                content = Path(path).read_text(encoding="utf-8")
+                # Canonical JSON uses ensure_ascii — check via round-trip
+                parsed = json.loads(content)
+                self.assertEqual(parsed["commit"]["author"]["name"], "Ñoño 日本語")
+                self.assertIn("ñ.py", parsed["commit"]["files"])
+            finally:
+                os.chdir(old_cwd)
+
+    def test_export_preserves_unicode(self):
+        """Export bundle should preserve non-ASCII data."""
+        commit = cli.CommitInfo(
+            sha="exportutf8test1", author_name="André",
+            author_email="a@test.com",
+            author_date="2026-01-01T00:00:00Z", committer_name="André",
+            committer_email="a@test.com",
+            committer_date="2026-01-01T00:00:00Z",
+            subject="feat: café", body="feat: café\n",
+            diff_stat="1 file changed",
+            diff_hash="sha256:ccc", files_changed=["café.py"],
+            is_ai_authored=True, ai_signals_detected=["copilot"],
+        )
+        with patch.object(cli, "_run_git", return_value="https://example.com/repo"):
+            receipt = cli.build_commit_receipt(commit)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            old_cwd = os.getcwd()
+            try:
+                os.chdir(tmpdir)
+                cli.append_to_ledger([receipt])
+                bundle = cli.export_ledger()
+                self.assertIn("André", json.dumps(bundle, ensure_ascii=False))
+            finally:
+                os.chdir(old_cwd)
+
+    def test_config_roundtrip_unicode_namespace(self):
+        """Config should preserve unicode namespace values."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cfg_path = Path(tmpdir) / "config.json"
+            config = {"instance_id": str(uuid.uuid4()),
+                      "namespace": "société-générale",
+                      "created": "2026-01-01T00:00:00Z"}
+            cli._save_config(cfg_path, config)
+            loaded = json.loads(cfg_path.read_text(encoding="utf-8"))
+            self.assertEqual(loaded["namespace"], "société-générale")
+
+
+class TestAtomicWriteSemantics(unittest.TestCase):
+    """Verify atomic write pattern works on all platforms."""
+
+    def test_save_config_uses_rename(self):
+        """_save_config should leave no .tmp files behind."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cfg_path = Path(tmpdir) / "config.json"
+            config = {"instance_id": "atomic-test", "created": "2026-01-01T00:00:00Z"}
+            cli._save_config(cfg_path, config)
+            # No .tmp file should remain
+            tmp_files = list(Path(tmpdir).glob("*.tmp"))
+            self.assertEqual(len(tmp_files), 0, f"Stale .tmp files found: {tmp_files}")
+            self.assertTrue(cfg_path.exists())
+
+    def test_save_index_uses_rename(self):
+        """_save_index should leave no .tmp files behind."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            idx_path = Path(tmpdir) / "index.json"
+            index = {"version": 1, "receipt_count": 5, "ai_commit_count": 2,
+                     "ai_percentage": 40.0, "first_receipt": "2026-01-01T00:00:00Z",
+                     "latest_timestamp": "2026-01-01T00:00:00Z",
+                     "unique_authors": 1, "commits": {}}
+            cli._save_index(idx_path, index)
+            tmp_files = list(Path(tmpdir).glob("*.tmp"))
+            self.assertEqual(len(tmp_files), 0)
+            self.assertTrue(idx_path.exists())
+            self.assertEqual(json.loads(idx_path.read_text())["receipt_count"], 5)
+
+    def test_overwrite_config_preserves_content(self):
+        """Overwriting config should not corrupt data."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cfg_path = Path(tmpdir) / "config.json"
+            for i in range(5):
+                config = {"instance_id": f"id-{i}", "created": "2026-01-01T00:00:00Z"}
+                cli._save_config(cfg_path, config)
+            final = json.loads(cfg_path.read_text())
+            self.assertEqual(final["instance_id"], "id-4")
+
+
+# Helper for cross-platform tests
+def _make_test_receipt():
+    """Create a minimal valid receipt for testing."""
+    commit = cli.CommitInfo(
+        sha="deadbeef12345678", author_name="Test User",
+        author_email="test@example.com",
+        author_date="2026-01-01T00:00:00Z", committer_name="Test User",
+        committer_email="test@example.com",
+        committer_date="2026-01-01T00:00:00Z",
+        subject="test: cross-platform", body="test: cross-platform\n",
+        diff_stat="1 file changed, 1 insertion(+)",
+        diff_hash="sha256:0000", files_changed=["test.py"],
+        is_ai_authored=False, ai_signals_detected=[],
+    )
+    with patch.object(cli, "_run_git", return_value="https://example.com/repo"):
+        return cli.build_commit_receipt(commit)

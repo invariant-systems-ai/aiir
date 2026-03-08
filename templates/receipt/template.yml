@@ -26,7 +26,7 @@ spec:
       description: "Pipeline stage for the receipt job"
       default: test
     version:
-      description: "AIIR version to install (pin for reproducibility)"
+      description: "AIIR version to install (pin for reproducibility, or 'source' to install from local checkout)"
       default: "1.0.6"
     ai-only:
       description: "Only receipt AI-authored commits (skip human-only commits)"
@@ -55,7 +55,12 @@ spec:
   stage: $[[ inputs.stage ]]
   before_script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
-    - pip install --quiet "aiir==$[[ inputs.version ]]"
+    - |
+      if [ "$[[ inputs.version ]]" = "source" ]; then
+        pip install --quiet -e .
+      else
+        pip install --quiet "aiir==$[[ inputs.version ]]"
+      fi
   script:
     - |
       AI_FLAG=""
@@ -89,7 +94,12 @@ spec:
   stage: $[[ inputs.stage ]]
   before_script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
-    - pip install --quiet "aiir==$[[ inputs.version ]]"
+    - |
+      if [ "$[[ inputs.version ]]" = "source" ]; then
+        pip install --quiet -e .
+      else
+        pip install --quiet "aiir==$[[ inputs.version ]]"
+      fi
   script:
     - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --depth=100
     - |

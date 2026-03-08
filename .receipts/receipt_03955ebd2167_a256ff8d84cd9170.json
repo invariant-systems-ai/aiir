@@ -1,0 +1,41 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.2",
+  "commit": {
+    "sha": "03955ebd2167a856409648932c252c2f491ea4c2",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:50:44-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:50:54-04:00"
+    },
+    "subject": "fix: CI test path + grep pipefail in component template",
+    "message_hash": "sha256:184c61a0b12e6cc5046243804d81528d7468ec4f4f8befb3f66ca64062902212",
+    "diff_hash": "sha256:743abf8492d85bcf9fd39c5681486f13ebc1484395524d6fad6e29233df25e6a",
+    "files_changed": 2,
+    "files": [
+      ".gitlab-ci.yml",
+      "templates/receipt/template.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "detection_method": "heuristic_v1"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.2",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-ff8d84cd91705bc9bd81e5adaeb01456",
+  "content_hash": "sha256:ff8d84cd91705bc9bd81e5adaeb014562d1527cb6888ce0af81191ed4aea59e4",
+  "timestamp": "2026-03-08T11:51:07Z",
+  "extensions": {}
+}

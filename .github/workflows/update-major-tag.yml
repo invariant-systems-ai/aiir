@@ -1,0 +1,215 @@
+# Auto-update major-version floating tags (v1, v2, etc.) when a semver tag
+# is pushed.  This is the standard GitHub Actions convention — users pin to
+# `invariant-systems-ai/aiir@v1` and get the latest v1.x.x automatically.
+#
+# Self-healing:
+#   • tag push     — immediate update after every release
+#   • schedule     — weekly drift check catches manual deletions or force-push accidents
+#   • dispatch     — on-demand repair (run from the Actions UI)
+#
+# Pipeline chain:  tag push → release.yml (GitHub Release)
+#                            → publish.yml (PyPI)
+#                            → sync.yml   (GitLab mirror)
+#                  tag push → update-major-tag.yml (this file — floating tag)
+name: Update Major Version Tag
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']  # v1.0.4, v2.3.1, etc.
+  schedule:
+    # Weekly Sunday 07:00 UTC — verify floating tags are in sync.
+    - cron: '0 7 * * 0'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Specific tag to fix (e.g. v1.0.4). Leave empty to auto-detect latest.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  update-major-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Determine target tag
+        id: target
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # Triggered by a tag push — use the pushed tag
+            TAG="${GITHUB_REF_NAME}"
+          elif [ -n "${{ github.event.inputs.tag }}" ]; then
+            # Manual dispatch with explicit tag
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            # Scheduled run or dispatch without tag — find the latest semver tag
+            TAG=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' \
+              | sort -V \
+              | tail -1)
+            if [ -z "$TAG" ]; then
+              echo "::error::No semver tags found in the repository"
+              exit 1
+            fi
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "📌 Target tag: $TAG"
+
+      - name: Extract major version and resolve commit
+        id: parse
+        run: |
+          TAG="${{ steps.target.outputs.tag }}"
+
+          # Validate tag format (vMAJOR.MINOR.PATCH with optional pre-release)
+          if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+'; then
+            echo "::error::Tag '$TAG' is not a valid semver tag (expected vX.Y.Z)"
+            exit 1
+          fi
+
+          # Extract major version number → floating tag name
+          MAJOR=$(echo "$TAG" | sed 's/^v\([0-9]*\)\..*/\1/')
+          FLOATING="v${MAJOR}"
+
+          # Resolve the tag to its underlying commit SHA (dereference annotated tags)
+          COMMIT=$(git rev-parse "${TAG}^{commit}" 2>/dev/null)
+          if [ -z "$COMMIT" ]; then
+            echo "::error::Cannot resolve tag '$TAG' to a commit"
+            exit 1
+          fi
+
+          echo "major=$FLOATING"  >> "$GITHUB_OUTPUT"
+          echo "commit=$COMMIT"   >> "$GITHUB_OUTPUT"
+
+          echo "🔢 Major version tag: $FLOATING"
+          echo "🎯 Target commit: $COMMIT (from $TAG)"
+
+      - name: Check current floating tag state
+        id: check
+        run: |
+          FLOATING="${{ steps.parse.outputs.major }}"
+          COMMIT="${{ steps.parse.outputs.commit }}"
+
+          # Check if the floating tag already points to the right commit
+          CURRENT=$(git rev-parse "${FLOATING}^{commit}" 2>/dev/null || echo "missing")
+
+          if [ "$CURRENT" = "$COMMIT" ]; then
+            echo "✅ ${FLOATING} already points to ${COMMIT:0:12} — no update needed"
+            echo "needs_update=false" >> "$GITHUB_OUTPUT"
+          elif [ "$CURRENT" = "missing" ]; then
+            echo "🆕 ${FLOATING} does not exist — will create it"
+            echo "needs_update=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "🔄 ${FLOATING} points to ${CURRENT:0:12}, needs update to ${COMMIT:0:12}"
+            echo "needs_update=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update floating tag
+        if: steps.check.outputs.needs_update == 'true'
+        run: |
+          FLOATING="${{ steps.parse.outputs.major }}"
+          COMMIT="${{ steps.parse.outputs.commit }}"
+          TAG="${{ steps.target.outputs.tag }}"
+
+          # Delete local tag if it exists (prevents "already exists" error)
+          git tag -d "$FLOATING" 2>/dev/null || true
+
+          # Create lightweight tag pointing directly at the commit
+          # (lightweight, not annotated — avoids nested-tag dereferencing issues)
+          git tag "$FLOATING" "$COMMIT"
+
+          # Force-push to origin (overwrites the old floating tag)
+          git push origin "$FLOATING" --force
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║     ✅ Floating tag updated successfully         ║"
+          echo "╠══════════════════════════════════════════════════╣"
+          printf "║  %-18s  %-28s ║\n" "Floating tag:" "$FLOATING"
+          printf "║  %-18s  %-28s ║\n" "Points to:" "${COMMIT:0:12}"
+          printf "║  %-18s  %-28s ║\n" "Same as:" "$TAG"
+          echo "╚══════════════════════════════════════════════════╝"
+          echo ""
+          echo "Users of invariant-systems-ai/aiir@${FLOATING} now get ${TAG}"
+
+      - name: Verify tag alignment
+        run: |
+          FLOATING="${{ steps.parse.outputs.major }}"
+          COMMIT="${{ steps.parse.outputs.commit }}"
+          TAG="${{ steps.target.outputs.tag }}"
+
+          # Re-fetch to verify the remote state
+          git fetch origin --tags --force 2>/dev/null
+
+          REMOTE=$(git rev-parse "origin/${FLOATING}" 2>/dev/null \
+            || git rev-parse "${FLOATING}^{commit}" 2>/dev/null \
+            || echo "missing")
+
+          if [ "$REMOTE" = "$COMMIT" ]; then
+            echo "✅ Verified: ${FLOATING} → ${COMMIT:0:12} (${TAG})"
+          else
+            echo "::error::Verification failed! ${FLOATING} points to ${REMOTE:0:12}, expected ${COMMIT:0:12}"
+            exit 1
+          fi
+
+  # ── Scheduled self-heal: check ALL major version tags ──────────────
+  audit-all-major-tags:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Audit all floating tags
+        run: |
+          echo ""
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║       AIIR Floating Tag Health Check             ║"
+          echo "╠══════════════════════════════════════════════════╣"
+
+          DRIFT=0
+
+          # Find all unique major versions from semver tags
+          for MAJOR in $(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' \
+            | sed 's/^\(v[0-9]*\)\..*/\1/' \
+            | sort -uV); do
+
+            # Find the latest patch for this major
+            LATEST=$(git tag -l "${MAJOR}.[0-9]*.[0-9]*" \
+              | sort -V \
+              | tail -1)
+            LATEST_COMMIT=$(git rev-parse "${LATEST}^{commit}" 2>/dev/null)
+
+            # Check if the floating tag exists and where it points
+            FLOATING_COMMIT=$(git rev-parse "${MAJOR}^{commit}" 2>/dev/null || echo "missing")
+
+            if [ "$FLOATING_COMMIT" = "missing" ]; then
+              printf "║  ⚠️  %-8s  MISSING  (should be %-12s = %s)  ║\n" \
+                "$MAJOR" "$LATEST" "${LATEST_COMMIT:0:12}"
+              DRIFT=1
+            elif [ "$FLOATING_COMMIT" = "$LATEST_COMMIT" ]; then
+              printf "║  ✅  %-8s  → %-12s (%s)  ║\n" \
+                "$MAJOR" "$LATEST" "${LATEST_COMMIT:0:12}"
+            else
+              printf "║  🔄  %-8s  STALE    (at %s, should be %s)  ║\n" \
+                "$MAJOR" "${FLOATING_COMMIT:0:12}" "${LATEST_COMMIT:0:12}"
+              DRIFT=1
+            fi
+          done
+
+          echo "╚══════════════════════════════════════════════════╝"
+          echo ""
+
+          if [ "$DRIFT" -ne 0 ]; then
+            echo "⚠️  DRIFT DETECTED — run this workflow manually with 'workflow_dispatch' to auto-repair"
+            echo "   Or push a new tag to trigger automatic update."
+            echo ""
+            echo "::warning title=Floating tag drift::One or more major-version floating tags are out of sync. See log for details."
+          else
+            echo "✅ All floating tags are in sync"
+          fi

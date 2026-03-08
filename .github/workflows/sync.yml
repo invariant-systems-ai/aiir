@@ -1,7 +1,7 @@
 # Sync GitHub → GitLab and verify all distribution channels are aligned.
 #
 # Triggers:
-#   1. After "Publish to PyPI" completes (success or failure) → mirror + verify
+#   1. After "Publish" completes (success or failure) → mirror + verify
 #   2. Daily at 06:00 UTC → catch any drift from manual edits or partial failures
 #   3. Manual workflow_dispatch → on-demand health check
 #
@@ -11,7 +11,7 @@ name: Sync
 
 on:
   workflow_run:
-    workflows: ["Publish to PyPI"]
+    workflows: ["Publish"]
     types: [completed]
   schedule:
     - cron: '0 6 * * *'

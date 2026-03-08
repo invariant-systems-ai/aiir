@@ -45,9 +45,12 @@ jobs:
             STATUS=$(gh api "repos/${{ github.repository }}/commits/${COMMIT}/status" \
               --jq '.state' 2>/dev/null || echo "unknown")
 
-            # Also check for check-runs (Actions use check-runs, not statuses)
+            # Also check for check-runs (Actions use check-runs, not statuses).
+            # Filter for actual CI jobs only: "test (...)" matrix jobs and the
+            # "ci-ok" rollup gate.  Exclude "smoke-test" (Action Health) which
+            # runs independently and should not block publishing.
             CHECKS=$(gh api "repos/${{ github.repository }}/commits/${COMMIT}/check-runs" \
-              --jq '[.check_runs[] | select(.name | test("test|package"; "i"))] | {total: length, success: [.[] | select(.conclusion == "success")] | length, pending: [.[] | select(.status != "completed")] | length}' \
+              --jq '[.check_runs[] | select(.name | test("^test \\(|^ci-ok$"; "i"))] | {total: length, success: [.[] | select(.conclusion == "success")] | length, pending: [.[] | select(.status != "completed")] | length}' \
               2>/dev/null || echo '{"total":0,"success":0,"pending":0}')
 
             TOTAL=$(echo "$CHECKS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total',0))")
@@ -165,6 +168,11 @@ jobs:
           name: dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e  # v1.13.0
+        with:
+          # Idempotent: if a tag is force-pushed after the version was already
+          # published, skip rather than fail.  PyPI is immutable — same version
+          # + same content is a no-op; different content is rejected regardless.
+          skip-existing: true
         # No API token needed — uses OIDC via Trusted Publisher config on PyPI
 
   # ── Step 4: Verify PyPI ────────────────────────────────────────────
@@ -192,75 +200,7 @@ jobs:
           echo "::error::PyPI did not update to $TAG within 3 minutes"
           exit 1
 
-  # ── Step 5: Build & push Docker image to Docker Hub ─────────────────
-  # Runs AFTER PyPI verify so `pip install aiir==<tag>` inside the
-  # Dockerfile resolves.  Multi-arch (amd64 + arm64) via QEMU.
-  #
-  # Required secrets: DOCKERHUB_USERNAME, DOCKERHUB_TOKEN
-  docker:
-    needs: verify
-    timeout-minutes: 20
-    runs-on: ubuntu-latest
-    # Non-blocking: a failed Docker push must not block the release.
-    # The image can be rebuilt manually or on the next tag.
-    continue-on-error: true
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Extract version from tag
-        id: version
-        run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          echo "version=$TAG"   >> "$GITHUB_OUTPUT"
-          echo "major=${TAG%%.*}" >> "$GITHUB_OUTPUT"
-
-      - name: Check Docker Hub credentials
-        id: creds
-        run: |
-          if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ] || [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
-            echo "::warning::DOCKERHUB_USERNAME / DOCKERHUB_TOKEN not set — skipping Docker push"
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392  # v3.6.0
-        if: steps.creds.outputs.skip != 'true'
-
-      - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2  # v3.10.0
-        if: steps.creds.outputs.skip != 'true'
-
-      - uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772  # v3.4.0
-        if: steps.creds.outputs.skip != 'true'
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804  # v5.7.0
-        if: steps.creds.outputs.skip != 'true'
-        id: meta
-        with:
-          images: invariantsystems/aiir
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}
-            type=raw,value=latest
-
-      - uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4  # v6.15.0
-        if: steps.creds.outputs.skip != 'true'
-        with:
-          context: .
-          push: true
-          platforms: linux/amd64,linux/arm64
-          build-args: AIIR_VERSION=${{ steps.version.outputs.version }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-  # ── Step 6: Propagate version to website ───────────────────────────
+  # ── Step 5: Propagate version to website ───────────────────────────
   update-website:
     needs: verify
     timeout-minutes: 5

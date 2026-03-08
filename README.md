@@ -60,7 +60,9 @@ cd your-repo
 aiir --pretty
 ```
 
-That's it. You just receipted your last commit. Zero dependencies. Python 3.9+.
+That's it. Your last commit now has a receipt in `.aiir/receipts.jsonl` — a
+tamper-evident JSONL ledger that auto-indexes and deduplicates. Run it again:
+same commit, zero duplicates. Zero dependencies. Python 3.9+.
 
 ---
 
@@ -86,17 +88,23 @@ Now your AI assistant generates receipts automatically after writing code. It sa
 ### 💻 CLI — Run it yourself
 
 ```bash
-# Receipt the last commit
+# Receipt the last commit (auto-saves to .aiir/receipts.jsonl)
 aiir --pretty
 
 # Receipt a whole PR branch
 aiir --range origin/main..HEAD --pretty
 
-# Only AI-authored commits, save to directory
+# Only AI-authored commits, save to directory (CI mode)
 aiir --ai-only --output .receipts/
 
-# Pipe to jq
+# Print JSON to stdout for piping (bypasses ledger)
+aiir --json | jq .receipt_id
+
+# JSON Lines output for streaming / piping
 aiir --range HEAD~5..HEAD --jsonl | jq .receipt_id
+
+# Custom ledger location
+aiir --ledger .audit/
 
 # Verify a receipt hasn't been tampered with
 aiir --verify receipt.json
@@ -193,6 +201,54 @@ This is by design — AIIR receipts what's declared, not what's hidden.
 ## Deep Dive
 
 <details>
+<summary><strong>Ledger — .aiir/ directory</strong></summary>
+
+By default, `aiir` appends receipts to a local JSONL ledger:
+
+```
+.aiir/
+├── receipts.jsonl   # One receipt per line (append-only)
+└── index.json       # Auto-maintained lookup index
+```
+
+**Why a ledger?**
+- **One file to commit** — `git add .aiir/` is your entire audit trail
+- **Auto-deduplicates** — re-running `aiir` on the same commit is a no-op
+- **Git-friendly** — append-only JSONL means clean diffs and easy `git blame`
+- **Queryable** — `jq`, `grep`, and `wc -l` all work naturally
+
+**index.json** tracks every commit SHA, receipt count, and AI commit count:
+
+```json
+{
+  "version": 1,
+  "receipt_count": 42,
+  "ai_commit_count": 7,
+  "latest_timestamp": "2026-03-06T09:48:59Z",
+  "commits": {
+    "c4dec85630...": { "receipt_id": "g1-a3f8...", "ai": true },
+    "e7b1a9f203...": { "receipt_id": "g1-b2c1...", "ai": false }
+  }
+}
+```
+
+**Output modes:**
+
+| Flag | Behaviour |
+|------|-----------|
+| _(none)_ | Append to `.aiir/receipts.jsonl` (default) |
+| `--ledger .audit/` | Append to custom ledger directory |
+| `--json` | Print JSON to stdout — no ledger write |
+| `--jsonl` | Print JSON Lines to stdout — no ledger write |
+| `--output dir/` | Write individual files to `dir/` — no ledger write |
+| `--pretty` | Human-readable summary to stderr (combines with any mode) |
+
+**Tip**: Add `.aiir/` to your repo. It becomes a permanent, auditable,
+append-only record of every receipted commit.
+
+</details>
+
+<details>
 <summary><strong>Receipt format</strong></summary>
 
 Each receipt is a content-addressed JSON document:
@@ -215,7 +271,8 @@ Each receipt is a content-addressed JSON document:
     "is_ai_authored": true,
     "signals_detected": ["message_match:co-authored-by: copilot"],
     "detection_method": "heuristic_v1"
-  }
+  },
+  "extensions": {}
 }
 ```
 

@@ -716,13 +716,14 @@ def build_commit_receipt(
     """
     now = _now_rfc3339()
 
-    # Determine repo identity
-    repo_url = ""
+    # Determine repo identity (None when no remote configured)
+    repo_url: Optional[str] = None
     try:
         repo_url = _run_git(
             ["remote", "get-url", "origin"], cwd=repo_root
-        ).strip()
-        repo_url = _strip_url_credentials(repo_url)  # Strip embedded creds
+        ).strip() or None
+        if repo_url:
+            repo_url = _strip_url_credentials(repo_url)
     except RuntimeError:
         pass
 
@@ -779,6 +780,11 @@ def build_commit_receipt(
         "receipt_id": receipt_id,
         "content_hash": content_hash,
         "timestamp": now,
+        # Extension point for downstream integrations.
+        # This field is NOT in CORE_KEYS and is excluded from
+        # content_hash/receipt_id, so integrations can populate it
+        # without breaking receipt verification.
+        "extensions": {},
     }
 
     return receipt
@@ -973,6 +979,131 @@ def write_receipt(
     else:
         print(receipt_json, flush=True)
         return "stdout:json"
+
+
+# ---------------------------------------------------------------------------
+# Ledger — append-only JSONL receipt log with auto-index
+# ---------------------------------------------------------------------------
+
+# Default ledger directory and filenames.
+_LEDGER_DIR = ".aiir"
+_LEDGER_FILE = "receipts.jsonl"
+_INDEX_FILE = "index.json"
+
+
+def _ledger_paths(
+    ledger_dir: Optional[str] = None,
+) -> Tuple[Path, Path, Path]:
+    """Return (dir, ledger_path, index_path) for the ledger."""
+    base = Path(ledger_dir or _LEDGER_DIR).resolve()
+    return base, base / _LEDGER_FILE, base / _INDEX_FILE
+
+
+def _load_index(index_path: Path) -> Dict[str, Any]:
+    """Load the ledger index, or return a fresh skeleton."""
+    if index_path.is_file():
+        try:
+            data = json.loads(index_path.read_text(encoding="utf-8"))
+            if isinstance(data, dict) and data.get("version") == 1:
+                return data
+        except (json.JSONDecodeError, OSError):
+            pass
+    return {
+        "version": 1,
+        "receipt_count": 0,
+        "ai_commit_count": 0,
+        "latest_timestamp": None,
+        "commits": {},
+    }
+
+
+def _save_index(index_path: Path, index: Dict[str, Any]) -> None:
+    """Atomically write the ledger index."""
+    tmp = index_path.with_suffix(".tmp")
+    fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+    os.fchmod(fd, 0o644)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        json.dump(index, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    os.replace(str(tmp), str(index_path))
+
+
+def append_to_ledger(
+    receipts: List[Dict[str, Any]],
+    ledger_dir: Optional[str] = None,
+) -> Tuple[int, int, str]:
+    """Append receipts to the JSONL ledger, skipping duplicates.
+
+    Returns (appended_count, skipped_count, ledger_path_str).
+    """
+    dir_path, ledger_path, index_path = _ledger_paths(ledger_dir)
+
+    # Path-traversal guard — same logic as write_receipt.
+    cwd_resolved = Path(os.getcwd()).resolve()
+    try:
+        dir_path.relative_to(cwd_resolved)
+    except ValueError:
+        raise ValueError(
+            f"ledger dir must be within the working directory: "
+            f"{dir_path} resolves outside {cwd_resolved}"
+        )
+    dir_path.mkdir(parents=True, exist_ok=True)
+    # Re-verify after mkdir (symlink TOCTOU defence).
+    real_dir = dir_path.resolve()
+    try:
+        real_dir.relative_to(cwd_resolved)
+    except ValueError:
+        raise ValueError(
+            "ledger dir escaped working directory after creation "
+            "(possible symlink attack)"
+        )
+
+    index = _load_index(index_path)
+    known_commits: Dict[str, Any] = index.get("commits", {})
+
+    appended = 0
+    skipped = 0
+
+    # Append new receipts — open once, write all, then flush.
+    fd = os.open(
+        str(ledger_path),
+        os.O_WRONLY | os.O_CREAT | os.O_APPEND,
+        0o644,
+    )
+    os.fchmod(fd, 0o644)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        for receipt in receipts:
+            sha = receipt.get("commit", {}).get("sha", "")
+            if not sha:
+                continue
+
+            # Dedup: skip if this commit SHA is already in the index.
+            if sha in known_commits:
+                skipped += 1
+                continue
+
+            line = _canonical_json(receipt)
+            f.write(line + "\n")
+            appended += 1
+
+            is_ai = receipt.get("ai_attestation", {}).get("is_ai_authored", False)
+            rid = receipt.get("receipt_id", "")
+            ts = receipt.get("timestamp", "")
+
+            known_commits[sha] = {
+                "receipt_id": rid,
+                "ai": is_ai,
+                "line": index.get("receipt_count", 0) + appended,
+            }
+            if is_ai:
+                index["ai_commit_count"] = index.get("ai_commit_count", 0) + 1
+            index["latest_timestamp"] = ts
+
+    index["receipt_count"] = index.get("receipt_count", 0) + appended
+    index["commits"] = known_commits
+    _save_index(index_path, index)
+
+    return appended, skipped, str(ledger_path)
 
 
 # ---------------------------------------------------------------------------
@@ -1453,14 +1584,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         description="AIIR - AI Integrity Receipts. Generate cryptographic receipts for git commits.",
         epilog=(
             "examples:\n"
-            "  aiir                        Receipt the latest commit (HEAD)\n"
-            "  aiir --pretty               Human-readable summary\n"
-            "  aiir -o .receipts           Save receipt as a JSON file\n"
-            "  aiir --pretty -o .receipts  Pretty-print AND save to disk\n"
+            "  aiir                        Receipt HEAD → .aiir/receipts.jsonl\n"
+            "  aiir --pretty               Same, plus human-readable summary\n"
             "  aiir -r origin/main..HEAD   Receipt every commit in a range\n"
-            "  aiir --ai-only --pretty     Only AI-authored commits\n"
+            "  aiir --ai-only              Only AI-authored commits\n"
+            "  aiir --json                 Print JSON to stdout (for piping)\n"
+            "  aiir -o .receipts           Individual receipt files in a dir\n"
             "  aiir --verify receipt.json   Verify a receipt's integrity\n"
             "  aiir --sign -o .receipts    Sign receipt with Sigstore\n"
+            "\n"
+            "default: receipts are appended to .aiir/receipts.jsonl and\n"
+            "auto-indexed in .aiir/index.json (one entry per commit SHA,\n"
+            "duplicates skipped).  Add .aiir/ to your repo for an audit trail.\n"
             "\n"
             "exit codes:\n"
             "  0  Success (receipts generated, or verification passed)\n"
@@ -1493,17 +1628,35 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--output",
         "-o",
         default=None,
-        help="Output directory for receipt JSON files",
+        help="Output directory for individual receipt JSON files (for CI)",
+    )
+    parser.add_argument(
+        "--ledger",
+        "-l",
+        nargs="?",
+        const=_LEDGER_DIR,
+        default=None,
+        help=(
+            "Append receipts to a JSONL ledger (default: .aiir/receipts.jsonl). "
+            "Duplicates are auto-skipped via .aiir/index.json. "
+            "This is the default when no output flags are given."
+        ),
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="json_stdout",
+        help="Print raw JSON to stdout instead of writing to ledger (for piping)",
     )
     parser.add_argument(
         "--jsonl",
         action="store_true",
-        help="Output as JSON Lines (one receipt per line)",
+        help="Output as JSON Lines to stdout (one receipt per line)",
     )
     parser.add_argument(
         "--pretty",
         action="store_true",
-        help="Print human-readable summary instead of JSON",
+        help="Print human-readable summary (combines with ledger by default)",
     )
     parser.add_argument(
         "--github-action",
@@ -1808,20 +1961,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
         return 1
 
-    # Output
-    # --pretty and --output are independent — when both are set,
-    # the receipt is printed in human-readable form AND written to disk.
+    # ── Determine output mode ──────────────────────────────────────────
+    # Priority: --json/--jsonl → stdout  |  --output → individual files
+    #           otherwise      → ledger  (the default)
+    # --pretty is orthogonal — it prints to stderr and combines with any mode.
+    explicit_stdout = args.json_stdout or args.jsonl
+    use_ledger = not explicit_stdout and not args.output and not args.github_action
+    # --ledger overrides even if --output is set (explicit wins).
+    if args.ledger is not None:
+        use_ledger = True
+
+    # ── Output ─────────────────────────────────────────────────────────
     signed_count = 0
-    # Track receipts destined for stdout JSON (not --jsonl, not
-    # --output) so we can wrap multiple receipts in a JSON array instead of
-    # emitting invalid concatenated JSON objects.
     stdout_json_receipts: List[Dict[str, Any]] = []
-    for receipt in receipts:
-        if args.pretty:
-            print(format_receipt_pretty(receipt))
-        # Catch ValueError from write_receipt (e.g. path traversal)
-        # and show a clean one-line error instead of a raw traceback.
-        if args.output or args.sign:
+
+    # Pretty-print (always goes to stderr so it can combine with any mode).
+    if args.pretty:
+        for receipt in receipts:
+            print(format_receipt_pretty(receipt), file=sys.stderr)
+
+    # Mode A: individual files (--output / --sign)
+    if args.output or args.sign:
+        for receipt in receipts:
             try:
                 path = write_receipt(receipt, output_dir=args.output, jsonl=args.jsonl)
             except ValueError as e:
@@ -1848,36 +2009,43 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         file=sys.stderr,
                     )
                     return 1
-        elif not args.pretty:
-            # Neither --pretty nor --output: default to stdout JSON/JSONL
-            if args.jsonl:
+
+    # Mode B: stdout (--json or --jsonl)
+    if explicit_stdout:
+        if args.jsonl:
+            for receipt in receipts:
                 try:
                     write_receipt(receipt, output_dir=None, jsonl=True)
                 except ValueError as e:
                     print(f"{_e('error')} {e}", file=sys.stderr)
                     return 1
-            else:
-                # Collect for JSON array output
-                stdout_json_receipts.append(receipt)
-
-    # Flush collected stdout JSON receipts — single receipt as
-    # a plain object (backward-compatible), multiple as a JSON array.
-    if stdout_json_receipts:
-        if len(stdout_json_receipts) == 1:
-            print(json.dumps(stdout_json_receipts[0], indent=2, ensure_ascii=False), flush=True)
         else:
-            print(json.dumps(stdout_json_receipts, indent=2, ensure_ascii=False), flush=True)
+            # --json: single object or array
+            if len(receipts) == 1:
+                print(json.dumps(receipts[0], indent=2, ensure_ascii=False), flush=True)
+            else:
+                print(json.dumps(receipts, indent=2, ensure_ascii=False), flush=True)
 
-    # Compute ai_count once — previously duplicated in
-    # the summary block and the GitHub Actions block.
+    # Mode C: ledger (default)
+    if use_ledger:
+        ledger_dir = args.ledger if args.ledger is not None else _LEDGER_DIR
+        try:
+            appended, skipped_count, ledger_path = append_to_ledger(
+                receipts, ledger_dir=ledger_dir,
+            )
+        except ValueError as e:
+            print(f"{_e('error')} {e}", file=sys.stderr)
+            return 1
+
+    # ── Compute stats ──────────────────────────────────────────────────
     ai_count = sum(
         1
         for r in receipts
         if r.get("ai_attestation", {}).get("is_ai_authored")
     )
 
-    # Summary
-    if not args.quiet and not args.jsonl and not args.output:
+    # ── Summary (stderr) ───────────────────────────────────────────────
+    if not args.quiet and not args.jsonl:
         n = len(receipts)
         parts = [f"{_e('ok')} {n} receipt{'s' if n != 1 else ''} generated"]
         if ai_count:
@@ -1886,9 +2054,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             parts.append(f"{_e('signed')} {signed_count} signed")
         print("\n" + " | ".join(parts), file=sys.stderr)
 
-    # Warn when receipts are unsigned — unsigned receipts are
-    # tamper-evident (content-addressed) but not tamper-proof (no signer).
-    # Anyone who can re-run `aiir` on the same commit can fabricate a receipt.
+        if use_ledger:
+            print(
+                f"   {_e('hint')} Saved to {ledger_path}"  # type: ignore[possibly-undefined]
+                + (f" ({skipped_count} duplicate{'s' if skipped_count != 1 else ''} skipped)"  # type: ignore[possibly-undefined]
+                   if skipped_count else ""),  # type: ignore[possibly-undefined]
+                file=sys.stderr,
+            )
+
+    # Unsigned receipt warning
     if not args.sign and not args.quiet and receipts:
         print(file=sys.stderr)
         print(
@@ -1897,7 +2071,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             file=sys.stderr,
         )
 
-    # Privacy hint — receipts include author email and filenames by default
+    # Privacy hint
     if not args.redact_files and not args.quiet and receipts:
         print(
             f"   {_e('hint')} Receipts include author emails and filenames. "
@@ -1909,9 +2083,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.github_action:
         set_github_output("receipt_count", str(len(receipts)))
         set_github_output("ai_commit_count", str(ai_count))
-        # GitHub Actions has a 1 MB per-output limit. If exceeded,
-        # the output is silently truncated, producing invalid JSON downstream.
-        # Guard against this by checking size before writing.
         _MAX_OUTPUT_SIZE = 1024 * 1024  # 1 MB
         receipts_payload = _canonical_json(receipts)
         if len(receipts_payload.encode("utf-8", errors="replace")) > _MAX_OUTPUT_SIZE:
@@ -1925,7 +2096,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         else:
             set_github_output("receipts_json", receipts_payload)
 
-        # Step summary
         summary = format_github_summary(receipts)
         set_github_summary(summary)
 

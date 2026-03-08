@@ -1,0 +1,40 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.2",
+  "commit": {
+    "sha": "f8775f1488d05a73648e7e278fc465613f7528d4",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:16:36-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:16:36-04:00"
+    },
+    "subject": "chore: bump to 1.0.2 — test Trusted Publisher OIDC flow",
+    "message_hash": "sha256:de6667c3a5d9cd688252a0b60ea8b0a4ca1972bd9d27913f8d4d77588d69bbed",
+    "diff_hash": "sha256:2fb9165b71eae5f4ecce711852268d307a6b3f3d45b776e5cb7b237a57299822",
+    "files_changed": 1,
+    "files": [
+      "aiir/__init__.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "detection_method": "heuristic_v1"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.2",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-9378a03dc557a53538374acce40717bd",
+  "content_hash": "sha256:9378a03dc557a53538374acce40717bd73dbe6d317631f43345191b8bc7f7e9f",
+  "timestamp": "2026-03-08T11:16:43Z",
+  "extensions": {}
+}

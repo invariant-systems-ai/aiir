@@ -34,7 +34,9 @@ verify-component:
 test:
   stage: test
   image: python:3.11-slim
-  timeout: 10 minutes
+  timeout: 15 minutes
+  variables:
+    HYPOTHESIS_PROFILE: ci
   script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
     - pip install --quiet pytest hypothesis

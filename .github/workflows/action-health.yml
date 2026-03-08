@@ -58,6 +58,11 @@ jobs:
           git config user.email "smoke@test.invalid"
           git config user.name "AIIR Smoke Test"
 
+          # Seed commit — anchor for the BASE..HEAD range.
+          # git log BASE..HEAD excludes BASE itself, so this empty
+          # root commit ensures all 3 real commits are in the range.
+          git commit --allow-empty -m "init: seed commit"
+
           # Commit 1: human commit
           echo "hello" > human.txt
           git add human.txt && git commit -m "feat: human-written feature"

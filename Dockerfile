@@ -8,9 +8,11 @@
 #   docker run --rm -v $(pwd):/repo -w /repo invariantsystems/aiir --pretty
 #   docker run --rm -v $(pwd):/repo -w /repo invariantsystems/aiir --range main..HEAD --output .receipts/
 #
-# Build:
+# Build (source — self-healing, always matches checked-out code):
 #   docker build -t invariantsystems/aiir .
-#   docker build -t invariantsystems/aiir:1.0.9 --build-arg AIIR_VERSION=1.0.9 .
+#
+# Build (pinned PyPI version — deterministic, used by publish.yml):
+#   docker build --build-arg AIIR_VERSION=1.0.9 -t invariantsystems/aiir:1.0.9 .
 
 FROM python:3.11-slim AS base
 
@@ -18,11 +20,21 @@ FROM python:3.11-slim AS base
 RUN groupadd --gid 1000 aiir && \
     useradd --uid 1000 --gid aiir --shell /bin/bash --create-home aiir
 
-# Install AIIR from PyPI (zero dependencies, tiny layer)
-# Default kept in sync with latest release; publish.yml overrides via --build-arg.
-ARG AIIR_VERSION=1.0.9
-RUN pip install --no-cache-dir "aiir==${AIIR_VERSION}" && \
-    aiir --version
+# Copy source (needed for local/source builds; harmless for PyPI builds).
+# .dockerignore whitelists only aiir/, pyproject.toml, LICENSE, README, CHANGELOG.
+COPY . /src/
+
+# Install AIIR:
+#   • AIIR_VERSION set  → install pinned version from PyPI  (publish.yml)
+#   • AIIR_VERSION empty → install from local source         (self-healing)
+ARG AIIR_VERSION=""
+RUN if [ -n "$AIIR_VERSION" ]; then \
+      pip install --no-cache-dir "aiir==${AIIR_VERSION}"; \
+    else \
+      pip install --no-cache-dir /src; \
+    fi && \
+    aiir --version && \
+    rm -rf /src
 
 # Git is required for commit scanning
 RUN apt-get update && \

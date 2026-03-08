@@ -114,16 +114,50 @@ jobs:
 
           DRIFT=0
 
-          if [ "$LOCAL" != "$GH_TAG" ]; then
+          # Helper: compare MAJOR.MINOR.PATCH versions (stdlib only).
+          # Returns "ahead", "behind", "equal", or "unknown".
+          ver_cmp() {
+            python3 -c "
+          import sys
+          a, b = sys.argv[1], sys.argv[2]
+          if 'unknown' in (a, b):
+              print('unknown'); sys.exit()
+          try:
+              ta = tuple(int(x) for x in a.split('.'))
+              tb = tuple(int(x) for x in b.split('.'))
+          except (ValueError, AttributeError):
+              print('unknown'); sys.exit()
+          if ta > tb:   print('ahead')
+          elif ta < tb: print('behind')
+          else:         print('equal')
+          " "$1" "$2"
+          }
+
+          # __init__.py vs latest git tag
+          LOCAL_VS_TAG=$(ver_cmp "$LOCAL" "$GH_TAG")
+          if [ "$LOCAL_VS_TAG" = "behind" ]; then
+            echo "::error title=Version regression::__init__.py ($LOCAL) is BEHIND latest git tag ($GH_TAG)"
+            DRIFT=1
+          elif [ "$LOCAL_VS_TAG" = "ahead" ]; then
+            echo "::notice title=Pre-release::__init__.py ($LOCAL) is ahead of latest tag ($GH_TAG) — release pending"
+          elif [ "$LOCAL_VS_TAG" = "unknown" ] && [ "$LOCAL" != "$GH_TAG" ]; then
             echo "::warning title=Version drift::__init__.py ($LOCAL) ≠ latest git tag ($GH_TAG)"
             DRIFT=1
           fi
 
-          if [ "$PYPI" != "unknown" ] && [ "$PYPI" != "$LOCAL" ]; then
+          # PyPI vs source
+          PYPI_VS_LOCAL=$(ver_cmp "$PYPI" "$LOCAL")
+          if [ "$PYPI" != "unknown" ] && [ "$PYPI_VS_LOCAL" = "ahead" ]; then
+            echo "::error title=PyPI drift::PyPI ($PYPI) is AHEAD of source ($LOCAL) — source may need a bump"
+            DRIFT=1
+          elif [ "$PYPI" != "unknown" ] && [ "$PYPI_VS_LOCAL" = "behind" ]; then
+            echo "::notice title=PyPI pending::PyPI ($PYPI) is behind source ($LOCAL) — publish pending"
+          elif [ "$PYPI" != "unknown" ] && [ "$PYPI_VS_LOCAL" = "unknown" ] && [ "$PYPI" != "$LOCAL" ]; then
             echo "::warning title=PyPI drift::PyPI ($PYPI) ≠ source ($LOCAL)"
             DRIFT=1
           fi
 
+          # GitLab tag vs GitHub tag (these should always match after mirror)
           if [ "$GL_TAG" != "unknown" ] && [ "$GL_TAG" != "$GH_TAG" ]; then
             echo "::warning title=GitLab drift::GitLab ($GL_TAG) ≠ GitHub ($GH_TAG)"
             DRIFT=1

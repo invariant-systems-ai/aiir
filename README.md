@@ -114,7 +114,34 @@ aiir --verify receipt.json
 ### ⚙️ GitHub Action — Automate it in CI
 
 ```yaml
-# .github/workflows/aiir.yml
+# .github/workflows/aiir.yml — recommended: signed receipts
+name: AIIR
+on: [push, pull_request]
+
+permissions:
+  id-token: write   # Required for Sigstore keyless signing
+  contents: read
+
+jobs:
+  receipt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: invariant-systems-ai/aiir@v1
+        with:
+          output-dir: .receipts/
+          sign: true
+```
+
+Each receipt gets a Sigstore bundle — Fulcio certificate + Rekor transparency log entry.
+Artifacts uploaded automatically when `output-dir` or `sign` is set.
+
+<details>
+<summary><strong>Unsigned (simpler, no permissions needed)</strong></summary>
+
+```yaml
 name: AIIR
 on: [push, pull_request]
 
@@ -128,7 +155,11 @@ jobs:
       - uses: invariant-systems-ai/aiir@v1
 ```
 
-Every push and PR gets a receipt. Uploaded as a build artifact automatically.
+> **Note**: Without signing, receipts are *tamper-evident* (hash integrity) but not
+> *tamper-proof* (anyone who can run `aiir` on the same commit can recreate a matching receipt).
+> For cryptographic non-repudiation, use the signed version above.
+
+</details>
 
 ### 🪝 pre-commit Hook — Receipt every commit locally
 
@@ -136,7 +167,7 @@ Every push and PR gets a receipt. Uploaded as a build artifact automatically.
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/invariant-systems-ai/aiir
-    rev: v1.0.0
+    rev: v1.0.2
     hooks:
       - id: aiir
 ```
@@ -288,6 +319,12 @@ Full template: [templates/jenkins/Jenkinsfile](templates/jenkins/Jenkinsfile)
 
 ## What It Detects
 
+AIIR detects three categories of signals in commit metadata:
+
+### Declared AI assistance
+
+Commits where a human or tool explicitly attributed AI involvement.
+
 | Signal | Examples |
 |--------|----------|
 | **Copilot** | `Co-authored-by: Copilot`, `Co-authored-by: GitHub Copilot` |
@@ -299,9 +336,23 @@ Full template: [templates/jenkins/Jenkinsfile](templates/jenkins/Jenkinsfile)
 | **Gemini** | `gemini code assist`, `google gemini`, `gemini[bot]` |
 | **Tabnine** | `tabnine` in commit metadata |
 | **Aider** | `aider:` prefix in commit messages |
-| **Bot authors** | `dependabot`, `renovate`, `snyk-bot`, `coderabbit` |
-| **Generic** | `AI-generated`, `LLM-generated`, `machine-generated` |
-| **Trailers** | `Generated-by:`, `AI-assisted:`, `Tool:` git trailers |
+| **Generic markers** | `AI-generated`, `LLM-generated`, `machine-generated` |
+| **Git trailers** | `Generated-by:`, `AI-assisted:`, `Tool:` git trailers |
+
+### Automation / bot activity
+
+Commits made by CI bots and automated dependency tools. These are *not* gen-AI assistance — they indicate automated (non-human) authorship.
+
+| Signal | Examples |
+|--------|----------|
+| **Dependabot** | `dependabot[bot]` as author |
+| **Renovate** | `renovate[bot]` as author |
+| **Snyk** | `snyk-bot` as author |
+| **CodeRabbit** | `coderabbit[bot]` as author |
+| **GitHub Actions** | `github-actions[bot]` as author |
+| **DeepSource** | `deepsource[bot]` as author |
+
+> **Note**: Bot-authored commits are flagged as `is_ai_authored: true` because they represent non-human code changes. This is a deliberate design choice — the receipt records *declared non-human involvement*, not just gen-AI specifically. If your use case requires distinguishing bots from gen-AI, filter on the `signals_detected` field: `message_match:*` = declared AI, `*_bot:*` = automation.
 
 <details>
 <summary><strong>Detection limitations</strong></summary>

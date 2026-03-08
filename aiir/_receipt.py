@@ -95,6 +95,7 @@ def build_commit_receipt(
             "is_bot_authored": commit.is_bot_authored,
             "bot_signals_detected": commit.bot_signals_detected,
             "bot_signal_count": len(commit.bot_signals_detected),
+            "authorship_class": commit.authorship_class,
             "detection_method": "heuristic_v2",
         },
         "provenance": {

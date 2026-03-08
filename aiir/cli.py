@@ -821,7 +821,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(file=sys.stderr)
         print(
             f"{_e('tip')} Tip: these receipts are unsigned. Add --sign for "
-            "cryptographic proof (requires: pip install sigstore)",
+            f"Sigstore keyless signing (default in GitHub Actions).",
             file=sys.stderr,
         )
 

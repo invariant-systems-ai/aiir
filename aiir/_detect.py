@@ -221,6 +221,18 @@ def get_commit_info(
     # Detect AI signals
     ai_signals, bot_signals = detect_ai_signals(body, a_name, a_email, c_name, c_email)
 
+    # Derive structured authorship class from boolean pair
+    is_ai = len(ai_signals) > 0
+    is_bot = len(bot_signals) > 0
+    if is_ai and is_bot:
+        authorship_class = "ai+bot"
+    elif is_ai:
+        authorship_class = "ai-assisted"
+    elif is_bot:
+        authorship_class = "bot-generated"
+    else:
+        authorship_class = "human"
+
     return CommitInfo(
         sha=sha,
         author_name=a_name,
@@ -235,9 +247,10 @@ def get_commit_info(
         diff_hash=diff_hash,
         files_changed=files_changed,
         ai_signals_detected=ai_signals,
-        is_ai_authored=len(ai_signals) > 0,
+        is_ai_authored=is_ai,
         bot_signals_detected=bot_signals,
-        is_bot_authored=len(bot_signals) > 0,
+        is_bot_authored=is_bot,
+        authorship_class=authorship_class,
     )
 
 

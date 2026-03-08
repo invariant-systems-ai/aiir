@@ -286,6 +286,10 @@ class CommitInfo:
     is_ai_authored: bool = False
     bot_signals_detected: List[str] = field(default_factory=list)
     is_bot_authored: bool = False
+    # Structured authorship classification — first-class taxonomy.
+    # Values: "human", "ai-assisted", "bot-generated", "ai+bot", "unknown".
+    # Derived from is_ai_authored / is_bot_authored at detection time.
+    authorship_class: str = "human"
 
 
 # ---------------------------------------------------------------------------

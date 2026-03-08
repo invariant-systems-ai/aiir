@@ -52,23 +52,20 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Configure GLOBAL credential for github.com so the separate
-          # clone at /tmp also authenticates.  actions/checkout only sets
-          # the LOCAL git config in $GITHUB_WORKSPACE; the /tmp clone
-          # won't see it.  This uses the same AUTHORIZATION: basic format
-          # as actions/checkout, and the token never appears in any URL
-          # (safe from git error output leaks).
-          git config --global "http.https://github.com/.extraheader" \
-            "AUTHORIZATION: basic $(echo -n "x-access-token:${GH_TOKEN}" | base64)"
+          # Authenticated remote URL for clone + push.
+          # The token is masked by GitHub Actions in all log output (appears
+          # as ***), so there is no practical leak risk.  We use the URL
+          # directly instead of git-config credential helpers because
+          # actions/checkout's persist-credentials only sets LOCAL config
+          # (not global), and the separate /tmp clone needs its own auth.
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
-          REPO_URL="https://github.com/${GITHUB_REPOSITORY}.git"
-
-          if git ls-remote --exit-code origin refs/heads/receipts >/dev/null 2>&1; then
-            git clone --single-branch --branch receipts "$REPO_URL" "$WORK"
+          if git ls-remote --exit-code "$REMOTE" refs/heads/receipts >/dev/null 2>&1; then
+            git clone --single-branch --branch receipts "$REMOTE" "$WORK"
           else
             mkdir -p "$WORK" && cd "$WORK"
             git init
-            git remote add origin "$REPO_URL"
+            git remote add origin "$REMOTE"
             git checkout --orphan receipts
             echo '# AIIR Receipts' > README.md
             echo '' >> README.md

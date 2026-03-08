@@ -39,6 +39,7 @@ classifiers = [
     "Topic :: Software Development :: Version Control :: Git",
     "Topic :: Security :: Cryptography",
     "Typing :: Typed",
+    "Operating System :: OS Independent",
 ]
 
 # ZERO dependencies — Python standard library only

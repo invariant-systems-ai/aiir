@@ -13,10 +13,19 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Full Python-version matrix on Linux; latest-only on Windows/macOS
+    # to verify cross-OS without burning 15 runner-minutes.
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        include:
+          - os: windows-latest
+            python-version: "3.12"
+          - os: macos-latest
+            python-version: "3.12"
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
       - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
@@ -53,13 +62,15 @@ jobs:
           aiir-mcp-server --version
 
       - name: Smoke test — receipt in a git repo
+        shell: bash
         run: |
-          cd $(mktemp -d)
+          TMPDIR=$(python -c "import tempfile; print(tempfile.mkdtemp())")
+          cd "$TMPDIR"
           git init && git config user.email ci@test && git config user.name CI
           echo hello > file.txt && git add . && git commit -m "init"
           aiir --pretty
-          test -f .aiir/receipts.jsonl || { echo "FAIL: ledger not created"; exit 1; }
-          test -f .aiir/index.json || { echo "FAIL: index not created"; exit 1; }
+          python -c "import pathlib, sys; sys.exit(0 if pathlib.Path('.aiir/receipts.jsonl').exists() else 1)" || { echo 'FAIL: ledger not created'; exit 1; }
+          python -c "import pathlib, sys; sys.exit(0 if pathlib.Path('.aiir/index.json').exists() else 1)" || { echo 'FAIL: index not created'; exit 1; }
           aiir -o .receipts/
           aiir --verify .receipts/*.json
 

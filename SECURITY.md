@@ -40,7 +40,15 @@ Instead, report vulnerabilities via:
 
 The following are in scope:
 
-- **aiir/cli.py** — receipt generation, AI detection, hashing, verification
+- **aiir/cli.py** — public API shell and CLI entry point
+- **aiir/_core.py** — constants, encoding helpers, git operations, hashing
+- **aiir/_detect.py** — AI signal detection and commit metadata parsing
+- **aiir/_receipt.py** — receipt building, generation, formatting, writing
+- **aiir/_verify.py** — receipt content-addressed integrity verification
+- **aiir/_sign.py** — Sigstore signing and verification
+- **aiir/_ledger.py** — append-only JSONL ledger with auto-index
+- **aiir/_stats.py** — badge, stats dashboard, policy checks
+- **aiir/_github.py** — GitHub Actions integration
 - **aiir/mcp_server.py** — MCP server for AI assistants (path-restricted, error-sanitized)
 - **action.yml** — GitHub Actions composite action
 - **Receipt integrity** — content-addressed hashing chain

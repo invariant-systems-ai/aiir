@@ -92,7 +92,10 @@ def build_commit_receipt(
             "is_ai_authored": commit.is_ai_authored,
             "signals_detected": commit.ai_signals_detected,
             "signal_count": len(commit.ai_signals_detected),
-            "detection_method": "heuristic_v1",
+            "is_bot_authored": commit.is_bot_authored,
+            "bot_signals_detected": commit.bot_signals_detected,
+            "bot_signal_count": len(commit.bot_signals_detected),
+            "detection_method": "heuristic_v2",
         },
         "provenance": {
             "repository": repo_url,

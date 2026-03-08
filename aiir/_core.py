@@ -284,6 +284,8 @@ class CommitInfo:
     files_changed: List[str] = field(default_factory=list)
     ai_signals_detected: List[str] = field(default_factory=list)
     is_ai_authored: bool = False
+    bot_signals_detected: List[str] = field(default_factory=list)
+    is_bot_authored: bool = False
 
 
 # ---------------------------------------------------------------------------

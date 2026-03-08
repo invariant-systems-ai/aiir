@@ -82,10 +82,12 @@ jobs:
       - name: Install actionlint
         run: |
           bash <(curl -sS https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          echo "$(pwd)" >> "$GITHUB_PATH"
+          pwd >> "$GITHUB_PATH"
 
       - name: Lint workflows
-        run: actionlint -color
+        # Disable shellcheck integration: it raises false positives on
+        # ${{ }} expressions (expanded by Actions before the shell sees them).
+        run: actionlint -shellcheck="" -color
 
   # Coverage gate — prevents silent test coverage regressions.
   # Runs the unit tests (no fuzz) with coverage and fails if the

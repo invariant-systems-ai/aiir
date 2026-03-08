@@ -1,0 +1,40 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.0",
+  "commit": {
+    "sha": "24ccaf06c3bba461af92dfbc4741fd51f1c9898b",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:03:35-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:03:43-04:00"
+    },
+    "subject": "fix: resolve tmpdir symlinks in tests for macOS (/tmp → /private/tmp)",
+    "message_hash": "sha256:5f66bb28906ad534f6baa52ef766186c7e1f4490638ea833962da0cdb18bfd52",
+    "diff_hash": "sha256:47e2a4bb0ada085bfa1d5471139fd84fbaff2214edd4028cfcd63a0d2fe4a361",
+    "files_changed": 1,
+    "files": [
+      "test_cli.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "detection_method": "heuristic_v1"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.0",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-41fb6e7c7ad3126e25703f1dee0e24ef",
+  "content_hash": "sha256:41fb6e7c7ad3126e25703f1dee0e24ef66d7f21b392e7a9ab6dde53c520b12b4",
+  "timestamp": "2026-03-08T11:03:51Z",
+  "extensions": {}
+}

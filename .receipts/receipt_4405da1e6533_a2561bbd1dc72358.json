@@ -1,0 +1,40 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.1",
+  "commit": {
+    "sha": "4405da1e6533050680c0fb7bc7a18f8378f1d34d",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:11:52-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:12:05-04:00"
+    },
+    "subject": "chore: bump version to 1.0.1 (PyPI filename reuse policy)",
+    "message_hash": "sha256:ff65de9ed0e8fa194170d0e6bbe3804a6707108e3225286444bde595f1833c63",
+    "diff_hash": "sha256:ab9bc7a3e69399679f7bdae4c5a157dc0277ea2e72454f4654103c89b8c0beb3",
+    "files_changed": 1,
+    "files": [
+      "aiir/__init__.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "detection_method": "heuristic_v1"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.1",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1bbd1dc72358bd8bc7f12ccefac1ac58",
+  "content_hash": "sha256:1bbd1dc72358bd8bc7f12ccefac1ac58ddd9f718af69f76207da2d4c139b064e",
+  "timestamp": "2026-03-08T11:12:13Z",
+  "extensions": {}
+}

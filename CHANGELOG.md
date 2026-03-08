@@ -54,7 +54,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Testing
 
-- 548 tests: 496 unit/integration tests and 52 Hypothesis property-based fuzz tests.
+- 564 tests: 512 unit/integration tests and 52 Hypothesis property-based fuzz tests.
 - Zero dependencies — uses only Python standard library (sigstore optional for signing).
 - Python 3.9–3.13 supported.
 - Apache-2.0 license.

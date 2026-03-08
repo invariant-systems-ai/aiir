@@ -27,6 +27,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: ./  # Test the local action
         id: receipt
@@ -52,20 +53,22 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Authenticated remote URL for clone + push.
-          # The token is masked by GitHub Actions in all log output (appears
-          # as ***), so there is no practical leak risk.  We use the URL
-          # directly instead of git-config credential helpers because
-          # actions/checkout's persist-credentials only sets LOCAL config
-          # (not global), and the separate /tmp clone needs its own auth.
-          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          # Build an authenticated push URL.  The runner's log sanitiser
+          # masks $GH_TOKEN automatically, so the token never leaks.
+          #
+          # Why not extraheader / credential-helper?
+          # actions/checkout v4 sets http.extraheader via --add in GLOBAL
+          # git config.  Our own git-config --global can't reliably
+          # override multi-valued keys, and the /tmp clone doesn't
+          # inherit the LOCAL config from $GITHUB_WORKSPACE.  Embedding
+          # the token in the push URL side-steps all of this.
+          PUSH_URL="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
-          if git ls-remote --exit-code "$REMOTE" refs/heads/receipts >/dev/null 2>&1; then
-            git clone --single-branch --branch receipts "$REMOTE" "$WORK"
+          if git ls-remote --exit-code origin refs/heads/receipts >/dev/null 2>&1; then
+            git clone --single-branch --branch receipts "$PUSH_URL" "$WORK"
           else
             mkdir -p "$WORK" && cd "$WORK"
             git init
-            git remote add origin "$REMOTE"
             git checkout --orphan receipts
             echo '# AIIR Receipts' > README.md
             echo '' >> README.md
@@ -74,7 +77,7 @@ jobs:
             echo 'Each receipt proves what AI tooling was involved in a commit to `main`.' >> README.md
             git add README.md
             git commit -m "chore: initialize receipts branch"
-            git push origin receipts
+            git push "$PUSH_URL" receipts
           fi
 
           cd "$WORK"
@@ -83,7 +86,7 @@ jobs:
 
           if ! git diff --cached --quiet; then
             git commit -m "chore: receipts for ${GITHUB_SHA::12}"
-            git push origin receipts
+            git push "$PUSH_URL" receipts
             echo "✅ Receipts pushed to receipts branch"
           else
             echo "ℹ️  No new receipts to commit"

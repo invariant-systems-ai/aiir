@@ -1,53 +1,95 @@
 # AIIR — AI Integrity Receipts for GitLab CI
+# https://github.com/invariant-systems-ai/aiir  |  https://pypi.org/project/aiir/
 #
-# Add this to your .gitlab-ci.yml to receipt every merge request and push.
+# Generates tamper-evident cryptographic receipts for every AI-generated
+# commit. EU AI Act ready. Zero dependencies. Apache 2.0.
 #
-# Option A: Include this template directly
+# ──────────────────────────────────────────────────────────────────────
+# QUICK START — add ONE line to your .gitlab-ci.yml:
 #
 #   include:
 #     - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.0/templates/gitlab-ci.yml'
 #
-# Option B: Copy the job definition into your pipeline
+# That's it. Every push and MR now generates receipts.
 #
-# The job generates receipts for all commits in the push or MR diff,
-# detects AI authorship, and uploads receipt JSON as a CI artifact.
+# ──────────────────────────────────────────────────────────────────────
+# SELF-HOSTED GITLAB — if you mirror AIIR to your own GitLab instance:
+#
+#   include:
+#     - project: 'your-group/aiir'
+#       ref: 'v1.0.0'
+#       file: '/templates/gitlab-ci.yml'
+#
+# ──────────────────────────────────────────────────────────────────────
+# CUSTOM CONFIGURATION — override variables in your pipeline:
+#
+#   variables:
+#     AIIR_VERSION: "1.0.0"       # Pin version (recommended)
+#     AIIR_AI_ONLY: ""            # Set to "--ai-only" to skip non-AI commits
+#     AIIR_EXTRA_ARGS: ""         # Any additional aiir CLI flags
+#     AIIR_ARTIFACT_EXPIRY: "90 days"  # How long to keep receipt artifacts
 #
 # Requirements: Python 3.9+ (available in python:3.11-slim image)
 # Dependencies: Zero (aiir has no runtime dependencies)
+# ──────────────────────────────────────────────────────────────────────
 
+# --- Base template (hidden job) ---
 .aiir-receipt:
   image: python:3.11-slim
   variables:
-    # Pin to specific version for reproducibility
     AIIR_VERSION: "1.0.0"
+    AIIR_AI_ONLY: ""
+    AIIR_EXTRA_ARGS: ""
+    AIIR_ARTIFACT_EXPIRY: "90 days"
   before_script:
     - pip install --quiet "aiir==${AIIR_VERSION}"
   artifacts:
     paths:
       - .aiir-receipts/
-    expire_in: 90 days
+    expire_in: $AIIR_ARTIFACT_EXPIRY
     when: always
 
-# Receipt every push to any branch
+# --- Receipt every push to any branch ---
 aiir-receipt-push:
   extends: .aiir-receipt
   stage: test
   script:
     - |
       if [ -n "$CI_COMMIT_BEFORE_SHA" ] && [ "$CI_COMMIT_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
-        aiir --range "${CI_COMMIT_BEFORE_SHA}..${CI_COMMIT_SHA}" --output .aiir-receipts/ --pretty
+        aiir --range "${CI_COMMIT_BEFORE_SHA}..${CI_COMMIT_SHA}" \
+          --output .aiir-receipts/ --pretty $AIIR_AI_ONLY $AIIR_EXTRA_ARGS
       else
-        aiir --output .aiir-receipts/ --pretty
+        aiir --output .aiir-receipts/ --pretty $AIIR_AI_ONLY $AIIR_EXTRA_ARGS
       fi
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
 
-# Receipt every merge request diff
+# --- Receipt every merge request diff ---
 aiir-receipt-mr:
   extends: .aiir-receipt
   stage: test
   script:
     - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --depth=100
-    - aiir --range "origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}..${CI_COMMIT_SHA}" --output .aiir-receipts/ --pretty
+    - |
+      aiir --range "origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}..${CI_COMMIT_SHA}" \
+        --output .aiir-receipts/ --pretty $AIIR_AI_ONLY $AIIR_EXTRA_ARGS
+    # Summary for MR notes (optional — pipe to MR comment via API)
+    - |
+      RECEIPT_COUNT=$(ls -1 .aiir-receipts/*.json 2>/dev/null | wc -l)
+      AI_COUNT=$(grep -l '"is_ai_authored": true' .aiir-receipts/*.json 2>/dev/null | wc -l)
+      echo "AIIR: ${RECEIPT_COUNT} commits receipted, ${AI_COUNT} AI-authored"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# --- (Optional) Scheduled full-repo audit ---
+# Uncomment to receipt your entire repo history on a schedule.
+# Useful for bootstrapping AIIR on an existing project.
+#
+# aiir-receipt-audit:
+#   extends: .aiir-receipt
+#   stage: test
+#   script:
+#     - aiir --range "$(git rev-list --max-parents=0 HEAD)..HEAD" \
+#         --output .aiir-receipts/ --pretty $AIIR_AI_ONLY $AIIR_EXTRA_ARGS
+#   rules:
+#     - if: '$CI_PIPELINE_SOURCE == "schedule"'

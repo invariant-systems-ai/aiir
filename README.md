@@ -25,10 +25,10 @@ Your auditors will ask: *"Which code was AI-generated? Can you prove it?"*
 |----------|---------------|
 | **SOC 2 / ISO 27001 auditor** | Tamper-evident record of AI involvement per commit |
 | **EU AI Act compliance** | Transparency trail for AI-generated artifacts |
-| **Insurance underwriter** | Proof of human oversight over AI code |
-| **Engineering leadership** | "We review all AI code" — now you can prove it |
+| **Insurance underwriter** | Record of AI involvement per commit |
+| **Engineering leadership** | "We track all AI code" — with cryptographic receipts |
 
-AIIR answers that question. One command. Zero dependencies. Apache 2.0.
+AIIR answers that question — for every commit with declared AI involvement. One command. Zero dependencies. Apache 2.0.
 
 ---
 
@@ -150,12 +150,21 @@ Runs **post-commit** (after your commit is created, since it needs the commit SH
 ### 🦊 GitLab CI — Receipt merge requests and pushes
 
 ```yaml
-# .gitlab-ci.yml
+# .gitlab-ci.yml — one line to include the full template
 include:
   - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.0/templates/gitlab-ci.yml'
 ```
 
-Or copy the job directly — see [templates/gitlab-ci.yml](templates/gitlab-ci.yml) for the full template.
+Self-hosted GitLab? Mirror the repo and use `project:` instead:
+
+```yaml
+include:
+  - project: 'your-group/aiir'
+    ref: 'v1.0.0'
+    file: '/templates/gitlab-ci.yml'
+```
+
+Customise via pipeline variables: `AIIR_VERSION`, `AIIR_AI_ONLY`, `AIIR_EXTRA_ARGS`, `AIIR_ARTIFACT_EXPIRY`. See [templates/gitlab-ci.yml](templates/gitlab-ci.yml) for the full template.
 
 ---
 

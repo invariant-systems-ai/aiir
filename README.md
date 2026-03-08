@@ -238,10 +238,12 @@ By default, `aiir` appends receipts to a local JSONL ledger:
 |------|-----------|
 | _(none)_ | Append to `.aiir/receipts.jsonl` (default) |
 | `--ledger .audit/` | Append to custom ledger directory |
-| `--json` | Print JSON to stdout — no ledger write |
-| `--jsonl` | Print JSON Lines to stdout — no ledger write |
-| `--output dir/` | Write individual files to `dir/` — no ledger write |
+| `--json` | Print JSON to stdout — no ledger write* |
+| `--jsonl` | Print JSON Lines to stdout — no ledger write* |
+| `--output dir/` | Write individual files to `dir/` — no ledger write* |
 | `--pretty` | Human-readable summary to stderr (combines with any mode) |
+
+\* Adding `--ledger` explicitly overrides and writes to **both** destinations.
 
 **Tip**: Add `.aiir/` to your repo. It becomes a permanent, auditable,
 append-only record of every receipted commit.
@@ -495,7 +497,7 @@ on every push to `main` and commits them back to the repo. Locally, the
 
 ## Security
 
-Extensive [security controls](THREAT_MODEL.md). 504 tests. Zero dependencies.
+Extensive [security controls](THREAT_MODEL.md). 548 tests. Zero dependencies.
 
 See [SECURITY.md](SECURITY.md) and [THREAT_MODEL.md](THREAT_MODEL.md).
 

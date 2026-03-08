@@ -18,6 +18,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - **Offline verification**: `--verify FILE` checks receipt integrity without network access.
 - **`--pretty`** human-readable terminal output with encoding-safe emoji/box-drawing (ASCII fallback on non-UTF-8 terminals).
 - **`--output`** writes receipts to disk with collision-resistant filenames (UUID + O_EXCL).
+- **Ledger mode** (default): receipts append to `.aiir/receipts.jsonl` with auto-deduplication via `.aiir/index.json`. Run `aiir` twice on the same commit — zero duplicates.
+- **`--json`** prints receipt JSON to stdout (bypasses ledger, for piping).
+- **`--ledger`** allows custom ledger directory.
 - **`--ai-only`** filters to AI-authored commits only.
 - **`--redact-files`** omits file paths from receipts for privacy.
 - **`--jsonl`** newline-delimited JSON output.
@@ -51,7 +54,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Testing
 
-- 502 tests: 450 unit/integration tests and 52 Hypothesis property-based fuzz tests.
+- 548 tests: 496 unit/integration tests and 52 Hypothesis property-based fuzz tests.
 - Zero dependencies — uses only Python standard library (sigstore optional for signing).
 - Python 3.9–3.13 supported.
 - Apache-2.0 license.

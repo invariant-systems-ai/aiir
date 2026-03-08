@@ -23,6 +23,8 @@
   pass_filenames: false
   args: ["--pretty"]
   description: >
-    Generate a cryptographic receipt for the latest commit.
+    Generate a cryptographic receipt for the latest commit and append it
+    to .aiir/receipts.jsonl (auto-deduplicated).
     Detects AI authorship (Copilot, ChatGPT, Claude, Cursor, etc.)
     and produces a tamper-evident audit trail.
+    Add .aiir/ to your repo to keep receipts versioned.

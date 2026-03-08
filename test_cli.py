@@ -4277,9 +4277,11 @@ class TestReadmeStats(unittest.TestCase):
         self.assertNotIn("504 tests", readme)
         self.assertNotIn("517 tests", readme)
         self.assertNotIn("518 tests", readme)
+        self.assertNotIn("532 tests", readme)
+        self.assertNotIn("545 tests", readme)
         # Should have current content
         self.assertIn("security controls", readme)
-        self.assertIn("532 tests", readme)
+        self.assertIn("548 tests", readme)
 
 
 class TestThreatModelR03Consistency(unittest.TestCase):
@@ -6825,6 +6827,59 @@ class TestExport(unittest.TestCase):
         self.assertEqual(rc, 0)
         bundle = json.loads(Path("bundle.json").read_text())
         self.assertEqual(bundle["namespace"], "acme-corp")
+
+    def test_export_no_ledger_fails(self):
+        """--export with no ledger should fail gracefully (not create .aiir/)."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--export", "bundle.json"])
+        self.assertEqual(rc, 1)
+        # Must NOT have created .aiir/config.json as a side effect.
+        self.assertFalse(Path(".aiir/config.json").exists())
+        self.assertFalse(Path("bundle.json").exists())
+
+
+class TestLedgerJsonCombo(unittest.TestCase):
+    """Combining --ledger with --json should write to both destinations."""
+
+    def setUp(self):
+        self._orig = os.getcwd()
+        self._tmp = tempfile.mkdtemp()
+        os.chdir(self._tmp)
+        subprocess.run(["git", "init"], capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.email", "t@t"], capture_output=True)
+        subprocess.run(["git", "config", "user.name", "T"], capture_output=True)
+        Path("f.txt").write_text("x")
+        subprocess.run(["git", "add", "."], capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], capture_output=True)
+
+    def tearDown(self):
+        os.chdir(self._orig)
+        import shutil
+        shutil.rmtree(self._tmp, ignore_errors=True)
+
+    def test_ledger_plus_json_writes_both(self):
+        """--ledger --json should write to ledger AND print to stdout."""
+        import io
+        stdout = io.StringIO()
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", stdout):
+            rc = cli.main(["--ledger", "--json"])
+        self.assertEqual(rc, 0)
+        # stdout should have JSON
+        data = json.loads(stdout.getvalue())
+        self.assertEqual(data["type"], "aiir.commit_receipt")
+        # Ledger should also exist
+        self.assertTrue(Path(".aiir/receipts.jsonl").exists())
+
+    def test_ledger_plus_output_writes_both(self):
+        """--ledger --output should write to ledger AND individual files."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--ledger", "--output", ".receipts"])
+        self.assertEqual(rc, 0)
+        self.assertTrue(Path(".aiir/receipts.jsonl").exists())
+        self.assertTrue(Path(".receipts").exists())
+        self.assertTrue(any(Path(".receipts").iterdir()))
 
 
 # ---------------------------------------------------------------------------

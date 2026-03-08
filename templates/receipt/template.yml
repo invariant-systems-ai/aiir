@@ -54,6 +54,7 @@ spec:
   image: $[[ inputs.python-image ]]
   stage: $[[ inputs.stage ]]
   before_script:
+    - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
     - pip install --quiet "aiir==$[[ inputs.version ]]"
   script:
     - |
@@ -87,6 +88,7 @@ spec:
   image: $[[ inputs.python-image ]]
   stage: $[[ inputs.stage ]]
   before_script:
+    - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
     - pip install --quiet "aiir==$[[ inputs.version ]]"
   script:
     - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --depth=100

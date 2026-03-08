@@ -1,0 +1,46 @@
+# Dependabot — auto-update pinned action SHAs and Python dependencies.
+#
+# Self-updating: when a dependency has a new release, Dependabot opens a
+# PR with the SHA bump.  CI runs tests on the PR; if green, merge.
+#
+# Covers:
+#   • GitHub Actions SHA pins (checkout, setup-python, upload-artifact, etc.)
+#   • pip dependencies (sigstore version range in action.yml + pyproject.toml)
+version: 2
+updates:
+  # ── GitHub Actions SHA pins ──────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Etc/UTC"
+    # Group minor+patch updates into a single PR to reduce noise.
+    groups:
+      actions-minor:
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    # Limit open PRs to prevent Dependabot flooding
+    open-pull-requests-limit: 5
+
+  # ── pip dependencies (pyproject.toml) ────────────────────────────────
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Etc/UTC"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "python"
+    open-pull-requests-limit: 3

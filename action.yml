@@ -76,6 +76,20 @@ runs:
         else
           RANGE="HEAD~1..HEAD"
         fi
+
+        # ── Input validation (self-healing) ──
+        # Reject ranges that could cause shell injection or unbounded work.
+        # Only hex SHAs, HEAD, HEAD~N, tag names, and .. separators are valid.
+        if echo "$RANGE" | grep -qE '[;&|$`\\]|[[:cntrl:]]'; then
+          echo "::error::Commit range contains forbidden characters: ${RANGE:0:80}"
+          exit 1
+        fi
+        # Warn (but don't fail) on suspiciously large ranges
+        COMMIT_COUNT=$(git rev-list --count "$RANGE" 2>/dev/null || echo "0")
+        if [ "$COMMIT_COUNT" -gt 500 ]; then
+          echo "::warning::Large commit range ($COMMIT_COUNT commits). Receipting may take a while. Max is 1000."
+        fi
+
         {
           echo "range<<${DELIM}"
           echo "$RANGE"

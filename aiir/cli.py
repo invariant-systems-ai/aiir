@@ -240,9 +240,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         nargs="?",
         const=_LEDGER_DIR,
         default=None,
+        metavar="DIR",
         help=(
-            "Append receipts to a JSONL ledger (default: .aiir/receipts.jsonl). "
-            "Duplicates are auto-skipped via .aiir/index.json. "
+            "Append receipts to a JSONL ledger directory (default: .aiir/). "
+            "The directory will contain receipts.jsonl and index.json. "
+            "Duplicates are auto-skipped. "
             "This is the default when no output flags are given."
         ),
     )
@@ -324,7 +326,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--namespace",
         default=None,
         metavar="NS",
-        help="Tag receipts with an organization namespace (e.g., 'acme-corp')",
+        help=(
+            "Tag receipts with an organization namespace (e.g., 'acme-corp'). "
+            "Stored in extensions.namespace — not part of the content hash, "
+            "so adding or changing a namespace does not invalidate receipts."
+        ),
     )
     parser.add_argument(
         "--export",
@@ -332,7 +338,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         const="aiir-export.json",
         default=None,
         metavar="FILE",
-        help="Export .aiir/ ledger as a portable JSON bundle (for backup or import)",
+        help=(
+            "Export ledger as a portable JSON bundle (for backup or import). "
+            "Path must be relative to the project root."
+        ),
     )
     parser.add_argument(
         "--badge",
@@ -825,6 +834,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             f"Sigstore keyless signing (default in GitHub Actions).",
             file=sys.stderr,
         )
+
+    # No-remote provenance warning
+    if not args.quiet and receipts:
+        has_no_remote = any(
+            r.get("provenance", {}).get("repository") is None for r in receipts
+        )
+        if has_no_remote:
+            print(
+                f"   {_e('hint')} No git remote configured. receipt_id will "
+                "change once an origin is set (provenance.repository is part "
+                "of the content hash).",
+                file=sys.stderr,
+            )
 
     # Privacy hint
     if not args.redact_files and not args.quiet and receipts:

@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.9] — 2026-03-09
+
+### Changed
+
+- **`--ledger` help text**: Clarified that the argument takes a directory path, not a file path. Added `metavar="DIR"` and documented that the directory will contain `receipts.jsonl` and `index.json`.
+- **`--namespace` help text**: Now states that namespace is stored in `extensions.namespace` and is not part of the content hash.
+- **`--export` help text**: Now notes that the path must be relative to the project root.
+- **No-remote provenance warning**: CLI now prints a hint to stderr when receipts are generated without a git remote configured, explaining that `receipt_id` will change once an origin is set.
+- **README receipt identity documentation**: Added a prominent note in the "Receipt format" section explaining that `provenance.repository` is part of the content hash, so receipt identity depends on the configured remote URL.
+- **README test count**: Updated from "604 tests" to "660+ tests".
+
 ## [1.0.8] — 2026-03-08
 
 ### Added

@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.5] — 2026-03-08
+
+### Added
+
+- **`authorship_class` field**: Receipts now include a structured `authorship_class` in `ai_attestation` — one of `"human"`, `"ai-assisted"`, `"bot-generated"`, or `"ai+bot"`. This gives downstream tools a single enum-like field for classification, eliminating the need to interpret boolean pairs.
+- **Trust stack architecture**: Website now includes a concrete OSS → Hub → Fortress diagram showing what each layer provides.
+
+### Changed
+
+- **Signing default**: GitHub Action now defaults to `sign: true` (Sigstore keyless signing). Ambient OIDC in GitHub Actions makes this zero-config. Opt out with `sign: false`.
+- **Surface synchronization**: Every public surface (README, website, org profile, GitLab template, version.js) now uses consistent version refs, `tamper-evident` language, and `heuristic_v2` references. Fixed: org profile "tamper-proof" → "tamper-evident", README GitLab version table, stale bot note, incomplete index.json example.
+
 ## [1.0.4] — 2026-03-08
 
 ### Changed

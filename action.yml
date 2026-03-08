@@ -20,9 +20,9 @@ inputs:
     required: false
     default: ""
   sign:
-    description: "Sign receipts with Sigstore keyless signing (requires id-token: write permission)"
+    description: "Sign receipts with Sigstore keyless signing (requires id-token: write permission). Set to 'false' to opt out."
     required: false
-    default: "false"
+    default: "true"
 
 outputs:
   receipt_count:

@@ -165,6 +165,7 @@ def append_to_ledger(
 
             is_ai = receipt.get("ai_attestation", {}).get("is_ai_authored", False)
             is_bot = receipt.get("ai_attestation", {}).get("is_bot_authored", False)
+            authorship = receipt.get("ai_attestation", {}).get("authorship_class", "human")
             rid = receipt.get("receipt_id", "")
             ts = receipt.get("timestamp", "")
 
@@ -173,6 +174,7 @@ def append_to_ledger(
                 "receipt_id": rid,
                 "ai": is_ai,
                 "bot": is_bot,
+                "authorship_class": authorship,
                 "author": author_email,
                 "line": index.get("receipt_count", 0) + appended,
             }

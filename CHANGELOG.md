@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.7] — 2026-03-08
+
+### Added
+
+- **CI OIDC detection**: `sign_receipt()` now detects CI environments (GitHub Actions, GitLab CI, Bitbucket, CircleCI, Jenkins, Azure Pipelines) and raises a clear, actionable error when ambient OIDC credentials are missing — instead of falling through to an interactive browser flow that hangs on headless runners. Fork PR context is explicitly mentioned in the GitHub Actions error.
+- **`receipts_overflow` output**: Documented in README and docs. When `receipts_json` exceeds 1 MB, it is set to `"OVERFLOW"` and `receipts_overflow` is set to `"true"`.
+- **3 new tests**: CI OIDC detection for GitHub Actions, fork PRs, and generic CI (567 total).
+
+### Changed
+
+- **Template versions**: All 5 CI platform templates (GitLab, Azure Pipelines, Bitbucket, CircleCI, Jenkins) updated from 1.0.0–1.0.2 to 1.0.7. Previously, non-GitHub CI users were running code missing 40% of AI tool detection.
+- **GitLab template shell quoting**: All `$AIIR_AI_ONLY` and `$AIIR_EXTRA_ARGS` variable expansions now use `${VAR:+"$VAR"}` pattern to prevent shell injection via pipeline variables.
+- **Recommended workflow triggers**: GitHub Action YAML examples in README and docs now use `push: { tags-ignore: ['**'] }` instead of bare `on: [push, pull_request]` to prevent tag pushes from receipting the entire repo history.
+- **upload-artifact SHA pins**: Aligned action.yml and dogfood.yml to v4.6.2 (was v4.6.0).
+- **Messaging alignment**: All template header comments updated from "AI-generated code commits" to "commits with declared AI involvement". Article 13 references retired.
+
+### Fixed
+
+- **README `sign` default**: Inputs table corrected from `false` to `true` (actual default since v1.0.5).
+- **README GitLab `output-dir` default**: Corrected from `.receipts` to `.aiir-receipts` to match actual template.yml spec.
+- **Fork PR resilience**: Fork PRs with `sign: true` now fail fast with a clear error message instead of hanging on interactive browser OIDC.
+
 ## [1.0.6] — 2026-03-08
 
 ### Changed

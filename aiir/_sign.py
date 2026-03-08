@@ -52,7 +52,41 @@ def sign_receipt(receipt_json_bytes: bytes) -> str:
     if raw_token is not None:
         identity_token = IdentityToken(raw_token)
     else:
-        # Fall back to interactive OIDC flow (opens browser)
+        # Detect CI environment — if we're in CI but have no ambient
+        # credential, the user is missing permissions (e.g., id-token: write)
+        # or this is a fork PR (which can't get OIDC tokens).
+        # Give a clear error instead of hanging on interactive browser flow.
+        ci_env = (
+            os.environ.get("CI")
+            or os.environ.get("GITHUB_ACTIONS")
+            or os.environ.get("GITLAB_CI")
+            or os.environ.get("BITBUCKET_BUILD_NUMBER")
+            or os.environ.get("CIRCLECI")
+            or os.environ.get("JENKINS_URL")
+            or os.environ.get("TF_BUILD")  # Azure Pipelines
+        )
+        if ci_env:
+            hints = []
+            if os.environ.get("GITHUB_ACTIONS"):
+                hints.append(
+                    "  - Add 'permissions: { id-token: write }' to your workflow"
+                )
+                if os.environ.get("GITHUB_EVENT_NAME") == "pull_request":
+                    hints.append(
+                        "  - Fork PRs cannot obtain OIDC tokens — use 'sign: false' for fork PRs"
+                    )
+            elif os.environ.get("GITLAB_CI"):
+                hints.append(
+                    "  - Ensure CI_JOB_JWT or SIGSTORE_ID_TOKEN is available"
+                )
+            hint_text = "\n".join(hints) if hints else "  - Ensure OIDC credentials are available in this CI environment"
+            raise RuntimeError(
+                "Sigstore signing failed: no ambient OIDC credential detected.\n"
+                "This usually means the CI runner cannot obtain an identity token.\n"
+                f"{hint_text}\n"
+                "  - Or disable signing with --no-sign / sign: false"
+            )
+        # Local development — fall back to interactive OIDC flow (opens browser)
         issuer = Issuer.production()
         identity_token = issuer.identity_token()
 

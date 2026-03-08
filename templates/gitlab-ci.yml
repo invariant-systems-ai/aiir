@@ -1,14 +1,14 @@
 # AIIR — AI Integrity Receipts for GitLab CI
 # https://github.com/invariant-systems-ai/aiir  |  https://pypi.org/project/aiir/
 #
-# Generates tamper-evident cryptographic receipts for every AI-generated
-# commit. Supports compliance evidence for EU AI Act. Zero dependencies. Apache 2.0.
+# Generates tamper-evident cryptographic receipts for commits with declared
+# AI involvement. Supports compliance evidence for EU AI Act. Zero dependencies. Apache 2.0.
 #
 # ──────────────────────────────────────────────────────────────────────
 # QUICK START — add ONE line to your .gitlab-ci.yml:
 #
 #   include:
-#     - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.4/templates/gitlab-ci.yml'
+#     - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.7/templates/gitlab-ci.yml'
 #
 # That's it. Every push and MR now generates receipts.
 #
@@ -17,14 +17,14 @@
 #
 #   include:
 #     - project: 'your-group/aiir'
-#       ref: 'v1.0.4'
+#       ref: 'v1.0.7'
 #       file: '/templates/gitlab-ci.yml'
 #
 # ──────────────────────────────────────────────────────────────────────
 # CUSTOM CONFIGURATION — override variables in your pipeline:
 #
 #   variables:
-#     AIIR_VERSION: "1.0.4"       # Pin version (recommended)
+#     AIIR_VERSION: "1.0.7"       # Pin version (recommended)
 #     AIIR_AI_ONLY: ""            # Set to "--ai-only" to skip non-AI commits
 #     AIIR_EXTRA_ARGS: ""         # Any additional aiir CLI flags
 #     AIIR_ARTIFACT_EXPIRY: "90 days"  # How long to keep receipt artifacts
@@ -37,7 +37,7 @@
 .aiir-receipt:
   image: python:3.11-slim
   variables:
-    AIIR_VERSION: "1.0.0"
+    AIIR_VERSION: "1.0.7"
     AIIR_AI_ONLY: ""
     AIIR_EXTRA_ARGS: ""
     AIIR_ARTIFACT_EXPIRY: "90 days"
@@ -57,9 +57,9 @@ aiir-receipt-push:
     - |
       if [ -n "$CI_COMMIT_BEFORE_SHA" ] && [ "$CI_COMMIT_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
         aiir --range "${CI_COMMIT_BEFORE_SHA}..${CI_COMMIT_SHA}" \
-          --output .aiir-receipts/ --pretty $AIIR_AI_ONLY $AIIR_EXTRA_ARGS
+          --output .aiir-receipts/ --pretty ${AIIR_AI_ONLY:+"$AIIR_AI_ONLY"} ${AIIR_EXTRA_ARGS:+"$AIIR_EXTRA_ARGS"}
       else
-        aiir --output .aiir-receipts/ --pretty $AIIR_AI_ONLY $AIIR_EXTRA_ARGS
+        aiir --output .aiir-receipts/ --pretty ${AIIR_AI_ONLY:+"$AIIR_AI_ONLY"} ${AIIR_EXTRA_ARGS:+"$AIIR_EXTRA_ARGS"}
       fi
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
@@ -72,7 +72,7 @@ aiir-receipt-mr:
     - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --depth=100
     - |
       aiir --range "origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}..${CI_COMMIT_SHA}" \
-        --output .aiir-receipts/ --pretty $AIIR_AI_ONLY $AIIR_EXTRA_ARGS
+        --output .aiir-receipts/ --pretty ${AIIR_AI_ONLY:+"$AIIR_AI_ONLY"} ${AIIR_EXTRA_ARGS:+"$AIIR_EXTRA_ARGS"}
     # Summary for MR notes (optional — pipe to MR comment via API)
     - |
       RECEIPT_COUNT=$(ls -1 .aiir-receipts/*.json 2>/dev/null | wc -l)

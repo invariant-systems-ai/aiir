@@ -3777,7 +3777,7 @@ class TestMcpSymlinkIntermediate(unittest.TestCase):
 
     def test_real_path_accepted(self):
         """A normal path without symlinks must be accepted."""
-        tmpdir = tempfile.mkdtemp()
+        tmpdir = os.path.realpath(tempfile.mkdtemp())
         original_cwd = os.getcwd()
         try:
             real_dir = Path(tmpdir, "sub")
@@ -5034,7 +5034,8 @@ class TestWriteReceiptShaSanitize(unittest.TestCase):
             "content_hash": "sha256:abc",
         }
         import tempfile
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = os.path.realpath(_tmpdir)
             # write_receipt checks cwd, so we chdir temporarily
             old_cwd = os.getcwd()
             os.chdir(tmpdir)
@@ -5056,7 +5057,8 @@ class TestWriteReceiptShaSanitize(unittest.TestCase):
             "content_hash": "sha256:abc",
         }
         import tempfile
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = os.path.realpath(_tmpdir)
             old_cwd = os.getcwd()
             os.chdir(tmpdir)
             try:

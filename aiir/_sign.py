@@ -79,12 +79,15 @@ def sign_receipt(receipt_json_bytes: bytes) -> str:
                 hints.append(
                     "  - Ensure CI_JOB_JWT or SIGSTORE_ID_TOKEN is available"
                 )
-            hint_text = "\n".join(hints) if hints else "  - Ensure OIDC credentials are available in this CI environment"
+            hint_text = "\n".join(hints) if hints else (
+                "  - Ensure OIDC credentials are available in this CI environment\n"
+                "  - Or set SIGSTORE_ID_TOKEN in your pipeline\n"
+                "  - Or disable signing with --no-sign / sign: false"
+            )
             raise RuntimeError(
                 "Sigstore signing failed: no ambient OIDC credential detected.\n"
                 "This usually means the CI runner cannot obtain an identity token.\n"
-                f"{hint_text}\n"
-                "  - Or disable signing with --no-sign / sign: false"
+                f"{hint_text}"
             )
         # Local development — fall back to interactive OIDC flow (opens browser)
         issuer = Issuer.production()

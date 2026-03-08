@@ -473,7 +473,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.export is not None:
         # Guard: fail early if no ledger exists (matches --badge / --stats).
         try:
-            _idx = _load_index(_ledger_paths()[2])
+            _idx = _load_index(_ledger_paths(args.ledger)[2])
         except OSError:
             _idx = {}
         if _idx.get("receipt_count", 0) == 0:
@@ -483,7 +483,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
             return 1
         try:
-            bundle = export_ledger()
+            bundle = export_ledger(ledger_dir=args.ledger)
         except Exception as e:
             print(f"{_e('error')} Export failed: {e}", file=sys.stderr)
             return 1
@@ -510,7 +510,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # --- Badge mode (no git repo needed) ---
     if args.badge:
         try:
-            idx = _load_index(_ledger_paths()[2])
+            idx = _load_index(_ledger_paths(args.ledger)[2])
         except OSError:
             idx = {}
         if idx.get("receipt_count", 0) == 0:
@@ -518,7 +518,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return 1
         cfg = {}
         try:
-            cfg = _load_config()
+            cfg = _load_config(args.ledger)
         except OSError:
             pass
         badge = format_badge(idx, namespace=cfg.get("namespace"))
@@ -531,7 +531,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # --- Stats mode (no git repo needed) ---
     if args.stats:
         try:
-            idx = _load_index(_ledger_paths()[2])
+            idx = _load_index(_ledger_paths(args.ledger)[2])
         except OSError:
             idx = {}
         if idx.get("receipt_count", 0) == 0:
@@ -539,7 +539,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return 1
         cfg = {}
         try:
-            cfg = _load_config()
+            cfg = _load_config(args.ledger)
         except OSError:
             pass
         print(format_stats(idx, config=cfg), file=sys.stderr)
@@ -548,7 +548,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # --- Check / policy gate mode (no git repo needed) ---
     if args.check or args.max_ai_percent is not None:
         try:
-            idx = _load_index(_ledger_paths()[2])
+            idx = _load_index(_ledger_paths(args.ledger)[2])
         except OSError:
             idx = {}
         passed, message = check_policy(
@@ -605,8 +605,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     instance_id: Optional[str] = None
     namespace: Optional[str] = getattr(args, "namespace", None)
     if use_ledger or namespace:
+        ledger_cfg_dir = args.ledger if args.ledger is not None else _LEDGER_DIR
         try:
-            config = _load_config()
+            config = _load_config(ledger_cfg_dir)
         except OSError:
             config = {}
         instance_id = config.get("instance_id")
@@ -615,7 +616,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if getattr(args, "namespace", None) and args.namespace != config.get("namespace"):
             config["namespace"] = args.namespace
             try:
-                _save_config(_config_path(), config)
+                _save_config(_config_path(ledger_cfg_dir), config)
             except OSError:
                 pass
 

@@ -1,0 +1,60 @@
+# AIIR — AI Integrity Receipts for Bitbucket Pipelines
+# https://github.com/invariant-systems-ai/aiir  |  https://pypi.org/project/aiir/
+#
+# Generates tamper-evident cryptographic receipts for every AI-generated
+# commit. EU AI Act ready. Zero dependencies. Apache 2.0.
+#
+# ──────────────────────────────────────────────────────────────────────
+# QUICK START — add this to your bitbucket-pipelines.yml:
+#
+#   pipelines:
+#     default:
+#       - step:
+#           name: AIIR Receipt
+#           image: python:3.11-slim
+#           script:
+#             - pip install aiir
+#             - aiir --range origin/main..HEAD --output .aiir-receipts/ --pretty
+#           artifacts:
+#             - .aiir-receipts/**
+#
+# ──────────────────────────────────────────────────────────────────────
+# FULL TEMPLATE — copy into your bitbucket-pipelines.yml:
+
+definitions:
+  steps:
+    - step: &aiir-receipt
+        name: AIIR Receipt
+        image: python:3.11-slim
+        script:
+          - pip install --quiet "aiir==1.0.2"
+          - |
+            if [ -n "$BITBUCKET_COMMIT" ]; then
+              # Receipt commits in the current push
+              # Bitbucket sets BITBUCKET_COMMIT to the HEAD commit
+              aiir --output .aiir-receipts/ --pretty
+            fi
+          - |
+            RECEIPT_COUNT=$(ls -1 .aiir-receipts/*.json 2>/dev/null | wc -l)
+            AI_COUNT=$(grep -l '"is_ai_authored": true' .aiir-receipts/*.json 2>/dev/null | wc -l)
+            echo "AIIR: ${RECEIPT_COUNT} commits receipted, ${AI_COUNT} AI-authored"
+        artifacts:
+          - .aiir-receipts/**
+
+pipelines:
+  default:
+    - step: *aiir-receipt
+
+  pull-requests:
+    '**':
+      - step:
+          <<: *aiir-receipt
+          name: AIIR Receipt (PR)
+          script:
+            - pip install --quiet "aiir==1.0.2"
+            - git fetch origin "$BITBUCKET_PR_DESTINATION_BRANCH" --depth=100
+            - aiir --range "origin/${BITBUCKET_PR_DESTINATION_BRANCH}..${BITBUCKET_COMMIT}" --output .aiir-receipts/ --pretty
+            - |
+              RECEIPT_COUNT=$(ls -1 .aiir-receipts/*.json 2>/dev/null | wc -l)
+              AI_COUNT=$(grep -l '"is_ai_authored": true' .aiir-receipts/*.json 2>/dev/null | wc -l)
+              echo "AIIR: ${RECEIPT_COUNT} commits receipted, ${AI_COUNT} AI-authored"

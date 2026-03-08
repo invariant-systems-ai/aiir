@@ -1,0 +1,7 @@
+# AIIR Docker image — ignore everything except what's needed
+*
+!aiir/
+!pyproject.toml
+!LICENSE
+!README.md
+!CHANGELOG.md

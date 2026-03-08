@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.6] — 2026-03-08
+
+### Changed
+
+- **Messaging normalization**: All public surfaces now use "commits with declared AI involvement" instead of "AI-generated code commits" — aligns with the website's existing "declared AI involvement" framing. Updated: `pyproject.toml` description, `action.yml` description, `__init__.py` docstring, GitHub repo description.
+- **EU AI Act framing**: Retired the incorrect "Article 13" shorthand. Article 13 is technical documentation for high-risk systems; transparency obligations are in Article 50. README now uses "EU AI Act transparency and provenance requirements" — accurate without overspecifying.
+- **Development Status**: Downgraded PyPI classifier from "Production/Stable" to "Beta" — honest for a project at this maturity stage.
+- **PyPI metadata**: Homepage and Documentation URLs now point to `invariantsystems.io` and `invariantsystems.io/docs` instead of GitHub.
+- **THREAT_MODEL.md**: CLI version bumped from 1.0.2 to 1.0.6.
+
+### Fixed
+
+- **Docs page**: `sign` input default corrected from `false` to `true` in the GitHub Action inputs table (actual default has been `true` since v1.0.5).
+- **About page timeline**: Added v1.0.4, v1.0.5, and v1.0.6 entries — timeline previously stopped at v1.0.3.
+
 ## [1.0.5] — 2026-03-08
 
 ### Added

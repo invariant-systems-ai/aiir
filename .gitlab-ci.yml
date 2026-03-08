@@ -28,6 +28,8 @@ verify-component:
     # Verify the component's receipt jobs exist in this pipeline
     - echo "✅ Component loaded successfully (this job wouldn't run otherwise)"
   rules:
+    - if: $CI_COMMIT_TAG
+      when: never
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
@@ -48,6 +50,8 @@ test:
     - cd $CI_PROJECT_DIR
     - python -m pytest tests/ -x -q --tb=short
   rules:
+    - if: $CI_COMMIT_TAG
+      when: never
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 

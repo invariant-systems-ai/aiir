@@ -336,7 +336,10 @@ def handle_tools_call(params: Dict[str, Any]) -> Dict[str, Any]:
     # would cause handler .get() calls to raise AttributeError, producing
     # opaque internal errors instead of proper validation errors.
     if not isinstance(arguments, dict):
-        arguments = {}
+        return _error_result(
+            "Invalid 'arguments': expected a JSON object (dict), "
+            f"got {type(arguments).__name__}."
+        )
 
     handler = TOOL_HANDLERS.get(name)
     if handler is None:

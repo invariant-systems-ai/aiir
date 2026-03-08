@@ -145,8 +145,7 @@ jobs:
           # Re-fetch to verify the remote state
           git fetch origin --tags --force 2>/dev/null
 
-          REMOTE=$(git rev-parse "origin/${FLOATING}" 2>/dev/null \
-            || git rev-parse "${FLOATING}^{commit}" 2>/dev/null \
+          REMOTE=$(git rev-parse "refs/tags/${FLOATING}^{commit}" 2>/dev/null \
             || echo "missing")
 
           if [ "$REMOTE" = "$COMMIT" ]; then

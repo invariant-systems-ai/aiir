@@ -758,6 +758,68 @@ class TestE2EUXContract(unittest.TestCase):
         self.assertEqual(rc2, 0, f"Multi-receipt verify should pass. stderr: {stderr2}")
         self.assertIn("3 receipts verified", stderr2)
 
+    # ── 30. Custom ledger read-path (Bug #1 regression) ────────────────
+
+    def test_30_stats_reads_custom_ledger(self):
+        """--stats --ledger .audit/ reads from .audit/, not default .aiir/."""
+        # Write receipts to custom ledger dir
+        rc, _, _ = self._run_cli("--ledger", ".audit")
+        self.assertEqual(rc, 0)
+        self.assertTrue(Path(".audit/index.json").exists())
+
+        # .aiir/ must NOT exist — proves we're not falling back
+        self.assertFalse(
+            Path(".aiir").exists(),
+            "Default .aiir/ should not be created when using custom ledger",
+        )
+
+        # --stats with custom ledger should succeed
+        rc2, _, stderr2 = self._run_cli("--stats", "--ledger", ".audit")
+        self.assertEqual(rc2, 0, f"--stats with custom ledger should work. stderr: {stderr2}")
+        self.assertTrue(
+            "receipt" in stderr2.lower() or "commit" in stderr2.lower(),
+            f"Stats should show data from custom ledger. Got: {stderr2}",
+        )
+
+    def test_30_badge_reads_custom_ledger(self):
+        """--badge --ledger .audit/ reads from .audit/, not default .aiir/."""
+        rc, _, _ = self._run_cli("--ledger", ".audit")
+        self.assertEqual(rc, 0)
+
+        rc2, stdout2, _ = self._run_cli("--badge", "--ledger", ".audit")
+        self.assertEqual(rc2, 0, "Badge with custom ledger should succeed")
+        self.assertIn("img.shields.io", stdout2)
+
+    def test_30_check_reads_custom_ledger(self):
+        """--check --ledger .audit/ reads from .audit/, not default .aiir/."""
+        rc, _, _ = self._run_cli("--ledger", ".audit")
+        self.assertEqual(rc, 0)
+
+        rc2, _, stderr2 = self._run_cli("--check", "--ledger", ".audit")
+        self.assertEqual(rc2, 0, f"Check with custom ledger should pass. stderr: {stderr2}")
+
+    def test_30_export_reads_custom_ledger(self):
+        """--export --ledger .audit/ reads from .audit/, not default .aiir/."""
+        rc, _, _ = self._run_cli("--ledger", ".audit")
+        self.assertEqual(rc, 0)
+
+        rc2, _, stderr2 = self._run_cli("--export", "bundle.json", "--ledger", ".audit")
+        self.assertEqual(rc2, 0, f"Export with custom ledger should work. stderr: {stderr2}")
+        bundle = json.loads(Path("bundle.json").read_text())
+        self.assertEqual(bundle["format"], "aiir.export.v1")
+        self.assertGreater(len(bundle["receipts"]), 0)
+
+    def test_30_stats_fails_without_custom_ledger_flag(self):
+        """--stats without --ledger should fail when receipts are only in .audit/."""
+        # Write to custom dir
+        rc, _, _ = self._run_cli("--ledger", ".audit")
+        self.assertEqual(rc, 0)
+
+        # --stats without --ledger should fail (no .aiir/ exists)
+        rc2, _, stderr2 = self._run_cli("--stats")
+        self.assertEqual(rc2, 1, "Stats without --ledger should fail when no default ledger")
+        self.assertIn("No ledger found", stderr2)
+
 
 if __name__ == "__main__":
     unittest.main()

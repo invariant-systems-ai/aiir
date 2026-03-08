@@ -19,8 +19,8 @@
 spec:
   description: >
     Generate tamper-evident cryptographic receipts for every commit with declared AI involvement.
-    Detects Copilot, ChatGPT, Claude, Cursor, Amazon Q, Devin, Gemini, and 20+
-    other AI tools. Supports compliance evidence for EU AI Act transparency requirements. Zero dependencies.
+    Detects Copilot, ChatGPT, Claude, Cursor, Amazon Q, Devin, Gemini, and 20+ other AI tools.
+    Compliance evidence for EU AI Act. Zero dependencies.
   inputs:
     stage:
       description: "Pipeline stage for the receipt job"

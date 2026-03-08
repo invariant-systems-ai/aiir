@@ -23,9 +23,12 @@ jobs:
           output-dir: .receipts/
 
       - name: Show results
+        env:
+          RECEIPT_COUNT: ${{ steps.receipt.outputs.receipt_count }}
+          AI_COMMIT_COUNT: ${{ steps.receipt.outputs.ai_commit_count }}
         run: |
-          echo "Receipts generated: ${{ steps.receipt.outputs.receipt_count }}"
-          echo "AI-authored: ${{ steps.receipt.outputs.ai_commit_count }}"
+          echo "Receipts generated: ${RECEIPT_COUNT}"
+          echo "AI-authored: ${AI_COMMIT_COUNT}"
 
       - name: Commit receipts back to repo
         run: |

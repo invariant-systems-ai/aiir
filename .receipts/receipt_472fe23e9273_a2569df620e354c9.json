@@ -1,0 +1,44 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.6",
+  "commit": {
+    "sha": "472fe23e9273c78d8511f369b8eda9fbd61e7bd1",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T12:20:34-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T12:20:34-04:00"
+    },
+    "subject": "fix(ci): add id-token permission for Sigstore OIDC signing",
+    "message_hash": "sha256:d1fe5051b7bddf87a2dba1f76bc29b41aa9e7068a67468cbfd9ded788e09e70d",
+    "diff_hash": "sha256:0aa66ebd7aafc6e158607cb5978113d51b694f3f8376f894b852275e9c60abd0",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/dogfood.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.6",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-9df620e354c9101e169dda3b1f7ca9ae",
+  "content_hash": "sha256:9df620e354c9101e169dda3b1f7ca9aebece82b952e93419023b2734d89b6157",
+  "timestamp": "2026-03-08T16:20:51Z",
+  "extensions": {}
+}

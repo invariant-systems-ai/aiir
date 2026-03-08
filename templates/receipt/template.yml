@@ -1,0 +1,113 @@
+# AIIR Receipt — GitLab CI/CD Catalog Component
+# https://gitlab.com/invariant-systems/aiir
+#
+# Generates tamper-evident cryptographic receipts for AI-generated commits.
+# EU AI Act ready. Zero dependencies. Apache 2.0.
+#
+# Usage:
+#   include:
+#     - component: $CI_SERVER_FQDN/invariant-systems/aiir/receipt@1
+#       inputs:
+#         stage: test
+#
+# Self-hosted GitLab (mirror):
+#   include:
+#     - component: $CI_SERVER_FQDN/your-group/aiir/receipt@1
+#       inputs:
+#         stage: test
+
+spec:
+  description: >
+    Generate tamper-evident cryptographic receipts for every AI-generated commit.
+    Detects Copilot, ChatGPT, Claude, Cursor, Amazon Q, Devin, Gemini, and 20+
+    other AI tools. EU AI Act Article 13 ready. Zero dependencies.
+  inputs:
+    stage:
+      description: "Pipeline stage for the receipt job"
+      default: test
+    version:
+      description: "AIIR version to install (pin for reproducibility)"
+      default: "1.0.2"
+    ai-only:
+      description: "Only receipt AI-authored commits (skip human-only commits)"
+      type: boolean
+      default: false
+    artifact-expiry:
+      description: "How long to keep receipt artifacts"
+      default: "90 days"
+    output-dir:
+      description: "Directory to write receipt JSON files"
+      default: ".aiir-receipts"
+    extra-args:
+      description: "Additional aiir CLI flags (e.g. '--redact-files')"
+      default: ""
+    python-image:
+      description: "Docker image with Python 3.9+ (override for air-gapped registries)"
+      default: "python:3.11-slim"
+    job-prefix:
+      description: "Prefix for job names (use to include the component multiple times)"
+      default: "aiir"
+---
+
+# --- Receipt on push ---
+"$[[ inputs.job-prefix ]]-receipt-push":
+  image: $[[ inputs.python-image ]]
+  stage: $[[ inputs.stage ]]
+  before_script:
+    - pip install --quiet "aiir==$[[ inputs.version ]]"
+  script:
+    - |
+      AI_FLAG=""
+      if [ "$[[ inputs.ai-only ]]" = "true" ]; then
+        AI_FLAG="--ai-only"
+      fi
+      if [ -n "$CI_COMMIT_BEFORE_SHA" ] && [ "$CI_COMMIT_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+        aiir --range "${CI_COMMIT_BEFORE_SHA}..${CI_COMMIT_SHA}" \
+          --output "$[[ inputs.output-dir ]]/" --pretty $AI_FLAG $[[ inputs.extra-args ]]
+      else
+        aiir --output "$[[ inputs.output-dir ]]/" --pretty $AI_FLAG $[[ inputs.extra-args ]]
+      fi
+    # Print summary
+    - |
+      RECEIPT_COUNT=$(ls -1 "$[[ inputs.output-dir ]]"/*.json 2>/dev/null | wc -l)
+      AI_COUNT=$(grep -l '"is_ai_authored": true' "$[[ inputs.output-dir ]]"/*.json 2>/dev/null | wc -l)
+      echo "────────────────────────────────────────"
+      echo "AIIR: ${RECEIPT_COUNT} commits receipted, ${AI_COUNT} AI-authored"
+      echo "────────────────────────────────────────"
+  artifacts:
+    paths:
+      - $[[ inputs.output-dir ]]/
+    expire_in: $[[ inputs.artifact-expiry ]]
+    when: always
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+
+# --- Receipt on merge request ---
+"$[[ inputs.job-prefix ]]-receipt-mr":
+  image: $[[ inputs.python-image ]]
+  stage: $[[ inputs.stage ]]
+  before_script:
+    - pip install --quiet "aiir==$[[ inputs.version ]]"
+  script:
+    - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --depth=100
+    - |
+      AI_FLAG=""
+      if [ "$[[ inputs.ai-only ]]" = "true" ]; then
+        AI_FLAG="--ai-only"
+      fi
+      aiir --range "origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}..${CI_COMMIT_SHA}" \
+        --output "$[[ inputs.output-dir ]]/" --pretty $AI_FLAG $[[ inputs.extra-args ]]
+    # Print summary
+    - |
+      RECEIPT_COUNT=$(ls -1 "$[[ inputs.output-dir ]]"/*.json 2>/dev/null | wc -l)
+      AI_COUNT=$(grep -l '"is_ai_authored": true' "$[[ inputs.output-dir ]]"/*.json 2>/dev/null | wc -l)
+      echo "────────────────────────────────────────"
+      echo "AIIR: ${RECEIPT_COUNT} commits receipted, ${AI_COUNT} AI-authored"
+      echo "────────────────────────────────────────"
+  artifacts:
+    paths:
+      - $[[ inputs.output-dir ]]/
+    expire_in: $[[ inputs.artifact-expiry ]]
+    when: always
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'

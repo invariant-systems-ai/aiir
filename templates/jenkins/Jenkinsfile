@@ -1,0 +1,68 @@
+// AIIR — AI Integrity Receipts for Jenkins
+// https://github.com/invariant-systems-ai/aiir  |  https://pypi.org/project/aiir/
+//
+// Generates tamper-evident cryptographic receipts for every AI-generated
+// commit. EU AI Act ready. Zero dependencies. Apache 2.0.
+//
+// ──────────────────────────────────────────────────────────────────────
+// QUICK START — save as Jenkinsfile, or copy the stage into your
+// existing pipeline.
+// ──────────────────────────────────────────────────────────────────────
+
+pipeline {
+    agent {
+        docker {
+            image 'python:3.11-slim'
+        }
+    }
+
+    parameters {
+        string(name: 'AIIR_VERSION', defaultValue: '1.0.2', description: 'AIIR version to install')
+        booleanParam(name: 'AI_ONLY', defaultValue: false, description: 'Only receipt AI-authored commits')
+    }
+
+    stages {
+        stage('Install AIIR') {
+            steps {
+                sh "pip install --quiet 'aiir==${params.AIIR_VERSION}'"
+            }
+        }
+
+        stage('Generate Receipts') {
+            steps {
+                sh '''
+                    AI_FLAG=""
+                    if [ "${AI_ONLY}" = "true" ]; then
+                        AI_FLAG="--ai-only"
+                    fi
+
+                    if [ -n "${CHANGE_TARGET}" ]; then
+                        # Pull request
+                        git fetch origin "${CHANGE_TARGET}" --depth=100
+                        aiir --range "origin/${CHANGE_TARGET}..${GIT_COMMIT}" \
+                            --output .aiir-receipts/ --pretty ${AI_FLAG}
+                    else
+                        # Push
+                        aiir --output .aiir-receipts/ --pretty ${AI_FLAG}
+                    fi
+                '''
+            }
+        }
+
+        stage('Summary') {
+            steps {
+                sh '''
+                    RECEIPT_COUNT=$(ls -1 .aiir-receipts/*.json 2>/dev/null | wc -l)
+                    AI_COUNT=$(grep -l '"is_ai_authored": true' .aiir-receipts/*.json 2>/dev/null | wc -l)
+                    echo "AIIR: ${RECEIPT_COUNT} commits receipted, ${AI_COUNT} AI-authored"
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: '.aiir-receipts/*.json', allowEmptyArchive: true
+        }
+    }
+}

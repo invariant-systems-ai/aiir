@@ -1,0 +1,69 @@
+# AIIR — AI Integrity Receipts for CircleCI
+# https://github.com/invariant-systems-ai/aiir  |  https://pypi.org/project/aiir/
+#
+# Generates tamper-evident cryptographic receipts for every AI-generated
+# commit. EU AI Act ready. Zero dependencies. Apache 2.0.
+#
+# ──────────────────────────────────────────────────────────────────────
+# QUICK START — save as .circleci/config.yml, or copy the job into
+# your existing CircleCI config.
+# ──────────────────────────────────────────────────────────────────────
+
+version: 2.1
+
+# --- AIIR Orb (inline definition) ---
+# Once published as a CircleCI Orb, use:
+#   orbs:
+#     aiir: invariant-systems/aiir@1.0
+#   workflows:
+#     receipt:
+#       jobs:
+#         - aiir/receipt
+
+jobs:
+  aiir-receipt:
+    docker:
+      - image: cimg/python:3.11
+    parameters:
+      version:
+        type: string
+        default: "1.0.2"
+      ai-only:
+        type: boolean
+        default: false
+    steps:
+      - checkout
+      - run:
+          name: Install AIIR
+          command: pip install --quiet "aiir==<< parameters.version >>"
+      - run:
+          name: Generate receipts
+          command: |
+            AI_FLAG=""
+            if [ "<< parameters.ai-only >>" = "true" ]; then
+              AI_FLAG="--ai-only"
+            fi
+
+            if [ -n "$CIRCLE_PULL_REQUEST" ]; then
+              # PR: receipt the diff
+              git fetch origin "$CIRCLE_BRANCH" --depth=100
+              BASE_BRANCH="${CIRCLE_PULL_REQUEST##*/}"
+              aiir --range "origin/main..HEAD" --output .aiir-receipts/ --pretty $AI_FLAG
+            else
+              # Push: receipt current commit
+              aiir --output .aiir-receipts/ --pretty $AI_FLAG
+            fi
+      - run:
+          name: AIIR summary
+          command: |
+            RECEIPT_COUNT=$(ls -1 .aiir-receipts/*.json 2>/dev/null | wc -l)
+            AI_COUNT=$(grep -l '"is_ai_authored": true' .aiir-receipts/*.json 2>/dev/null | wc -l)
+            echo "AIIR: ${RECEIPT_COUNT} commits receipted, ${AI_COUNT} AI-authored"
+      - store_artifacts:
+          path: .aiir-receipts
+          destination: aiir-receipts
+
+workflows:
+  receipt:
+    jobs:
+      - aiir-receipt

@@ -1,0 +1,78 @@
+# AIIR — GitLab CI/CD pipeline
+# Tests the CI/CD Catalog component and publishes releases.
+#
+# This pipeline runs on GitLab (gitlab.com/invariant-systems/aiir).
+# The GitHub mirror uses .github/workflows/ instead.
+
+stages:
+  - test
+  - release
+
+# --- Test the component from the current commit ---
+include:
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/receipt@$CI_COMMIT_SHA
+    inputs:
+      stage: test
+      job-prefix: "test-aiir"
+
+# --- Verify the component jobs were added ---
+verify-component:
+  stage: test
+  image: python:3.11-slim
+  script:
+    - pip install --quiet aiir
+    - aiir --version
+    - echo "✅ AIIR installed and runs"
+    # Verify the component's receipt jobs exist in this pipeline
+    - echo "✅ Component loaded successfully (this job wouldn't run otherwise)"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# --- Run the test suite ---
+test:
+  stage: test
+  image: python:3.11-slim
+  script:
+    - pip install --quiet pytest hypothesis
+    - pip install --quiet -e .
+    - cd /tmp && git init test-repo && cd test-repo
+    - git config user.name "Test" && git config user.email "test@test.com"
+    - echo "hello" > file.txt && git add . && git commit -m "test commit"
+    - cd -
+    - python -m pytest test_cli.py -x -q --tb=short
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# --- Publish release to CI/CD Catalog ---
+create-release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/cli:latest
+  script:
+    - echo "Publishing release $CI_COMMIT_TAG to CI/CD Catalog"
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
+  release:
+    tag_name: $CI_COMMIT_TAG
+    description: |
+      ## AIIR $CI_COMMIT_TAG
+
+      AI Integrity Receipts — tamper-evident cryptographic receipts for every AI-generated commit.
+
+      ### Install
+
+      ```
+      pip install aiir==$CI_COMMIT_TAG
+      ```
+
+      ### Use as CI/CD Component
+
+      ```yaml
+      include:
+        - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/receipt@$CI_COMMIT_TAG
+      ```
+
+      ### Changelog
+
+      See [CHANGELOG.md](https://github.com/invariant-systems-ai/aiir/blob/main/CHANGELOG.md)

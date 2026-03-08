@@ -1,0 +1,66 @@
+# AIIR — AI Integrity Receipts for Azure Pipelines
+# https://github.com/invariant-systems-ai/aiir  |  https://pypi.org/project/aiir/
+#
+# Generates tamper-evident cryptographic receipts for every AI-generated
+# commit. EU AI Act ready. Zero dependencies. Apache 2.0.
+#
+# ──────────────────────────────────────────────────────────────────────
+# QUICK START — add this file as azure-pipelines.yml in your repo,
+# or copy the steps into your existing pipeline.
+# ──────────────────────────────────────────────────────────────────────
+
+trigger:
+  branches:
+    include:
+      - '*'
+
+pr:
+  branches:
+    include:
+      - '*'
+
+variables:
+  AIIR_VERSION: '1.0.2'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - checkout: self
+    fetchDepth: 0
+    displayName: 'Checkout (full history)'
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.11'
+    displayName: 'Use Python 3.11'
+
+  - script: pip install --quiet "aiir==$(AIIR_VERSION)"
+    displayName: 'Install AIIR'
+
+  - script: |
+      if [ "$(Build.Reason)" = "PullRequest" ]; then
+        # PR: receipt the diff between target and source
+        git fetch origin "$(System.PullRequest.TargetBranch)" --depth=100
+        aiir --range "origin/$(System.PullRequest.TargetBranch)..$(Build.SourceVersion)" \
+          --output .aiir-receipts/ --pretty
+      else
+        # Push: receipt the current commit
+        aiir --output .aiir-receipts/ --pretty
+      fi
+    displayName: 'Generate AIIR receipts'
+
+  - script: |
+      RECEIPT_COUNT=$(ls -1 .aiir-receipts/*.json 2>/dev/null | wc -l)
+      AI_COUNT=$(grep -l '"is_ai_authored": true' .aiir-receipts/*.json 2>/dev/null | wc -l)
+      echo "##vso[task.setvariable variable=receiptCount]${RECEIPT_COUNT}"
+      echo "##vso[task.setvariable variable=aiCommitCount]${AI_COUNT}"
+      echo "AIIR: ${RECEIPT_COUNT} commits receipted, ${AI_COUNT} AI-authored"
+    displayName: 'AIIR summary'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: '.aiir-receipts'
+      artifactName: 'aiir-receipts'
+    displayName: 'Upload AIIR receipts'
+    condition: succeededOrFailed()

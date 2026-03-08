@@ -5,6 +5,7 @@
 [![PyPI](https://img.shields.io/pypi/v/aiir?color=blue)](https://pypi.org/project/aiir/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/invariant-systems-ai/aiir)
+[![GitLab CI/CD Catalog](https://img.shields.io/badge/GitLab-CI%2FCD%20Catalog-orange?logo=gitlab)](https://gitlab.com/explore/catalog/invariant-systems/aiir)
 [![AIIR Receipted](https://img.shields.io/badge/AIIR-Receipted%20✓-blue)](https://github.com/invariant-systems-ai/aiir)
 
 <p align="center">
@@ -66,7 +67,7 @@ same commit, zero duplicates. Zero dependencies. Python 3.9+.
 
 ---
 
-## Five Ways to Use AIIR
+## Every Platform. One Command.
 
 ### 🤖 MCP Tool — Let your AI do it
 
@@ -149,13 +150,35 @@ Runs **post-commit** (after your commit is created, since it needs the commit SH
 
 ### 🦊 GitLab CI — Receipt merge requests and pushes
 
+**CI/CD Catalog component** (recommended — [browse in Catalog](https://gitlab.com/explore/catalog/invariant-systems/aiir)):
+
 ```yaml
-# .gitlab-ci.yml — one line to include the full template
+# .gitlab-ci.yml — one line
+include:
+  - component: gitlab.com/invariant-systems/aiir/receipt@1
+    inputs:
+      stage: test
+```
+
+All inputs are optional and typed:
+
+| Input | Type | Default | Description |
+|-------|------|---------|-------------|
+| `stage` | string | `test` | Pipeline stage |
+| `version` | string | `1.0.2` | AIIR version from PyPI |
+| `ai-only` | boolean | `false` | Only receipt AI-authored commits |
+| `output-dir` | string | `.receipts` | Artifact output directory |
+| `artifact-expiry` | string | `90 days` | Artifact retention |
+| `extra-args` | string | `""` | Additional CLI flags |
+
+**Legacy include** (still works — no Catalog required):
+
+```yaml
 include:
   - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.0/templates/gitlab-ci.yml'
 ```
 
-Self-hosted GitLab? Mirror the repo and use `project:` instead:
+**Self-hosted GitLab?** Mirror the repo and use `project:` instead:
 
 ```yaml
 include:
@@ -165,6 +188,101 @@ include:
 ```
 
 Customise via pipeline variables: `AIIR_VERSION`, `AIIR_AI_ONLY`, `AIIR_EXTRA_ARGS`, `AIIR_ARTIFACT_EXPIRY`. See [templates/gitlab-ci.yml](templates/gitlab-ci.yml) for the full template.
+
+### 🐳 Docker — Run anywhere
+
+```bash
+# Receipt the current repo (mount it in)
+docker run --rm -v "$(pwd):/repo" -w /repo invariantsystems/aiir --pretty
+
+# AI-only, save receipts
+docker run --rm -v "$(pwd):/repo" -w /repo invariantsystems/aiir --ai-only --output .receipts/
+```
+
+Works in any CI/CD system that supports container steps — Tekton, Buildkite, Drone, Woodpecker, etc.
+
+### More CI/CD Platforms
+
+<details>
+<summary><strong>Bitbucket Pipelines</strong></summary>
+
+```yaml
+# bitbucket-pipelines.yml
+pipelines:
+  default:
+    - step:
+        name: AIIR Receipt
+        image: python:3.11
+        script:
+          - pip install aiir
+          - aiir --pretty --output .receipts/
+        artifacts:
+          - .receipts/**
+```
+
+Full template with PR support: [templates/bitbucket-pipelines.yml](templates/bitbucket-pipelines.yml)
+
+</details>
+
+<details>
+<summary><strong>Azure DevOps</strong></summary>
+
+```yaml
+# azure-pipelines.yml
+steps:
+  - task: UsePythonVersion@0
+    inputs: { versionSpec: '3.11' }
+  - script: pip install aiir && aiir --pretty --output .receipts/
+    displayName: 'Generate AIIR receipt'
+  - publish: .receipts/
+    artifact: aiir-receipts
+```
+
+Full template with PR/CI detection: [templates/azure-pipelines.yml](templates/azure-pipelines.yml)
+
+</details>
+
+<details>
+<summary><strong>CircleCI</strong></summary>
+
+```yaml
+# .circleci/config.yml
+jobs:
+  receipt:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - run: pip install aiir && aiir --pretty --output .receipts/
+      - store_artifacts:
+          path: .receipts
+```
+
+Full template: [templates/circleci/config.yml](templates/circleci/config.yml)
+
+</details>
+
+<details>
+<summary><strong>Jenkins</strong></summary>
+
+```groovy
+// Jenkinsfile
+pipeline {
+    agent { docker { image 'python:3.11' } }
+    stages {
+        stage('AIIR Receipt') {
+            steps {
+                sh 'pip install aiir && aiir --pretty --output .receipts/'
+                archiveArtifacts artifacts: '.receipts/**'
+            }
+        }
+    }
+}
+```
+
+Full template: [templates/jenkins/Jenkinsfile](templates/jenkins/Jenkinsfile)
+
+</details>
 
 ---
 

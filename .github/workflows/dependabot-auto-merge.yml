@@ -1,0 +1,82 @@
+# Auto-merge Dependabot PRs after CI passes.
+#
+# Policy:
+#   • minor + patch updates → auto-approve + auto-merge (squash)
+#   • major updates → require human review (no auto-approve)
+#
+# Security model:
+#   Uses pull_request_target (not pull_request) so it runs on the BASE
+#   branch's version of this workflow, not the PR's.  This is safe because
+#   we only act on Dependabot PRs (verified by actor check) and never
+#   checkout or execute any code from the PR branch.
+#
+# Requirements (GitHub repo settings):
+#   1. Settings → General → "Allow auto-merge" ✅
+#   2. Branch protection on main:
+#      - Require status checks: "test (ubuntu-latest, 3.12)" + "package"
+#      - Require branches to be up to date: ✅
+#      - Do NOT require CODEOWNERS review for this to work
+#        (CODEOWNERS still shows in PR UI as advisory)
+#
+# Flow:
+#   Dependabot PR → CI runs → this workflow approves → auto-merge queued
+#   → CI passes → GitHub merges → dogfood.yml receipts the merge commit
+name: Dependabot Auto-Merge
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write       # Enable auto-merge
+  pull-requests: write  # Approve PRs
+
+jobs:
+  auto-merge:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ github.token }}
+
+      - name: Auto-approve minor and patch updates
+        if: >-
+          steps.metadata.outputs.update-type != 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          echo "✅ Auto-approving ${{ steps.metadata.outputs.dependency-names }} (${{ steps.metadata.outputs.update-type }})"
+          gh pr review "$PR_URL" --approve \
+            --body "🤖 Auto-approved: **${{ steps.metadata.outputs.update-type }}** update for \`${{ steps.metadata.outputs.dependency-names }}\`.
+
+          Policy: minor/patch dependency updates are auto-approved after CI passes.
+          Major updates require human review."
+
+      - name: Enable auto-merge (squash)
+        if: >-
+          steps.metadata.outputs.update-type != 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          echo "⏳ Queuing auto-merge for $PR_URL"
+          gh pr merge "$PR_URL" --auto --squash \
+            --body "chore(deps): auto-merge ${{ steps.metadata.outputs.dependency-names }} ${{ steps.metadata.outputs.update-type }}"
+
+      - name: Flag major updates for human review
+        if: >-
+          steps.metadata.outputs.update-type == 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          echo "⚠️ Major update — skipping auto-merge, requesting human review"
+          gh pr comment "$PR_URL" --body "⚠️ **Major version bump** — requires human review before merge.
+
+          \`${{ steps.metadata.outputs.dependency-names }}\`: ${{ steps.metadata.outputs.previous-version }} → ${{ steps.metadata.outputs.new-version }}
+
+          Please review the changelog for breaking changes, then approve and merge manually."

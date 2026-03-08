@@ -24,10 +24,12 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+import uuid
 from pathlib import Path
 from unittest.mock import patch
 
@@ -6572,3 +6574,253 @@ class TestLedgerDefaultMode(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertFalse(Path(".aiir").exists())
         self.assertTrue(Path(".receipts").exists())
+
+
+# ---------------------------------------------------------------------------
+# Config, instance_id, namespace, richer index, and export tests
+# ---------------------------------------------------------------------------
+
+
+class TestConfigAndInstanceId(unittest.TestCase):
+    """Tests for .aiir/config.json and instance_id generation."""
+
+    def setUp(self):
+        self._orig = os.getcwd()
+        self._tmp = tempfile.mkdtemp()
+        os.chdir(self._tmp)
+        subprocess.run(["git", "init"], capture_output=True)
+        subprocess.run(["git", "config", "user.name", "Test"], capture_output=True)
+        subprocess.run(["git", "config", "user.email", "t@t.com"], capture_output=True)
+        Path("f.txt").write_text("x")
+        subprocess.run(["git", "add", "."], capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], capture_output=True)
+
+    def tearDown(self):
+        os.chdir(self._orig)
+        shutil.rmtree(self._tmp, ignore_errors=True)
+
+    def test_config_created_on_first_ledger_run(self):
+        """First `aiir` run (ledger mode) creates config.json with instance_id."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        cfg = json.loads(Path(".aiir/config.json").read_text())
+        self.assertIn("instance_id", cfg)
+        self.assertIn("created", cfg)
+        # instance_id should be a valid UUID4
+        uuid.UUID(cfg["instance_id"], version=4)
+
+    def test_instance_id_persists_across_runs(self):
+        """instance_id stays the same on second run."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        first_id = json.loads(Path(".aiir/config.json").read_text())["instance_id"]
+        # Make a second commit
+        Path("g.txt").write_text("y")
+        subprocess.run(["git", "add", "."], capture_output=True)
+        subprocess.run(["git", "commit", "-m", "second"], capture_output=True)
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        second_id = json.loads(Path(".aiir/config.json").read_text())["instance_id"]
+        self.assertEqual(first_id, second_id)
+
+    def test_instance_id_in_receipt_extensions(self):
+        """Receipt extensions should contain the instance_id in ledger mode."""
+        import io
+        captured = io.StringIO()
+        # Use ledger mode (default) — then read the JSONL
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", captured):
+            cli.main([])
+        receipt = json.loads(Path(".aiir/receipts.jsonl").read_text().strip())
+        self.assertIn("instance_id", receipt["extensions"])
+        cfg = json.loads(Path(".aiir/config.json").read_text())
+        self.assertEqual(receipt["extensions"]["instance_id"], cfg["instance_id"])
+
+    def test_json_mode_no_instance_id(self):
+        """--json mode should NOT populate instance_id (no config loaded)."""
+        import io
+        captured = io.StringIO()
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", captured):
+            cli.main(["--json"])
+        receipt = json.loads(captured.getvalue())
+        # extensions should be empty — no config loaded
+        self.assertEqual(receipt["extensions"], {})
+
+    def test_instance_id_excluded_from_content_hash(self):
+        """instance_id in extensions must not affect content_hash."""
+        commit = cli.CommitInfo(
+            sha="abc123", author_name="Test", author_email="test@test.com",
+            author_date="2026-01-01T00:00:00Z", committer_name="Test",
+            committer_email="test@test.com", committer_date="2026-01-01T00:00:00Z",
+            subject="test", body="test", diff_stat="", diff_hash="sha256:abc",
+        )
+        with patch("aiir.cli._run_git", return_value="https://github.com/org/repo.git\n"):
+            r1 = cli.build_commit_receipt(commit)
+            r2 = cli.build_commit_receipt(commit, instance_id="test-uuid-1234")
+        self.assertEqual(r1["content_hash"], r2["content_hash"])
+        self.assertEqual(r1["receipt_id"], r2["receipt_id"])
+        self.assertEqual(r2["extensions"]["instance_id"], "test-uuid-1234")
+
+
+class TestNamespace(unittest.TestCase):
+    """Tests for --namespace flag."""
+
+    def setUp(self):
+        self._orig = os.getcwd()
+        self._tmp = tempfile.mkdtemp()
+        os.chdir(self._tmp)
+        subprocess.run(["git", "init"], capture_output=True)
+        subprocess.run(["git", "config", "user.name", "Test"], capture_output=True)
+        subprocess.run(["git", "config", "user.email", "t@t.com"], capture_output=True)
+        Path("f.txt").write_text("x")
+        subprocess.run(["git", "add", "."], capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], capture_output=True)
+
+    def tearDown(self):
+        os.chdir(self._orig)
+        shutil.rmtree(self._tmp, ignore_errors=True)
+
+    def test_namespace_in_receipt_extensions(self):
+        """--namespace should appear in receipt extensions."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main(["--namespace", "acme-corp"])
+        receipt = json.loads(Path(".aiir/receipts.jsonl").read_text().strip())
+        self.assertEqual(receipt["extensions"]["namespace"], "acme-corp")
+
+    def test_namespace_persisted_to_config(self):
+        """--namespace should be saved to config.json."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main(["--namespace", "acme-corp"])
+        cfg = json.loads(Path(".aiir/config.json").read_text())
+        self.assertEqual(cfg["namespace"], "acme-corp")
+
+    def test_namespace_excluded_from_content_hash(self):
+        """namespace in extensions must not affect content_hash."""
+        commit = cli.CommitInfo(
+            sha="abc123", author_name="Test", author_email="test@test.com",
+            author_date="2026-01-01T00:00:00Z", committer_name="Test",
+            committer_email="test@test.com", committer_date="2026-01-01T00:00:00Z",
+            subject="test", body="test", diff_stat="", diff_hash="sha256:abc",
+        )
+        with patch("aiir.cli._run_git", return_value="https://github.com/org/repo.git\n"):
+            r1 = cli.build_commit_receipt(commit)
+            r2 = cli.build_commit_receipt(commit, namespace="acme-corp")
+        self.assertEqual(r1["content_hash"], r2["content_hash"])
+        self.assertEqual(r2["extensions"]["namespace"], "acme-corp")
+
+
+class TestRicherIndex(unittest.TestCase):
+    """Tests for richer index.json stats."""
+
+    def setUp(self):
+        self._orig = os.getcwd()
+        self._tmp = tempfile.mkdtemp()
+        os.chdir(self._tmp)
+        subprocess.run(["git", "init"], capture_output=True)
+        subprocess.run(["git", "config", "user.name", "Test"], capture_output=True)
+        subprocess.run(["git", "config", "user.email", "t@t.com"], capture_output=True)
+        Path("f.txt").write_text("x")
+        subprocess.run(["git", "add", "."], capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], capture_output=True)
+
+    def tearDown(self):
+        os.chdir(self._orig)
+        shutil.rmtree(self._tmp, ignore_errors=True)
+
+    def test_index_has_richer_stats(self):
+        """index.json should contain first_receipt, unique_authors, ai_percentage."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        idx = json.loads(Path(".aiir/index.json").read_text())
+        self.assertIn("first_receipt", idx)
+        self.assertIn("unique_authors", idx)
+        self.assertIn("ai_percentage", idx)
+        self.assertIsNotNone(idx["first_receipt"])
+        self.assertEqual(idx["unique_authors"], 1)
+        self.assertIsInstance(idx["ai_percentage"], float)
+
+    def test_index_tracks_multiple_authors(self):
+        """unique_authors should count distinct commit authors."""
+        import io
+        # First commit already done in setUp by "Test <t@t.com>"
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        # Second commit with different author
+        subprocess.run(["git", "config", "user.name", "Other"], capture_output=True)
+        subprocess.run(["git", "config", "user.email", "other@test.com"], capture_output=True)
+        Path("g.txt").write_text("y")
+        subprocess.run(["git", "add", "."], capture_output=True)
+        subprocess.run(["git", "commit", "-m", "second"], capture_output=True)
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        idx = json.loads(Path(".aiir/index.json").read_text())
+        self.assertEqual(idx["unique_authors"], 2)
+
+
+class TestExport(unittest.TestCase):
+    """Tests for aiir --export."""
+
+    def setUp(self):
+        self._orig = os.getcwd()
+        self._tmp = tempfile.mkdtemp()
+        os.chdir(self._tmp)
+        subprocess.run(["git", "init"], capture_output=True)
+        subprocess.run(["git", "config", "user.name", "Test"], capture_output=True)
+        subprocess.run(["git", "config", "user.email", "t@t.com"], capture_output=True)
+        Path("f.txt").write_text("x")
+        subprocess.run(["git", "add", "."], capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], capture_output=True)
+
+    def tearDown(self):
+        os.chdir(self._orig)
+        shutil.rmtree(self._tmp, ignore_errors=True)
+
+    def test_export_creates_bundle(self):
+        """--export should create a JSON bundle with all receipts."""
+        import io
+        # Generate receipts first
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        # Export
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--export", "bundle.json"])
+        self.assertEqual(rc, 0)
+        bundle = json.loads(Path("bundle.json").read_text())
+        self.assertEqual(bundle["format"], "aiir.export.v1")
+        self.assertIn("exported_at", bundle)
+        self.assertIn("instance_id", bundle)
+        self.assertIn("index", bundle)
+        self.assertIn("receipts", bundle)
+        self.assertEqual(len(bundle["receipts"]), 1)
+
+    def test_export_default_filename(self):
+        """--export with no arg should use 'aiir-export.json'."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--export"])
+        self.assertEqual(rc, 0)
+        self.assertTrue(Path("aiir-export.json").exists())
+
+    def test_export_rejects_path_traversal(self):
+        """--export should reject paths with '..'."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--export", "../evil.json"])
+        self.assertEqual(rc, 1)
+
+    def test_export_includes_namespace(self):
+        """Export bundle should include namespace from config."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main(["--namespace", "acme-corp"])
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--export", "bundle.json"])
+        self.assertEqual(rc, 0)
+        bundle = json.loads(Path("bundle.json").read_text())
+        self.assertEqual(bundle["namespace"], "acme-corp")

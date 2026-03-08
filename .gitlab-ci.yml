@@ -43,7 +43,7 @@ test:
     - git config user.name "Test" && git config user.email "test@test.com"
     - echo "hello" > file.txt && git add . && git commit -m "test commit"
     - cd $CI_PROJECT_DIR
-    - python -m pytest test_cli.py -x -q --tb=short
+    - python -m pytest tests/ -x -q --tb=short
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'

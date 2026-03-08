@@ -37,10 +37,10 @@ jobs:
         run: pip install hypothesis pytest
 
       - name: Run unit tests
-        run: python -m pytest test_cli.py -v --tb=short
+        run: python -m pytest tests/ -v --tb=short -k 'not test_fuzz'
 
       - name: Run fuzz tests
-        run: python -m pytest fuzz_cli.py -v --tb=short
+        run: python -m pytest tests/test_fuzz.py -v --tb=short
 
   # Smoke test: install the wheel and verify entry points + packaging.
   # Catches regressions that source-tree pytest misses (missing py.typed,

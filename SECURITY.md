@@ -15,7 +15,7 @@
 
 Instead, report vulnerabilities via:
 
-- **Email**: [security@invariantsystems.io](mailto:security@invariantsystems.io)
+- **Email**: [noah@invariantsystems.io](mailto:noah@invariantsystems.io)
 - **Subject prefix**: `[VULN] aiir: <brief description>`
 
 ### What to include

@@ -10,7 +10,7 @@ readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.9"
 authors = [
-    { name = "Invariant Systems, Inc.", email = "hello@invariantsystems.io" },
+    { name = "Invariant Systems, Inc.", email = "noah@invariantsystems.io" },
 ]
 keywords = [
     "ai",

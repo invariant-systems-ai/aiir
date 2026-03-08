@@ -1049,7 +1049,7 @@ def _save_config(cfg_path: Path, config: Dict[str, Any]) -> None:
     """Atomically write the config file."""
     tmp = cfg_path.with_suffix(".tmp")
     fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
-    if hasattr(os, "fchmod"):
+    if _HAS_FCHMOD:
         os.fchmod(fd, 0o644)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2, ensure_ascii=False)
@@ -1209,6 +1209,104 @@ def export_ledger(
         "index": index,
         "receipts": receipts,
     }
+
+
+# ---------------------------------------------------------------------------
+# Badge, stats, and policy check helpers
+# ---------------------------------------------------------------------------
+
+
+def format_badge(
+    index: Dict[str, Any],
+    namespace: Optional[str] = None,
+) -> Dict[str, str]:
+    """Generate a shields.io badge URL and Markdown snippet from ledger stats.
+
+    Returns a dict with keys: url, markdown, text.
+    """
+    total = index.get("receipt_count", 0)
+    ai_pct = index.get("ai_percentage", 0.0)
+    # URL-encode the percent sign for shields.io.
+    label = "AI Transparency"
+    value = f"{ai_pct}%25 AI" if total > 0 else "no receipts"
+    color = "blue" if total > 0 else "lightgrey"
+    # shields.io static badge: label-value-color
+    # Spaces → underscores, hyphens → double-dash per shields.io spec.
+    safe_label = label.replace("-", "--").replace(" ", "_")
+    safe_value = value.replace("-", "--").replace(" ", "_")
+    url = f"https://img.shields.io/badge/{safe_label}-{safe_value}-{color}"
+    md = f"[![{label}]({url})](https://github.com/invariant-systems-ai/aiir)"
+    text = f"{label}: {ai_pct}% AI ({total} receipts)"
+    return {"url": url, "markdown": md, "text": text}
+
+
+def format_stats(
+    index: Dict[str, Any],
+    config: Optional[Dict[str, Any]] = None,
+) -> str:
+    """Format a human-readable stats dashboard from the ledger index."""
+    total = index.get("receipt_count", 0)
+    ai_count = index.get("ai_commit_count", 0)
+    ai_pct = index.get("ai_percentage", 0.0)
+    authors = index.get("unique_authors", 0)
+    first = index.get("first_receipt") or "—"
+    latest = index.get("latest_timestamp") or "—"
+    # Truncate timestamps to date for readability.
+    if first and "T" in str(first):
+        first = str(first).split("T")[0]
+    if latest and "T" in str(latest):
+        latest = str(latest).split("T")[0]
+    ns = ""
+    if config and config.get("namespace"):
+        ns = f"  Namespace: {config['namespace']}\n"
+    iid = ""
+    if config and config.get("instance_id"):
+        iid = f"  Instance:  {config['instance_id'][:8]}…\n"
+    bar = "─" * 44 if _USE_BOXDRAW else "-" * 44
+    return (
+        f"{bar}\n"
+        f"  AIIR Ledger — {total} receipt{'s' if total != 1 else ''}"
+        f", {authors} author{'s' if authors != 1 else ''}\n"
+        f"{bar}\n"
+        f"  AI-authored:  {ai_count} commit{'s' if ai_count != 1 else ''}"
+        f" ({ai_pct}%)\n"
+        f"  First:        {first}\n"
+        f"  Latest:       {latest}\n"
+        f"{ns}"
+        f"{iid}"
+        f"{bar}"
+    )
+
+
+def check_policy(
+    index: Dict[str, Any],
+    *,
+    max_ai_percent: Optional[float] = None,
+) -> Tuple[bool, str]:
+    """Evaluate policy gates against ledger stats.
+
+    Returns (passed, message).  `passed` is True when all gates pass.
+    """
+    total = index.get("receipt_count", 0)
+    if total == 0:
+        return False, "No receipts found — run 'aiir' first to generate receipts."
+
+    ai_pct = index.get("ai_percentage", 0.0)
+
+    if max_ai_percent is not None:
+        if ai_pct > max_ai_percent:
+            return (
+                False,
+                f"FAIL: AI percentage {ai_pct}% exceeds threshold {max_ai_percent}%"
+                f" ({index.get('ai_commit_count', 0)}/{total} commits)",
+            )
+        return (
+            True,
+            f"PASS: AI percentage {ai_pct}% within threshold {max_ai_percent}%"
+            f" ({index.get('ai_commit_count', 0)}/{total} commits)",
+        )
+
+    return True, f"OK: {total} receipts, {ai_pct}% AI"
 
 
 # ---------------------------------------------------------------------------
@@ -1836,6 +1934,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         metavar="FILE",
         help="Export .aiir/ ledger as a portable JSON bundle (for backup or import)",
     )
+    parser.add_argument(
+        "--badge",
+        action="store_true",
+        help="Print a shields.io badge Markdown snippet from ledger stats",
+    )
+    parser.add_argument(
+        "--stats",
+        action="store_true",
+        help="Print a summary dashboard of ledger statistics",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Run policy checks against ledger stats (for CI gates)",
+    )
+    parser.add_argument(
+        "--max-ai-percent",
+        type=float,
+        default=None,
+        metavar="N",
+        help="Policy gate: fail if AI-authored percentage exceeds N (use with --check)",
+    )
 
     args = parser.parse_args(argv)
 
@@ -1974,6 +2094,60 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             file=sys.stderr,
         )
         return 0
+
+    # --- Badge mode (no git repo needed) ---
+    if args.badge:
+        try:
+            idx = _load_index(_ledger_paths()[2])
+        except OSError:
+            idx = {}
+        if idx.get("receipt_count", 0) == 0:
+            print(f"{_e('error')} No ledger found — run 'aiir' first to generate receipts.", file=sys.stderr)
+            return 1
+        cfg = {}
+        try:
+            cfg = _load_config()
+        except OSError:
+            pass
+        badge = format_badge(idx, namespace=cfg.get("namespace"))
+        print(badge["markdown"])
+        print(file=sys.stderr)
+        print(f"   {_e('hint')} Paste into your README.md for an AI transparency badge.", file=sys.stderr)
+        print(f"   URL: {badge['url']}", file=sys.stderr)
+        return 0
+
+    # --- Stats mode (no git repo needed) ---
+    if args.stats:
+        try:
+            idx = _load_index(_ledger_paths()[2])
+        except OSError:
+            idx = {}
+        if idx.get("receipt_count", 0) == 0:
+            print(f"{_e('error')} No ledger found — run 'aiir' first to generate receipts.", file=sys.stderr)
+            return 1
+        cfg = {}
+        try:
+            cfg = _load_config()
+        except OSError:
+            pass
+        print(format_stats(idx, config=cfg), file=sys.stderr)
+        return 0
+
+    # --- Check / policy gate mode (no git repo needed) ---
+    if args.check or args.max_ai_percent is not None:
+        try:
+            idx = _load_index(_ledger_paths()[2])
+        except OSError:
+            idx = {}
+        passed, message = check_policy(
+            idx, max_ai_percent=args.max_ai_percent,
+        )
+        if passed:
+            print(f"{_e('ok')} {message}", file=sys.stderr)
+            return 0
+        else:
+            print(f"{_e('error')} {message}", file=sys.stderr)
+            return 1
 
     # --- Receipt generation mode ---
     try:

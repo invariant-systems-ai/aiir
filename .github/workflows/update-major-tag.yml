@@ -65,9 +65,9 @@ jobs:
 
       - name: Extract major version and resolve commit
         id: parse
+        env:
+          TAG: ${{ steps.target.outputs.tag }}
         run: |
-          TAG="${{ steps.target.outputs.tag }}"
-
           # Validate tag format (vMAJOR.MINOR.PATCH with optional pre-release)
           if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+'; then
             echo "::error::Tag '$TAG' is not a valid semver tag (expected vX.Y.Z)"
@@ -93,10 +93,10 @@ jobs:
 
       - name: Check current floating tag state
         id: check
+        env:
+          FLOATING: ${{ steps.parse.outputs.major }}
+          COMMIT: ${{ steps.parse.outputs.commit }}
         run: |
-          FLOATING="${{ steps.parse.outputs.major }}"
-          COMMIT="${{ steps.parse.outputs.commit }}"
-
           # Check if the floating tag already points to the right commit
           CURRENT=$(git rev-parse "${FLOATING}^{commit}" 2>/dev/null || echo "missing")
 
@@ -113,11 +113,11 @@ jobs:
 
       - name: Update floating tag
         if: steps.check.outputs.needs_update == 'true'
+        env:
+          FLOATING: ${{ steps.parse.outputs.major }}
+          COMMIT: ${{ steps.parse.outputs.commit }}
+          TAG: ${{ steps.target.outputs.tag }}
         run: |
-          FLOATING="${{ steps.parse.outputs.major }}"
-          COMMIT="${{ steps.parse.outputs.commit }}"
-          TAG="${{ steps.target.outputs.tag }}"
-
           # Delete local tag if it exists (prevents "already exists" error)
           git tag -d "$FLOATING" 2>/dev/null || true
 
@@ -140,11 +140,11 @@ jobs:
           echo "Users of invariant-systems-ai/aiir@${FLOATING} now get ${TAG}"
 
       - name: Verify tag alignment
+        env:
+          FLOATING: ${{ steps.parse.outputs.major }}
+          COMMIT: ${{ steps.parse.outputs.commit }}
+          TAG: ${{ steps.target.outputs.tag }}
         run: |
-          FLOATING="${{ steps.parse.outputs.major }}"
-          COMMIT="${{ steps.parse.outputs.commit }}"
-          TAG="${{ steps.target.outputs.tag }}"
-
           # Re-fetch to verify the remote state
           git fetch origin --tags --force 2>/dev/null
 

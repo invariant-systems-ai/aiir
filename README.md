@@ -716,7 +716,7 @@ on every push to `main` and commits them back to the repo. Locally, the
 
 ## Security
 
-Extensive [security controls](THREAT_MODEL.md). 564 tests. Zero dependencies.
+Extensive [security controls](THREAT_MODEL.md). 604 tests. Zero dependencies.
 
 See [SECURITY.md](SECURITY.md) and [THREAT_MODEL.md](THREAT_MODEL.md).
 

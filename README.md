@@ -487,6 +487,15 @@ Each receipt is a content-addressed JSON document:
 
 > **Note**: Unsigned receipts are *tamper-evident*, not *tamper-proof*. Anyone who can re-run `aiir` on the same commit can recreate a matching receipt. For cryptographic non-repudiation, enable [Sigstore signing](#sigstore-signing).
 
+> **Receipt identity depends on repository provenance.**
+> The `provenance.repository` field (your `git remote get-url origin`) is part
+> of the content hash. The same commit will produce a **different `receipt_id`**
+> if the remote URL changes — for example after a fork, a repo rename, or
+> adding an origin to a previously local-only repo. If you need stable receipt
+> identity as a durable external reference, generate receipts after your remote
+> is configured. Fields inside `extensions` (such as `namespace`) are *not*
+> part of the content hash, so they can change without invalidating a receipt.
+
 </details>
 
 <details>
@@ -716,7 +725,7 @@ on every push to `main` and commits them back to the repo. Locally, the
 
 ## Security
 
-Extensive [security controls](THREAT_MODEL.md). 604 tests. Zero dependencies.
+Extensive [security controls](THREAT_MODEL.md). 660+ tests. Zero dependencies.
 
 See [SECURITY.md](SECURITY.md) and [THREAT_MODEL.md](THREAT_MODEL.md).
 

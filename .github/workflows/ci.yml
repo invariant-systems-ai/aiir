@@ -68,6 +68,49 @@ jobs:
       - name: Run fuzz tests
         run: python -m pytest tests/test_fuzz.py -v --tb=short
 
+  # Validate all GitHub Actions workflow YAML files.  Catches syntax
+  # errors, unknown action inputs, expression typos, etc. before they
+  # fail at runtime.  Runs in ~5 s.
+  lint:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install actionlint
+        run: |
+          bash <(curl -sS https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          echo "$(pwd)" >> "$GITHUB_PATH"
+
+      - name: Lint workflows
+        run: actionlint -color
+
+  # Coverage gate — prevents silent test coverage regressions.
+  # Runs the unit tests (no fuzz) with coverage and fails if the
+  # overall line coverage drops below the threshold.
+  coverage:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install pytest coverage
+
+      - name: Run tests with coverage
+        run: |
+          coverage run --source=aiir -m pytest tests/ --ignore=tests/test_fuzz.py -q --tb=short
+          coverage report --show-missing
+          coverage report --fail-under=85
+
   # Smoke test: install the wheel and verify entry points + packaging.
   # Catches regressions that source-tree pytest misses (missing py.typed,
   # broken entry_points, bad MANIFEST, etc.).
@@ -114,7 +157,7 @@ jobs:
   # Branch protection requires: ci-ok
   ci-ok:
     if: always()
-    needs: [test, fuzz, package]
+    needs: [test, fuzz, lint, coverage, package]
     timeout-minutes: 2
     runs-on: ubuntu-latest
     steps:
@@ -122,10 +165,16 @@ jobs:
         run: |
           # Fail if ANY needed job was not successful.
           # "result" is one of: success, failure, cancelled, skipped.
-          echo "test:    ${{ needs.test.result }}"
-          echo "fuzz:    ${{ needs.fuzz.result }}"
-          echo "package: ${{ needs.package.result }}"
-          if [[ "${{ needs.test.result }}" != "success" || "${{ needs.fuzz.result }}" != "success" || "${{ needs.package.result }}" != "success" ]]; then
+          echo "test:     ${{ needs.test.result }}"
+          echo "fuzz:     ${{ needs.fuzz.result }}"
+          echo "lint:     ${{ needs.lint.result }}"
+          echo "coverage: ${{ needs.coverage.result }}"
+          echo "package:  ${{ needs.package.result }}"
+          if [[ "${{ needs.test.result }}" != "success" || \
+                "${{ needs.fuzz.result }}" != "success" || \
+                "${{ needs.lint.result }}" != "success" || \
+                "${{ needs.coverage.result }}" != "success" || \
+                "${{ needs.package.result }}" != "success" ]]; then
             echo "::error::CI gate failed — one or more jobs did not succeed"
             exit 1
           fi

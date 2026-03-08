@@ -2071,6 +2071,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     # --- Export mode (no git repo needed) ---
     if args.export is not None:
+        # Guard: fail early if no ledger exists (matches --badge / --stats).
+        try:
+            _idx = _load_index(_ledger_paths()[2])
+        except OSError:
+            _idx = {}
+        if _idx.get("receipt_count", 0) == 0:
+            print(
+                f"{_e('error')} No ledger found — run 'aiir' first to generate receipts.",
+                file=sys.stderr,
+            )
+            return 1
         try:
             bundle = export_ledger()
         except Exception as e:

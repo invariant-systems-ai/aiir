@@ -16,7 +16,7 @@ inputs:
     required: false
     default: ""
   output-dir:
-    description: "Directory to write receipt JSON files (default: prints to log)"
+    description: "Directory to write individual receipt JSON files (default: receipts appear in step summary and outputs only)"
     required: false
     default: ""
   sign:

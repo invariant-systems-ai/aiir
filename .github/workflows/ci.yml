@@ -58,6 +58,8 @@ jobs:
           git init && git config user.email ci@test && git config user.name CI
           echo hello > file.txt && git add . && git commit -m "init"
           aiir --pretty
+          test -f .aiir/receipts.jsonl || { echo "FAIL: ledger not created"; exit 1; }
+          test -f .aiir/index.json || { echo "FAIL: index not created"; exit 1; }
           aiir -o .receipts/
           aiir --verify .receipts/*.json
 

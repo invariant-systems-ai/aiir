@@ -102,6 +102,7 @@ class TestLedgerAppend(unittest.TestCase):
         with self.assertRaises(ValueError):
             cli.append_to_ledger([r], ledger_dir="/tmp")
 
+    @unittest.skipIf(sys.platform == "win32", "Unix file permissions not applicable on Windows")
     def test_ledger_file_permissions(self):
         """Ledger and index should be 0o644."""
         r = self._make_receipt()

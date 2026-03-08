@@ -57,7 +57,7 @@ def set_github_summary(markdown: str) -> None:
         markdown = md_bytes[:budget].decode("utf-8", errors="ignore") + _SUFFIX.decode("utf-8")
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_file:
-        with open(summary_file, "a", encoding="utf-8") as f:
+        with open(summary_file, "a", encoding="utf-8", newline="") as f:
             f.write(markdown + "\n")
 
 

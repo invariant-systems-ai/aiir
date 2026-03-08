@@ -509,16 +509,18 @@ class TestSummaryByteTruncation(unittest.TestCase):
         self.assertGreater(len(text.encode("utf-8")), cli.MAX_SUMMARY_SIZE)
 
         import tempfile
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            os.environ["GITHUB_STEP_SUMMARY"] = f.name
-            try:
-                cli.set_github_summary(text)
-                result = open(f.name, "rb").read()
-                # Written bytes must not exceed 1 MB + 1 byte for the trailing newline
-                self.assertLessEqual(len(result), cli.MAX_SUMMARY_SIZE + 1)
-            finally:
-                del os.environ["GITHUB_STEP_SUMMARY"]
-                os.unlink(f.name)
+        f = tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False)
+        fname = f.name
+        f.close()
+        os.environ["GITHUB_STEP_SUMMARY"] = fname
+        try:
+            cli.set_github_summary(text)
+            result = open(fname, "rb").read()
+            # Written bytes must not exceed 1 MB + 1 byte for the trailing newline
+            self.assertLessEqual(len(result), cli.MAX_SUMMARY_SIZE + 1)
+        finally:
+            del os.environ["GITHUB_STEP_SUMMARY"]
+            os.unlink(fname)
 
     def test_emoji_truncation_under_limit(self):
         """Emoji text (4 bytes/char) must be truncated to stay under 1 MB."""
@@ -527,44 +529,50 @@ class TestSummaryByteTruncation(unittest.TestCase):
         self.assertGreater(len(text.encode("utf-8")), cli.MAX_SUMMARY_SIZE)
 
         import tempfile
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            os.environ["GITHUB_STEP_SUMMARY"] = f.name
-            try:
-                cli.set_github_summary(text)
-                result = open(f.name, "rb").read()
-                self.assertLessEqual(len(result), cli.MAX_SUMMARY_SIZE + 1)
-            finally:
-                del os.environ["GITHUB_STEP_SUMMARY"]
-                os.unlink(f.name)
+        f = tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False)
+        fname = f.name
+        f.close()
+        os.environ["GITHUB_STEP_SUMMARY"] = fname
+        try:
+            cli.set_github_summary(text)
+            result = open(fname, "rb").read()
+            self.assertLessEqual(len(result), cli.MAX_SUMMARY_SIZE + 1)
+        finally:
+            del os.environ["GITHUB_STEP_SUMMARY"]
+            os.unlink(fname)
 
     def test_truncation_includes_suffix(self):
         """Truncated summary must include the truncation notice."""
         text = "X" * (cli.MAX_SUMMARY_SIZE + 100)
         import tempfile
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            os.environ["GITHUB_STEP_SUMMARY"] = f.name
-            try:
-                cli.set_github_summary(text)
-                result = open(f.name, "r").read()
-                self.assertIn("truncated", result)
-            finally:
-                del os.environ["GITHUB_STEP_SUMMARY"]
-                os.unlink(f.name)
+        f = tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False)
+        fname = f.name
+        f.close()
+        os.environ["GITHUB_STEP_SUMMARY"] = fname
+        try:
+            cli.set_github_summary(text)
+            result = open(fname, "r").read()
+            self.assertIn("truncated", result)
+        finally:
+            del os.environ["GITHUB_STEP_SUMMARY"]
+            os.unlink(fname)
 
     def test_ascii_below_limit_not_truncated(self):
         """ASCII text below 1 MB must not be truncated."""
         text = "x" * 1000
         import tempfile
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            os.environ["GITHUB_STEP_SUMMARY"] = f.name
-            try:
-                cli.set_github_summary(text)
-                result = open(f.name, "r").read()
-                self.assertNotIn("truncated", result)
-                self.assertIn("x" * 1000, result)
-            finally:
-                del os.environ["GITHUB_STEP_SUMMARY"]
-                os.unlink(f.name)
+        f = tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False)
+        fname = f.name
+        f.close()
+        os.environ["GITHUB_STEP_SUMMARY"] = fname
+        try:
+            cli.set_github_summary(text)
+            result = open(fname, "r").read()
+            self.assertNotIn("truncated", result)
+            self.assertIn("x" * 1000, result)
+        finally:
+            del os.environ["GITHUB_STEP_SUMMARY"]
+            os.unlink(fname)
 
 
 class TestGitEnvHardening(unittest.TestCase):

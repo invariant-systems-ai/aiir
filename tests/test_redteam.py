@@ -205,7 +205,7 @@ class TestRedTeamHardeningR3(unittest.TestCase):
                 os.chdir(tmpdir)
                 receipt = {"type": "test", "commit": {"sha": "deadbeefcafe"}, "receipt_id": "g1-test"}
                 result = cli.write_receipt(receipt, output_dir=os.path.join(tmpdir, "sub", "dir"))
-                self.assertIn("sub/dir", result)
+                self.assertIn(os.path.join("sub", "dir"), result)
             finally:
                 os.chdir(original_cwd)
 
@@ -574,13 +574,13 @@ class TestRedTeamHardeningR4(unittest.TestCase):
         """R4-09: action.yml sigstore install should have an upper version bound."""
         action_path = Path(__file__).parent.parent / "action.yml"
         if action_path.exists():
-            content = action_path.read_text()
-            # Should have both >= and < bounds
+            content = action_path.read_text(encoding="utf-8")            # Should have both >= and < bounds
             self.assertIn("<5.0.0", content,
                           "action.yml should pin sigstore with upper bound <5.0.0")
 
     # --- R4-10: Bundle file permissions ---
 
+    @unittest.skipIf(sys.platform == "win32", "Unix file permissions not applicable on Windows")
     def test_bundle_file_permissions(self):
         """R4-10: Bundle files should have explicit 0o644 permissions."""
         # Save and set a known umask so the test is deterministic
@@ -1973,8 +1973,7 @@ class TestPublicBasicR8(unittest.TestCase):
         """SECURITY.md must reference current version as supported."""
         security_md = Path(__file__).parent.parent / "SECURITY.md"
         self.assertTrue(security_md.exists())
-        content = security_md.read_text()
-        # Must mention 1.0.x as supported
+        content = security_md.read_text(encoding="utf-8")
         self.assertIn("1.0.x", content)
         self.assertIn("Active", content)
 
@@ -1983,7 +1982,7 @@ class TestPublicBasicR8(unittest.TestCase):
     def test_r8_pub_02_py_typed_in_sdist_include(self):
         """pyproject.toml sdist include must list aiir/py.typed explicitly."""
         pyproject = Path(__file__).parent.parent / "pyproject.toml"
-        content = pyproject.read_text()
+        content = pyproject.read_text(encoding="utf-8")
         self.assertIn("aiir/py.typed", content)
 
     def test_r8_pub_02_py_typed_not_a_python_file(self):
@@ -1998,14 +1997,13 @@ class TestPublicBasicR8(unittest.TestCase):
         """CHANGELOG.md must exist and mention the current CLI version."""
         changelog = Path(__file__).parent.parent / "CHANGELOG.md"
         self.assertTrue(changelog.exists())
-        content = changelog.read_text()
+        content = changelog.read_text(encoding="utf-8")
         self.assertIn(cli.CLI_VERSION, content)
 
     def test_threat_model_round_count_not_inflated(self):
         """THREAT_MODEL.md should mention comprehensive hardening."""
         tm = Path(__file__).parent.parent / "THREAT_MODEL.md"
-        content = tm.read_text()
-        # Should mention comprehensive hardening
+        content = tm.read_text(encoding="utf-8")
         self.assertIn("comprehensive", content)
         # Should mention 142 total controls
         self.assertIn("142 total security controls", content)
@@ -2233,7 +2231,7 @@ class TestSecurityMaliciousR8(unittest.TestCase):
     def test_r8_sec_01_action_yml_has_openssl_fallback(self):
         """action.yml must have a fallback when openssl is unavailable."""
         action = Path(__file__).parent.parent / "action.yml"
-        content = action.read_text()
+        content = action.read_text(encoding="utf-8")
         self.assertIn("2>/dev/null", content)  # Suppress openssl error
         self.assertIn("python3 -c", content)   # Python fallback
         self.assertIn("secrets.token_hex", content)  # Cryptographic fallback

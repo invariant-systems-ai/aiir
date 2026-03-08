@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write   # Sigstore keyless signing (OIDC)
 
 jobs:
   receipt:

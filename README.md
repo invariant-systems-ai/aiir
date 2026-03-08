@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://invariantsystems.io">
+    <img src="docs/logo.svg" alt="Invariant Systems" width="120" height="120">
+  </a>
+</p>
+
 # AIIR — AI Integrity Receipts
 
 **AI wrote your code. Here's the receipt.** 🧾
@@ -18,14 +24,14 @@
 
 AI writes 30–50% of new code at most companies. Copilot, ChatGPT, Claude, Cursor — it all goes into `git commit` with no systematic record of what was human and what was machine.
 
-> **EU AI Act, Article 13** takes effect August 2026. AI systems in production require transparency and audit trails. AI-generated code with no provenance is a compliance gap.
+> **EU AI Act** transparency and provenance requirements take effect August 2026. AI systems in production require audit trails. AI-generated code with no provenance is a compliance gap.
 
 Your auditors will ask: *"Which code was AI-generated? Can you prove it?"*
 
 | Who asks | What they need |
 |----------|---------------|
 | **SOC 2 / ISO 27001 auditor** | Tamper-evident record of AI involvement per commit |
-| **EU AI Act compliance** | Supports Article 13 transparency evidence |
+| **EU AI Act compliance** | Supports transparency and provenance evidence |
 | **Insurance underwriter** | Record of AI involvement per commit |
 | **Engineering leadership** | "We track all AI code" — with cryptographic receipts |
 

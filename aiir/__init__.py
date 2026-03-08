@@ -1,7 +1,7 @@
 """
 AIIR — AI Integrity Receipts
 
-Generate cryptographic receipts for AI-generated code commits.
+Generate cryptographic receipts for commits with declared AI involvement.
 Zero dependencies — uses only Python standard library.
 
 Copyright 2025-2026 Invariant Systems, Inc.

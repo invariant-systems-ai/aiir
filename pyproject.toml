@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "aiir"
 dynamic = ["version"]
-description = "AI Integrity Receipts — cryptographic receipts for AI-generated code commits"
+description = "AI Integrity Receipts — cryptographic receipts for commits with declared AI involvement"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.9"
@@ -26,7 +26,7 @@ keywords = [
     "mcp",
 ]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
@@ -50,8 +50,8 @@ sign = ["sigstore>=4.0.0,<5.0.0"]
 dev = ["hypothesis>=6.0", "pytest>=7.0"]
 
 [project.urls]
-Homepage = "https://github.com/invariant-systems-ai/aiir"
-Documentation = "https://github.com/invariant-systems-ai/aiir#readme"
+Homepage = "https://invariantsystems.io"
+Documentation = "https://invariantsystems.io/docs"
 Repository = "https://github.com/invariant-systems-ai/aiir"
 Issues = "https://github.com/invariant-systems-ai/aiir/issues"
 Changelog = "https://github.com/invariant-systems-ai/aiir/blob/main/CHANGELOG.md"

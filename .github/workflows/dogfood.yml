@@ -9,6 +9,11 @@ name: AI Commit Receipt
 on:
   push:
     branches: [main]
+    tags-ignore: ['**']   # Tag pushes handled by publish.yml, not dogfood
+
+concurrency:
+  group: dogfood-${{ github.sha }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -16,11 +21,13 @@ permissions:
 
 jobs:
   receipt:
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: ./  # Test the local action
         id: receipt
@@ -39,22 +46,24 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Use a SEPARATE clone in /tmp so we never switch branches on
-          # the main checkout — switching away from main would break the
-          # composite action's Post Run step (can't find action.yml).
+          # Use a SEPARATE clone so we never switch branches on the main
+          # checkout — that would break the composite action's Post Run step.
           WORK="/tmp/receipts-push"
 
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          # Use extraHeader instead of embedding the token in the URL.
+          # Embedding tokens in URLs risks leaking them in git error output.
+          REPO_URL="https://github.com/${GITHUB_REPOSITORY}.git"
+          AUTH_HEADER="Authorization: Bearer ${GH_TOKEN}"
 
           if git ls-remote --exit-code origin refs/heads/receipts >/dev/null 2>&1; then
-            git clone --single-branch --branch receipts "$REMOTE" "$WORK"
+            git -c "http.extraHeader=${AUTH_HEADER}" clone --single-branch --branch receipts "$REPO_URL" "$WORK"
           else
             mkdir -p "$WORK" && cd "$WORK"
             git init
-            git remote add origin "$REMOTE"
+            git remote add origin "$REPO_URL"
             git checkout --orphan receipts
             echo '# AIIR Receipts' > README.md
             echo '' >> README.md
@@ -63,7 +72,7 @@ jobs:
             echo 'Each receipt proves what AI tooling was involved in a commit to `main`.' >> README.md
             git add README.md
             git commit -m "chore: initialize receipts branch"
-            git push origin receipts
+            git -c "http.extraHeader=${AUTH_HEADER}" push origin receipts
           fi
 
           cd "$WORK"
@@ -72,7 +81,7 @@ jobs:
 
           if ! git diff --cached --quiet; then
             git commit -m "chore: receipts for ${GITHUB_SHA::12}"
-            git push origin receipts
+            git -c "http.extraHeader=${AUTH_HEADER}" push origin receipts
             echo "✅ Receipts pushed to receipts branch"
           else
             echo "ℹ️  No new receipts to commit"

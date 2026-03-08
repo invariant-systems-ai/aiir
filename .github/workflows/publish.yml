@@ -1,11 +1,12 @@
 # Publish to PyPI when a version tag is pushed.
 #
 # Single workflow handles the full pipeline:
-#   1. Verify tag matches __version__
-#   2. Create GitHub Release (with auto-generated notes)
-#   3. Build wheel + sdist
-#   4. Publish to PyPI via OIDC Trusted Publisher
-#   5. Verify PyPI has the version (retries 6×)
+#   1. Verify CI tests passed on the tagged commit (gate)
+#   2. Verify tag matches __version__
+#   3. Create GitHub Release (with auto-generated notes)
+#   4. Build wheel + sdist
+#   5. Publish to PyPI via OIDC Trusted Publisher
+#   6. Verify PyPI has the version (retries 6×)
 #
 # NOTE: This is a single workflow instead of release→publish chaining
 # because GitHub Actions won't trigger workflows from events created
@@ -16,15 +17,80 @@ on:
   push:
     tags: ['v[0-9]+.[0-9]+.[0-9]+']
 
+concurrency:
+  group: publish-${{ github.ref_name }}
+  # Never cancel a running publish — half-published state is worse than waiting
+  cancel-in-progress: false
+
 permissions:
   contents: write  # For creating the GitHub Release
 
 jobs:
+  # ── Gate: verify CI tests passed on this commit ────────────────────
+  ci-gate:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for CI tests to pass
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          COMMIT="${GITHUB_SHA}"
+          echo "⏳ Checking CI status for commit ${COMMIT:0:12}..."
+
+          # Poll for up to 5 minutes — CI may still be running from
+          # the push that created the tag.
+          for i in $(seq 1 30); do
+            # Get the combined status check result for this commit
+            STATUS=$(gh api "repos/${{ github.repository }}/commits/${COMMIT}/status" \
+              --jq '.state' 2>/dev/null || echo "unknown")
+
+            # Also check for check-runs (Actions use check-runs, not statuses)
+            CHECKS=$(gh api "repos/${{ github.repository }}/commits/${COMMIT}/check-runs" \
+              --jq '[.check_runs[] | select(.name | test("test|package"; "i"))] | {total: length, success: [.[] | select(.conclusion == "success")] | length, pending: [.[] | select(.status != "completed")] | length}' \
+              2>/dev/null || echo '{"total":0,"success":0,"pending":0}')
+
+            TOTAL=$(echo "$CHECKS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total',0))")
+            SUCCESS=$(echo "$CHECKS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('success',0))")
+            PENDING=$(echo "$CHECKS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('pending',0))")
+
+            echo "  Attempt $i/30: total=$TOTAL success=$SUCCESS pending=$PENDING status=$STATUS"
+
+            # Need at least 1 check, all successful, none pending
+            if [ "$TOTAL" -gt 0 ] && [ "$SUCCESS" -eq "$TOTAL" ] && [ "$PENDING" -eq 0 ]; then
+              echo "✅ CI gate passed: $SUCCESS/$TOTAL checks successful"
+              exit 0
+            fi
+
+            # If any check failed (not pending, not success), fail fast
+            FAILED=$(echo "$CHECKS" | python3 -c "
+          import sys,json
+          d = json.load(sys.stdin)
+          f = d.get('total',0) - d.get('success',0) - d.get('pending',0)
+          print(f)
+          ")
+            if [ "$FAILED" -gt 0 ]; then
+              echo "::error::CI gate failed: $FAILED check(s) failed on ${COMMIT:0:12}"
+              echo "See: https://github.com/${{ github.repository }}/commit/${COMMIT}"
+              exit 1
+            fi
+
+            sleep 10
+          done
+
+          echo "::error::CI gate timed out — tests did not complete within 5 minutes for ${COMMIT:0:12}"
+          echo "Push a new tag after CI passes, or re-run this workflow."
+          exit 1
+
   # ── Gate: verify tag = code version ────────────────────────────────
   preflight:
+    needs: ci-gate
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          persist-credentials: false
       - name: Verify tag matches package version
         run: |
           TAG="${GITHUB_REF_NAME#v}"
@@ -43,11 +109,13 @@ jobs:
   # ── Step 1: Create GitHub Release ──────────────────────────────────
   release:
     needs: preflight
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -66,9 +134,12 @@ jobs:
   # ── Step 2: Build sdist + wheel ────────────────────────────────────
   build:
     needs: preflight
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
           python-version: "3.12"
@@ -82,6 +153,7 @@ jobs:
   # ── Step 3: Publish to PyPI ────────────────────────────────────────
   publish:
     needs: build
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
@@ -98,6 +170,7 @@ jobs:
   # ── Step 4: Verify PyPI ────────────────────────────────────────────
   verify:
     needs: publish
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Wait for PyPI index propagation

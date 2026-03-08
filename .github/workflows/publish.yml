@@ -123,14 +123,19 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Idempotent: skip if release already exists (e.g. manual pre-release)
+          # Idempotent: if release exists, promote it to latest (un-prerelease).
+          # This handles the case where a release was manually created as
+          # pre-release or auto-detected as one — we always want tagged
+          # semver releases to be full releases for Marketplace eligibility.
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            echo "✅ Release $GITHUB_REF_NAME already exists — skipping creation"
+            echo "ℹ️  Release $GITHUB_REF_NAME already exists — ensuring it is marked as latest"
+            gh release edit "$GITHUB_REF_NAME" --prerelease=false --latest
           else
             gh release create "$GITHUB_REF_NAME" \
               --title "$GITHUB_REF_NAME" \
               --generate-notes \
-              --verify-tag
+              --verify-tag \
+              --latest
             echo "✅ Release $GITHUB_REF_NAME created"
           fi
 

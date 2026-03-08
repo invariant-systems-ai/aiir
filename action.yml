@@ -32,8 +32,11 @@ outputs:
     description: "Number of AI-authored commits detected"
     value: ${{ steps.receipt.outputs.ai_commit_count }}
   receipts_json:
-    description: "JSON array of all generated receipts"
+    description: "JSON array of all generated receipts (set to OVERFLOW if >1 MB)"
     value: ${{ steps.receipt.outputs.receipts_json }}
+  receipts_overflow:
+    description: "'true' when receipts_json exceeded 1 MB and was truncated"
+    value: ${{ steps.receipt.outputs.receipts_overflow }}
 
 runs:
   using: "composite"

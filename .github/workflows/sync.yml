@@ -17,6 +17,10 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch:
 
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
 permissions:
   contents: read
   issues: write      # Auto-create issue on drift
@@ -24,11 +28,13 @@ permissions:
 jobs:
   # ── Step 1: Mirror all branches + tags to GitLab ──────────────────
   mirror-gitlab:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Push to GitLab mirror
         env:
@@ -48,11 +54,13 @@ jobs:
   verify-sync:
     needs: mirror-gitlab
     if: always()
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Check version alignment
         id: drift
@@ -137,6 +145,7 @@ jobs:
   alert-drift:
     needs: verify-sync
     if: failure()
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     permissions:
       issues: write

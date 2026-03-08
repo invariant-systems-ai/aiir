@@ -17,7 +17,7 @@ pipeline {
     }
 
     parameters {
-        string(name: 'AIIR_VERSION', defaultValue: '1.0.8', description: 'AIIR version to install')
+        string(name: 'AIIR_VERSION', defaultValue: '1.0.9', description: 'AIIR version to install')
         booleanParam(name: 'AI_ONLY', defaultValue: false, description: 'Only receipt AI-authored commits')
     }
 

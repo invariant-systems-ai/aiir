@@ -26,7 +26,7 @@ That's it. Every push and merge request now generates receipts, uploaded as CI a
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
 | `stage` | string | `test` | Pipeline stage for the receipt job |
-| `version` | string | `1.0.8` | AIIR version to install |
+| `version` | string | `1.0.9` | AIIR version to install |
 | `ai-only` | boolean | `false` | Only receipt AI-authored commits |
 | `artifact-expiry` | string | `90 days` | How long to keep receipt artifacts |
 | `output-dir` | string | `.aiir-receipts` | Directory for receipt JSON files |

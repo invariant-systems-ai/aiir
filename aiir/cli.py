@@ -37,6 +37,9 @@ from urllib.parse import urlparse, urlunparse
 # Users enable with --verbose or AIIR_LOG_LEVEL=DEBUG.
 logger = logging.getLogger("aiir")
 
+# Windows does not have os.fchmod — guard all permission-setting calls.
+_HAS_FCHMOD = hasattr(os, "fchmod")
+
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -707,6 +710,8 @@ def list_commits_in_range(
 def build_commit_receipt(
     commit: CommitInfo, repo_root: Optional[str] = None,
     redact_files: bool = False,
+    instance_id: Optional[str] = None,
+    namespace: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Build a cryptographic receipt for a git commit.
 
@@ -784,7 +789,10 @@ def build_commit_receipt(
         # This field is NOT in CORE_KEYS and is excluded from
         # content_hash/receipt_id, so integrations can populate it
         # without breaking receipt verification.
-        "extensions": {},
+        "extensions": {
+            **(({"instance_id": instance_id}) if instance_id else {}),
+            **(({"namespace": namespace}) if namespace else {}),
+        },
     }
 
     return receipt
@@ -795,6 +803,8 @@ def generate_receipt(
     cwd: Optional[str] = None,
     ai_only: bool = False,
     redact_files: bool = False,
+    instance_id: Optional[str] = None,
+    namespace: Optional[str] = None,
 ) -> Optional[Dict[str, Any]]:
     """Generate a receipt for a single commit. Returns None if skipped."""
     _validate_ref(commit_ref)
@@ -803,7 +813,10 @@ def generate_receipt(
     if ai_only and not commit.is_ai_authored:
         return None
 
-    return build_commit_receipt(commit, repo_root=cwd, redact_files=redact_files)
+    return build_commit_receipt(
+        commit, repo_root=cwd, redact_files=redact_files,
+        instance_id=instance_id, namespace=namespace,
+    )
 
 
 def generate_receipts_for_range(
@@ -811,12 +824,17 @@ def generate_receipts_for_range(
     cwd: Optional[str] = None,
     ai_only: bool = False,
     redact_files: bool = False,
+    instance_id: Optional[str] = None,
+    namespace: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """Generate receipts for all commits in a range."""
     shas = list_commits_in_range(range_spec, cwd=cwd)
     receipts = []
     for sha in shas:
-        receipt = generate_receipt(sha, cwd=cwd, ai_only=ai_only, redact_files=redact_files)
+        receipt = generate_receipt(
+            sha, cwd=cwd, ai_only=ai_only, redact_files=redact_files,
+            instance_id=instance_id, namespace=namespace,
+        )
         if receipt is not None:
             receipts.append(receipt)
     return receipts
@@ -968,7 +986,8 @@ def write_receipt(
             return str(filepath)
         fd = os.open(str(filepath), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
         # os.open mode is masked by umask — force 0o644 after creation
-        os.fchmod(fd, 0o644)
+        if _HAS_FCHMOD:
+            os.fchmod(fd, 0o644)
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(receipt_json + "\n")
         return str(filepath)
@@ -989,6 +1008,7 @@ def write_receipt(
 _LEDGER_DIR = ".aiir"
 _LEDGER_FILE = "receipts.jsonl"
 _INDEX_FILE = "index.json"
+_CONFIG_FILE = "config.json"
 
 
 def _ledger_paths(
@@ -997,6 +1017,44 @@ def _ledger_paths(
     """Return (dir, ledger_path, index_path) for the ledger."""
     base = Path(ledger_dir or _LEDGER_DIR).resolve()
     return base, base / _LEDGER_FILE, base / _INDEX_FILE
+
+
+def _config_path(config_dir: Optional[str] = None) -> Path:
+    """Return the path to the config file."""
+    return Path(config_dir or _LEDGER_DIR).resolve() / _CONFIG_FILE
+
+
+def _load_config(config_dir: Optional[str] = None) -> Dict[str, Any]:
+    """Load .aiir/config.json, creating it with a fresh instance_id if absent."""
+    dir_path = Path(config_dir or _LEDGER_DIR).resolve()
+    cfg_path = dir_path / _CONFIG_FILE
+    if cfg_path.is_file():
+        try:
+            data = json.loads(cfg_path.read_text(encoding="utf-8"))
+            if isinstance(data, dict) and isinstance(data.get("instance_id"), str):
+                return data
+        except (json.JSONDecodeError, OSError):
+            pass
+    # Generate a new config with a stable instance_id.
+    config: Dict[str, Any] = {
+        "instance_id": str(uuid.uuid4()),
+        "created": _now_rfc3339(),
+    }
+    dir_path.mkdir(parents=True, exist_ok=True)
+    _save_config(cfg_path, config)
+    return config
+
+
+def _save_config(cfg_path: Path, config: Dict[str, Any]) -> None:
+    """Atomically write the config file."""
+    tmp = cfg_path.with_suffix(".tmp")
+    fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+    if hasattr(os, "fchmod"):
+        os.fchmod(fd, 0o644)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    os.replace(str(tmp), str(cfg_path))
 
 
 def _load_index(index_path: Path) -> Dict[str, Any]:
@@ -1012,7 +1070,10 @@ def _load_index(index_path: Path) -> Dict[str, Any]:
         "version": 1,
         "receipt_count": 0,
         "ai_commit_count": 0,
+        "ai_percentage": 0.0,
+        "first_receipt": None,
         "latest_timestamp": None,
+        "unique_authors": 0,
         "commits": {},
     }
 
@@ -1021,7 +1082,8 @@ def _save_index(index_path: Path, index: Dict[str, Any]) -> None:
     """Atomically write the ledger index."""
     tmp = index_path.with_suffix(".tmp")
     fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
-    os.fchmod(fd, 0o644)
+    if _HAS_FCHMOD:
+        os.fchmod(fd, 0o644)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         json.dump(index, f, indent=2, ensure_ascii=False)
         f.write("\n")
@@ -1070,7 +1132,8 @@ def append_to_ledger(
         os.O_WRONLY | os.O_CREAT | os.O_APPEND,
         0o644,
     )
-    os.fchmod(fd, 0o644)
+    if _HAS_FCHMOD:
+        os.fchmod(fd, 0o644)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         for receipt in receipts:
             sha = receipt.get("commit", {}).get("sha", "")
@@ -1090,20 +1153,62 @@ def append_to_ledger(
             rid = receipt.get("receipt_id", "")
             ts = receipt.get("timestamp", "")
 
+            author_email = receipt.get("commit", {}).get("author", {}).get("email", "")
             known_commits[sha] = {
                 "receipt_id": rid,
                 "ai": is_ai,
+                "author": author_email,
                 "line": index.get("receipt_count", 0) + appended,
             }
             if is_ai:
                 index["ai_commit_count"] = index.get("ai_commit_count", 0) + 1
+            if index.get("first_receipt") is None:
+                index["first_receipt"] = ts
             index["latest_timestamp"] = ts
 
     index["receipt_count"] = index.get("receipt_count", 0) + appended
     index["commits"] = known_commits
+    # Compute derived stats.
+    authors = {v.get("author", "") for v in known_commits.values() if isinstance(v, dict) and v.get("author")}
+    index["unique_authors"] = len(authors)
+    total = index["receipt_count"]
+    index["ai_percentage"] = round(index.get("ai_commit_count", 0) / total * 100, 1) if total > 0 else 0.0
     _save_index(index_path, index)
 
     return appended, skipped, str(ledger_path)
+
+
+def export_ledger(
+    ledger_dir: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Bundle the .aiir/ ledger into a portable JSON export.
+
+    Returns a dict suitable for serialization.  The format is designed so
+    that managed services can ingest it in a single upload.
+    """
+    dir_path, ledger_path, index_path = _ledger_paths(ledger_dir)
+
+    # Load existing data.
+    index = _load_index(index_path)
+    config = _load_config(str(dir_path))
+    receipts: List[Dict[str, Any]] = []
+    if ledger_path.is_file():
+        for line in ledger_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line:
+                try:
+                    receipts.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
+
+    return {
+        "format": "aiir.export.v1",
+        "exported_at": _now_rfc3339(),
+        "instance_id": config.get("instance_id"),
+        "namespace": config.get("namespace"),
+        "index": index,
+        "receipts": receipts,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -1434,7 +1539,8 @@ def sign_receipt_file(receipt_path: str) -> str:
 
     bundle_path = str(path) + ".sigstore"
     fd = os.open(bundle_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
-    os.fchmod(fd, 0o644)  # Force permissions regardless of umask
+    if _HAS_FCHMOD:
+        os.fchmod(fd, 0o644)  # Force permissions regardless of umask
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         f.write(bundle_json)
     return bundle_path
@@ -1716,6 +1822,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         action="store_true",
         help="Omit individual file paths from receipts (privacy; mitigates I-05 file enumeration)",
     )
+    parser.add_argument(
+        "--namespace",
+        default=None,
+        metavar="NS",
+        help="Tag receipts with an organization namespace (e.g., 'acme-corp')",
+    )
+    parser.add_argument(
+        "--export",
+        nargs="?",
+        const="aiir-export.json",
+        default=None,
+        metavar="FILE",
+        help="Export .aiir/ ledger as a portable JSON bundle (for backup or import)",
+    )
 
     args = parser.parse_args(argv)
 
@@ -1829,6 +1949,32 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print(json.dumps(result, indent=2))
             return 1
 
+    # --- Export mode (no git repo needed) ---
+    if args.export is not None:
+        try:
+            bundle = export_ledger()
+        except Exception as e:
+            print(f"{_e('error')} Export failed: {e}", file=sys.stderr)
+            return 1
+        export_path = args.export
+        # Validate export path — reject path traversal.
+        if ".." in export_path or export_path.startswith("/"):
+            print(f"{_e('error')} Export path must be relative and within the project.", file=sys.stderr)
+            return 1
+        out = Path(export_path)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(
+            json.dumps(bundle, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        n = len(bundle.get("receipts", []))
+        iid = bundle.get("instance_id", "none")[:8]
+        print(
+            f"{_e('ok')} Exported {n} receipt{'s' if n != 1 else ''} → {export_path}  (instance: {iid}…)",
+            file=sys.stderr,
+        )
+        return 0
+
     # --- Receipt generation mode ---
     try:
         cwd = get_repo_root()
@@ -1861,17 +2007,45 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     receipts: List[Dict[str, Any]] = []
 
+    # Determine output mode early — config loading creates .aiir/ so
+    # we only load it when the ledger (or explicit --namespace) is active.
+    explicit_stdout = args.json_stdout or args.jsonl
+    use_ledger = not explicit_stdout and not args.output and not args.github_action
+    if args.ledger is not None:
+        use_ledger = True
+
+    # Load config for instance_id and namespace only when .aiir/ will be
+    # used anyway (ledger mode) or the user explicitly set --namespace.
+    instance_id: Optional[str] = None
+    namespace: Optional[str] = getattr(args, "namespace", None)
+    if use_ledger or namespace:
+        try:
+            config = _load_config()
+        except OSError:
+            config = {}
+        instance_id = config.get("instance_id")
+        namespace = namespace or config.get("namespace")
+        # Persist namespace to config if set via CLI flag.
+        if getattr(args, "namespace", None) and args.namespace != config.get("namespace"):
+            config["namespace"] = args.namespace
+            try:
+                _save_config(_config_path(), config)
+            except OSError:
+                pass
+
     try:
         if args.range_spec:
             receipts = generate_receipts_for_range(
                 args.range_spec, cwd=cwd, ai_only=args.ai_only,
                 redact_files=args.redact_files,
+                instance_id=instance_id, namespace=namespace,
             )
         else:
             commit_ref = args.commit or "HEAD"
             receipt = generate_receipt(
                 commit_ref, cwd=cwd, ai_only=args.ai_only,
                 redact_files=args.redact_files,
+                instance_id=instance_id, namespace=namespace,
             )
             if receipt:
                 receipts = [receipt]
@@ -1962,14 +2136,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 1
 
     # ── Determine output mode ──────────────────────────────────────────
-    # Priority: --json/--jsonl → stdout  |  --output → individual files
-    #           otherwise      → ledger  (the default)
+    # (use_ledger was computed earlier to control config loading)
     # --pretty is orthogonal — it prints to stderr and combines with any mode.
-    explicit_stdout = args.json_stdout or args.jsonl
-    use_ledger = not explicit_stdout and not args.output and not args.github_action
-    # --ledger overrides even if --output is set (explicit wins).
-    if args.ledger is not None:
-        use_ledger = True
 
     # ── Output ─────────────────────────────────────────────────────────
     signed_count = 0

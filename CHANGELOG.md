@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [1.0.9] — 2026-03-09
+## [1.0.9] — 2026-03-08
+
+### Fixed
+
+- **`--ledger` flag pass-through**: `--badge`, `--stats`, `--check`, and `--export` now correctly read from a custom ledger directory when `--ledger DIR` is specified. Previously these sub-commands ignored the flag and always read from the default `.aiir/`.
+- **MCP argument validation**: `tools/call` with non-dict `arguments` (string, list, number) now returns a proper error instead of silently falling back to `{}`.
+- **Sigstore error hints**: OIDC credential failure message now includes actionable steps (`SIGSTORE_ID_TOKEN`, `--no-sign`, `sign: false`).
 
 ### Changed
 
@@ -12,7 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - **`--namespace` help text**: Now states that namespace is stored in `extensions.namespace` and is not part of the content hash.
 - **`--export` help text**: Now notes that the path must be relative to the project root.
 - **No-remote provenance warning**: CLI now prints a hint to stderr when receipts are generated without a git remote configured, explaining that `receipt_id` will change once an origin is set.
-- **README receipt identity documentation**: Added a prominent note in the "Receipt format" section explaining that `provenance.repository` is part of the content hash, so receipt identity depends on the configured remote URL.
+- **Coverage gate**: CI coverage threshold set to 92% (actual: 94% local, 92% CI floor due to environment-dependent OIDC detection paths).
+- **Template versions**: All CI platform templates bumped to 1.0.9.
 - **README test count**: Updated from "604 tests" to "660+ tests".
 
 ## [1.0.8] — 2026-03-08

@@ -27,7 +27,7 @@ definitions:
         name: AIIR Receipt
         image: python:3.11-slim
         script:
-          - pip install --quiet "aiir==1.0.8"
+          - pip install --quiet "aiir==1.0.9"
           - |
             if [ -n "$BITBUCKET_COMMIT" ]; then
               # Receipt commits in the current push
@@ -51,7 +51,7 @@ pipelines:
           <<: *aiir-receipt
           name: AIIR Receipt (PR)
           script:
-            - pip install --quiet "aiir==1.0.8"
+            - pip install --quiet "aiir==1.0.9"
             - git fetch origin "$BITBUCKET_PR_DESTINATION_BRANCH" --depth=100
             - aiir --range "origin/${BITBUCKET_PR_DESTINATION_BRANCH}..${BITBUCKET_COMMIT}" --output .aiir-receipts/ --pretty
             - |

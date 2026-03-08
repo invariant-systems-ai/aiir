@@ -296,7 +296,7 @@ class TestFuzzSetGithubOutput:
         try:
             with unittest.mock.patch.dict(os.environ, {"GITHUB_OUTPUT": tmp}):
                 cli.set_github_output(key, value)
-            with open(tmp) as f:
+            with open(tmp, encoding="utf-8") as f:
                 content = f.read()
             # The output starts with exactly one of: key=value or key<<delimiter
             # Count only TOP-LEVEL entries (not content inside heredocs)
@@ -701,7 +701,7 @@ class TestFuzzRegressions:
                     cli.set_github_output(key, value)
                 except ValueError:
                     return  # Invalid key, correctly rejected
-            with open(tmp) as f:
+            with open(tmp, encoding="utf-8") as f:
                 content = f.read()
             # Verify the file starts with the key (only one entry written)
             assert content.startswith(key), (

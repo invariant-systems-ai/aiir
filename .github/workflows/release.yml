@@ -1,0 +1,47 @@
+# Auto-create a GitHub Release when a version tag is pushed.
+# This triggers publish.yml (release: published) → PyPI upload,
+# which in turn triggers sync.yml → GitLab mirror + verification.
+#
+# The ENTIRE release pipeline is: tag push → release → publish → sync.
+# No manual steps.
+name: Release
+
+on:
+  push:
+    tags: ['v[0-9]*']
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag matches package version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(python3 -c "
+          import re
+          text = open('aiir/__init__.py').read()
+          m = re.search(r'__version__\s*=\s*[\"\\x27]([^\"\\x27]+)', text)
+          print(m.group(1))
+          ")
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::Tag ($TAG) ≠ aiir/__init__.py version ($PKG). Aborting release."
+            exit 1
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # --verify-tag: fail if the tag doesn't exist (safety net)
+          # --generate-notes: auto-generate changelog from commits since last tag
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            --verify-tag

@@ -57,3 +57,28 @@ jobs:
 
       - uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e  # v1.13.0
         # No API token needed — uses OIDC via Trusted Publisher config on PyPI
+
+  # ── Self-healing: verify PyPI actually has the version ────────────
+  verify:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for PyPI index propagation
+        run: sleep 30
+
+      - name: Verify package on PyPI
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          for i in 1 2 3 4 5 6; do
+            VERSION=$(curl -sf "https://pypi.org/pypi/aiir/json" \
+              | python3 -c "import sys,json; print(json.load(sys.stdin)['info']['version'])" \
+              2>/dev/null || echo "unknown")
+            if [ "$VERSION" = "$TAG" ]; then
+              echo "✅ PyPI verified: aiir==$TAG"
+              exit 0
+            fi
+            echo "⏳ Attempt $i/6: PyPI has $VERSION, waiting for $TAG..."
+            sleep 30
+          done
+          echo "::error::PyPI did not update to $TAG within 3 minutes"
+          exit 1

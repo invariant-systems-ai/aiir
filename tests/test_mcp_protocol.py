@@ -571,5 +571,50 @@ class TestSendHelper(unittest.TestCase):
         self.assertEqual(parsed["jsonrpc"], "2.0")
 
 
+# ---------------------------------------------------------------------------
+# tools/call: non-dict arguments → error (Bug #4 regression)
+# ---------------------------------------------------------------------------
+
+
+class TestToolsCallNonDictArguments(unittest.TestCase):
+    """Non-dict arguments in tools/call must return an error, not be silently coerced."""
+
+    def test_string_arguments_returns_error(self):
+        responses = _run_server([
+            _rpc("tools/call", params={"name": "aiir_receipt", "arguments": "bad"}),
+        ])
+        self.assertEqual(len(responses), 1)
+        result = responses[0]["result"]
+        self.assertTrue(result.get("isError"), "String arguments should produce error")
+        self.assertIn("Invalid", result["content"][0]["text"])
+
+    def test_list_arguments_returns_error(self):
+        responses = _run_server([
+            _rpc("tools/call", params={"name": "aiir_receipt", "arguments": [1, 2]}),
+        ])
+        self.assertEqual(len(responses), 1)
+        result = responses[0]["result"]
+        self.assertTrue(result.get("isError"), "List arguments should produce error")
+        self.assertIn("Invalid", result["content"][0]["text"])
+
+    def test_number_arguments_returns_error(self):
+        responses = _run_server([
+            _rpc("tools/call", params={"name": "aiir_receipt", "arguments": 42}),
+        ])
+        self.assertEqual(len(responses), 1)
+        result = responses[0]["result"]
+        self.assertTrue(result.get("isError"), "Number arguments should produce error")
+
+    def test_null_arguments_defaults_to_empty_dict(self):
+        """null/missing arguments should still default to {} (valid per spec)."""
+        responses = _run_server([
+            _rpc("tools/call", params={"name": "nonexistent_tool"}),
+        ])
+        self.assertEqual(len(responses), 1)
+        result = responses[0]["result"]
+        # Should get "Unknown tool" error, not an arguments-type error
+        self.assertIn("Unknown tool", result["content"][0]["text"])
+
+
 if __name__ == "__main__":
     unittest.main()

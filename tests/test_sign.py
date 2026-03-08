@@ -387,6 +387,7 @@ class TestSignCIDetection(unittest.TestCase):
                             cli.sign_receipt(b'{"test": true}')
                         self.assertIn("no ambient OIDC credential", str(ctx.exception))
                         self.assertIn("sign: false", str(ctx.exception))
+                        self.assertIn("SIGSTORE_ID_TOKEN", str(ctx.exception))
                     finally:
                         os.environ.update(env_backup)
 

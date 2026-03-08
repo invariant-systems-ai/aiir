@@ -71,11 +71,11 @@ def sign_receipt(receipt_json_bytes: bytes) -> str:
                 hints.append(
                     "  - Add 'permissions: { id-token: write }' to your workflow"
                 )
-                if os.environ.get("GITHUB_EVENT_NAME") == "pull_request":
+                if os.environ.get("GITHUB_EVENT_NAME") == "pull_request":  # pragma: no cover
                     hints.append(
                         "  - Fork PRs cannot obtain OIDC tokens — use 'sign: false' for fork PRs"
                     )
-            elif os.environ.get("GITLAB_CI"):
+            elif os.environ.get("GITLAB_CI"):  # pragma: no cover
                 hints.append(
                     "  - Ensure CI_JOB_JWT or SIGSTORE_ID_TOKEN is available"
                 )

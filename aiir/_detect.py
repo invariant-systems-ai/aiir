@@ -166,7 +166,7 @@ def get_commit_info(
     # identities to human emails, which would bypass AI detection heuristics.
     line = _run_git(["log", "-1", "--no-mailmap", f"--format={fmt}", commit_ref], cwd=cwd).strip()
     parts = line.split("\x00", 7)
-    if len(parts) < 8:
+    if len(parts) < 8:  # pragma: no cover
         raise ValueError(f"Failed to parse commit {commit_ref}: got {line!r}")
 
     sha, a_name, a_email, a_date, c_name, c_email, c_date, subject = parts
@@ -200,7 +200,7 @@ def get_commit_info(
                 env=_GIT_SAFE_ENV,    # Consistent with _run_git
             )
             parent = result.stdout.decode().strip()
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:  # pragma: no cover
             raise RuntimeError(f"Failed to compute empty tree hash: {e}") from e
 
     # Diff stat

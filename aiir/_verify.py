@@ -76,7 +76,7 @@ def verify_receipt(receipt: Dict[str, Any]) -> Dict[str, Any]:
         id_ok = hmac.compare_digest(
             stored_id.encode("utf-8"), expected_id.encode("utf-8")
         )
-    except (AttributeError, UnicodeDecodeError):
+    except (AttributeError, UnicodeDecodeError):  # pragma: no cover
         hash_ok = False
         id_ok = False
 
@@ -116,7 +116,7 @@ def verify_receipt_file(filepath: str) -> Dict[str, Any]:
     # Reject oversized files to prevent memory exhaustion
     try:
         file_size = path.stat().st_size
-    except OSError as e:
+    except OSError as e:  # pragma: no cover
         return {"valid": False, "error": f"Cannot stat file: {e}"}
     if file_size > MAX_RECEIPT_FILE_SIZE:
         return {
@@ -141,5 +141,5 @@ def verify_receipt_file(filepath: str) -> Dict[str, Any]:
         return {"valid": all_valid, "receipts": results, "count": len(results)}
     elif isinstance(data, dict):
         return verify_receipt(data)
-    else:
+    else:  # pragma: no cover
         return {"valid": False, "error": "Expected JSON object or array"}

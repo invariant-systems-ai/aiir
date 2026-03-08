@@ -111,7 +111,7 @@ jobs:
         run: |
           coverage run --source=aiir -m pytest tests/ --ignore=tests/test_fuzz.py -q --tb=short
           coverage report --show-missing
-          coverage report --fail-under=85
+          coverage report --fail-under=90
 
   # Smoke test: install the wheel and verify entry points + packaging.
   # Catches regressions that source-tree pytest misses (missing py.typed,

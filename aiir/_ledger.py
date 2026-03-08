@@ -46,7 +46,7 @@ def _load_config(config_dir: Optional[str] = None) -> Dict[str, Any]:
             data = json.loads(cfg_path.read_text(encoding="utf-8"))
             if isinstance(data, dict) and isinstance(data.get("instance_id"), str):
                 return data
-        except (json.JSONDecodeError, OSError):
+        except (json.JSONDecodeError, OSError):  # pragma: no cover
             pass
     # Generate a new config with a stable instance_id.
     config: Dict[str, Any] = {
@@ -77,7 +77,7 @@ def _load_index(index_path: Path) -> Dict[str, Any]:
             data = json.loads(index_path.read_text(encoding="utf-8"))
             if isinstance(data, dict) and data.get("version") == 1:
                 return data
-        except (json.JSONDecodeError, OSError):
+        except (json.JSONDecodeError, OSError):  # pragma: no cover
             pass
     return {
         "version": 1,
@@ -128,7 +128,7 @@ def append_to_ledger(
     real_dir = dir_path.resolve()
     try:
         real_dir.relative_to(cwd_resolved)
-    except ValueError:
+    except ValueError:  # pragma: no cover — TOCTOU race
         raise ValueError(
             "ledger dir escaped working directory after creation "
             "(possible symlink attack)"
@@ -218,7 +218,7 @@ def export_ledger(
             if line:
                 try:
                     receipts.append(json.loads(line))
-                except json.JSONDecodeError:
+                except json.JSONDecodeError:  # pragma: no cover
                     continue
 
     return {

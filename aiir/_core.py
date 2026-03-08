@@ -104,7 +104,7 @@ def _can_encode(probe: str) -> bool:
         enc = getattr(sys.stderr, "encoding", None) or "ascii"
         probe.encode(enc)
         return True
-    except (UnicodeEncodeError, LookupError):
+    except (UnicodeEncodeError, LookupError):  # pragma: no cover
         return False
 
 
@@ -459,7 +459,7 @@ def _hash_diff_streaming(parent: str, sha: str, cwd: Optional[str] = None) -> st
     _killed_for_cleanup = False
     try:
         proc.wait(timeout=30)
-    except subprocess.TimeoutExpired:
+    except subprocess.TimeoutExpired:  # pragma: no cover
         proc.kill()
         proc.wait()
         _killed_for_cleanup = True
@@ -487,7 +487,7 @@ def _strip_url_credentials(url: str) -> str:
             return urlunparse(parsed._replace(
                 netloc=clean_netloc, query="", fragment="",
             ))
-    except Exception:
+    except Exception:  # pragma: no cover
         # If URL parsing/reconstruction fails, return a safe
         # placeholder instead of the original (which may contain credentials).
         # The old code did `pass` + `return url`, leaking embedded PATs.

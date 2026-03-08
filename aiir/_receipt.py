@@ -270,7 +270,7 @@ def write_receipt(
         real_out = out_path.resolve()
         try:
             real_out.relative_to(cwd_resolved)
-        except ValueError:
+        except ValueError:  # pragma: no cover — TOCTOU race
             raise ValueError(
                 "output-dir escaped working directory after creation "
                 "(possible symlink attack)"

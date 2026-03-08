@@ -41,7 +41,7 @@ test:
     - cd /tmp && git init test-repo && cd test-repo
     - git config user.name "Test" && git config user.email "test@test.com"
     - echo "hello" > file.txt && git add . && git commit -m "test commit"
-    - cd -
+    - cd $CI_PROJECT_DIR
     - python -m pytest test_cli.py -x -q --tb=short
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'

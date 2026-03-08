@@ -71,7 +71,7 @@ spec:
     # Print summary
     - |
       RECEIPT_COUNT=$(ls -1 "$[[ inputs.output-dir ]]"/*.json 2>/dev/null | wc -l)
-      AI_COUNT=$(grep -l '"is_ai_authored": true' "$[[ inputs.output-dir ]]"/*.json 2>/dev/null | wc -l)
+      AI_COUNT=$(grep -l '"is_ai_authored": true' "$[[ inputs.output-dir ]]"/*.json 2>/dev/null | wc -l) || AI_COUNT=0
       echo "────────────────────────────────────────"
       echo "AIIR: ${RECEIPT_COUNT} commits receipted, ${AI_COUNT} AI-authored"
       echo "────────────────────────────────────────"
@@ -102,7 +102,7 @@ spec:
     # Print summary
     - |
       RECEIPT_COUNT=$(ls -1 "$[[ inputs.output-dir ]]"/*.json 2>/dev/null | wc -l)
-      AI_COUNT=$(grep -l '"is_ai_authored": true' "$[[ inputs.output-dir ]]"/*.json 2>/dev/null | wc -l)
+      AI_COUNT=$(grep -l '"is_ai_authored": true' "$[[ inputs.output-dir ]]"/*.json 2>/dev/null | wc -l) || AI_COUNT=0
       echo "────────────────────────────────────────"
       echo "AIIR: ${RECEIPT_COUNT} commits receipted, ${AI_COUNT} AI-authored"
       echo "────────────────────────────────────────"

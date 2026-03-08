@@ -4,11 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [1.0.4] — 2026-03-09
+## [1.0.4] — 2026-03-08
 
 ### Changed
 
 - **heuristic_v2 — AI / bot signal split**: `detect_ai_signals()` now returns a `(ai_signals, bot_signals)` tuple, cleanly separating genuine AI-tool involvement (Copilot, ChatGPT, Claude, Cursor, Aider, etc.) from pure automation bots (Dependabot, Renovate, GitHub Actions, Snyk, DeepSource). Receipt schema gains `is_bot_authored`, `bot_signals_detected`, and `bot_signal_count` fields; ledger index gains `bot_commit_count`. Detection method bumped to `heuristic_v2`.
+- **Test suite split**: Monolithic 7,338-line `test_cli.py` decomposed into 12 focused modules under `tests/` — core, detect, receipt, ledger, verify, sign, github, mcp, redteam, cli_integration, fuzz, conftest. CI updated to use `tests/` directory.
 - **Claims language**: "tamper-proof" → "tamper-evident" in MCP server tool descriptions; EU AI Act wording softened to "supports compliance evidence" across all CI templates.
 - **Sigstore guidance**: README now documents `--signer-identity` / `--signer-issuer` pinning for Trusted Publisher OIDC verification.
 

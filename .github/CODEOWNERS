@@ -1,15 +1,12 @@
 # CODEOWNERS — require review for security-critical paths.
 # See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-# Core CLI and detection logic
-aiir/                       @invariant-systems-ai/core
-
-# GitHub Action definition
-action.yml                  @invariant-systems-ai/core
+# Default: all changes require review from an org owner
+*                           @Boatlover
 
 # Security policy and threat model
-SECURITY.md                 @invariant-systems-ai/core
-THREAT_MODEL.md             @invariant-systems-ai/core
+SECURITY.md                 @Boatlover
+THREAT_MODEL.md             @Boatlover
 
 # CI workflows
-.github/workflows/          @invariant-systems-ai/core
+.github/workflows/          @Boatlover

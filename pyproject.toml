@@ -49,11 +49,11 @@ sign = ["sigstore>=4.0.0,<5.0.0"]
 dev = ["hypothesis>=6.0", "pytest>=7.0"]
 
 [project.urls]
-Homepage = "https://github.com/invariant-systems-ai/aiir-action"
-Documentation = "https://github.com/invariant-systems-ai/aiir-action#readme"
-Repository = "https://github.com/invariant-systems-ai/aiir-action"
-Issues = "https://github.com/invariant-systems-ai/aiir-action/issues"
-Changelog = "https://github.com/invariant-systems-ai/aiir-action/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/invariant-systems-ai/aiir"
+Documentation = "https://github.com/invariant-systems-ai/aiir#readme"
+Repository = "https://github.com/invariant-systems-ai/aiir"
+Issues = "https://github.com/invariant-systems-ai/aiir/issues"
+Changelog = "https://github.com/invariant-systems-ai/aiir/blob/main/CHANGELOG.md"
 
 [project.scripts]
 aiir = "aiir.cli:main"

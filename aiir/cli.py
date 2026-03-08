@@ -763,7 +763,7 @@ def build_commit_receipt(
         "provenance": {
             "repository": repo_url,
             # URI-based tool identifier for SLSA/in-toto compatibility.
-            "tool": f"https://github.com/invariant-systems-ai/aiir-action@{CLI_VERSION}",
+            "tool": f"https://github.com/invariant-systems-ai/aiir@{CLI_VERSION}",
             "generator": "aiir.cli",
         },
     }
@@ -1466,7 +1466,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "  0  Success (receipts generated, or verification passed)\n"
             "  1  Error (verification failed, git error, bad input)\n"
             "\n"
-            "https://github.com/invariant-systems-ai/aiir-action  |  "
+            "https://github.com/invariant-systems-ai/aiir  |  "
             "https://invariantsystems.io"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,

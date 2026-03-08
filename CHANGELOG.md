@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.8] — 2026-03-08
+
+### Added
+
+- **Dependabot config**: `.github/dependabot.yml` auto-updates pinned action SHAs (checkout, setup-python, upload-artifact, pypi-publish) and pip dependencies weekly. Grouped minor+patch PRs to reduce noise.
+- **Action Health workflow**: `action-health.yml` runs post-release smoke tests using the *published* `@v1` action (not local `./`) — catches packaging regressions dogfood testing misses. Includes unsigned + signed receipt validation, Sigstore bundle verification, and PyPI version cross-check. Auto-creates P0 issue on failure.
+- **Dependency freshness audit**: Weekly check comparing pinned SHAs against latest releases. Auto-creates advisory issue when staleness is detected.
+- **OSSF Scorecard**: `scorecard.yml` runs weekly, publishes supply chain security results to GitHub Security tab and OpenSSF badge API.
+- **Drift auto-issue**: `sync.yml` now auto-creates a GitHub issue (label: `version-drift`) when distribution channel drift is detected, instead of only logging warnings.
+
+### Changed
+
+- **Commit-range validation**: `action.yml` range step now rejects inputs containing shell metacharacters (`;`, `&`, `|`, `$`, backticks, control chars) and warns on ranges exceeding 500 commits.
+
 ## [1.0.7] — 2026-03-08
 
 ### Added

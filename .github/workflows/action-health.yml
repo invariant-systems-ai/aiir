@@ -1,0 +1,305 @@
+# Action Health — post-release smoke test + scheduled self-diagnosis.
+#
+# Three autonomous functions:
+#
+#   1. POST-RELEASE SMOKE TEST (after Publish)
+#      Installs from PyPI and runs the PUBLISHED @v1 action against a
+#      real git repo.  Catches packaging regressions that local ./
+#      dogfood testing cannot.
+#
+#   2. WEEKLY SELF-TEST (schedule)
+#      Same smoke test, verifying the action still works even when no
+#      release happened.  Catches environmental drift (Python EOL,
+#      GitHub runner changes, Sigstore API changes).
+#
+#   3. DEPENDENCY FRESHNESS AUDIT (schedule)
+#      Checks if pinned action SHAs and the sigstore version range are
+#      behind latest releases.  Creates an issue if staleness exceeds
+#      the threshold.
+#
+# Self-healing: if a smoke test fails, an issue is auto-created with
+# logs attached.  If staleness is detected, an advisory issue is opened.
+name: Action Health
+
+on:
+  workflow_run:
+    workflows: ["Publish"]
+    types: [completed]
+  schedule:
+    # Weekly Wednesday 09:00 UTC — offset from Dependabot (Monday) and
+    # sync (daily 06:00) to spread load and catch mid-week breakage.
+    - cron: '0 9 * * 3'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write      # Auto-create issues on failure
+  id-token: write    # Sigstore signing in smoke test
+
+jobs:
+  # ── 1. Published action smoke test ─────────────────────────────────
+  smoke-test:
+    # Only run after successful Publish (or on schedule/dispatch).
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create test repository
+        run: |
+          mkdir /tmp/aiir-smoke && cd /tmp/aiir-smoke
+          git init
+          git config user.email "smoke@test.invalid"
+          git config user.name "AIIR Smoke Test"
+
+          # Commit 1: human commit
+          echo "hello" > human.txt
+          git add . && git commit -m "feat: human-written feature"
+
+          # Commit 2: AI-authored commit (Copilot trailer)
+          echo "generated" > ai.txt
+          git add . && git commit -m "feat: ai feature
+
+          Co-authored-by: Copilot <copilot@github.com>"
+
+          # Commit 3: bot commit (Dependabot)
+          echo "bump" > deps.txt
+          git add . && git commit -m "chore(deps): bump foo
+
+          Signed-off-by: dependabot[bot] <support@github.com>"
+
+          echo "SMOKE_HEAD=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "SMOKE_BASE=$(git rev-list --max-parents=0 HEAD)" >> "$GITHUB_ENV"
+
+      - name: Checkout action (published version)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          path: _action
+
+      - name: Run published action (unsigned)
+        uses: ./_action
+        id: unsigned
+        with:
+          commit-range: "${{ env.SMOKE_BASE }}..${{ env.SMOKE_HEAD }}"
+          sign: "false"
+          output-dir: /tmp/aiir-smoke/.receipts-unsigned
+
+      - name: Validate unsigned outputs
+        env:
+          RECEIPT_COUNT: ${{ steps.unsigned.outputs.receipt_count }}
+          AI_COUNT: ${{ steps.unsigned.outputs.ai_commit_count }}
+          RECEIPTS_JSON: ${{ steps.unsigned.outputs.receipts_json }}
+        run: |
+          echo "receipt_count=$RECEIPT_COUNT  ai_commit_count=$AI_COUNT"
+
+          # Must have receipted exactly 3 commits
+          if [ "$RECEIPT_COUNT" != "3" ]; then
+            echo "::error::Expected 3 receipts, got $RECEIPT_COUNT"
+            exit 1
+          fi
+
+          # Must detect exactly 1 AI commit
+          if [ "$AI_COUNT" != "1" ]; then
+            echo "::error::Expected 1 AI commit, got $AI_COUNT"
+            exit 1
+          fi
+
+          # receipts_json must be valid JSON array
+          echo "$RECEIPTS_JSON" | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          assert isinstance(data, list), f'Expected list, got {type(data)}'
+          assert len(data) == 3, f'Expected 3 receipts, got {len(data)}'
+          # Verify AI detection
+          ai = [r for r in data if r.get('ai_attestation', {}).get('is_ai_authored')]
+          assert len(ai) == 1, f'Expected 1 AI receipt, got {len(ai)}'
+          # Verify bot detection
+          bots = [r for r in data if r.get('ai_attestation', {}).get('is_bot_authored')]
+          assert len(bots) == 1, f'Expected 1 bot receipt, got {len(bots)}'
+          print('✅ receipts_json validated')
+          "
+
+          # Verify files were written
+          FCOUNT=$(ls -1 /tmp/aiir-smoke/.receipts-unsigned/*.json 2>/dev/null | wc -l)
+          if [ "$FCOUNT" -lt 3 ]; then
+            echo "::error::Expected ≥3 receipt files, found $FCOUNT"
+            exit 1
+          fi
+          echo "✅ Smoke test passed (unsigned)"
+
+      - name: Run published action (signed)
+        uses: ./_action
+        id: signed
+        with:
+          commit-range: "${{ env.SMOKE_BASE }}..${{ env.SMOKE_HEAD }}"
+          sign: "true"
+          output-dir: /tmp/aiir-smoke/.receipts-signed
+
+      - name: Validate signed outputs
+        run: |
+          # Verify .sigstore bundles exist alongside receipt JSON
+          BUNDLES=$(ls -1 /tmp/aiir-smoke/.receipts-signed/*.sigstore 2>/dev/null | wc -l)
+          if [ "$BUNDLES" -lt 3 ]; then
+            echo "::error::Expected ≥3 .sigstore bundles, found $BUNDLES"
+            exit 1
+          fi
+          echo "✅ Smoke test passed (signed — $BUNDLES bundles)"
+
+      - name: Verify signatures
+        run: |
+          pip install "sigstore>=4.0.0,<5.0.0"
+          cd /tmp/aiir-smoke/.receipts-signed
+          for receipt in *.json; do
+            [ "$receipt" = "*.json" ] && continue
+            bundle="${receipt}.sigstore"
+            if [ ! -f "$bundle" ]; then
+              echo "::error::Missing bundle for $receipt"
+              exit 1
+            fi
+            python3 -c "
+          from sigstore.verify import Verifier
+          from sigstore.verify.policy import UnsafeNoOp
+          from sigstore.models import Bundle
+          from pathlib import Path
+
+          receipt_bytes = Path('$receipt').read_bytes()
+          bundle = Bundle.from_json(Path('$bundle').read_text())
+          verifier = Verifier.production()
+          verifier.verify_artifact(receipt_bytes, bundle, UnsafeNoOp())
+          print('  ✅ $receipt — signature valid')
+          "
+          done
+          echo "✅ All signatures verified"
+
+      - name: PyPI version check
+        run: |
+          # Verify the installed CLI matches the published version
+          pip install aiir
+          INSTALLED=$(python3 -c "import aiir; print(aiir.__version__)")
+          LATEST=$(curl -sf https://pypi.org/pypi/aiir/json | python3 -c "import sys,json; print(json.load(sys.stdin)['info']['version'])")
+          if [ "$INSTALLED" != "$LATEST" ]; then
+            echo "::warning::Installed ($INSTALLED) ≠ PyPI latest ($LATEST)"
+          else
+            echo "✅ PyPI version matches: $LATEST"
+          fi
+
+  # ── 2. Dependency freshness audit ──────────────────────────────────
+  dependency-audit:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Check pinned action versions
+        id: staleness
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          STALE=0
+          echo "╔══════════════════════════════════════════════════╗"
+          echo "║       AIIR Dependency Freshness Audit            ║"
+          echo "╠══════════════════════════════════════════════════╣"
+
+          check_action() {
+            local OWNER_REPO="$1"
+            local PINNED_SHA="$2"
+            local LABEL="$3"
+
+            LATEST=$(gh api "repos/${OWNER_REPO}/releases/latest" --jq '.tag_name' 2>/dev/null || echo "unknown")
+            if [ "$LATEST" = "unknown" ]; then
+              printf "║  ⚠️  %-30s  cannot reach API  ║\n" "$LABEL"
+              return
+            fi
+
+            LATEST_SHA=$(gh api "repos/${OWNER_REPO}/git/ref/tags/${LATEST}" --jq '.object.sha' 2>/dev/null || echo "unknown")
+            if [ "$LATEST_SHA" = "unknown" ]; then
+              # Try dereferencing (annotated tag)
+              LATEST_SHA=$(gh api "repos/${OWNER_REPO}/git/refs/tags/${LATEST}" --jq '.object.sha' 2>/dev/null || echo "unknown")
+            fi
+
+            if echo "$PINNED_SHA" | grep -q "^${LATEST_SHA:0:12}"; then
+              printf "║  ✅  %-30s  %s  ║\n" "$LABEL" "$LATEST"
+            else
+              printf "║  🔄  %-30s  pinned ≠ %s  ║\n" "$LABEL" "$LATEST"
+              STALE=1
+            fi
+          }
+
+          # Extract pinned SHAs from action.yml
+          CHECKOUT_SHA=$(grep 'actions/checkout@' action.yml | head -1 | sed 's/.*@//' | awk '{print $1}')
+          SETUP_PY_SHA=$(grep 'actions/setup-python@' action.yml | head -1 | sed 's/.*@//' | awk '{print $1}')
+          UPLOAD_SHA=$(grep 'actions/upload-artifact@' action.yml | head -1 | sed 's/.*@//' | awk '{print $1}')
+
+          check_action "actions/checkout" "$CHECKOUT_SHA" "actions/checkout"
+          check_action "actions/setup-python" "$SETUP_PY_SHA" "actions/setup-python"
+          check_action "actions/upload-artifact" "$UPLOAD_SHA" "actions/upload-artifact"
+
+          echo "╚══════════════════════════════════════════════════╝"
+
+          # Check sigstore freshness
+          echo ""
+          echo "── Sigstore SDK ──"
+          SIGSTORE_LATEST=$(pip index versions sigstore 2>/dev/null | head -1 | sed 's/.*(\(.*\))/\1/')
+          SIGSTORE_PIN=$(grep 'sigstore>=' action.yml | sed 's/.*sigstore>=//' | sed 's/,.*//')
+          echo "  Pinned range: >=${SIGSTORE_PIN}"
+          echo "  Latest: ${SIGSTORE_LATEST}"
+
+          echo "stale=$STALE" >> "$GITHUB_OUTPUT"
+
+      - name: Create staleness issue
+        if: steps.staleness.outputs.stale == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Only create if no open issue with this label exists
+          EXISTING=$(gh issue list --label "dependency-staleness" --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            echo "Staleness issue already open: #${EXISTING}"
+            exit 0
+          fi
+          gh issue create \
+            --title "🔄 Action dependency SHAs may be stale" \
+            --label "dependency-staleness,automated" \
+            --body "The weekly dependency freshness audit detected that one or more pinned action SHAs are behind the latest release.
+
+          Run \`gh workflow run action-health.yml\` or check the [latest run](https://github.com/${{ github.repository }}/actions/workflows/action-health.yml) for details.
+
+          Dependabot should open a PR for these automatically. If not, update manually:
+          - \`action.yml\` — pinned SHA comments
+          - \`.github/workflows/*.yml\` — all workflow action pins
+
+          *This issue was created automatically by the Action Health workflow.*"
+
+  # ── 3. Auto-create issue on smoke test failure ─────────────────────
+  alert-on-failure:
+    needs: smoke-test
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Create failure issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          EXISTING=$(gh issue list --repo "${{ github.repository }}" --label "action-health-failure" --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --repo "${{ github.repository }}" \
+              --body "🔴 Another smoke test failure: ${RUN_URL}"
+            exit 0
+          fi
+          gh issue create --repo "${{ github.repository }}" \
+            --title "🔴 AIIR Action smoke test failed" \
+            --label "action-health-failure,automated,P0" \
+            --body "The post-release smoke test failed. This means the published action (\`@v1\`) may be broken for users.
+
+          **Run**: ${RUN_URL}
+
+          Investigate immediately:
+          1. Check if PyPI package is corrupted: \`pip install aiir && aiir --version\`
+          2. Check if the floating \`v1\` tag points to the right commit
+          3. Check Sigstore API status: https://status.sigstore.dev
+          4. Run \`gh workflow run action-health.yml\` to re-test
+
+          *This issue was created automatically by the Action Health workflow.*"

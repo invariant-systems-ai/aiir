@@ -19,6 +19,7 @@ on:
 
 permissions:
   contents: read
+  issues: write      # Auto-create issue on drift
 
 jobs:
   # ── Step 1: Mirror all branches + tags to GitLab ──────────────────
@@ -54,6 +55,7 @@ jobs:
           fetch-depth: 0
 
       - name: Check version alignment
+        id: drift
         run: |
           set +e  # Don't exit on individual failures; we want to report all drift
 
@@ -118,6 +120,7 @@ jobs:
 
           if [ "$DRIFT" -eq 0 ]; then
             echo "✅ All channels in sync: v${LOCAL}"
+            echo "drift=false" >> "$GITHUB_OUTPUT"
           else
             echo ""
             echo "⚠️  DRIFT DETECTED — see warnings above"
@@ -125,5 +128,41 @@ jobs:
             echo "Self-healing actions taken:"
             echo "  • GitLab mirror was force-pushed (branches + tags)"
             echo "  • PyPI cannot be self-healed (immutable). If behind, create a new release."
+            echo "drift=true" >> "$GITHUB_OUTPUT"
+            echo "drift_summary=__init__.py=${LOCAL} GitHub=${GH_TAG} PyPI=${PYPI} GitLab=${GL_TAG}" >> "$GITHUB_OUTPUT"
             exit 1
           fi
+
+  # ── Step 3: Auto-create issue on drift ────────────────────────────
+  alert-drift:
+    needs: verify-sync
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Create or update drift issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          EXISTING=$(gh issue list --repo "${{ github.repository }}" --label "version-drift" --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --repo "${{ github.repository }}" \
+              --body "🔄 Drift still detected — ${RUN_URL}"
+            exit 0
+          fi
+          gh issue create --repo "${{ github.repository }}" \
+            --title "🔄 Distribution channel version drift detected" \
+            --label "version-drift,automated,P1" \
+            --body "The Sync workflow detected version drift between distribution channels.
+
+          **Run**: ${RUN_URL}
+
+          Self-healing already attempted:
+          - ✅ GitLab mirror force-pushed (branches + tags)
+          - ❌ PyPI is immutable — if behind, a new patch release is needed
+
+          Check the workflow run for the exact version table.
+
+          *This issue was created automatically by the Sync workflow.*"

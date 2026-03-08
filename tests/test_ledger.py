@@ -427,9 +427,37 @@ class TestExport(unittest.TestCase):
     def test_export_rejects_path_traversal(self):
         """--export should reject paths with '..'."""
         import io
+        # Must generate a ledger first so we reach the path validation check.
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        stderr = io.StringIO()
+        with patch("sys.stderr", stderr), patch("sys.stdout", io.StringIO()):
             rc = cli.main(["--export", "../evil.json"])
         self.assertEqual(rc, 1)
+        self.assertIn("relative", stderr.getvalue())
+
+    def test_export_rejects_absolute_path(self):
+        """--export should reject absolute paths."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        stderr = io.StringIO()
+        with patch("sys.stderr", stderr), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--export", "/tmp/evil.json"])
+        self.assertEqual(rc, 1)
+        self.assertIn("relative", stderr.getvalue())
+
+    def test_export_failure_error_path(self):
+        """--export should handle export_ledger() failure gracefully."""
+        import io
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
+            cli.main([])
+        stderr = io.StringIO()
+        with patch("aiir.cli.export_ledger", side_effect=RuntimeError("disk full")), \
+             patch("sys.stderr", stderr), patch("sys.stdout", io.StringIO()):
+            rc = cli.main(["--export", "bundle.json"])
+        self.assertEqual(rc, 1)
+        self.assertIn("Export failed", stderr.getvalue())
 
     def test_export_includes_namespace(self):
         """Export bundle should include namespace from config."""

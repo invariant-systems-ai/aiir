@@ -474,7 +474,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # Guard: fail early if no ledger exists (matches --badge / --stats).
         try:
             _idx = _load_index(_ledger_paths(args.ledger)[2])
-        except OSError:
+        except OSError:  # pragma: no cover — filesystem error
             _idx = {}
         if _idx.get("receipt_count", 0) == 0:
             print(
@@ -511,7 +511,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.badge:
         try:
             idx = _load_index(_ledger_paths(args.ledger)[2])
-        except OSError:
+        except OSError:  # pragma: no cover — filesystem error
             idx = {}
         if idx.get("receipt_count", 0) == 0:
             print(f"{_e('error')} No ledger found — run 'aiir' first to generate receipts.", file=sys.stderr)
@@ -519,7 +519,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         cfg = {}
         try:
             cfg = _load_config(args.ledger)
-        except OSError:
+        except OSError:  # pragma: no cover — filesystem error
             pass
         badge = format_badge(idx, namespace=cfg.get("namespace"))
         print(badge["markdown"])
@@ -532,7 +532,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.stats:
         try:
             idx = _load_index(_ledger_paths(args.ledger)[2])
-        except OSError:
+        except OSError:  # pragma: no cover — filesystem error
             idx = {}
         if idx.get("receipt_count", 0) == 0:
             print(f"{_e('error')} No ledger found — run 'aiir' first to generate receipts.", file=sys.stderr)
@@ -540,7 +540,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         cfg = {}
         try:
             cfg = _load_config(args.ledger)
-        except OSError:
+        except OSError:  # pragma: no cover — filesystem error
             pass
         print(format_stats(idx, config=cfg), file=sys.stderr)
         return 0
@@ -549,7 +549,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.check or args.max_ai_percent is not None:
         try:
             idx = _load_index(_ledger_paths(args.ledger)[2])
-        except OSError:
+        except OSError:  # pragma: no cover — filesystem error
             idx = {}
         passed, message = check_policy(
             idx, max_ai_percent=args.max_ai_percent,
@@ -608,7 +608,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ledger_cfg_dir = args.ledger if args.ledger is not None else _LEDGER_DIR
         try:
             config = _load_config(ledger_cfg_dir)
-        except OSError:
+        except OSError:  # pragma: no cover — filesystem error
             config = {}
         instance_id = config.get("instance_id")
         namespace = namespace or config.get("namespace")
@@ -617,7 +617,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             config["namespace"] = args.namespace
             try:
                 _save_config(_config_path(ledger_cfg_dir), config)
-            except OSError:
+            except OSError:  # pragma: no cover — filesystem error
                 pass
 
     try:

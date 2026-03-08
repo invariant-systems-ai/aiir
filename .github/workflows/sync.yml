@@ -65,8 +65,8 @@ jobs:
           print(m.group(1))
           ")
 
-          # ── Latest git tag ──
-          GH_TAG=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "unknown")
+          # ── Latest git tag (semver only, ignore floating v1/v2 tags) ──
+          GH_TAG=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -1 | sed 's/^v//' || echo "unknown")
 
           # ── PyPI version ──
           PYPI=$(curl -sf "https://pypi.org/pypi/aiir/json" \

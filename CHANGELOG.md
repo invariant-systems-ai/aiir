@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.2] — 2026-03-08
+
+### Added
+
+- **GitLab CI/CD Catalog component** (`templates/receipt/template.yml`) — one-line include with typed `spec:` inputs for stage, version, ai-only, output-dir, artifact-expiry, extra-args, python-image, and job-prefix.
+- **Multi-platform CI templates**: Bitbucket Pipelines, Azure DevOps, CircleCI, Jenkins.
+- **Docker support**: `Dockerfile` + `.dockerignore` for container-based usage in any CI/CD system.
+- **Root `.gitlab-ci.yml`** for component testing and automated release publishing via semantic version tags.
+- GitLab CI/CD Catalog badge in README.
+- Expanded README with quick-start examples for all supported platforms.
+
+## [1.0.1] — 2026-03-07
+
+### Fixed
+
+- Version bump for Trusted Publisher OIDC test.
+
 ## [1.0.0] — 2026-03-07
 
 ### Added

@@ -24,7 +24,7 @@
 
 AI writes 30–50% of new code at most companies. Copilot, ChatGPT, Claude, Cursor — it all goes into `git commit` with no systematic record of what was human and what was machine.
 
-> **EU AI Act** transparency and provenance requirements take effect August 2026. AI systems in production require audit trails. AI-generated code with no provenance is a compliance gap.
+> **EU AI Act** transparency obligations are phasing in now — general-purpose AI transparency rules from August 2025, high-risk system requirements from August 2026. AI-generated code with no provenance is a compliance gap.
 
 Your auditors will ask: *"Which code was AI-generated? Can you prove it?"*
 
@@ -122,7 +122,10 @@ aiir --verify receipt.json
 ```yaml
 # .github/workflows/aiir.yml — signed receipts (default)
 name: AIIR
-on: [push, pull_request]
+on:
+  push:
+    tags-ignore: ['**']   # Don't receipt tag pushes (receipts the whole history)
+  pull_request:
 
 permissions:
   id-token: write   # Required for Sigstore keyless signing
@@ -148,7 +151,10 @@ Artifacts uploaded automatically when `output-dir` is set.
 
 ```yaml
 name: AIIR
-on: [push, pull_request]
+on:
+  push:
+    tags-ignore: ['**']
+  pull_request:
 
 jobs:
   receipt:
@@ -174,7 +180,7 @@ jobs:
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/invariant-systems-ai/aiir
-    rev: v1.0.6
+    rev: v1.0.7
     hooks:
       - id: aiir
 ```
@@ -203,9 +209,9 @@ All inputs are optional and typed:
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
 | `stage` | string | `test` | Pipeline stage |
-| `version` | string | `1.0.6` | AIIR version from PyPI |
+| `version` | string | `1.0.7` | AIIR version from PyPI |
 | `ai-only` | boolean | `false` | Only receipt AI-authored commits |
-| `output-dir` | string | `.receipts` | Artifact output directory |
+| `output-dir` | string | `.aiir-receipts` | Artifact output directory |
 | `artifact-expiry` | string | `90 days` | Artifact retention |
 | `extra-args` | string | `""` | Additional CLI flags |
 
@@ -213,7 +219,7 @@ All inputs are optional and typed:
 
 ```yaml
 include:
-  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.6/templates/gitlab-ci.yml'
+  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.7/templates/gitlab-ci.yml'
 ```
 
 **Self-hosted GitLab?** Mirror the repo and use `project:` instead:
@@ -221,7 +227,7 @@ include:
 ```yaml
 include:
   - project: 'your-group/aiir'
-    ref: 'v1.0.6'
+    ref: 'v1.0.7'
     file: '/templates/gitlab-ci.yml'
 ```
 
@@ -493,7 +499,7 @@ Each receipt is a content-addressed JSON document:
 | `ai-only` | Only receipt AI-authored commits | `false` |
 | `commit-range` | Specific commit range (e.g., `main..HEAD`) | Auto-detected from event |
 | `output-dir` | Directory to write receipt JSON files | _(prints to log)_ |
-| `sign` | Sign receipts with Sigstore | `false` |
+| `sign` | Sign receipts with Sigstore | `true` |
 
 ### Outputs
 
@@ -501,7 +507,8 @@ Each receipt is a content-addressed JSON document:
 |--------|-------------|
 | `receipt_count` | Number of receipts generated |
 | `ai_commit_count` | Number of AI-authored commits detected |
-| `receipts_json` | Full JSON array of all receipts |
+| `receipts_json` | Full JSON array of all receipts (set to `"OVERFLOW"` if >1 MB) |
+| `receipts_overflow` | `"true"` when `receipts_json` exceeded 1 MB and was truncated |
 
 > ⚠️ **Security note on `receipts_json`**: Contains commit metadata which may include shell metacharacters. **Never** interpolate directly into `run:` steps via `${{ }}`. Write to a file instead.
 
@@ -571,7 +578,10 @@ Optionally sign receipts with [Sigstore](https://sigstore.dev) keyless signing f
 
 ```yaml
 name: AIIR (Signed)
-on: [push, pull_request]
+on:
+  push:
+    tags-ignore: ['**']
+  pull_request:
 
 permissions:
   id-token: write
@@ -589,6 +599,8 @@ jobs:
           output-dir: .receipts/
           sign: true
 ```
+
+> **Fork PRs**: GitHub does not grant OIDC tokens to fork pull requests. If your project accepts external contributions, either use `sign: false` for PRs or conditionally skip signing on forks. AIIR will detect the missing credential and fail with a clear error rather than hanging.
 
 Each receipt gets an accompanying `.sigstore` bundle:
 - **Fulcio certificate** — short-lived cert proving the signer's OIDC identity

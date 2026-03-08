@@ -52,10 +52,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" \
-            --title "$GITHUB_REF_NAME" \
-            --generate-notes \
-            --verify-tag
+          # Idempotent: skip if release already exists (e.g. manual pre-release)
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "✅ Release $GITHUB_REF_NAME already exists — skipping creation"
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              --title "$GITHUB_REF_NAME" \
+              --generate-notes \
+              --verify-tag
+            echo "✅ Release $GITHUB_REF_NAME created"
+          fi
 
   # ── Step 2: Build sdist + wheel ────────────────────────────────────
   build:

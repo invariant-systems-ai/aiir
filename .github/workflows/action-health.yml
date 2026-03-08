@@ -45,26 +45,27 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+      # Create the test repo in $GITHUB_WORKSPACE so the composite
+      # action (which runs in the workspace root) sees a valid git repo.
       - name: Create test repository
         run: |
-          mkdir /tmp/aiir-smoke && cd /tmp/aiir-smoke
-          git init
+          git init .
           git config user.email "smoke@test.invalid"
           git config user.name "AIIR Smoke Test"
 
           # Commit 1: human commit
           echo "hello" > human.txt
-          git add . && git commit -m "feat: human-written feature"
+          git add human.txt && git commit -m "feat: human-written feature"
 
           # Commit 2: AI-authored commit (Copilot trailer)
           echo "generated" > ai.txt
-          git add . && git commit -m "feat: ai feature
+          git add ai.txt && git commit -m "feat: ai feature
 
           Co-authored-by: Copilot <copilot@github.com>"
 
           # Commit 3: bot commit (Dependabot)
           echo "bump" > deps.txt
-          git add . && git commit -m "chore(deps): bump foo
+          git add deps.txt && git commit -m "chore(deps): bump foo
 
           Signed-off-by: dependabot[bot] <support@github.com>"
 
@@ -82,7 +83,7 @@ jobs:
         with:
           commit-range: "${{ env.SMOKE_BASE }}..${{ env.SMOKE_HEAD }}"
           sign: "false"
-          output-dir: /tmp/aiir-smoke/.receipts-unsigned
+          output-dir: .receipts-unsigned
 
       - name: Validate unsigned outputs
         env:
@@ -120,7 +121,7 @@ jobs:
           "
 
           # Verify files were written
-          FCOUNT=$(ls -1 /tmp/aiir-smoke/.receipts-unsigned/*.json 2>/dev/null | wc -l)
+          FCOUNT=$(ls -1 "$GITHUB_WORKSPACE/.receipts-unsigned/"*.json 2>/dev/null | wc -l)
           if [ "$FCOUNT" -lt 3 ]; then
             echo "::error::Expected ≥3 receipt files, found $FCOUNT"
             exit 1
@@ -133,12 +134,12 @@ jobs:
         with:
           commit-range: "${{ env.SMOKE_BASE }}..${{ env.SMOKE_HEAD }}"
           sign: "true"
-          output-dir: /tmp/aiir-smoke/.receipts-signed
+          output-dir: .receipts-signed
 
       - name: Validate signed outputs
         run: |
           # Verify .sigstore bundles exist alongside receipt JSON
-          BUNDLES=$(ls -1 /tmp/aiir-smoke/.receipts-signed/*.sigstore 2>/dev/null | wc -l)
+          BUNDLES=$(ls -1 "$GITHUB_WORKSPACE/.receipts-signed/"*.sigstore 2>/dev/null | wc -l)
           if [ "$BUNDLES" -lt 3 ]; then
             echo "::error::Expected ≥3 .sigstore bundles, found $BUNDLES"
             exit 1
@@ -148,7 +149,7 @@ jobs:
       - name: Verify signatures
         run: |
           pip install "sigstore>=4.0.0,<5.0.0"
-          cd /tmp/aiir-smoke/.receipts-signed
+          cd "$GITHUB_WORKSPACE/.receipts-signed"
           for receipt in *.json; do
             [ "$receipt" = "*.json" ] && continue
             bundle="${receipt}.sigstore"

@@ -22,7 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Fixed
 
-- **14 security vulnerabilities** identified during adversarial red-team review: path traversal in `--check`, ReDoS in commit message parsing, Unicode homoglyph bypasses, MCP argument injection, resource exhaustion via oversized inputs, and more. All hardened with bounds checks, input validation, and safe defaults.
+- **Security hardening**: Multiple input validation and output sanitization improvements identified during adversarial red-team review. All hardened with bounds checks, input validation, and safe defaults. See [THREAT_MODEL.md](THREAT_MODEL.md) for the full control inventory.
 
 ## [1.0.14] — 2026-03-09
 
@@ -45,7 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - **Explainable verification** (`--explain`): Human-readable verification output for non-crypto users. Categorizes failures (hash mismatch, unknown type/schema, invalid version, malformed input) with plain-English problem descriptions, common causes, and remediation steps. Schema warnings displayed independently of hash verdict.
 - **Org policy engine** (`--policy PRESET`, `--policy-init PRESET`): Three enforcement presets — `strict` (hard-fail, signing required, max 50% AI commits), `balanced` (soft-fail, signing recommended), `permissive` (warn-only). Policies stored in `.aiir/policy.json`. Per-receipt checks: signing status, provenance repo, authorship class, schema validity. Aggregate ledger check: AI commit percentage cap. Integrates with `--check` for CI enforcement.
 - **Agent attestation envelope** (`--agent-tool`, `--agent-model`, `--agent-context`): Structured metadata for AI-agent-generated commits stored in `extensions.agent_attestation`. Six allowlisted keys (`tool_id`, `model_class`, `session_id`, `run_context`, `tool_version`, `confidence`) with sanitization — string coercion, 200-char cap, no core hash impact.
-- **Architecture document** (`ARCHITECTURE.md`): Target architecture overview with module responsibilities, 3-phase evolution roadmap (Assurance Baseline → Provenance Depth → AI-First Experience), schema evolution policy, and backward compatibility guarantees.
+- **Architecture document** (`ARCHITECTURE.md`): Architecture overview with module responsibilities, shipped capabilities, schema evolution policy, and backward compatibility guarantees.
 
 ### Changed
 

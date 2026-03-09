@@ -1,8 +1,6 @@
 # AIIR Architecture
 
-> Target architecture and phased evolution roadmap for AIIR.
-> This document is informed by external evaluation findings and the project's
-> goal of becoming a first-class AI commit-provenance layer.
+> Architecture overview for AIIR — the reference implementation of AI Integrity Receipts.
 
 ## Current Architecture (v1.0.x)
 
@@ -53,58 +51,35 @@
 
 ---
 
-## Evolution Roadmap
+## Shipped Capabilities
 
-The roadmap is organized in three phases. Each phase builds on the previous
-one and maintains full backward compatibility with existing receipts.
+All capabilities listed below are available in the current release and
+maintain full backward compatibility with existing receipts.
 
-### Phase 1 — Assurance Baseline (v1.0.13 – v1.1.x)
-
-**Goal**: Strengthen evidence quality and human experience without breaking
-the receipt format.
-
-| Capability | Status | Notes |
+| Capability | Since | Notes |
 | --- | --- | --- |
-| Explainable verification (`--explain`) | ✅ Shipped | Plain-English failure diagnostics with remediation |
-| Org policy presets (`--policy`) | ✅ Shipped | strict / balanced / permissive; `.aiir/policy.json` |
-| Policy initialization (`--policy-init`) | ✅ Shipped | Scaffolds policy file with chosen preset |
-| Agent attestation envelope | ✅ Shipped | `extensions.agent_attestation` — tool, model, context |
-| in-toto Statement v1 wrapper (`--in-toto`) | ✅ Shipped | Native supply-chain attestation envelope |
-| Signed-by-default posture | 🔲 Planned | `--sign` default when OIDC available; `--no-sign` opt-out |
-| CONTRIBUTING.md onboarding fixes | ✅ Shipped | Correct test commands, hypothesis note |
-| Schema validation in `--check` | ✅ Shipped (v1.0.12) | `schema_errors` in verification result |
+| Explainable verification (`--explain`) | v1.0.13 | Plain-English failure diagnostics with remediation |
+| Org policy presets (`--policy`) | v1.0.13 | strict / balanced / permissive; `.aiir/policy.json` |
+| Policy initialization (`--policy-init`) | v1.0.13 | Scaffolds policy file with chosen preset |
+| Agent attestation envelope | v1.0.13 | `extensions.agent_attestation` — tool, model, context |
+| in-toto Statement v1 wrapper (`--in-toto`) | v1.0.14 | Native supply-chain attestation envelope |
+| Schema validation in `--check` | v1.0.12 | `schema_errors` in verification result |
+| Public Python API | v1.0.15 | `from aiir import generate_receipt, verify_receipt` |
+| 5 MCP tools | v1.0.15 | receipt, verify, stats, explain, policy_check |
+| Full Unicode TR39 confusable detection | v1.0.15 | 669 entries across 69 scripts |
+| Adversarial red-team hardening | v1.0.15 | 80 hostile tests, 142 security controls |
 
-### Phase 2 — Provenance Depth (v1.2.x)
+---
 
-**Goal**: Richer provenance primitives that support audit trails and
-cross-system correlation.
+## Future Direction
 
-| Capability | Target | Notes |
-| --- | --- | --- |
-| Chained receipts | v1.2.0 | `parent_receipt_id` linking sequential commits |
-| Diff-level attestation | v1.2.0 | Per-hunk AI vs human classification |
-| SLSA Build Level 2 provenance | v1.2.x | Build environment attestation in extensions |
-| Receipt chain verification | v1.2.x | `--verify-chain` validates parent linkage |
-| CI template: signed-by-default | v1.2.0 | All platform templates enable `--sign` |
-| Policy: per-path rules | v1.2.x | Different policies for `src/` vs `docs/` vs `tests/` |
+AIIR's roadmap focuses on three themes: **deeper provenance primitives**,
+**richer verification experiences**, and **tighter ecosystem integration**.
+New capabilities follow the schema evolution policy below — extensions
+first, promotion after proven stability.
 
-**Schema evolution strategy**: New fields go into `extensions.*` (no core
-hash change). When a field proves stable across two minor versions, it may
-be promoted to a CORE_KEY in the next major version with a migration guide.
-
-### Phase 3 — AI-First Experience (v2.0.x)
-
-**Goal**: Purpose-built UX for AI-agent workflows and organizational
-governance dashboards.
-
-| Capability | Target | Notes |
-| --- | --- | --- |
-| PR-native risk summaries | v2.0.0 | GitHub Check Run with per-commit risk scoring |
-| Agent session correlation | v2.0.0 | Link receipts across a multi-commit agent session |
-| Org dashboard API | v2.0.x | Aggregate policy compliance across repositories |
-| Receipt format v2 | v2.0.0 | Promote stable extensions to core; deprecate v1 fields |
-| CBOR compact encoding | v2.0.x | Binary receipt format for high-throughput pipelines |
-| Webhook integration | v2.0.x | Push receipt events to external audit systems |
+See [SPEC.md](SPEC.md) for the canonical specification and
+[CHANGELOG.md](CHANGELOG.md) for the latest shipped capabilities.
 
 ---
 
@@ -138,8 +113,8 @@ governance dashboards.
   gated behind a minor version bump with opt-out.
 
 - **Ledger format**: The JSONL append-only ledger and `index.json`
-  structure are stable within v1.x. Future ledger features (e.g., chain
-  verification) add new index fields without removing existing ones.
+  structure are stable within v1.x. Future ledger features add new
+  index fields without removing existing ones.
 
 - **GitHub Action**: The `v1` floating tag always points to the latest
   v1.x.x release. Breaking changes require `v2`.

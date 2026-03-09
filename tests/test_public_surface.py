@@ -104,11 +104,12 @@ class TestWebsiteHTMLIntegrity(unittest.TestCase):
         }
         self.assertEqual(pages, expected, f"Missing pages: {expected - pages}")
 
-    def test_nav_consistency_7_links(self):
-        """Every main page header <nav> has exactly 7 links."""
+    def test_nav_consistency_8_links(self):
+        """Every main page header <nav> has exactly 8 links."""
         expected_hrefs = {
             "/docs",
             "/verify",
+            "/integrations",
             "/spec",
             "/pricing",
             "/security",
@@ -122,8 +123,8 @@ class TestWebsiteHTMLIntegrity(unittest.TestCase):
             hrefs = re.findall(r'href="([^"]*)"', nav_html)
             self.assertEqual(
                 len(hrefs),
-                7,
-                f"{page.name}: expected 7 nav links, got {len(hrefs)}: {hrefs}",
+                8,
+                f"{page.name}: expected 8 nav links, got {len(hrefs)}: {hrefs}",
             )
             # Check essential internal links are present
             href_set = set(hrefs)

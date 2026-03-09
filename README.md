@@ -776,11 +776,24 @@ on every push to `main` and commits them back to the repo. Locally, the
 
 ## Security
 
-Extensive [security controls](THREAT_MODEL.md). 1000+ tests. Zero dependencies.
+Extensive [security controls](THREAT_MODEL.md). 1022 tests. Zero dependencies.
 
 See [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), and
 [Tamper Detection](docs/tamper-detection.md).
+### Trust Tiers
 
+Receipts exist at three trust levels. Choose the right one for your use case:
+
+| Tier | What you get | Use when |
+|------|-------------|----------|
+| **Unsigned** (`sign: false`) | Tamper-evident — hash integrity detects modification, but anyone can recreate a matching receipt from the same commit | Local development, smoke testing, internal audit trails |
+| **Signed** (`sign: true`, default) | Tamper-proof — Sigstore signature binds the *entire* receipt (including extensions) to an OIDC identity via a transparency log | CI/CD compliance, SOC 2 evidence, regulatory audit |
+| **Enveloped** (in-toto Statement) | Signed + wrapped in a supply-chain attestation envelope with explicit subject and predicate binding | SLSA provenance, cross-system verification, EU AI Act evidence packages |
+
+> **Rule of thumb**: For anything an auditor will read, use **Signed** or
+> **Enveloped**. Unsigned receipts are developer convenience — do not
+> cite them as tamper-proof evidence. See [SPEC.md §11.1](SPEC.md) for
+> the full normative definition.
 ---
 
 ## Specification & Schemas

@@ -277,12 +277,25 @@ The `extensions` field is a JSON object that MAY contain arbitrary keys.
 It is NOT part of CORE_KEYS and does NOT affect `content_hash` or
 `receipt_id`.
 
+> **⚠️ Normative**: Extension data is **annotation-only metadata**.
+> Extensions (including `agent_attestation`, `instance_id`, etc.) are
+> NOT covered by the content-addressing scheme. A receipt's
+> `content_hash` and `receipt_id` remain unchanged if extension fields
+> are added, modified, or removed.
+>
+> If extension data is policy-significant (e.g., agent identity,
+> model name, or context window), the receipt MUST be wrapped in a
+> signed envelope (Sigstore per §11, or in-toto Statement per §14.2)
+> to bind extension content cryptographically. Implementations MUST
+> NOT treat unsigned extension fields as audit-grade evidence.
+
 Known extension keys:
 
 | Key | Type | Description |
 |-----|------|-------------|
 | `instance_id` | string | User-supplied instance identifier |
 | `namespace` | string | Organizational grouping label |
+| `agent_attestation` | object | Agent identity, model, and context metadata (annotation-only; see warning above) |
 
 Implementations SHOULD preserve unknown extension keys when round-tripping
 receipts.
@@ -366,6 +379,31 @@ but not **tamper-proof** (a new valid receipt can be fabricated by anyone who
 can run the tool on the same commit).
 
 Signing is RECOMMENDED for compliance-critical workflows.
+
+### 11.1 Trust Tiers
+
+Receipts exist at one of three trust tiers. Consumers MUST understand
+which tier applies before making policy decisions:
+
+| Tier | Configuration | Integrity | Authenticity | Suitable for |
+|------|--------------|-----------|-------------|-------------|
+| **Tier 1 — Unsigned** | `sign: false` | Tamper-**evident** (content hash) | None — anyone who can run `aiir` on the same commit can produce an identical receipt | Developer convenience, local audit trails, smoke testing |
+| **Tier 2 — Signed** | `sign: true` (default in GitHub Action) | Tamper-**proof** (Sigstore bundle) | Signer identity bound via OIDC + transparency log | CI/CD compliance, SOC 2 evidence, audit-grade provenance |
+| **Tier 3 — Enveloped** | in-toto Statement wrapper (§14.2) | Tamper-**proof** + envelope integrity | Predicate + subject bound to signer | Supply-chain attestation, SLSA provenance, cross-system verification |
+
+**Extensions at each tier:**
+
+- **Tier 1**: Extensions are mutable annotation. They MAY change without
+  affecting `receipt_id`. Do NOT use for policy decisions.
+- **Tier 2**: The Sigstore signature covers the **entire** receipt JSON
+  (including extensions). Modification of any field — core or extension —
+  invalidates the signature.
+- **Tier 3**: The in-toto envelope binds the full predicate (receipt) to
+  a subject and signer. Extensions are cryptographically bound.
+
+> **Guideline**: For regulatory compliance (EU AI Act, SOC 2, ISO 27001),
+> use Tier 2 or Tier 3. Tier 1 receipts are useful for development
+> workflows but SHOULD NOT be cited as tamper-proof evidence.
 
 ---
 

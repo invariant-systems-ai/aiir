@@ -1,6 +1,6 @@
 # AIIR Example: GitHub Actions Integration
 
-This example demonstrates AIIR (AI Integrity Receipts) in a real GitHub Actions workflow. It shows how to automatically generate cryptographic receipts for every commit that touches your codebase — with special attention to AI-authored code.
+This example demonstrates AIIR (AI Integrity Receipts) in a real GitHub Actions workflow. It shows how to automatically generate cryptographic receipts for every commit that touches your codebase — with special attention to commits with declared AI involvement.
 
 ## What This Does
 

@@ -2,7 +2,7 @@
   "$schema": "https://invariantsystems.io/schemas/mcp-manifest.v1.json",
   "name": "aiir",
   "displayName": "AIIR — AI Integrity Receipts",
-  "description": "Generate and verify cryptographic receipts for AI-authored code commits. Detects AI authorship signals, produces content-addressed JSON receipts, and provides tamper-evident audit trails for compliance.",
+  "description": "Tamper-evident receipts for commits with declared AI involvement. Detects AI-involvement signals, produces content-addressed JSON receipts, and provides cryptographic audit trails for compliance.",
   "version": "1.2.0",
   "author": {
     "name": "Invariant Systems, Inc.",

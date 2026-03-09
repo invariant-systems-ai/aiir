@@ -1,0 +1,48 @@
+# Auto-generated release notes configuration.
+# GitHub uses this to categorize PRs when --generate-notes is passed to
+# gh release create.  The Marketplace listing renders these sections.
+#
+# Docs: https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
+
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+      - dependencies    # Dependabot bumps get their own section below
+
+  categories:
+    - title: "🚀 Features"
+      labels:
+        - enhancement
+        - feature
+
+    - title: "🔒 Security & Verification"
+      labels:
+        - security
+        - verification
+        - attestation
+
+    - title: "🐛 Bug Fixes"
+      labels:
+        - bug
+        - fix
+
+    - title: "📖 Documentation"
+      labels:
+        - documentation
+        - docs
+
+    - title: "🔧 Maintenance"
+      labels:
+        - chore
+        - maintenance
+        - ci
+        - refactor
+
+    - title: "📦 Dependency Updates"
+      labels:
+        - dependencies
+
+    - title: "🧩 Other Changes"
+      labels:
+        - "*"

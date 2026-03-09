@@ -621,31 +621,14 @@ class TestVerifyRelease(unittest.TestCase):
 class TestVerifyReleaseWithRange(unittest.TestCase):
     """Tests that require mocking git operations."""
 
-    def _mock_commits(self, shas):
-        """Create mock CommitInfo objects with padded SHAs."""
-        from aiir._core import CommitInfo
-
-        return [
-            CommitInfo(
-                sha=_pad_sha(sha),
-                author_name="Test",
-                author_email="test@example.com",
-                author_date="2026-03-09T12:00:00Z",
-                committer_name="Test",
-                committer_email="test@example.com",
-                committer_date="2026-03-09T12:00:00Z",
-                subject="test",
-                body="",
-                diff_stat="",
-                diff_hash="0" * 64,
-            )
-            for sha in shas
-        ]
+    def _mock_shas(self, shas):
+        """Return padded SHA strings (matches list_commits_in_range return type)."""
+        return [_pad_sha(sha) for sha in shas]
 
     @patch("aiir._verify_release.list_commits_in_range")
     @patch("aiir._verify_release._validate_ref")
     def test_full_coverage_passes(self, mock_validate, mock_list):
-        mock_list.return_value = self._mock_commits(["sha1", "sha2", "sha3"])
+        mock_list.return_value = self._mock_shas(["sha1", "sha2", "sha3"])
         with tempfile.TemporaryDirectory() as td:
             receipts = [
                 _make_receipt(sha="sha1"),
@@ -664,7 +647,7 @@ class TestVerifyReleaseWithRange(unittest.TestCase):
     @patch("aiir._verify_release.list_commits_in_range")
     @patch("aiir._verify_release._validate_ref")
     def test_missing_receipts_fails_strict(self, mock_validate, mock_list):
-        mock_list.return_value = self._mock_commits(["sha1", "sha2", "sha3"])
+        mock_list.return_value = self._mock_shas(["sha1", "sha2", "sha3"])
         with tempfile.TemporaryDirectory() as td:
             # Only 1 of 3 commits has a receipt
             receipts = [_make_receipt(sha="sha1")]
@@ -683,7 +666,7 @@ class TestVerifyReleaseWithRange(unittest.TestCase):
     @patch("aiir._verify_release._validate_ref")
     def test_coverage_gap_warn_passes(self, mock_validate, mock_list):
         """Enforcement=warn → coverage gap doesn't fail."""
-        mock_list.return_value = self._mock_commits(["sha1", "sha2"])
+        mock_list.return_value = self._mock_shas(["sha1", "sha2"])
         with tempfile.TemporaryDirectory() as td:
             receipts = [_make_receipt(sha="sha1")]
             ledger_path = _write_ledger(Path(td), receipts)
@@ -1103,6 +1086,42 @@ class TestEdgeCases(unittest.TestCase):
             )
             self.assertEqual(result["verificationResult"], "PASSED")
             self.assertEqual(result["predicate"]["evaluation"]["totalReceipts"], 100)
+
+    def test_commit_range_with_real_shas(self):
+        """Regression: list_commits_in_range returns List[str] (plain SHAs).
+
+        Previously verify_release did `[c.sha for c in commits]` which raised
+        AttributeError because the elements are already strings, not objects.
+        Fixed to `commit_shas = list_commits_in_range(...)` directly.
+        """
+        sha_a = _pad_sha("aaa111")
+        sha_b = _pad_sha("bbb222")
+        sha_c = _pad_sha("ccc333")
+
+        receipts = [
+            _make_receipt(sha="aaa111"),
+            _make_receipt(sha="bbb222"),
+        ]
+        with tempfile.TemporaryDirectory() as td:
+            ledger_path = _write_ledger(Path(td), receipts)
+
+            # Mock list_commits_in_range to return List[str] (plain SHAs),
+            # exactly as the real function does.
+            with patch(
+                "aiir._verify_release.list_commits_in_range",
+                return_value=[sha_a, sha_b, sha_c],
+            ):
+                # This used to raise: AttributeError: 'str' has no attribute 'sha'
+                result = verify_release(
+                    commit_range="v1.1.0..v1.2.0",
+                    receipts_path=ledger_path,
+                    policy_preset="balanced",
+                )
+                # Should succeed without AttributeError.
+                # sha_c has no receipt → coverage gap → result depends on policy.
+                self.assertIn(result["verificationResult"], ("PASSED", "FAILED"))
+                coverage = result.get("coverage", {})
+                self.assertEqual(coverage.get("commits_total"), 3)
 
 
 if __name__ == "__main__":

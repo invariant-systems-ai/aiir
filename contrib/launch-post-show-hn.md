@@ -1,4 +1,4 @@
-# Show HN: AIIR — Cryptographic receipts for AI-authored code
+# Show HN: AIIR — Cryptographic receipts for commits with declared AI involvement
 
 AI writes 30–50% of new code at most companies. Copilot, ChatGPT, Claude, Cursor, Windsurf, Devin — it all goes into `git commit` with no systematic record of what was human and what was machine.
 

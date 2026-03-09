@@ -133,20 +133,47 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+
+          # Build a structured header that appears above --generate-notes content.
+          # The .github/release.yml template categorizes PRs by label.
+          HEADER=$(cat <<'HEADER_END'
+          ## Install
+
+          ```bash
+          pip install aiir==$VERSION_PLACEHOLDER
+          ```
+
+          **GitHub Action** — `uses: invariant-systems-ai/aiir@v1`
+          **Docker** — `docker run ghcr.io/invariant-systems-ai/aiir:$VERSION_PLACEHOLDER`
+          **GitLab CI/CD** — [Catalog component](https://gitlab.com/explore/catalog/invariant-systems/aiir)
+          HEADER_END
+          )
+          HEADER="${HEADER//\$VERSION_PLACEHOLDER/$VERSION}"
+          # Dedent (the heredoc is indented for readability in the workflow)
+          HEADER=$(echo "$HEADER" | sed 's/^          //')
+
           # Idempotent: if release exists, promote it to latest (un-prerelease).
           # This handles the case where a release was manually created as
           # pre-release or auto-detected as one — we always want tagged
           # semver releases to be full releases for Marketplace eligibility.
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            echo "ℹ️  Release $GITHUB_REF_NAME already exists — ensuring it is marked as latest"
-            gh release edit "$GITHUB_REF_NAME" --prerelease=false --latest
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "ℹ️  Release $TAG already exists — ensuring it is marked as latest"
+            gh release edit "$TAG" --prerelease=false --latest
           else
-            gh release create "$GITHUB_REF_NAME" \
-              --title "$GITHUB_REF_NAME" \
+            gh release create "$TAG" \
+              --title "AIIR $TAG" \
+              --notes-start-tag "$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || echo '')" \
               --generate-notes \
               --verify-tag \
               --latest
-            echo "✅ Release $GITHUB_REF_NAME created"
+            echo "✅ Release $TAG created"
+
+            # Prepend the install header above the auto-generated notes
+            EXISTING=$(gh release view "$TAG" --json body --jq .body)
+            printf '%s\n\n%s' "$HEADER" "$EXISTING" | gh release edit "$TAG" --notes-file -
+            echo "✅ Release notes enriched with install header"
           fi
 
   # ── Step 1b: Attach SBOM to release ────────────────────────────────
@@ -273,7 +300,46 @@ jobs:
           echo "::error::PyPI did not update to $TAG within 3 minutes"
           exit 1
 
-  # ── Step 5: Build & push Docker image to GHCR ──────────────────────
+  # ── Step 4b: Publish JS SDK to npm ───────────────────────────────────
+  publish-npm:
+    needs: preflight
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e  # v4.3.0
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Sync JS SDK version to release tag
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          cd sdks/js
+          # Update package.json version to match the release tag.
+          # Uses node to preserve JSON formatting.
+          node -e "
+            const pkg = require('./package.json');
+            pkg.version = '${TAG}';
+            require('fs').writeFileSync(
+              'package.json',
+              JSON.stringify(pkg, null, 2) + '\n'
+            );
+          "
+          echo "✅ JS SDK version set to ${TAG}"
+          cat package.json | grep '"version"'
+      - name: Publish to npm
+        working-directory: sdks/js
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          # publishConfig.access = "public" is set in package.json,
+          # but we pass --access public as belt-and-suspenders.
+          npm publish --access public
+          echo "✅ @invariantsystems/aiir@${GITHUB_REF_NAME#v} published to npm"
+
+  # ── Step 6: Build & push Docker image to GHCR ──────────────────────
   docker:
     needs: verify
     timeout-minutes: 15
@@ -307,9 +373,9 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.tag }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-  # ── Step 6: Propagate version to website ───────────────────────────
+  # ── Step 7: Propagate version to website ───────────────────────────
   update-website:
-    needs: [verify, docker]
+    needs: [verify, docker, publish-npm]
     timeout-minutes: 5
     runs-on: ubuntu-latest
     # Non-blocking: website has a 6-hour self-heal schedule as backup

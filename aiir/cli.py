@@ -1149,10 +1149,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             file=sys.stderr,
                         )
                 except Exception as e:
+                    # Remove the unsigned receipt — leaving it behind is a
+                    # footgun (users may unknowingly ship unsigned receipts).
+                    try:
+                        os.remove(path)
+                    except OSError:
+                        pass
                     err_msg = _strip_terminal_escapes(str(e))[:200]
                     print(f"{_e('error')} Signing failed: {err_msg}", file=sys.stderr)
                     print(
-                        f"   {_e('hint')} Check your internet connection and try again.",
+                        f"   {_e('hint')} The unsigned receipt was removed. "
+                        "Check your internet connection and try again.",
                         file=sys.stderr,
                     )
                     return 1

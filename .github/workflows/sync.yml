@@ -99,6 +99,11 @@ jobs:
               print('unknown')
           " 2>/dev/null || echo "unknown")
 
+          # ── npm version (@invariantsystems/aiir) ──
+          NPM=$(curl -sf "https://registry.npmjs.org/@invariantsystems/aiir" \
+            | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('dist-tags',{}).get('latest','unknown'))" \
+            2>/dev/null || echo "unknown")
+
           echo ""
           echo "╔══════════════════════════════════════════════╗"
           echo "║        AIIR Distribution Health Check        ║"
@@ -109,6 +114,7 @@ jobs:
           printf "║  %-20s  %-21s ║\n" "GitHub tag" "$GH_TAG"
           printf "║  %-20s  %-21s ║\n" "PyPI" "$PYPI"
           printf "║  %-20s  %-21s ║\n" "GitLab tag" "$GL_TAG"
+          printf "║  %-20s  %-21s ║\n" "npm" "$NPM"
           echo "╚══════════════════════════════════════════════╝"
           echo ""
 
@@ -163,6 +169,18 @@ jobs:
             DRIFT=1
           fi
 
+          # npm vs source (should match after publish pipeline)
+          NPM_VS_LOCAL=$(ver_cmp "$NPM" "$LOCAL")
+          if [ "$NPM" != "unknown" ] && [ "$NPM_VS_LOCAL" = "ahead" ]; then
+            echo "::error title=npm drift::npm ($NPM) is AHEAD of source ($LOCAL) — source may need a bump"
+            DRIFT=1
+          elif [ "$NPM" != "unknown" ] && [ "$NPM_VS_LOCAL" = "behind" ]; then
+            echo "::notice title=npm pending::npm ($NPM) is behind source ($LOCAL) — publish pending"
+          elif [ "$NPM" != "unknown" ] && [ "$NPM_VS_LOCAL" = "unknown" ] && [ "$NPM" != "$LOCAL" ]; then
+            echo "::warning title=npm drift::npm ($NPM) ≠ source ($LOCAL)"
+            DRIFT=1
+          fi
+
           if [ "$DRIFT" -eq 0 ]; then
             echo "✅ All channels in sync: v${LOCAL}"
             echo "drift=false" >> "$GITHUB_OUTPUT"
@@ -173,8 +191,9 @@ jobs:
             echo "Self-healing actions taken:"
             echo "  • GitLab mirror was force-pushed (branches + tags)"
             echo "  • PyPI cannot be self-healed (immutable). If behind, create a new release."
+            echo "  • npm cannot be self-healed (immutable). If behind, create a new release."
             echo "drift=true" >> "$GITHUB_OUTPUT"
-            echo "drift_summary=__init__.py=${LOCAL} GitHub=${GH_TAG} PyPI=${PYPI} GitLab=${GL_TAG}" >> "$GITHUB_OUTPUT"
+            echo "drift_summary=__init__.py=${LOCAL} GitHub=${GH_TAG} PyPI=${PYPI} GitLab=${GL_TAG} npm=${NPM}" >> "$GITHUB_OUTPUT"
             exit 1
           fi
 
@@ -208,6 +227,7 @@ jobs:
           Self-healing already attempted:
           - ✅ GitLab mirror force-pushed (branches + tags)
           - ❌ PyPI is immutable — if behind, a new patch release is needed
+          - ❌ npm is immutable — if behind, a new patch release is needed
 
           Check the workflow run for the exact version table.
 

@@ -1,4 +1,4 @@
-# @aiir/verify
+# @invariantsystems/aiir
 
 **AIIR receipt verification for JavaScript and TypeScript** — zero dependencies, works in browsers and Node.js (≥18).
 
@@ -7,7 +7,7 @@ Verify the cryptographic integrity of [AIIR commit receipts](https://github.com/
 ## Install
 
 ```bash
-npm install @aiir/verify
+npm install @invariantsystems/aiir
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ npm install @aiir/verify
 ### Node.js
 
 ```javascript
-const { verify } = require('@aiir/verify');
+const { verify } = require('@invariantsystems/aiir');
 
 const receipt = JSON.parse(fs.readFileSync('receipt.aiir.json', 'utf-8'));
 const result = await verify(receipt);
@@ -30,7 +30,7 @@ if (result.valid) {
 ### TypeScript
 
 ```typescript
-import { verify, VerifyResult } from '@aiir/verify';
+import { verify, VerifyResult } from '@invariantsystems/aiir';
 
 const result: VerifyResult = await verify(receipt);
 ```
@@ -38,7 +38,7 @@ const result: VerifyResult = await verify(receipt);
 ### Browser
 
 ```html
-<script src="https://unpkg.com/@aiir/verify"></script>
+<script src="https://unpkg.com/@invariantsystems/aiir"></script>
 <script>
   const result = await AIIR.verify(receiptObject);
 </script>
@@ -47,7 +47,7 @@ const result: VerifyResult = await verify(receipt);
 Or as an ES module:
 
 ```javascript
-import { verify } from '@aiir/verify';
+import { verify } from '@invariantsystems/aiir';
 ```
 
 ## API

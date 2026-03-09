@@ -1,6 +1,6 @@
 ---
 title: "AI writes 40% of your code. Here's how to audit it."
-description: "Introducing AIIR — open-source cryptographic receipts for AI-authored commits. EU AI Act compliance, SOC 2 evidence, and engineering visibility in one tool."
+description: "Introducing AIIR — open-source cryptographic receipts for commits with declared AI involvement. EU AI Act compliance, SOC 2 evidence, and engineering visibility in one tool."
 tags: ai, security, opensource, devops
 canonical_url: https://invariantsystems.io/blog/introducing-aiir
 ---

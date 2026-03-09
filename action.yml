@@ -1,5 +1,5 @@
 name: "AIIR — AI Integrity Receipts"
-description: "Generate cryptographic receipts for commits with declared AI involvement. Prove what your AI did."
+description: "Generate and verify cryptographic receipts for commits with declared AI involvement. Receipt, verify, attest."
 author: "Invariant Systems, Inc."
 
 branding:

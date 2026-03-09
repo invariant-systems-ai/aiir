@@ -6,8 +6,9 @@
 
 # AIIR — AI Integrity Receipts
 
-**AI wrote your code. Here's the receipt.** 🧾
+**Tamper-evident receipts for commits with declared AI involvement.** 🧾
 
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-AIIR-blue?logo=github)](https://github.com/marketplace/actions/aiir-ai-integrity-receipts)
 [![PyPI](https://img.shields.io/pypi/v/aiir?color=blue)](https://pypi.org/project/aiir/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/invariant-systems-ai/aiir)
@@ -25,18 +26,21 @@
 
 AI writes 30–50% of new code at most companies. Copilot, ChatGPT, Claude, Cursor — it all goes into `git commit` with no systematic record of what was human and what was machine.
 
-> **EU AI Act** transparency obligations are phasing in now — general-purpose AI transparency rules from August 2025, high-risk system requirements from August 2026. AI-generated code with no provenance is a compliance gap.
+> **EU AI Act** transparency obligations are phasing in now — general-purpose AI transparency rules from August 2025, high-risk system requirements from August 2026. Code with undocumented AI involvement is a compliance gap.
 
-Your auditors will ask: *"Which code was AI-generated? Can you prove it?"*
+Your auditors will ask: *"Which commits involved AI tools? Can you show the audit trail?"*
+
+And then: *"Did you verify every release against policy before shipping?"*
 
 | Who asks | What they need |
 |----------|---------------|
-| **SOC 2 / ISO 27001 auditor** | Tamper-evident record of AI involvement per commit |
-| **EU AI Act compliance** | Supports transparency and provenance evidence |
-| **Insurance underwriter** | Record of AI involvement per commit |
-| **Engineering leadership** | "We track all AI code" — with cryptographic receipts |
+| **SOC 2 / ISO 27001 auditor** | Tamper-evident record of declared AI involvement per commit |
+| **EU AI Act compliance** | Transparency evidence for commits with AI markers + verified release attestation |
+| **Insurance underwriter** | Policy-evaluated verification of declared AI involvement per release |
+| **GRC / supply-chain security** | SLSA-compatible Verification Summary Attestation (VSA) |
+| **Engineering leadership** | "We track declared AI involvement *and* verify every release" — with cryptographic receipts |
 
-AIIR answers that question — for every commit with declared AI involvement. One command. Zero dependencies. Apache 2.0.
+AIIR answers both questions. **Generate** receipts for every commit. **Verify** releases against policy. **Attest** the result as a machine-readable VSA. One tool. Zero dependencies. Apache 2.0.
 
 ---
 
@@ -83,6 +87,16 @@ aiir --verify .aiir/receipts.jsonl --explain
 See [Tamper Detection](docs/tamper-detection.md) for a walkthrough of what
 happens when a receipt is modified.
 
+### Verify a release
+
+Evaluate all receipts against policy and emit a [Verification Summary Attestation](https://slsa.dev/verification_summary) (VSA):
+
+```bash
+aiir --verify-release --policy strict --emit-vsa
+```
+
+AIIR acts as a **verifier** — it identifies itself (`https://invariantsystems.io/verifiers/aiir`), names the policy, evaluates every receipt, computes commit coverage, and emits a signed PASS/FAIL decision as an [in-toto Statement v1](https://in-toto.io/Statement/v1). Downstream CI gates, auditors, and GRC platforms consume the VSA without re-evaluating receipts themselves.
+
 ---
 
 ## Every Platform. One Command.
@@ -125,8 +139,39 @@ aiir --range HEAD~5..HEAD --jsonl | jq .receipt_id
 # Custom ledger location
 aiir --ledger .audit/
 
-# Verify a receipt hasn't been tampered with
-aiir --verify receipt.json
+# Verify a receipt — with human-readable explanation
+aiir --verify receipt.json --explain
+
+# Wrap receipts in an in-toto Statement v1 envelope (SLSA-compatible)
+aiir --range HEAD~3..HEAD --in-toto --output .receipts/
+
+# Sign + wrap for full supply-chain attestation
+aiir --sign --in-toto --output .receipts/
+
+# Attach agent attestation metadata (Copilot, Cursor, Claude, etc.)
+aiir --agent-tool copilot --agent-model gpt-4o --agent-context ide
+
+# Policy engine — initialise and enforce org-wide rules
+aiir --policy-init strict          # creates .aiir/policy.json
+aiir --check --policy strict       # CI gate: fail if policy violated
+aiir --check --max-ai-percent 50   # fail if >50% commits are AI-authored
+
+# Verify an entire release against policy, emit a VSA
+aiir --verify-release --receipts .aiir/receipts.jsonl --emit-vsa --policy strict
+
+# Ledger utilities
+aiir --stats                       # dashboard of ledger statistics
+aiir --badge                       # shields.io badge Markdown
+aiir --export backup.json          # portable JSON bundle
+
+# Privacy — omit file paths from receipts
+aiir --redact-files --namespace acme-corp
+
+# Native GitLab CI mode (MR comments, dotenv outputs)
+aiir --gitlab-ci --output .receipts/
+
+# GitLab SAST report for Security Dashboard
+aiir --gitlab-ci --gl-sast-report
 ```
 
 ### ⚙️ GitHub Action — Automate it in CI
@@ -362,6 +407,7 @@ Commits where a human or tool explicitly attributed AI involvement.
 | **Amazon Q / CodeWhisperer** | `amazon q`, `codewhisperer`, `Co-authored-by: Amazon Q` |
 | **Devin** | `Co-authored-by: Devin`, `devin[bot]` |
 | **Gemini** | `gemini code assist`, `google gemini`, `gemini[bot]` |
+| **GitLab Duo** | `gitlab duo`, `duo code suggestions`, `duo chat`, `duo enterprise`, `Co-authored-by: gitlab duo` |
 | **Tabnine** | `tabnine` in commit metadata |
 | **Aider** | `aider:` prefix in commit messages |
 | **Generic markers** | `AI-generated`, `LLM-generated`, `machine-generated` |
@@ -378,12 +424,13 @@ Commits made by CI bots and automated dependency tools. These are *not* gen-AI a
 | **Snyk** | `snyk-bot` as author |
 | **CodeRabbit** | `coderabbit[bot]` as author |
 | **GitHub Actions** | `github-actions[bot]` as author |
+| **GitLab Bot** | `gitlab-bot` as author |
 | **DeepSource** | `deepsource[bot]` as author |
 
 > **Note**: Since v1.0.4, bot and AI signals are fully separated. A Dependabot commit gets `is_bot_authored: true` and `authorship_class: "bot"`, **not** `is_ai_authored: true`. The `authorship_class` field provides a single structured value: `"human"`, `"ai_assisted"`, `"bot"`, or `"ai+bot"`.
 
-<details>
-<summary><strong>Detection limitations</strong></summary>
+<details open>
+<summary><strong>Detection scope and limitations</strong></summary>
 
 AI detection uses `heuristic_v2` — matching on commit metadata signals.
 
@@ -398,7 +445,7 @@ AI detection uses `heuristic_v2` — matching on commit metadata signals.
 - Squash-merged AI branches with clean messages
 - Amended commits that remove AI trailers
 
-This is by design — AIIR receipts what's declared, not what's hidden.
+This is by design — AIIR receipts what's *declared*, not what's hidden. Receipts prove the integrity of what was recorded, not the completeness of AI involvement.
 
 </details>
 
@@ -753,6 +800,114 @@ The server uses the same zero-dependency core as the CLI. No extra packages need
 </details>
 
 <details>
+<summary><strong>Release verification & VSA</strong></summary>
+
+Verify an entire release against policy and produce a machine-readable [Verification Summary Attestation (VSA)](https://slsa.dev/verification_summary):
+
+```bash
+# Verify receipts against strict policy, emit VSA
+aiir --verify-release --receipts .aiir/receipts.jsonl --policy strict --emit-vsa
+
+# Custom subject for the VSA (e.g., an OCI image digest)
+aiir --verify-release --receipts .aiir/receipts.jsonl \
+  --subject 'oci://ghcr.io/myorg/app@sha256:abc123...' --emit-vsa aiir-vsa.intoto.jsonl
+```
+
+The VSA is an [in-toto Statement v1](https://in-toto.io/Statement/v1) with a `https://slsa.dev/verification_summary/v1` predicate that records:
+- **Verifier identity** — who ran the check
+- **Policy digest** — SHA-256 of the policy that was evaluated
+- **Coverage metrics** — commit coverage percentage, AI/bot/human breakdown
+- **Pass/fail result** — per-receipt and aggregate evaluation
+
+Policy presets: `strict` (hard-fail, signing required, max 50% AI), `balanced` (soft-fail, signing recommended), `permissive` (warn-only). Customise via `.aiir/policy.json`.
+
+</details>
+
+<details>
+<summary><strong>Policy engine</strong></summary>
+
+Enforce organisational AI-usage policies in CI:
+
+```bash
+# Initialise a policy file from a preset
+aiir --policy-init strict   # creates .aiir/policy.json
+aiir --policy-init balanced
+aiir --policy-init permissive
+
+# Run policy checks against the ledger
+aiir --check --policy strict
+
+# Quick gate: fail if AI-authored percentage exceeds a threshold
+aiir --check --max-ai-percent 50
+```
+
+Three presets:
+
+| Preset | Enforcement | Signing | Max AI % | Use case |
+|--------|-------------|---------|----------|----------|
+| `strict` | Hard-fail | Required | 50% | Regulated industries, SOC 2, EU AI Act |
+| `balanced` | Soft-fail | Recommended | 80% | Most teams — catches issues without blocking |
+| `permissive` | Warn-only | Optional | 100% | Early adoption, experimentation |
+
+Per-receipt checks: signing status, provenance repository, authorship class, schema validity.  
+Aggregate checks: AI commit percentage cap.
+
+Commit `.aiir/policy.json` to your repo so every contributor and CI run uses the same rules.
+
+</details>
+
+<details>
+<summary><strong>Agent attestation</strong></summary>
+
+Attach structured metadata identifying which AI tool generated a commit:
+
+```bash
+aiir --agent-tool copilot --agent-model gpt-4o --agent-context ide
+aiir --agent-tool cursor --agent-model claude-sonnet-4-20250514 --agent-context ide
+aiir --agent-tool claude-code --agent-context cli
+```
+
+Stored in `extensions.agent_attestation` (not part of the content hash — adding or changing agent metadata does not invalidate receipts):
+
+```json
+{
+  "extensions": {
+    "agent_attestation": {
+      "tool_id": "copilot",
+      "model_class": "gpt-4o",
+      "run_context": "ide"
+    }
+  }
+}
+```
+
+Six allowlisted keys: `tool_id`, `model_class`, `session_id`, `run_context`, `tool_version`, `confidence`. All values are sanitised (string coercion, 200-char cap).
+
+</details>
+
+<details>
+<summary><strong>in-toto Statement wrapping</strong></summary>
+
+Wrap receipts in a standard [in-toto Statement v1](https://in-toto.io/Statement/v1) envelope for compatibility with the supply-chain attestation ecosystem:
+
+```bash
+# Wrap a receipt in an in-toto envelope
+aiir --in-toto --output .receipts/
+
+# Combine with signing for full attestation
+aiir --sign --in-toto --output .receipts/
+```
+
+The predicate type is `https://aiir.dev/commit_receipt/v1`. The subject identifies the git commit by repository URL and SHA. This makes AIIR receipts native to:
+
+- **SLSA** verifiers
+- **Sigstore** policy-controller
+- **Kyverno** / **OPA/Gatekeeper** admission policies
+- **Tekton Chains** supply-chain security
+
+</details>
+
+<details>
 <summary><strong>Detection internals</strong></summary>
 
 See [THREAT_MODEL.md](THREAT_MODEL.md) for full STRIDE analysis, DREAD scoring, and attack trees.
@@ -763,20 +918,24 @@ Homoglyph detection uses the full [Unicode TR39 confusable map](https://www.unic
 
 ---
 
-## Dogfood: This Repo Receipts Itself
+## Proof Points
 
-AIIR eats its own dogfood. Every commit to `main` gets a
-cryptographic receipt committed back to `.receipts/` automatically.
+Everything below is verifiable. No testimonials-behind-a-login — just public artifacts you can audit yourself.
 
-**Verify it yourself:**
-
-```bash
-pip install aiir
-for f in .receipts/*.json; do aiir --verify "$f"; done
-```
+| Proof | What it proves | Verify it |
+|-------|---------------|-----------|
+| **This repo receipts itself** | Dogfood — AIIR generates its own receipts on every push to `main` | `for f in .receipts/*.json; do aiir --verify "$f"; done` |
+| **1170+ tests, 92%+ coverage** | Every release passes Python 3.9–3.13 × Ubuntu/macOS/Windows | [CI runs](https://github.com/invariant-systems-ai/aiir/actions/workflows/ci.yml) |
+| **25 conformance test vectors** | Third-party implementors can verify their hashing against ours | [schemas/test_vectors.json](schemas/test_vectors.json) |
+| **Public threat model** | Full STRIDE/DREAD analysis — we show attackers what we defend against | [THREAT_MODEL.md](THREAT_MODEL.md) |
+| **SLSA provenance on every release** | PyPI wheel has a verifiable build attestation | `gh attestation verify aiir-*.whl --repo invariant-systems-ai/aiir` |
+| **OpenSSF Scorecard** | Automated security health assessment (branch protection, SAST, signing) | [Scorecard](https://scorecard.dev/viewer/?uri=github.com/invariant-systems-ai/aiir) |
+| **CycloneDX SBOM on every release** | Machine-readable bill of materials attached to every GitHub Release | [Latest release](https://github.com/invariant-systems-ai/aiir/releases/latest) → `aiir-sbom.cdx.json` |
+| **Zero dependencies** | Nothing to compromise — `pip show aiir` shows `Requires:` empty | `pip install aiir && pip show aiir` |
+| **Browser verifier** | Client-side receipt verification — no upload, no account, no server | [invariantsystems.io/verify](https://invariantsystems.io/verify) |
 
 The [dogfood CI workflow](.github/workflows/dogfood.yml) generates receipts
-on every push to `main` and commits them back to the repo. Locally, the
+on every push to `main` and commits them back to `.receipts/`. Locally, the
 [pre-commit hook](.pre-commit-config.yaml) receipts every commit at
 `post-commit` stage.
 
@@ -784,7 +943,7 @@ on every push to `main` and commits them back to the repo. Locally, the
 
 ## Security
 
-Extensive [security controls](THREAT_MODEL.md). 1075+ tests. Zero dependencies.
+Extensive [security controls](THREAT_MODEL.md). 1170+ tests. Zero dependencies.
 
 See [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), and
 [Tamper Detection](docs/tamper-detection.md).
@@ -812,6 +971,7 @@ AIIR publishes a formal specification and machine-readable schema for third-part
 |----------|---------|
 | [SPEC.md](SPEC.md) | Normative specification — canonical JSON, content addressing, verification algorithm (RFC 2119) |
 | [schemas/commit_receipt.v1.schema.json](schemas/commit_receipt.v1.schema.json) | JSON Schema (draft 2020-12) for `aiir/commit_receipt.v1` |
+| [schemas/verification_summary.v1.schema.json](schemas/verification_summary.v1.schema.json) | JSON Schema for the Verification Summary Attestation (VSA) predicate |
 | [schemas/test_vectors.json](schemas/test_vectors.json) | 25 conformance test vectors with precomputed hashes |
 | [THREAT_MODEL.md](THREAT_MODEL.md) | STRIDE/DREAD threat model with comprehensive security controls |
 | [docs/tamper-detection.md](docs/tamper-detection.md) | Walkthrough — what happens when a receipt is modified |

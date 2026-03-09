@@ -490,8 +490,8 @@ def verify_release(
             part = part.strip()
             if part:
                 _validate_ref(part)
-        commits = list_commits_in_range(commit_range, cwd=cwd)
-        commit_shas = [c.sha for c in commits]
+        # list_commits_in_range() returns List[str] (plain SHA hex strings).
+        commit_shas = list_commits_in_range(commit_range, cwd=cwd)
 
     # 5) Compute coverage
     if commit_shas:

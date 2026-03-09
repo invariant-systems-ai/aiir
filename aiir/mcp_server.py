@@ -57,6 +57,8 @@ from aiir.cli import (
     generate_receipts_for_range,
     verify_receipt_file,
     explain_verification,
+    verify_release,
+    format_release_report,
     _load_index,
     _ledger_paths,
 )
@@ -280,6 +282,43 @@ TOOLS = [
             },
         },
     },
+    {
+        "name": "aiir_verify_release",
+        "description": (
+            "Verify a release by evaluating AIIR receipts against a named policy. "
+            "Produces a Verification Summary Attestation (VSA) with pass/fail decision, "
+            "coverage statistics, and policy evaluation details. Use this for CI gates, "
+            "audit trails, and compliance checks. "
+            "Reads receipts from the .aiir/ ledger in the current working directory."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "commit_range": {
+                    "type": "string",
+                    "description": (
+                        "Git commit range to verify (e.g., 'origin/main..HEAD'). "
+                        "If omitted, all receipts in the ledger are evaluated."
+                    ),
+                },
+                "policy": {
+                    "type": "string",
+                    "description": (
+                        "Policy preset name ('strict', 'balanced', 'permissive') "
+                        "or path to a policy JSON file. Default: balanced."
+                    ),
+                },
+                "emit_intoto": {
+                    "type": "boolean",
+                    "description": (
+                        "If true, wrap the result as an in-toto Statement v1 "
+                        "Verification Summary Attestation."
+                    ),
+                    "default": False,
+                },
+            },
+        },
+    },
 ]
 
 # ---------------------------------------------------------------------------
@@ -420,6 +459,47 @@ def _handle_aiir_policy_check(args: Dict[str, Any]) -> Dict[str, Any]:
         return _error_result(_sanitize_error(e))
 
 
+def _handle_aiir_verify_release(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Verify a release by evaluating receipts against policy."""
+    commit_range = args.get("commit_range")
+    policy_arg = args.get("policy")
+    emit_intoto = args.get("emit_intoto", False)
+
+    ledger_path = str(Path.cwd() / ".aiir" / "receipts.jsonl")
+
+    # Determine policy
+    from aiir._policy import POLICY_PRESETS as _PP
+
+    policy_preset = None
+    policy_path = None
+    if policy_arg:
+        if policy_arg in _PP:
+            policy_preset = policy_arg
+        else:
+            # Validate path within cwd
+            try:
+                safe_path = _safe_verify_path(policy_arg)
+                policy_path = safe_path
+            except ValueError as e:
+                return _error_result(str(e))
+
+    try:
+        result = verify_release(
+            commit_range=commit_range,
+            receipts_path=ledger_path,
+            policy_path=policy_path,
+            policy_preset=policy_preset,
+            emit_intoto=emit_intoto,
+        )
+    except (FileNotFoundError, ValueError, RuntimeError) as e:
+        return _error_result(_sanitize_error(e))
+    except Exception as e:
+        return _error_result(_sanitize_error(e))
+
+    report = format_release_report(result)
+    return _text_result(report)
+
+
 # ---------------------------------------------------------------------------
 # MCP response helpers
 # ---------------------------------------------------------------------------
@@ -443,6 +523,7 @@ TOOL_HANDLERS = {
     "aiir_stats": _handle_aiir_stats,
     "aiir_explain": _handle_aiir_explain,
     "aiir_policy_check": _handle_aiir_policy_check,
+    "aiir_verify_release": _handle_aiir_verify_release,
 }
 
 

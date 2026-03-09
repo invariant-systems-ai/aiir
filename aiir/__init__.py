@@ -35,6 +35,11 @@ from aiir._receipt import (
 from aiir._schema import validate_receipt_schema as validate_receipt  # noqa: F401
 from aiir._stats import check_policy, format_badge, format_stats  # noqa: F401
 from aiir._verify import verify_receipt, verify_receipt_file  # noqa: F401
+from aiir._verify_release import (  # noqa: F401
+    verify_release,
+    format_release_report,
+    VSA_PREDICATE_TYPE,
+)
 from aiir._gitlab import (  # noqa: F401
     format_gitlab_summary,
     format_gl_sast_report,
@@ -57,6 +62,10 @@ __all__ = [
     "verify_receipt",
     "verify_receipt_file",
     "explain_verification",
+    # Release verification
+    "verify_release",
+    "format_release_report",
+    "VSA_PREDICATE_TYPE",
     # Schema
     "validate_receipt",
     # Ledger

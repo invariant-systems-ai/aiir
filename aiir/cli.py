@@ -145,6 +145,12 @@ from aiir._explain import (  # noqa: F401
     explain_verification,
 )
 
+from aiir._verify_release import (  # noqa: F401
+    verify_release,
+    format_release_report,
+    VSA_PREDICATE_TYPE,
+)
+
 from aiir._sign import (  # noqa: F401
     _sigstore_available,
     sign_receipt,
@@ -392,6 +398,46 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="Expected OIDC issuer URL for --verify-signature",
     )
     parser.add_argument(
+        "--verify-release",
+        action="store_true",
+        dest="verify_release",
+        help=(
+            "Verify a release by evaluating receipts against policy. "
+            "Produces a Verification Summary Attestation (VSA). "
+            "Use with --range, --receipts, --policy, --emit-vsa."
+        ),
+    )
+    parser.add_argument(
+        "--receipts",
+        default=None,
+        metavar="PATH",
+        help=(
+            "Path to receipts ledger (JSONL) or directory of receipt JSONs. "
+            "Default: .aiir/receipts.jsonl. Used with --verify-release."
+        ),
+    )
+    parser.add_argument(
+        "--emit-vsa",
+        nargs="?",
+        const="aiir-vsa.intoto.jsonl",
+        default=None,
+        metavar="FILE",
+        dest="emit_vsa",
+        help=(
+            "Write the Verification Summary Attestation as an in-toto Statement "
+            "to a file. Default filename: aiir-vsa.intoto.jsonl. Used with --verify-release."
+        ),
+    )
+    parser.add_argument(
+        "--subject",
+        default=None,
+        metavar="SUBJECT",
+        help=(
+            "Subject identifier for the VSA (e.g., 'oci://registry/app@sha256:...'). "
+            "Default: auto-detected from git remote + HEAD. Used with --verify-release."
+        ),
+    )
+    parser.add_argument(
         "--redact-files",
         action="store_true",
         help="Omit individual file paths from receipts (privacy; mitigates I-05 file enumeration)",
@@ -630,6 +676,85 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 print("", file=sys.stderr)
                 print(explain_verification(result), file=sys.stderr)
             print(json.dumps(result, indent=2))
+            return 1
+
+    # --- Verify-release mode ---
+    if getattr(args, "verify_release", False):
+        receipts_path = args.receipts or ".aiir/receipts.jsonl"
+        # Determine policy
+        vr_policy_preset = None
+        vr_policy_path = None
+        if args.policy:
+            from aiir._policy import POLICY_PRESETS as _PP
+
+            if args.policy in _PP:
+                vr_policy_preset = args.policy
+            else:
+                vr_policy_path = args.policy
+
+        # Build policy overrides from CLI flags
+        vr_overrides = {}
+        if args.max_ai_percent is not None:
+            vr_overrides["max_ai_percent"] = args.max_ai_percent
+
+        try:
+            vr_result = verify_release(
+                commit_range=args.range_spec,
+                receipts_path=receipts_path,
+                policy_path=vr_policy_path,
+                policy_preset=vr_policy_preset,
+                subject_name=getattr(args, "subject", None),
+                emit_intoto=bool(getattr(args, "emit_vsa", None)),
+                policy_overrides=vr_overrides if vr_overrides else None,
+            )
+        except (FileNotFoundError, ValueError, RuntimeError) as e:
+            print(f"{_e('error')} {e}", file=sys.stderr)
+            return 1
+
+        verdict = vr_result.get("verificationResult", "UNKNOWN")
+        reason = vr_result.get("reason", "")
+
+        # Print human report to stderr
+        report = format_release_report(vr_result)
+        print(report, file=sys.stderr)
+
+        # Write in-toto VSA file if requested
+        if getattr(args, "emit_vsa", None) and "intoto_statement" in vr_result:
+            vsa_path = args.emit_vsa
+            if ".." in vsa_path or vsa_path.startswith("/"):
+                print(
+                    f"{_e('error')} VSA path must be relative and within the project.",
+                    file=sys.stderr,
+                )
+                return 1
+            from pathlib import Path as _VsaPath
+
+            out = _VsaPath(vsa_path)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(
+                json.dumps(vr_result["intoto_statement"], indent=2, ensure_ascii=False)
+                + "\n",
+                encoding="utf-8",
+            )
+            print(
+                f"{_e('ok')} VSA written: {vsa_path}",
+                file=sys.stderr,
+            )
+
+        # Print JSON result to stdout
+        if getattr(args, "emit_vsa", None) and "intoto_statement" in vr_result:
+            print(json.dumps(vr_result["intoto_statement"], indent=2))
+        else:
+            print(json.dumps(vr_result, indent=2))
+
+        if verdict == "PASSED":
+            print(f"\n{_e('ok')} Release verification PASSED", file=sys.stderr)
+            return 0
+        else:
+            print(
+                f"\n{_e('error')} Release verification FAILED: {reason}",
+                file=sys.stderr,
+            )
             return 1
 
     # --- Export mode (no git repo needed) ---

@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://invariantsystems.io/schemas/aiir/verification_summary.v1.schema.json",
+  "title": "AIIR Verification Summary v1",
+  "description": "Verification Summary Attestation (VSA) predicate for AIIR release-scoped verification. A verifier evaluates a bundle of AIIR commit receipts against a named policy and emits a pass/fail decision. Follows the SLSA Verification Summary Attestation pattern.",
+  "type": "object",
+  "required": [
+    "verifier",
+    "timeVerified",
+    "policy",
+    "inputAttestations",
+    "verificationResult",
+    "coverage",
+    "evaluation"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "verifier": {
+      "$ref": "#/$defs/Verifier",
+      "description": "The verifier that produced this summary."
+    },
+    "timeVerified": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp of when verification was performed."
+    },
+    "policy": {
+      "$ref": "#/$defs/PolicyRef",
+      "description": "The policy that was evaluated."
+    },
+    "inputAttestations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/InputAttestation" },
+      "minItems": 1,
+      "description": "The input attestation bundles (receipt ledgers/files) that were evaluated."
+    },
+    "verificationResult": {
+      "type": "string",
+      "enum": ["PASSED", "FAILED"],
+      "description": "The overall verification decision."
+    },
+    "coverage": {
+      "$ref": "#/$defs/Coverage",
+      "description": "Receipt coverage statistics for the evaluated commit range."
+    },
+    "evaluation": {
+      "$ref": "#/$defs/Evaluation",
+      "description": "Summary of per-receipt verification and policy evaluation."
+    },
+    "constraints": {
+      "$ref": "#/$defs/Constraints",
+      "description": "Policy constraints that were enforced during verification."
+    }
+  },
+  "$defs": {
+    "Verifier": {
+      "type": "object",
+      "required": ["id", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI identifying the verifier (e.g., 'https://invariantsystems.io/verifiers/aiir')."
+        },
+        "version": {
+          "type": "object",
+          "required": ["aiir"],
+          "additionalProperties": false,
+          "properties": {
+            "aiir": {
+              "type": "string",
+              "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([.+\\-][0-9a-zA-Z.+\\-]*)?$",
+              "description": "SemVer version of the AIIR verifier."
+            }
+          }
+        }
+      }
+    },
+    "PolicyRef": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "additionalProperties": false,
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "URI identifying the policy (file path, preset URI, or inline)."
+        },
+        "digest": {
+          "type": "object",
+          "required": ["sha256"],
+          "additionalProperties": false,
+          "properties": {
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$",
+              "description": "SHA-256 digest of the canonical policy JSON."
+            }
+          }
+        }
+      }
+    },
+    "InputAttestation": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "additionalProperties": false,
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "URI or path identifying the receipt bundle."
+        },
+        "digest": {
+          "type": "object",
+          "required": ["sha256"],
+          "additionalProperties": false,
+          "properties": {
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$",
+              "description": "SHA-256 digest of the receipt bundle content."
+            }
+          }
+        }
+      }
+    },
+    "Coverage": {
+      "type": "object",
+      "required": [
+        "commitRange",
+        "commitsTotal",
+        "receiptsFound",
+        "receiptsMissing",
+        "coveragePercent"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "commitRange": {
+          "type": "string",
+          "description": "The git commit range that was evaluated (e.g., 'origin/main..HEAD')."
+        },
+        "commitsTotal": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of commits in the range."
+        },
+        "receiptsFound": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of commits with matching receipts."
+        },
+        "receiptsMissing": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of commits without receipts."
+        },
+        "coveragePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percentage of commits covered by receipts."
+        }
+      }
+    },
+    "Evaluation": {
+      "type": "object",
+      "required": [
+        "totalReceipts",
+        "validReceipts",
+        "invalidReceipts",
+        "policyViolations"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "totalReceipts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total receipts evaluated."
+        },
+        "validReceipts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Receipts passing integrity verification."
+        },
+        "invalidReceipts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Receipts failing integrity verification."
+        },
+        "policyViolations": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of policy violations across all receipts."
+        }
+      }
+    },
+    "Constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requireSigned": {
+          "type": "boolean",
+          "description": "Whether the policy required all receipts to be signed."
+        },
+        "allowedDetectionMethods": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allowed AI detection methods."
+        },
+        "disallowUnsignedExtensions": {
+          "type": "boolean",
+          "description": "Whether unsigned extensions were disallowed."
+        },
+        "allowedAuthorshipClasses": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allowed authorship classification values."
+        },
+        "maxAiPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Maximum allowed AI-authored commit percentage."
+        }
+      }
+    }
+  }
+}

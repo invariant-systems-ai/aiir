@@ -97,7 +97,7 @@ Then just say: *"receipt the last 5 commits"* in Claude Chat.
 ```yaml
 repos:
   - repo: https://github.com/invariant-systems-ai/aiir
-    rev: v1.2.0
+    rev: v1.2.1
     hooks:
       - id: aiir-receipt
 ```

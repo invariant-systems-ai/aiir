@@ -1,6 +1,6 @@
 {
   "name": "@invariantsystems/aiir",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "AIIR commit receipt verification — zero dependencies, browser + Node.js",
   "main": "aiir-verify.js",
   "types": "aiir-verify.d.ts",

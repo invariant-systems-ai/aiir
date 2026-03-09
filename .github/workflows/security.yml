@@ -149,8 +149,11 @@ jobs:
         run: |
           # --strict = fail on ANY known vulnerability
           # --desc   = include vulnerability descriptions in output
-          pip-audit --strict --desc --format json --output pip-audit-report.json || true
-          pip-audit --strict --desc
+          # Generate a requirements file of all installed packages,
+          # excluding aiir itself (not on PyPI, would cause --strict error)
+          pip freeze | grep -iv '^aiir==' > _audit_reqs.txt
+          pip-audit --strict --desc -r _audit_reqs.txt --format json --output pip-audit-report.json || true
+          pip-audit --strict --desc -r _audit_reqs.txt
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:

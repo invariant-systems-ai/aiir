@@ -1,6 +1,6 @@
 # AIIR Commit Receipt Specification
 
-**Specification version**: 1.0.0
+**Specification version**: 1.0.1
 **Schema identifier**: `aiir/commit_receipt.v1`
 **Status**: Stable
 **Date**: 2026-03-09
@@ -403,10 +403,55 @@ Conforming implementations MUST pass all test vectors.
 
 ## 14. IANA Considerations
 
-This specification does not currently register any IANA media types or URIs.
-Future versions may register:
-- Media type: `application/vnd.aiir.commit-receipt+json`
-- Schema URI: `https://invariantsystems.io/schemas/aiir/commit_receipt.v1.schema.json`
+### 14.1 Media Type Registration
+
+The following media type registration is prepared per
+[RFC 6838](https://www.rfc-editor.org/rfc/rfc6838) §3.2 (Vendor Tree):
+
+| Field | Value |
+|-------|-------|
+| **Type name** | `application` |
+| **Subtype name** | `vnd.aiir.commit-receipt+json` |
+| **Required parameters** | None |
+| **Optional parameters** | `schema` — the receipt schema identifier (e.g., `aiir/commit_receipt.v1`). When absent, consumers SHOULD inspect the `schema` field in the JSON body. |
+| **Encoding considerations** | 8bit. The content is UTF-8 encoded JSON per [RFC 8259](https://www.rfc-editor.org/rfc/rfc8259). |
+| **Security considerations** | See §12 and [THREAT_MODEL.md](THREAT_MODEL.md). Receipts contain git commit metadata including author names, email addresses, and commit subjects. Consumers MUST validate receipts using the verification algorithm (§9) before trusting content. Receipt fields may contain user-controlled text — display layers MUST sanitize to prevent injection (XSS, terminal escape, log injection). The `content_hash` field MUST be verified via constant-time comparison (§9.2) to prevent timing side-channel attacks. |
+| **Interoperability considerations** | All conforming implementations MUST produce identical `content_hash` and `receipt_id` values for the same input data (§7.3). Interoperability is verified via published test vectors (§13). Two independent implementations (Python, TypeScript) currently pass all vectors. |
+| **Published specification** | This document ([SPEC.md](https://github.com/invariant-systems-ai/aiir/blob/main/SPEC.md)). Machine-readable schema: [`commit_receipt.v1.schema.json`](https://invariantsystems.io/schemas/aiir/commit_receipt.v1.schema.json). |
+| **Applications which use this media type** | AIIR CLI, AIIR GitHub Action, AIIR MCP Server, CI/CD pipelines, compliance audit systems, supply-chain attestation frameworks (via in-toto envelope). |
+| **Fragment identifier considerations** | None. |
+| **Restrictions on usage** | None. |
+| **Additional information** | File extension: `.json`, `.jsonl` (when stored as append-only ledger). Macintosh file type code: None. Deprecated alias names: None. Magic number: The first bytes of a receipt will match `{"type":"aiir.commit_receipt"` after whitespace normalization. |
+| **Person & email address to contact** | Noah — `noah@invariantsystems.io` |
+| **Intended usage** | COMMON |
+| **Change controller** | Invariant Systems, Inc. |
+
+### 14.2 Predicate Type URI
+
+The in-toto predicate type URI is:
+
+```
+https://aiir.dev/commit_receipt/v1
+```
+
+This URI identifies AIIR commit receipt predicates within
+[in-toto Statement v1](https://in-toto.io/Statement/v1) envelopes.
+It resolves to a human-readable description of the predicate format
+with links to the specification and schema.
+
+Canonical alias (until `aiir.dev` DNS is delegated):
+`https://invariantsystems.io/predicates/aiir/commit_receipt/v1`
+
+### 14.3 Schema URI
+
+The JSON Schema `$id` URI is:
+
+```
+https://invariantsystems.io/schemas/aiir/commit_receipt.v1.schema.json
+```
+
+This URI resolves to the machine-readable JSON Schema (draft 2020-12)
+for the `aiir/commit_receipt.v1` receipt format.
 
 ---
 
@@ -470,3 +515,4 @@ Third-party implementations claiming AIIR compatibility SHOULD:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0.0 | 2026-03-09 | Initial specification extracted from reference implementation |
+| 1.0.1 | 2026-03-09 | §14: IANA media type registration template, predicate type URI, schema URI resolution |

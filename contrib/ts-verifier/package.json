@@ -1,0 +1,48 @@
+{
+  "name": "@aiir/verifier",
+  "version": "1.0.0",
+  "description": "AIIR commit receipt verifier — independent TypeScript conformance implementation",
+  "type": "module",
+  "main": "dist/verify.js",
+  "types": "dist/verify.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/verify.js",
+      "types": "./dist/verify.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc && node dist/test/run-vectors.js",
+    "test:vectors": "tsc && node dist/test/run-vectors.js"
+  },
+  "keywords": [
+    "aiir",
+    "receipt",
+    "verification",
+    "ai",
+    "integrity",
+    "provenance",
+    "cryptographic"
+  ],
+  "author": "Invariant Systems, Inc.",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/invariant-systems-ai/aiir",
+    "directory": "contrib/ts-verifier"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.5",
+    "typescript": "^5.4.0"
+  }
+}

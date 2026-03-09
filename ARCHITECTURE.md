@@ -83,6 +83,22 @@ See [SPEC.md](SPEC.md) for the canonical specification and
 
 ---
 
+## Independent Implementations
+
+AIIR's specification is designed for third-party implementation. Multiple
+independent verifiers exist to prove the spec is sufficient:
+
+| Language | Package | Scope | Conformant |
+| --- | --- | --- | --- |
+| Python | [`aiir`](https://pypi.org/project/aiir/) | Full (generate + verify) | ✅ Reference |
+| TypeScript | [`@aiir/verifier`](contrib/ts-verifier/) | Verification only | ✅ 15/15 vectors |
+
+The TypeScript implementation was written from the specification alone (not
+ported from Python) and passes all published test vectors. See
+[`contrib/ts-verifier/`](contrib/ts-verifier/) for source and instructions.
+
+---
+
 ## Schema Evolution Policy
 
 1. **CORE_KEYS are immutable within a major version.**

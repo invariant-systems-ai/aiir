@@ -1,0 +1,155 @@
+{
+  "$schema": "https://invariantsystems.io/schemas/mcp-manifest.v1.json",
+  "name": "aiir",
+  "displayName": "AIIR — AI Integrity Receipts",
+  "description": "Generate and verify cryptographic receipts for AI-authored code commits. Detects AI authorship signals, produces content-addressed JSON receipts, and provides tamper-evident audit trails for compliance.",
+  "version": "1.0.15",
+  "author": {
+    "name": "Invariant Systems, Inc.",
+    "url": "https://invariantsystems.io",
+    "email": "noah@invariantsystems.io"
+  },
+  "license": "Apache-2.0",
+  "repository": "https://github.com/invariant-systems-ai/aiir",
+  "homepage": "https://invariantsystems.io",
+  "documentation": "https://github.com/invariant-systems-ai/aiir/blob/main/docs/api.md",
+
+  "transport": ["stdio"],
+  "runtime": "python",
+  "runtimeVersion": ">=3.9",
+
+  "installation": {
+    "pip": "pip install aiir",
+    "pipx": "pipx install aiir"
+  },
+
+  "command": "aiir-mcp-server",
+  "args": ["--stdio"],
+
+  "protocolVersion": "2025-03-26",
+
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false
+  },
+
+  "tools": [
+    {
+      "name": "aiir_receipt",
+      "description": "Generate a cryptographic receipt for git commits in the current repository. Detects AI authorship signals (Copilot, ChatGPT, Claude, Cursor, etc.) and produces a content-addressed JSON receipt for audit trails.",
+      "parameters": {
+        "commit": { "type": "string", "description": "Specific commit SHA to receipt. Default: HEAD.", "required": false },
+        "range": { "type": "string", "description": "Commit range to receipt (e.g., 'HEAD~3..HEAD').", "required": false },
+        "ai_only": { "type": "boolean", "description": "Only receipt commits detected as AI-authored.", "required": false },
+        "pretty": { "type": "boolean", "description": "Return human-readable summary instead of raw JSON.", "required": false },
+        "redact_files": { "type": "boolean", "description": "Omit individual file paths from receipts (privacy).", "required": false }
+      }
+    },
+    {
+      "name": "aiir_verify",
+      "description": "Verify the integrity of an AIIR receipt file. Checks that content_hash and receipt_id are valid — any modification invalidates the receipt.",
+      "parameters": {
+        "file": { "type": "string", "description": "Relative path to the receipt JSON file to verify.", "required": true }
+      }
+    },
+    {
+      "name": "aiir_stats",
+      "description": "Show statistics for the AIIR receipt ledger. Returns receipt count, AI-authored percentage, unique authors, and date range.",
+      "parameters": {}
+    },
+    {
+      "name": "aiir_explain",
+      "description": "Provide a human-readable explanation of a receipt verification result. Designed for non-cryptography users.",
+      "parameters": {
+        "file": { "type": "string", "description": "Relative path to the receipt JSON file to explain.", "required": true }
+      }
+    },
+    {
+      "name": "aiir_policy_check",
+      "description": "Check the current AIIR ledger against policy constraints. Evaluates AI-authored commit percentage against a configurable threshold.",
+      "parameters": {
+        "max_ai_percent": { "type": "number", "description": "Maximum allowed AI-authored commit percentage (0-100). Default: 50.", "required": false }
+      }
+    }
+  ],
+
+  "categories": [
+    "security",
+    "compliance",
+    "developer-tools",
+    "git",
+    "ai-governance"
+  ],
+
+  "keywords": [
+    "aiir",
+    "ai-integrity",
+    "receipts",
+    "provenance",
+    "audit",
+    "compliance",
+    "copilot",
+    "claude",
+    "cursor",
+    "git",
+    "mcp",
+    "supply-chain",
+    "in-toto",
+    "sigstore"
+  ],
+
+  "clientConfigs": {
+    "claude-desktop": {
+      "mcpServers": {
+        "aiir": {
+          "command": "aiir-mcp-server",
+          "args": ["--stdio"]
+        }
+      }
+    },
+    "vscode-copilot": {
+      "mcp": {
+        "servers": {
+          "aiir": {
+            "command": "aiir-mcp-server",
+            "args": ["--stdio"]
+          }
+        }
+      }
+    },
+    "cursor": {
+      "mcpServers": {
+        "aiir": {
+          "command": "aiir-mcp-server",
+          "args": ["--stdio"]
+        }
+      }
+    },
+    "continue": {
+      "mcpServers": [
+        {
+          "name": "aiir",
+          "command": "aiir-mcp-server",
+          "args": ["--stdio"]
+        }
+      ]
+    },
+    "cline": {
+      "mcpServers": {
+        "aiir": {
+          "command": "aiir-mcp-server",
+          "args": ["--stdio"]
+        }
+      }
+    },
+    "windsurf": {
+      "mcpServers": {
+        "aiir": {
+          "command": "aiir-mcp-server",
+          "args": ["--stdio"]
+        }
+      }
+    }
+  }
+}

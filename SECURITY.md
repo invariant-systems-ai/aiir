@@ -4,8 +4,10 @@
 
 | Version | Supported |
 |---------|-----------|
-| 1.0.x   | ✅ Active |
-| < 1.0.0 | ❌ Unsupported — upgrade to 1.0.x |
+| 1.2.x   | ✅ Active (current) |
+| 1.1.x   | ✅ Security fixes |
+| 1.0.x   | ✅ Security fixes |
+| < 1.0.0 | ❌ Unsupported — upgrade to 1.2.x |
 
 ## Reporting a Vulnerability
 

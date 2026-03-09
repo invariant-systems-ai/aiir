@@ -1,0 +1,124 @@
+# AIIR — GitLab-first partner demo
+#
+# This pipeline demonstrates the full AIIR → GitLab compliance flow:
+#
+#   Component → Receipt → Security Dashboard → Duo summary
+#
+# To use: copy this file to your project's .gitlab-ci.yml, or include it
+# via CI/CD Catalog component (see README.md).
+#
+# Requirements: Python 3.9+ (provided by python:3.11-slim image)
+# Dependencies: Zero (aiir has no runtime deps; sigstore optional for signing)
+
+stages:
+  - test
+  - receipt
+  - verify
+
+# ──────────────────────────────────────────────────────────────────────
+# Your existing test jobs go in the `test` stage.
+# AIIR runs *after* tests pass (stage: receipt).
+# ──────────────────────────────────────────────────────────────────────
+
+# --- AIIR receipt on every merge request ---
+aiir-receipt-mr:
+  stage: receipt
+  image: python:3.11-slim
+  # GitLab OIDC for Sigstore keyless signing
+  id_tokens:
+    SIGSTORE_ID_TOKEN:
+      aud: sigstore
+  variables:
+    AIIR_VERSION: "1.2.1"
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
+    - pip install --quiet "aiir==${AIIR_VERSION}" sigstore
+  script:
+    - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --depth=100
+    # Generate receipts for all commits in the MR, sign them, produce
+    # a GL-SAST report, and post a summary comment on the MR.
+    - |
+      aiir --range "origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}..${CI_COMMIT_SHA}" \
+        --output .aiir-receipts/ \
+        --pretty \
+        --gitlab-ci \
+        --sign \
+        --gl-sast-report gl-sast-report.json
+    # Summary
+    - |
+      RECEIPT_COUNT=$(ls -1 .aiir-receipts/*.json 2>/dev/null | wc -l)
+      AI_COUNT=$(grep -l '"is_ai_authored": true' .aiir-receipts/*.json 2>/dev/null | wc -l) || AI_COUNT=0
+      echo "────────────────────────────────────────────────────"
+      echo "AIIR: ${RECEIPT_COUNT} commits receipted, ${AI_COUNT} AI-authored"
+      echo "────────────────────────────────────────────────────"
+  artifacts:
+    paths:
+      - .aiir-receipts/
+    reports:
+      # → MR pipeline variables (AIIR_RECEIPT_COUNT, AIIR_AI_PERCENT, etc.)
+      dotenv: aiir.env
+      # → Security Dashboard: AI findings as informational-severity items
+      sast: gl-sast-report.json
+    expire_in: 90 days
+    when: always
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# --- AIIR receipt on push to default branch ---
+aiir-receipt-push:
+  stage: receipt
+  image: python:3.11-slim
+  id_tokens:
+    SIGSTORE_ID_TOKEN:
+      aud: sigstore
+  variables:
+    AIIR_VERSION: "1.2.1"
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
+    - pip install --quiet "aiir==${AIIR_VERSION}" sigstore
+  script:
+    - |
+      if [ -n "$CI_COMMIT_BEFORE_SHA" ] && [ "$CI_COMMIT_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+        aiir --range "${CI_COMMIT_BEFORE_SHA}..${CI_COMMIT_SHA}" \
+          --output .aiir-receipts/ --pretty --gitlab-ci --sign \
+          --gl-sast-report gl-sast-report.json
+      else
+        aiir --output .aiir-receipts/ --pretty --gitlab-ci --sign \
+          --gl-sast-report gl-sast-report.json
+      fi
+  artifacts:
+    paths:
+      - .aiir-receipts/
+    reports:
+      dotenv: aiir.env
+      sast: gl-sast-report.json
+    expire_in: 90 days
+    when: always
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+
+# --- (Optional) Release verification ---
+# Verifies all receipts in a tag pipeline and emits a SLSA-style VSA.
+aiir-verify-release:
+  stage: verify
+  image: python:3.11-slim
+  variables:
+    AIIR_VERSION: "1.2.1"
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
+    - pip install --quiet "aiir==${AIIR_VERSION}"
+  script:
+    - |
+      aiir --verify-release \
+        --receipts .aiir-receipts/ \
+        --emit-vsa vsa.json \
+        --pretty
+  artifacts:
+    paths:
+      - vsa.json
+    expire_in: 1 year
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+/'

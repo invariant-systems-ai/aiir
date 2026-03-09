@@ -29,8 +29,9 @@ APPROVED_TERMS: list[str] = [
     "HPND",  # Historical Permission Notice and Disclaimer
 ]
 
-# Packages to skip (e.g. the project itself, installed as editable)
-SKIP_PACKAGES: set[str] = {"aiir"}
+# Packages to skip (e.g. the project itself, or packages whose metadata
+# reports UNKNOWN but are verified Apache-2.0 / MIT upstream)
+SKIP_PACKAGES: set[str] = {"aiir", "sigstore-models"}
 
 
 def main() -> int:

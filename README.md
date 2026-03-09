@@ -652,12 +652,16 @@ Install signing support: `pip install aiir[sign]`
 <details>
 <summary><strong>MCP server details</strong></summary>
 
-The AIIR MCP server exposes two tools:
+The AIIR MCP server exposes six tools:
 
 | Tool | Description |
 |------|-------------|
 | `aiir_receipt` | Generate receipts for commit(s). Accepts `commit`, `range`, `ai_only`, `pretty`. |
 | `aiir_verify` | Verify a receipt file's integrity. Accepts `file` path. |
+| `aiir_stats` | Ledger statistics: receipt count, AI percentage, unique authors. |
+| `aiir_explain` | Human-readable explanation of verification results. |
+| `aiir_policy_check` | Check ledger against org AI-usage policy thresholds. |
+| `aiir_verify_release` | Release-scoped verification — evaluate receipts against policy, emit VSA. |
 
 **Install globally:**
 

@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-03-09
+
+### Added
+
+- **Release verification engine** (`aiir/_verify_release.py`): Release-scoped verification that evaluates a set of commit receipts against policy, computes commit coverage, and produces a pass/fail result. 679 lines. Supports `strict`, `balanced`, and `permissive` policy presets with configurable enforcement levels (`hard-fail`, `soft-fail`, `warn`).
+- **Verification Summary Attestation (VSA)**: SLSA-style VSA predicate builder and in-toto Statement v1 wrapper. Emits machine-readable attestations that record verifier identity, policy digest, coverage metrics, and evaluation results.
+- **VSA JSON Schema** (`schemas/verification_summary.v1.schema.json`): JSON Schema (draft 2020-12) for the VSA predicate format. 227 lines.
+- **`--verify-release` CLI flag**: Verify all receipts against policy and output a release report. Accepts `--receipts`, `--emit-vsa`, and `--subject` flags.
+- **`aiir_verify_release` MCP tool**: Release verification exposed as an MCP tool for AI-assisted compliance workflows.
+- **62 new tests** across 14 test classes covering coverage calculation, receipt evaluation, receipt loading, VSA predicate builder, in-toto wrapper, end-to-end verification, range tests, report formatting, schema compliance, constants, CLI integration, MCP integration, public exports, and edge cases.
+- **1093 tests passing** (up from 1084 in v1.1.0).
+
+### Changed
+
+- **Public API**: Added `verify_release`, `format_release_report`, and `VSA_PREDICATE_TYPE` to `aiir/__init__.py` public API and `__all__`.
+- **MCP surface**: Expanded from 5 to 6 tools (`aiir_verify_release`).
+
 ## [1.1.0] — 2026-03-09
 
 ### Added

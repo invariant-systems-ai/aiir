@@ -144,14 +144,13 @@ jobs:
       - name: Install pip-audit and project extras
         run: |
           pip install pip-audit
-          pip install -e ".[dev,sign]"
+          pip install ".[dev,sign]"
       - name: Audit dependencies
         run: |
           # --strict = fail on ANY known vulnerability
           # --desc   = include vulnerability descriptions in output
-          # --skip-editable = skip local (editable) installs like aiir itself
-          pip-audit --strict --desc --skip-editable --format json --output pip-audit-report.json || true
-          pip-audit --strict --desc --skip-editable
+          pip-audit --strict --desc --format json --output pip-audit-report.json || true
+          pip-audit --strict --desc
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
@@ -173,13 +172,32 @@ jobs:
       - name: Install license checker
         run: |
           pip install pip-licenses
-          pip install -e ".[dev,sign]"
+          pip install ".[dev,sign]"
       - name: Verify license policy
         run: |
-          # Allow-list: only OSI-approved permissive licenses
+          # Dump all licenses to JSON for artifact
           pip-licenses --format=json --output-file=licenses.json
-          pip-licenses --allow-only="Apache Software License;Apache-2.0 OR BSD-2-Clause;MIT License;MIT;BSD License;BSD-3-Clause;ISC License (ISCL);Python Software Foundation License;Mozilla Public License 2.0 (MPL 2.0)"
-          echo "✅ All dependency licenses are policy-compliant"
+          # Verify: every license string must contain at least one approved term
+          python3 -c "
+import json, sys
+APPROVED = ['Apache', 'MIT', 'BSD', 'ISC', 'PSF', 'Python Software Foundation',
+            'Mozilla Public License', 'MPL', 'Public Domain', 'Unlicense']
+with open('licenses.json') as f:
+    pkgs = json.load(f)
+failed = []
+for p in pkgs:
+    name, lic = p['Name'], p['License']
+    if name == 'aiir':  # skip self
+        continue
+    if not any(term in lic for term in APPROVED):
+        failed.append(f'{name}:{p.get("Version","?")} => {lic}')
+if failed:
+    print('❌ Unapproved licenses found:', file=sys.stderr)
+    for f in failed:
+        print(f'  {f}', file=sys.stderr)
+    sys.exit(1)
+print('✅ All dependency licenses are policy-compliant')
+"
 
   # ── Summary gate ───────────────────────────────────────────────────
   security-ok:

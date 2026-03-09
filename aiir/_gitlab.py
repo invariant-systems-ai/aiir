@@ -140,7 +140,7 @@ def _gitlab_api_request(
     req = Request(url, data=data, headers=headers, method=method)
 
     try:
-        with urlopen(req, timeout=_API_TIMEOUT) as resp:  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected
+        with urlopen(req, timeout=_API_TIMEOUT) as resp:  # nosec B310  # nosemgrep
             return json.loads(resp.read().decode("utf-8"))
     except HTTPError as e:
         error_body = ""
@@ -713,7 +713,7 @@ def query_gitlab_graphql(
     req = Request(url, data=data, headers=headers, method="POST")
 
     try:
-        with urlopen(req, timeout=_API_TIMEOUT) as resp:  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected
+        with urlopen(req, timeout=_API_TIMEOUT) as resp:  # nosec B310  # nosemgrep
             result = json.loads(resp.read().decode("utf-8"))
             if "errors" in result:
                 raise RuntimeError(

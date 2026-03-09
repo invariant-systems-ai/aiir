@@ -180,7 +180,7 @@ jobs:
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/invariant-systems-ai/aiir
-    rev: v1.0.14
+    rev: v1.0.15
     hooks:
       - id: aiir
 ```
@@ -209,7 +209,7 @@ All inputs are optional and typed:
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
 | `stage` | string | `test` | Pipeline stage |
-| `version` | string | `1.0.14` | AIIR version from PyPI |
+| `version` | string | `1.0.15` | AIIR version from PyPI |
 | `ai-only` | boolean | `false` | Only receipt AI-authored commits |
 | `output-dir` | string | `.aiir-receipts` | Artifact output directory |
 | `artifact-expiry` | string | `90 days` | Artifact retention |
@@ -219,7 +219,7 @@ All inputs are optional and typed:
 
 ```yaml
 include:
-  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.14/templates/gitlab-ci.yml'
+  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.0.15/templates/gitlab-ci.yml'
 ```
 
 **Self-hosted GitLab?** Mirror the repo and use `project:` instead:
@@ -227,7 +227,7 @@ include:
 ```yaml
 include:
   - project: 'your-group/aiir'
-    ref: 'v1.0.14'
+    ref: 'v1.0.15'
     file: '/templates/gitlab-ci.yml'
 ```
 

@@ -7,6 +7,7 @@
 #   4. Build wheel + sdist
 #   5. Publish to PyPI via OIDC Trusted Publisher
 #   6. Verify PyPI has the version (retries 6×)
+#   7. Build & push Docker image to GHCR
 #
 # NOTE: This is a single workflow instead of release→publish chaining
 # because GitHub Actions won't trigger workflows from events created
@@ -148,7 +149,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
           python-version: "3.12"
       - name: Build
@@ -205,9 +206,43 @@ jobs:
           echo "::error::PyPI did not update to $TAG within 3 minutes"
           exit 1
 
-  # ── Step 5: Propagate version to website ───────────────────────────
-  update-website:
+  # ── Step 5: Build & push Docker image to GHCR ──────────────────────
+  docker:
     needs: verify
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Log in to GHCR
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567  # v3.3.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract version from tag
+        id: version
+        run: echo "tag=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - name: Build and push
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75  # v6.9.0
+        with:
+          context: .
+          push: true
+          build-args: AIIR_VERSION=${{ steps.version.outputs.tag }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+  # ── Step 6: Propagate version to website ───────────────────────────
+  update-website:
+    needs: [verify, docker]
     timeout-minutes: 5
     runs-on: ubuntu-latest
     # Non-blocking: website has a 6-hour self-heal schedule as backup

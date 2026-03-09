@@ -26,7 +26,7 @@ keywords = [
     "mcp",
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
@@ -51,7 +51,7 @@ dev = ["hypothesis>=6.0", "pytest>=7.0"]
 
 [project.urls]
 Homepage = "https://invariantsystems.io"
-Documentation = "https://invariantsystems.io/docs"
+Documentation = "https://github.com/invariant-systems-ai/aiir/blob/main/docs/api.md"
 Repository = "https://github.com/invariant-systems-ai/aiir"
 Issues = "https://github.com/invariant-systems-ai/aiir/issues"
 Changelog = "https://github.com/invariant-systems-ai/aiir/blob/main/CHANGELOG.md"

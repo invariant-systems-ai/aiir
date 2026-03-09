@@ -248,6 +248,141 @@ class TestSignalListValidation(unittest.TestCase):
         self.assertIn("x" * 80, ai_line)
 
 
+class TestFormatReceiptDetail(unittest.TestCase):
+    """Tests for format_receipt_detail — detailed human-readable output."""
+
+    FULL_RECEIPT = {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "1.0.10",
+        "commit": {
+            "sha": "abcdef1234567890abcdef1234567890abcdef12",
+            "author": {"name": "Jane Dev", "email": "jane@example.com", "date": "2026-03-08T10:00:00-05:00"},
+            "committer": {"name": "CI Bot", "email": "ci@example.com", "date": "2026-03-08T10:01:00-05:00"},
+            "subject": "feat: add auth middleware",
+            "message_hash": "sha256:aaa111",
+            "diff_hash": "sha256:bbb222",
+            "files_changed": 3,
+            "files": ["src/auth.py", "tests/test_auth.py", "README.md"],
+        },
+        "ai_attestation": {
+            "is_ai_authored": True,
+            "signals_detected": ["message_match:co-authored-by: copilot"],
+            "signal_count": 1,
+            "is_bot_authored": False,
+            "bot_signals_detected": [],
+            "bot_signal_count": 0,
+            "authorship_class": "ai-assisted",
+            "detection_method": "heuristic_v2",
+        },
+        "provenance": {
+            "repository": "https://github.com/example/repo",
+            "tool": "https://github.com/invariant-systems-ai/aiir@1.0.10",
+            "generator": "aiir.cli",
+        },
+        "receipt_id": "g1-test-detail-receipt",
+        "content_hash": "sha256:deadbeef1234",
+        "timestamp": "2026-03-08T15:01:00Z",
+        "extensions": {"namespace": "prod"},
+    }
+
+    def test_includes_schema_identity(self):
+        output = cli.format_receipt_detail(self.FULL_RECEIPT)
+        self.assertIn("aiir.commit_receipt", output)
+        self.assertIn("aiir/commit_receipt.v1", output)
+        self.assertIn("1.0.10", output)
+
+    def test_includes_full_sha(self):
+        """Detail mode shows the full 40-char SHA, not truncated."""
+        output = cli.format_receipt_detail(self.FULL_RECEIPT)
+        self.assertIn("abcdef1234567890abcdef1234567890abcdef12", output)
+
+    def test_includes_committer(self):
+        output = cli.format_receipt_detail(self.FULL_RECEIPT)
+        self.assertIn("CI Bot", output)
+        self.assertIn("ci@example.com", output)
+
+    def test_includes_hashes(self):
+        output = cli.format_receipt_detail(self.FULL_RECEIPT)
+        self.assertIn("sha256:aaa111", output)
+        self.assertIn("sha256:bbb222", output)
+
+    def test_includes_file_list(self):
+        output = cli.format_receipt_detail(self.FULL_RECEIPT)
+        self.assertIn("src/auth.py", output)
+        self.assertIn("tests/test_auth.py", output)
+        self.assertIn("README.md", output)
+
+    def test_includes_authorship_class(self):
+        output = cli.format_receipt_detail(self.FULL_RECEIPT)
+        self.assertIn("ai-assisted", output)
+
+    def test_includes_detection_method(self):
+        output = cli.format_receipt_detail(self.FULL_RECEIPT)
+        self.assertIn("heuristic_v2", output)
+
+    def test_includes_provenance(self):
+        output = cli.format_receipt_detail(self.FULL_RECEIPT)
+        self.assertIn("https://github.com/example/repo", output)
+        self.assertIn("aiir.cli", output)
+
+    def test_includes_extensions(self):
+        output = cli.format_receipt_detail(self.FULL_RECEIPT)
+        self.assertIn("namespace", output)
+        self.assertIn("prod", output)
+
+    def test_includes_signed_line(self):
+        output = cli.format_receipt_detail(self.FULL_RECEIPT, signed="YES (sigstore)")
+        self.assertIn("YES (sigstore)", output)
+
+    def test_bot_field(self):
+        output = cli.format_receipt_detail(self.FULL_RECEIPT)
+        # Bot: no should be present
+        bot_line = [l for l in output.split("\n") if "Bot:" in l][0]
+        self.assertIn("no", bot_line)
+
+    def test_caps_file_list_at_20(self):
+        """Receipts with >20 files should be capped to prevent terminal flood."""
+        receipt = {**self.FULL_RECEIPT}
+        receipt["commit"] = {
+            **self.FULL_RECEIPT["commit"],
+            "files": [f"file_{i}.py" for i in range(30)],
+            "files_changed": 30,
+        }
+        output = cli.format_receipt_detail(receipt)
+        self.assertIn("file_19.py", output)
+        self.assertNotIn("file_20.py", output)
+        self.assertIn("and 10 more", output)
+
+    def test_survives_empty_receipt(self):
+        """Defensive: empty dict should not crash."""
+        output = cli.format_receipt_detail({})
+        self.assertIn("unknown", output)
+        self.assertIsInstance(output, str)
+
+    def test_survives_non_dict_nested_fields(self):
+        """Defensive: non-dict commit/ai_attestation should not crash."""
+        receipt = {
+            "commit": "not a dict",
+            "ai_attestation": 42,
+            "provenance": ["list"],
+            "extensions": "string",
+        }
+        output = cli.format_receipt_detail(receipt)
+        self.assertIsInstance(output, str)
+
+    def test_detail_is_superset_of_pretty(self):
+        """Detail output should contain all info from pretty output."""
+        pretty = cli.format_receipt_pretty(self.FULL_RECEIPT)
+        detail = cli.format_receipt_detail(self.FULL_RECEIPT)
+        # Detail has more lines
+        self.assertGreater(len(detail.split("\n")), len(pretty.split("\n")))
+        # Key fields from pretty are also in detail
+        self.assertIn("feat: add auth middleware", detail)
+        self.assertIn("Jane Dev", detail)
+        self.assertIn("sha256:deadbeef1234", detail)
+
+
 class TestRedactFilesFlag(unittest.TestCase):
     """I-05-FIX: --redact-files flag omits file paths from receipts."""
 

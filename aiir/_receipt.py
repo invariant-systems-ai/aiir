@@ -251,6 +251,156 @@ def format_receipt_pretty(receipt: Dict[str, Any], signed: str = "none") -> str:
     return "\n".join(lines)
 
 
+def format_receipt_detail(receipt: Dict[str, Any], signed: str = "none") -> str:
+    """Detailed human-readable receipt — shows all fields.
+
+    Same box-drawing style as format_receipt_pretty, but includes every
+    field from the receipt JSON: schema identity, committer, hashes,
+    file list, full AI attestation, provenance, and extensions.
+
+    Args:
+        receipt: The receipt dict.
+        signed: Signing status to display (e.g. 'YES (sigstore)' or 'none').
+    """
+    # ── Safe extraction (same defensive pattern as format_receipt_pretty) ──
+    commit = receipt.get("commit", {})
+    ai = receipt.get("ai_attestation", {})
+    provenance = receipt.get("provenance", {})
+    extensions = receipt.get("extensions", {})
+    if not isinstance(commit, dict):
+        commit = {}
+    if not isinstance(ai, dict):
+        ai = {}
+    if not isinstance(provenance, dict):
+        provenance = {}
+    if not isinstance(extensions, dict):
+        extensions = {}
+
+    def _safe(obj: Any, key: str, default: str = "") -> str:
+        if not isinstance(obj, dict):
+            return default
+        return _strip_terminal_escapes(str(obj.get(key, default)))
+
+    def _safe_dict(obj: Any, key: str) -> dict:
+        val = obj.get(key, {}) if isinstance(obj, dict) else {}
+        return val if isinstance(val, dict) else {}
+
+    author = _safe_dict(commit, "author")
+    committer = _safe_dict(commit, "committer")
+
+    # Guard files list — must be a list of strings.
+    files = commit.get("files", [])
+    if not isinstance(files, (list, tuple)):
+        files = []
+
+    # Guard signals — same pattern as pretty.
+    signals = ai.get("signals_detected", [])
+    if not isinstance(signals, (list, tuple)):
+        signals = []
+    bot_signals = ai.get("bot_signals_detected", [])
+    if not isinstance(bot_signals, (list, tuple)):
+        bot_signals = []
+
+    try:
+        files_count = int(commit.get("files_changed", 0))
+    except (TypeError, ValueError, OverflowError):
+        files_count = 0
+
+    # Box-drawing chars
+    from aiir.cli import _b as _box  # noqa: C0415
+    tl, vl, bl_char, hl = _box("tl"), _box("vl"), _box("bl"), _box("hl")
+    sec = f"{vl}{'─' * 44}"  # section separator
+
+    lines = [
+        f"{tl}{hl} Receipt: {_safe(receipt, 'receipt_id', 'unknown')}",
+        sec,
+        f"{vl}  Type:    {_safe(receipt, 'type')}",
+        f"{vl}  Schema:  {_safe(receipt, 'schema')}",
+        f"{vl}  Version: {_safe(receipt, 'version')}",
+        sec,
+        f"{vl}  Commit:     {_safe(commit, 'sha', 'unknown')}",
+        f"{vl}  Subject:    {_safe(commit, 'subject')}",
+        f"{vl}  Author:     {_safe(author, 'name')} <{_safe(author, 'email')}>",
+        f"{vl}               {_safe(author, 'date')}",
+        f"{vl}  Committer:  {_safe(committer, 'name')} <{_safe(committer, 'email')}>",
+        f"{vl}               {_safe(committer, 'date')}",
+        f"{vl}  Msg hash:   {_safe(commit, 'message_hash')}",
+        f"{vl}  Diff hash:  {_safe(commit, 'diff_hash')}",
+        f"{vl}  Files:      {files_count} changed",
+    ]
+
+    # File list — cap at 20 to prevent terminal flooding from crafted receipts.
+    for f in files[:20]:
+        if isinstance(f, str):
+            lines.append(f"{vl}               {_strip_terminal_escapes(f)[:120]}")
+    if len(files) > 20:
+        lines.append(f"{vl}               ... and {len(files) - 20} more")
+
+    lines.append(sec)
+    lines.append(
+        f"{vl}  AI:           {'YES' if ai.get('is_ai_authored') else 'no'}"
+    )
+    lines.append(
+        f"{vl}  Class:        {_safe(ai, 'authorship_class', 'unknown')}"
+    )
+    lines.append(
+        f"{vl}  Method:       {_safe(ai, 'detection_method', 'unknown')}"
+    )
+
+    # Signals
+    if signals:
+        sig_str = ", ".join(
+            _strip_terminal_escapes(str(s))[:80]
+            for s in signals[:10]
+            if isinstance(s, (str, int, float))
+        )
+        lines.append(f"{vl}  Signals:      {sig_str}")
+    else:
+        lines.append(f"{vl}  Signals:      none")
+
+    try:
+        sig_count = int(ai.get("signal_count", 0))
+    except (TypeError, ValueError, OverflowError):
+        sig_count = 0
+    lines.append(f"{vl}  Signal count: {sig_count}")
+
+    # Bot attestation
+    lines.append(
+        f"{vl}  Bot:          {'YES' if ai.get('is_bot_authored') else 'no'}"
+    )
+    if bot_signals:
+        bot_str = ", ".join(
+            _strip_terminal_escapes(str(s))[:80]
+            for s in bot_signals[:10]
+            if isinstance(s, (str, int, float))
+        )
+        lines.append(f"{vl}  Bot signals:  {bot_str}")
+
+    lines.append(sec)
+    lines.append(f"{vl}  Repo:     {_safe(provenance, 'repository')}")
+    lines.append(f"{vl}  Tool:     {_safe(provenance, 'tool')}")
+    lines.append(f"{vl}  Generator:{' ' if _safe(provenance, 'generator') else ''}{_safe(provenance, 'generator')}")
+
+    lines.append(sec)
+    lines.append(f"{vl}  Hash:    {_safe(receipt, 'content_hash')}")
+    lines.append(f"{vl}  Time:    {_safe(receipt, 'timestamp')}")
+    lines.append(f"{vl}  Signed:  {_strip_terminal_escapes(signed)}")
+
+    # Extensions — show keys and short values if present.
+    if extensions:
+        lines.append(sec)
+        for i, (k, v) in enumerate(extensions.items()):
+            if i >= 10:
+                lines.append(f"{vl}  ... and {len(extensions) - 10} more")
+                break
+            k_safe = _strip_terminal_escapes(str(k))[:40]
+            v_safe = _strip_terminal_escapes(str(v))[:80]
+            lines.append(f"{vl}  ext.{k_safe}: {v_safe}")
+
+    lines.append(f"{bl_char}{hl * 46}")
+    return "\n".join(lines)
+
+
 def write_receipt(
     receipt: Dict[str, Any],
     output_dir: Optional[str] = None,

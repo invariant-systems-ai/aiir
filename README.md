@@ -71,6 +71,17 @@ That's it. Your last commit now has a receipt in `.aiir/receipts.jsonl` — a
 tamper-evident JSONL ledger that auto-indexes and deduplicates. Run it again:
 same commit, zero duplicates. Zero dependencies. Python 3.9+.
 
+### Verify a receipt
+
+Receipts are content-addressed — change one byte, the hash breaks:
+
+```bash
+aiir --verify .aiir/receipts.jsonl --explain
+```
+
+See [Tamper Detection](docs/tamper-detection.md) for a walkthrough of what
+happens when a receipt is modified.
+
 ---
 
 ## Every Platform. One Command.
@@ -764,9 +775,10 @@ on every push to `main` and commits them back to the repo. Locally, the
 
 ## Security
 
-Extensive [security controls](THREAT_MODEL.md). 840+ tests. Zero dependencies.
+Extensive [security controls](THREAT_MODEL.md). 1000+ tests. Zero dependencies.
 
-See [SECURITY.md](SECURITY.md) and [THREAT_MODEL.md](THREAT_MODEL.md).
+See [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), and
+[Tamper Detection](docs/tamper-detection.md).
 
 ---
 
@@ -780,6 +792,7 @@ AIIR publishes a formal specification and machine-readable schema for third-part
 | [schemas/commit_receipt.v1.schema.json](schemas/commit_receipt.v1.schema.json) | JSON Schema (draft 2020-12) for `aiir/commit_receipt.v1` |
 | [schemas/test_vectors.json](schemas/test_vectors.json) | 15 conformance test vectors with precomputed hashes |
 | [THREAT_MODEL.md](THREAT_MODEL.md) | STRIDE/DREAD threat model with comprehensive security controls |
+| [docs/tamper-detection.md](docs/tamper-detection.md) | Walkthrough — what happens when a receipt is modified |
 
 ---
 
@@ -791,6 +804,20 @@ Built by [Invariant Systems, Inc.](https://invariantsystems.io)
 
 **Trademarks**: "AIIR", "AI Integrity Receipts", and "Invariant Systems"
 are trademarks of Invariant Systems, Inc. See [TRADEMARK.md](TRADEMARK.md).
+
+**Signed releases**: Every PyPI release is published using
+[Trusted Publishers](https://docs.pypi.org/trusted-publishers/) (OIDC) —
+no static API tokens. The GitHub Actions workflow authenticates to PyPI via
+short-lived OIDC tokens issued by GitHub's identity provider. This means:
+
+- **No secrets to leak** — publishing credentials are ephemeral
+- **Verifiable provenance** — each release is tied to a specific GitHub Actions
+  run, commit SHA, and workflow file
+- **Tamper-resistant pipeline** — the publish environment is protected by
+  GitHub's deployment protection rules
+
+The [publish workflow](.github/workflows/publish.yml) runs: tag push →
+full test suite → build → OIDC publish → verify on PyPI.
 
 **Enterprise**: The AIIR open-source library is and will remain free under
 Apache-2.0. Invariant Systems may offer additional commercial products and

@@ -5,7 +5,7 @@
 # Receipts are pushed to the orphan `receipts` branch (not main) so that
 # branch protection rules don't block the github-actions[bot] push.
 # Artifacts serve as a backup/second copy.
-name: AI Commit Receipt
+name: AIIR Dogfood
 on:
   push:
     branches: [main]

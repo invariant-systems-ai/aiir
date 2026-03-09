@@ -689,7 +689,7 @@ class TestReadmeStats(unittest.TestCase):
         self.assertNotIn("760+ tests", readme)
         # Should have current content
         self.assertIn("security controls", readme)
-        self.assertIn("840+ tests", readme)
+        self.assertIn("1000+ tests", readme)
 
 
 class TestThreatModelR03Consistency(unittest.TestCase):

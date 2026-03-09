@@ -64,6 +64,48 @@ to the AIIR receipt JSON schema and pass `aiir verify`, you may state:
 You may **not** state or imply that your tool **is** AIIR, or that it has
 been tested, certified, or approved by Invariant Systems.
 
+### Conformance requirements
+
+To claim "AIIR-Compatible", your implementation MUST:
+
+1. **Pass all conformance test vectors** — the [15 test vectors](schemas/test_vectors.json)
+   included in this repository cover valid receipts, tampered receipts, and
+   edge cases. Your implementation must produce identical verification results.
+
+2. **Produce valid `content_hash` values** — for any input, your implementation
+   must compute the same SHA-256 hash as the reference implementation when
+   given the same core fields (see [SPEC.md § 7](SPEC.md#7-content-addressing)).
+
+3. **Implement canonical JSON encoding** — keys sorted lexicographically,
+   no trailing commas, no extra whitespace, all non-ASCII escaped as
+   `\uXXXX` (see [SPEC.md § 6](SPEC.md#6-canonical-json)).
+
+4. **Use the `aiir/commit_receipt.v1` schema identifier** — receipts must
+   include `"schema": "aiir/commit_receipt.v1"` and validate against the
+   published [JSON Schema](schemas/commit_receipt.v1.schema.json).
+
+### Badge usage
+
+If your implementation meets the conformance requirements above, you may
+display the following badge in your README or documentation:
+
+```markdown
+[![AIIR-Compatible](https://img.shields.io/badge/AIIR-Compatible-blue)](https://github.com/invariant-systems-ai/aiir)
+```
+
+Badge text must be exactly **"AIIR-Compatible"**. Do not use variations like
+"AIIR Certified", "AIIR Verified", or "AIIR Approved" — those imply
+endorsement by Invariant Systems, which requires a separate agreement.
+
+### Self-attestation
+
+Compatibility is **self-attested**. Invariant Systems does not currently
+operate a formal certification program. By displaying the badge, you are
+representing that your implementation passes all conformance test vectors.
+Invariant Systems reserves the right to request evidence of conformance
+and to revoke badge permission if an implementation fails the published
+test vectors.
+
 ## Requesting permission
 
 For trademark use not covered above, contact:

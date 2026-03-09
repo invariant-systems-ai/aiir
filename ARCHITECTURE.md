@@ -69,6 +69,7 @@ the receipt format.
 | Org policy presets (`--policy`) | ✅ Shipped | strict / balanced / permissive; `.aiir/policy.json` |
 | Policy initialization (`--policy-init`) | ✅ Shipped | Scaffolds policy file with chosen preset |
 | Agent attestation envelope | ✅ Shipped | `extensions.agent_attestation` — tool, model, context |
+| in-toto Statement v1 wrapper (`--in-toto`) | ✅ Shipped | Native supply-chain attestation envelope |
 | Signed-by-default posture | 🔲 Planned | `--sign` default when OIDC available; `--no-sign` opt-out |
 | CONTRIBUTING.md onboarding fixes | ✅ Shipped | Correct test commands, hypothesis note |
 | Schema validation in `--check` | ✅ Shipped (v1.0.12) | `schema_errors` in verification result |
@@ -142,6 +143,40 @@ governance dashboards.
 
 - **GitHub Action**: The `v1` floating tag always points to the latest
   v1.x.x release. Breaking changes require `v2`.
+
+---
+
+## Integration Recipes
+
+AIIR ships integration guides for popular AI coding tools and CI/CD platforms:
+
+| Recipe | Path |
+| --- | --- |
+| Claude Code hooks | [`docs/claude-code-hooks.md`](docs/claude-code-hooks.md) |
+| GitLab Duo + CI/CD | [`docs/gitlab-duo-recipe.md`](docs/gitlab-duo-recipe.md) |
+| MCP server configs | [README.md § MCP Tool](README.md#-mcp-tool--let-your-ai-do-it) (Claude, Copilot, Cursor, Continue, Cline, Windsurf) |
+| GitHub Action | [README.md § GitHub Action](README.md#️-github-action--automate-it-in-ci) |
+| pre-commit hook | [README.md § pre-commit](README.md#-pre-commit-hook--receipt-every-commit-locally) |
+
+### in-toto as the Integration Bridge
+
+The `--in-toto` flag wraps every AIIR receipt in a standard
+[in-toto Statement v1](https://in-toto.io/Statement/v1) envelope:
+
+```json
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [{"name": "repo@sha", "digest": {"gitCommit": "abc..."}}],
+  "predicateType": "https://aiir.dev/commit_receipt/v1",
+  "predicate": { "...the full AIIR receipt..." }
+}
+```
+
+This makes AIIR receipts a **native citizen** of the supply-chain
+attestation ecosystem. Every tool from Sigstore policy-controller to
+Tekton Chains to OPA/Gatekeeper understands this shape. The predicate
+type URI (`https://aiir.dev/commit_receipt/v1`) allows routing policies
+to match on AIIR-specific content without parsing the inner receipt.
 
 ---
 

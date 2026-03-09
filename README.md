@@ -77,7 +77,7 @@ same commit, zero duplicates. Zero dependencies. Python 3.9+.
 
 ### 🤖 MCP Tool — Let your AI do it
 
-Any MCP-aware AI assistant (Claude, Copilot, Cursor) can discover and use AIIR as a tool. Add to your MCP config:
+Any MCP-aware AI assistant (Claude, Copilot, Cursor, Continue, Cline, Windsurf) can discover and use AIIR as a tool. Add to your MCP config:
 
 ```json
 {
@@ -678,6 +678,52 @@ pip install aiir
 ```
 
 **Cursor** (`.cursor/mcp.json`):
+```json
+{
+  "mcpServers": {
+    "aiir": {
+      "command": "aiir-mcp-server",
+      "args": ["--stdio"]
+    }
+  }
+}
+```
+
+**Continue** (`.continue/config.yaml`):
+```yaml
+mcpServers:
+  - name: aiir
+    command: aiir-mcp-server
+    args:
+      - --stdio
+```
+
+Or in `.continue/config.json`:
+```json
+{
+  "mcpServers": [
+    {
+      "name": "aiir",
+      "command": "aiir-mcp-server",
+      "args": ["--stdio"]
+    }
+  ]
+}
+```
+
+**Cline** (VS Code settings or `.cline/mcp_settings.json`):
+```json
+{
+  "mcpServers": {
+    "aiir": {
+      "command": "aiir-mcp-server",
+      "args": ["--stdio"]
+    }
+  }
+}
+```
+
+**Windsurf** (`.windsurf/mcp.json`):
 ```json
 {
   "mcpServers": {

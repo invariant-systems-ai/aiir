@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.14] — 2026-03-09
+
+### Added
+
+- **in-toto Statement v1 wrapper** (`--in-toto`): Wrap receipts in a standard [in-toto Statement v1](https://in-toto.io/Statement/v1) envelope. Makes AIIR receipts native to the supply-chain attestation ecosystem — compatible with SLSA verifiers, Sigstore policy-controller, Kyverno, OPA/Gatekeeper, and Tekton Chains. Predicate type: `https://aiir.dev/commit_receipt/v1`. Subject identifies the git commit by repository and SHA.
+- **Claude Code hooks recipe** (`docs/claude-code-hooks.md`): Step-by-step guide for auto-generating receipts via Claude Code's PostToolUse hooks. Covers basic, signed, agent attestation, in-toto envelope, and quiet mode variants.
+- **GitLab Duo recipe** (`docs/gitlab-duo-recipe.md`): `.gitlab-ci.yml` examples for receipting Duo-generated MRs. Covers MR detection, agent attestation, in-toto output, policy enforcement, and MR comment integration.
+- **Continue, Cline, and Windsurf MCP configs**: Added MCP server configuration examples for Continue (YAML and JSON), Cline, and Windsurf alongside existing Claude Desktop, VS Code/Copilot, and Cursor configs in README.
+
+### Changed
+
+- **ARCHITECTURE.md**: Added Integration Recipes section and in-toto integration bridge documentation.
+- **README.md**: MCP intro now lists all six supported clients (Claude, Copilot, Cursor, Continue, Cline, Windsurf).
+
 ## [1.0.13] — 2026-03-08
 
 ### Added

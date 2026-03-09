@@ -86,6 +86,8 @@ from aiir._receipt import (  # noqa: F401
     format_receipt_pretty,
     format_receipt_detail,
     write_receipt,
+    wrap_in_toto_statement,
+    INTOTO_PREDICATE_TYPE,
 )
 
 from aiir._ledger import (  # noqa: F401
@@ -320,6 +322,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--explain",
         action="store_true",
         help="Show human-readable explanation of verification result (use with --verify)",
+    )
+    parser.add_argument(
+        "--in-toto",
+        action="store_true",
+        dest="in_toto",
+        help=(
+            "Wrap receipts in an in-toto Statement v1 envelope "
+            "(https://in-toto.io/Statement/v1). Makes AIIR receipts native "
+            "to the supply-chain attestation ecosystem (SLSA, Sigstore "
+            "policy-controller, Kyverno, OPA/Gatekeeper, Tekton Chains)."
+        ),
     )
     parser.add_argument(
         "--sign",
@@ -857,6 +870,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             set_github_output("receipt_count", "0")
             set_github_output("ai_commit_count", "0")
         return 0
+
+    # ── in-toto envelope wrapping ──────────────────────────────────
+    if getattr(args, 'in_toto', False):
+        receipts = [wrap_in_toto_statement(r) for r in receipts]
 
     # Validate signing requirements
     if args.sign and not args.output:

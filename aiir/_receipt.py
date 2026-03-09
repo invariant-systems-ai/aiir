@@ -215,6 +215,71 @@ def generate_receipts_for_range(
 
 
 # ---------------------------------------------------------------------------
+# in-toto Statement v1 envelope
+# ---------------------------------------------------------------------------
+
+# Predicate type URI registered for AIIR commit receipts.
+# Format: https://in-toto.io/attestation/v1#predicateType
+INTOTO_PREDICATE_TYPE = "https://aiir.dev/commit_receipt/v1"
+
+
+def wrap_in_toto_statement(receipt: Dict[str, Any]) -> Dict[str, Any]:
+    """Wrap an AIIR receipt in an in-toto Statement v1 envelope.
+
+    The in-toto attestation framework (https://in-toto.io) defines a
+    standard envelope for software supply-chain attestations.  This function
+    wraps a single AIIR commit receipt so that it can be consumed by any
+    tool that understands in-toto — Sigstore policy-controller, SLSA
+    verifiers, Kyverno, OPA/Gatekeeper, Tekton Chains, etc.
+
+    Envelope shape (https://in-toto.io/Statement/v1):
+
+        {
+          "_type": "https://in-toto.io/Statement/v1",
+          "subject": [
+            {
+              "name": "<repository>@<commit_sha>",
+              "digest": { "gitCommit": "<full_sha>" }
+            }
+          ],
+          "predicateType": "https://aiir.dev/commit_receipt/v1",
+          "predicate": { <the receipt> }
+        }
+
+    The `subject` identifies the git commit; the `predicate` is the
+    full AIIR receipt including its content hash.  Downstream verifiers
+    can match on `predicateType` to route attestations.
+
+    Returns:
+        A dict conforming to the in-toto Statement v1 schema.
+    """
+    commit = receipt.get("commit", {})
+    if not isinstance(commit, dict):
+        commit = {}
+
+    sha = commit.get("sha", "")
+    repo = receipt.get("provenance", {})
+    if not isinstance(repo, dict):
+        repo = {}
+    repo_url = repo.get("repository") or "unknown"
+
+    # Subject name: <repo>@<sha> (mirrors OCI artifact naming)
+    subject_name = f"{_strip_url_credentials(repo_url)}@{sha}" if sha else repo_url
+
+    return {
+        "_type": "https://in-toto.io/Statement/v1",
+        "subject": [
+            {
+                "name": _strip_terminal_escapes(subject_name),
+                "digest": {"gitCommit": _strip_terminal_escapes(str(sha))},
+            }
+        ],
+        "predicateType": INTOTO_PREDICATE_TYPE,
+        "predicate": receipt,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Output helpers
 # ---------------------------------------------------------------------------
 

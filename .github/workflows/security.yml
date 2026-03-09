@@ -174,33 +174,9 @@ jobs:
           pip install pip-licenses
           pip install ".[dev,sign]"
       - name: Verify license policy
-        shell: bash
         run: |
           pip-licenses --format=json --output-file=licenses.json
-          python3 -c "
-          import json, sys
-          APPROVED = ['Apache', 'MIT', 'BSD', 'ISC', 'PSF',
-                      'Python Software Foundation',
-                      'Mozilla Public License', 'MPL',
-                      'Public Domain', 'Unlicense']
-          KNOWN_GOOD = {'aiir', 'sigstore-models'}
-          with open('licenses.json') as f:
-              pkgs = json.load(f)
-          failed = []
-          for p in pkgs:
-              name, lic = p['Name'], p['License']
-              if name in KNOWN_GOOD:
-                  continue
-              if not any(term in lic for term in APPROVED):
-                  ver = p.get('Version', '?')
-                  failed.append(f'{name}:{ver} => {lic}')
-          if failed:
-              print('Unapproved licenses:', file=sys.stderr)
-              for item in failed:
-                  print(f'  {item}', file=sys.stderr)
-              sys.exit(1)
-          print('All dependency licenses are policy-compliant')
-          "
+          python3 scripts/check_licenses.py licenses.json
 
   # ── Summary gate ───────────────────────────────────────────────────
   security-ok:

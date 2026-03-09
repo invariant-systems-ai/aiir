@@ -362,7 +362,7 @@ def _handle_aiir_stats(args: Dict[str, Any]) -> Dict[str, Any]:
     """Return ledger statistics for the current repository."""
     try:
         ledger_dir = Path.cwd() / ".aiir"
-        _, index_path = _ledger_paths(str(ledger_dir))
+        _, _, index_path = _ledger_paths(str(ledger_dir))
         if not Path(index_path).is_file():
             return _text_result(
                 "No AIIR ledger found in this repository.\n"
@@ -402,7 +402,7 @@ def _handle_aiir_policy_check(args: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         ledger_dir = Path.cwd() / ".aiir"
-        _, index_path = _ledger_paths(str(ledger_dir))
+        _, _, index_path = _ledger_paths(str(ledger_dir))
         if not Path(index_path).is_file():
             return _text_result(
                 "No AIIR ledger found — run 'aiir' first to generate receipts."
@@ -518,7 +518,7 @@ def serve_stdio() -> None:
         if hasattr(stream, "reconfigure"):
             try:
                 stream.reconfigure(encoding="utf-8")
-            except (AttributeError, OSError):
+            except (AttributeError, OSError):  # pragma: no cover
                 pass  # Non-reconfigurable stream (e.g., pytest capture)
 
     # Cap maximum line length to prevent OOM from a single huge message.
@@ -628,5 +628,5 @@ def main() -> None:
     serve_stdio()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

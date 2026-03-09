@@ -90,8 +90,8 @@ def sign_receipt(receipt_json_bytes: bytes) -> str:
                 f"{hint_text}"
             )
         # Local development — fall back to interactive OIDC flow (opens browser)
-        issuer = Issuer.production()
-        identity_token = issuer.identity_token()
+        issuer = Issuer.production()  # pragma: no cover
+        identity_token = issuer.identity_token()  # pragma: no cover
 
     config = ClientTrustConfig.production()
     ctx = SigningContext.from_trust_config(config)

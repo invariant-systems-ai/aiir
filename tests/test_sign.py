@@ -143,6 +143,19 @@ class TestSigstoreSigning(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             cli.sign_receipt_file("/tmp/nonexistent_receipt_xyz.json")
 
+    def test_sign_receipt_file_rejects_existing_bundle(self):
+        """sign_receipt_file() raises FileExistsError if .sigstore already exists."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            receipt_path = os.path.join(tmpdir, "receipt.json")
+            Path(receipt_path).write_text('{"type": "test"}', encoding="utf-8")
+            # Pre-create the bundle file
+            bundle_path = receipt_path + ".sigstore"
+            Path(bundle_path).write_text('{"old": true}', encoding="utf-8")
+
+            with self.assertRaises(FileExistsError) as ctx:
+                cli.sign_receipt_file(receipt_path)
+            self.assertIn("already exists", str(ctx.exception))
+
 
 class TestSigstoreVerification(unittest.TestCase):
     """Tests for verify_receipt_signature() with mocked sigstore."""

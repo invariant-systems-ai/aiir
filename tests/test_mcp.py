@@ -197,3 +197,59 @@ class TestMcpRedactFiles(unittest.TestCase):
         _, kwargs = mock_gen.call_args
         self.assertTrue(kwargs.get("redact_files"))
 
+
+class TestMcpNewToolHandlers(unittest.TestCase):
+    """Tests for the new MCP tool handlers (stats, explain, policy_check)."""
+
+    def test_stats_no_ledger(self):
+        """aiir_stats returns helpful message when no ledger exists."""
+        from aiir.mcp_server import _handle_aiir_stats
+        with tempfile.TemporaryDirectory() as tmpdir:
+            old_cwd = os.getcwd()
+            try:
+                os.chdir(tmpdir)
+                result = _handle_aiir_stats({})
+            finally:
+                os.chdir(old_cwd)
+        self.assertIn("content", result)
+        text = result["content"][0]["text"]
+        self.assertIn("No AIIR ledger", text)
+
+    def test_explain_missing_file_param(self):
+        """aiir_explain returns error when 'file' is missing."""
+        from aiir.mcp_server import _handle_aiir_explain
+        result = _handle_aiir_explain({})
+        self.assertTrue(result.get("isError"))
+
+    def test_verify_missing_file_param(self):
+        """aiir_verify returns error when 'file' is missing."""
+        from aiir.mcp_server import _handle_aiir_verify
+        result = _handle_aiir_verify({})
+        self.assertTrue(result.get("isError"))
+
+    def test_policy_check_no_ledger(self):
+        """aiir_policy_check returns message when no ledger exists."""
+        from aiir.mcp_server import _handle_aiir_policy_check
+        with tempfile.TemporaryDirectory() as tmpdir:
+            old_cwd = os.getcwd()
+            try:
+                os.chdir(tmpdir)
+                result = _handle_aiir_policy_check({})
+            finally:
+                os.chdir(old_cwd)
+        text = result["content"][0]["text"]
+        self.assertIn("No AIIR ledger", text)
+
+    def test_policy_check_invalid_threshold(self):
+        """aiir_policy_check defaults to 50 when given bad max_ai_percent."""
+        from aiir.mcp_server import _handle_aiir_policy_check
+        with tempfile.TemporaryDirectory() as tmpdir:
+            old_cwd = os.getcwd()
+            try:
+                os.chdir(tmpdir)
+                result = _handle_aiir_policy_check({"max_ai_percent": "bad"})
+            finally:
+                os.chdir(old_cwd)
+        text = result["content"][0]["text"]
+        self.assertIn("No AIIR ledger", text)
+

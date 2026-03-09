@@ -207,7 +207,9 @@ class TestValidateReceiptSchema(unittest.TestCase):
         self.assertTrue(any("authorship_class" in e for e in errors))
 
     def test_valid_authorship_classes(self):
-        for cls in ("human", "ai_assisted", "ai_generated", "bot", "ai+bot"):
+        # Canonical forms + legacy forms accepted for backward compat
+        for cls in ("human", "ai_assisted", "ai_generated", "bot", "ai+bot",
+                     "ai-assisted", "ai-generated", "bot-generated"):
             r = _make_valid_receipt()
             r["ai_attestation"]["authorship_class"] = cls
             errors = validate_receipt_schema(r)

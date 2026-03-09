@@ -9,7 +9,7 @@ git clone https://github.com/invariant-systems-ai/aiir.git
 cd aiir
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"    # installs pytest + hypothesis
-python -m pytest tests/ -q  # 1020+ tests, ~2 min
+python -m pytest tests/ -q  # 1030+ tests, ~2 min
 ```
 
 > **Note**: `pip install -e ".[dev]"` installs `hypothesis` (property-based fuzz
@@ -59,7 +59,7 @@ Use clear, descriptive commit messages. Examples:
 ## Code standards
 
 - **Zero runtime dependencies.** This is a hard rule. AIIR ships with nothing but the Python standard library.
-- **Test everything.** We maintain 1020+ tests across unit, integration, security, and fuzz suites.
+- **Test everything.** We maintain 1030+ tests across unit, integration, security, and fuzz suites.
 - **Security-first.** All inputs are validated. All outputs are deterministic. See the [Threat Model](THREAT_MODEL.md).
 
 ## Development setup

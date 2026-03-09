@@ -3,7 +3,7 @@
   "name": "aiir",
   "displayName": "AIIR — AI Integrity Receipts",
   "description": "Generate and verify cryptographic receipts for AI-authored code commits. Detects AI authorship signals, produces content-addressed JSON receipts, and provides tamper-evident audit trails for compliance.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": {
     "name": "Invariant Systems, Inc.",
     "url": "https://invariantsystems.io",
@@ -70,6 +70,24 @@
       "description": "Check the current AIIR ledger against policy constraints. Evaluates AI-authored commit percentage against a configurable threshold.",
       "parameters": {
         "max_ai_percent": { "type": "number", "description": "Maximum allowed AI-authored commit percentage (0-100). Default: 50.", "required": false }
+      }
+    },
+    {
+      "name": "aiir_verify_release",
+      "description": "Verify a release by evaluating AIIR receipts against a named policy. Produces a Verification Summary Attestation (VSA) with pass/fail decision, coverage statistics, and policy evaluation details. Use this for CI gates, audit trails, and compliance checks.",
+      "parameters": {
+        "commit_range": { "type": "string", "description": "Git commit range to verify (e.g., 'origin/main..HEAD'). If omitted, all receipts in the ledger are evaluated.", "required": false },
+        "policy": { "type": "string", "description": "Policy preset name ('strict', 'balanced', 'permissive') or path to a policy JSON file. Default: balanced.", "required": false },
+        "emit_intoto": { "type": "boolean", "description": "If true, wrap the result as an in-toto Statement v1 Verification Summary Attestation.", "required": false }
+      }
+    },
+    {
+      "name": "aiir_gitlab_summary",
+      "description": "Generate a GitLab-flavored Markdown summary of AIIR receipts. Returns a formatted table with AI authorship breakdown, per-commit details, and optional SAST report data. Designed for GitLab Duo Chat, MR comments, and CI pipelines.",
+      "parameters": {
+        "range": { "type": "string", "description": "Commit range to summarize (e.g., 'origin/main..HEAD'). If omitted, all receipts are summarized.", "required": false },
+        "include_sast": { "type": "boolean", "description": "Include SAST report data (Security Dashboard format) alongside the Markdown summary.", "required": false },
+        "post_to_mr": { "type": "boolean", "description": "Post the summary as a comment on the current merge request. Only works inside GitLab CI with CI_MERGE_REQUEST_IID set.", "required": false }
       }
     }
   ],

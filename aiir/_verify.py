@@ -103,7 +103,14 @@ def verify_receipt(receipt: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def verify_receipt_file(filepath: str) -> Dict[str, Any]:
-    """Load and verify a receipt JSON file."""
+    """Load and verify a receipt JSON file.
+
+    Note: unlike the MCP server's _safe_verify_path, the CLI does NOT
+    restrict --verify to the current working directory.  This is intentional:
+    --verify is read-only and the user explicitly supplies the path.
+    The MCP restriction exists because an AI assistant could be tricked
+    into using verify as a filesystem oracle (F4-02).
+    """
     path = Path(filepath)
     if not path.exists():
         return {"valid": False, "error": f"File not found: {filepath}"}

@@ -1083,6 +1083,86 @@ class TestFriendlyVerify(unittest.TestCase):
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
+class TestVerifyPathBoundary(unittest.TestCase):
+    """CLI --verify is intentionally NOT CWD-restricted (unlike MCP).
+
+    The MCP server restricts verify to CWD to prevent AI-assistant oracle
+    attacks (F4-02).  CLI --verify is read-only and the user explicitly
+    supplies the path, so cross-directory verification is allowed.
+    Write operations (--output, --export) ARE CWD-restricted.
+    """
+
+    def test_verify_outside_cwd_is_allowed(self):
+        """CLI --verify should accept valid receipts from any readable path."""
+        import tempfile
+        import shutil
+
+        parent = tempfile.mkdtemp()
+        project_dir = Path(parent, "project")
+        outside_dir = Path(parent, "outside")
+        project_dir.mkdir()
+        outside_dir.mkdir()
+
+        receipt = {
+            "type": "aiir.commit_receipt",
+            "schema": "aiir/commit_receipt.v1",
+            "version": "1.0.0",
+            "commit": {"sha": "a" * 40, "author": {}, "committer": {},
+                       "subject": "test", "message_hash": "", "diff_hash": "",
+                       "files_changed": 0, "files": []},
+            "ai_attestation": {"is_ai_authored": False, "signals_detected": [],
+                               "signal_count": 0, "detection_method": "heuristic_v2"},
+            "provenance": {"repository": "", "tool": "", "generator": "test"},
+        }
+        from aiir._core import _canonical_json, _sha256
+        core_keys = {"type", "schema", "version", "commit", "ai_attestation", "provenance"}
+        core = {k: v for k, v in receipt.items() if k in core_keys}
+        core_json = _canonical_json(core)
+        receipt["content_hash"] = "sha256:" + _sha256(core_json)
+        receipt["receipt_id"] = "g1-" + _sha256(core_json)[:32]
+        receipt["timestamp"] = "2026-01-01T00:00:00Z"
+        receipt["extensions"] = {}
+
+        outside_file = outside_dir / "receipt.json"
+        outside_file.write_text(json.dumps(receipt))
+
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(project_dir)
+            # Should succeed — CLI verify is read-only, no CWD restriction
+            result = cli.verify_receipt_file(str(outside_file))
+            self.assertTrue(result["valid"],
+                            f"CLI --verify should allow outside-CWD reads: {result}")
+        finally:
+            os.chdir(old_cwd)
+            shutil.rmtree(parent, ignore_errors=True)
+
+    def test_mcp_verify_rejects_outside_cwd(self):
+        """MCP verify MUST reject outside-CWD paths (F4-02 oracle prevention)."""
+        from aiir.mcp_server import _safe_verify_path
+        import tempfile
+        import shutil
+
+        parent = tempfile.mkdtemp()
+        project_dir = Path(parent, "project")
+        outside_dir = Path(parent, "outside")
+        project_dir.mkdir()
+        outside_dir.mkdir()
+
+        outside_file = outside_dir / "receipt.json"
+        outside_file.write_text('{}')
+
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(project_dir)
+            with self.assertRaises(ValueError) as ctx:
+                _safe_verify_path(str(outside_file))
+            self.assertIn("current working directory", str(ctx.exception))
+        finally:
+            os.chdir(old_cwd)
+            shutil.rmtree(parent, ignore_errors=True)
+
+
 class TestTerminalEscapeInErrors(unittest.TestCase):
     """R18-SEC-01 / R18-SEC-02: User input in error messages must be sanitised."""
 

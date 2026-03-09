@@ -1,8 +1,8 @@
 {
   "name": "aiir",
   "displayName": "AIIR — AI Integrity Receipts",
-  "description": "Verify AIIR commit receipts directly in VS Code. Content-addressed integrity checks for AI-assisted commits.",
-  "version": "0.1.0",
+  "description": "Verify AIIR commit receipts directly in VS Code. Status bar, receipt explorer, CodeLens, and diagnostics for AI-assisted commit auditing.",
+  "version": "0.2.0",
   "publisher": "invariant-systems",
   "license": "Apache-2.0",
   "repository": {
@@ -15,7 +15,8 @@
     "vscode": "^1.85.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Linters"
   ],
   "keywords": [
     "aiir",
@@ -24,11 +25,17 @@
     "verification",
     "integrity",
     "compliance",
-    "audit"
+    "audit",
+    "copilot",
+    "claude",
+    "chatgpt",
+    "eu-ai-act"
   ],
   "activationEvents": [
     "onLanguage:json",
-    "workspaceContains:**/*.aiir.json"
+    "workspaceContains:**/*.aiir.json",
+    "workspaceContains:**/.receipts/*.json",
+    "workspaceContains:**/.aiir/**"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -36,15 +43,76 @@
       {
         "command": "aiir.verifyFile",
         "title": "AIIR: Verify Receipt",
-        "category": "AIIR"
+        "category": "AIIR",
+        "icon": "$(verified)"
       },
       {
         "command": "aiir.verifySelection",
         "title": "AIIR: Verify Selected Receipt",
         "category": "AIIR"
+      },
+      {
+        "command": "aiir.verifyAll",
+        "title": "AIIR: Verify All Receipts",
+        "category": "AIIR",
+        "icon": "$(checklist)"
+      },
+      {
+        "command": "aiir.refresh",
+        "title": "AIIR: Refresh Receipts",
+        "category": "AIIR",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "aiir.showSummary",
+        "title": "AIIR: Show Receipt Summary",
+        "category": "AIIR",
+        "icon": "$(graph)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "aiir",
+          "title": "AIIR Receipts",
+          "icon": "$(shield)"
+        }
+      ]
+    },
+    "views": {
+      "aiir": [
+        {
+          "id": "aiir.receiptExplorer",
+          "name": "Receipt Explorer",
+          "icon": "$(shield)",
+          "contextualTitle": "AIIR"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "aiir.receiptExplorer",
+        "contents": "No AIIR receipts found in this workspace.\n\nGenerate receipts with the CLI:\n[Generate Receipts](command:workbench.action.terminal.new)\n\n```\npip install aiir\naiir --range HEAD~5..HEAD\n```\n\nOr add the [GitHub Action](https://github.com/invariant-systems-ai/aiir) to your CI pipeline."
       }
     ],
     "menus": {
+      "view/title": [
+        {
+          "command": "aiir.refresh",
+          "when": "view == aiir.receiptExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "aiir.verifyAll",
+          "when": "view == aiir.receiptExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "aiir.showSummary",
+          "when": "view == aiir.receiptExplorer",
+          "group": "navigation"
+        }
+      ],
       "explorer/context": [
         {
           "command": "aiir.verifyFile",
@@ -57,6 +125,13 @@
           "command": "aiir.verifySelection",
           "when": "editorHasSelection",
           "group": "aiir@1"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "aiir.verifyFile",
+          "when": "resourceFilename =~ /\\.aiir\\.json$/",
+          "group": "navigation"
         }
       ]
     },

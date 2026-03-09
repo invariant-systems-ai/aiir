@@ -1,0 +1,25 @@
+# Dev / build artifacts
+node_modules/
+.npm
+*.tgz
+
+# Test files
+test.js
+test/
+tests/
+__tests__/
+
+# Config
+.eslintrc*
+.prettierrc*
+tsconfig.json
+.editorconfig
+
+# CI
+.github/
+.gitlab-ci.yml
+
+# Misc
+.DS_Store
+*.log
+.local/

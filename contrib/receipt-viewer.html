@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIIR Receipt Viewer — Verify AI Integrity Receipts</title>
+    <meta name="description" content="Paste an AIIR receipt to verify its cryptographic integrity. No data leaves your browser.">
+    <meta property="og:title" content="AIIR Receipt Viewer">
+    <meta property="og:description" content="Verify AI Integrity Receipts — cryptographic proof of AI code authorship">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://invariantsystems.io/verify">
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-dim: #8b949e;
+            --accent: #58a6ff;
+            --green: #3fb950;
+            --red: #f85149;
+            --yellow: #d29922;
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            --radius: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        header h1 span { color: var(--accent); }
+
+        header p {
+            color: var(--text-dim);
+            font-size: 0.95em;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.75em;
+            color: var(--text-dim);
+            margin-top: 12px;
+        }
+
+        .input-section {
+            margin-bottom: 24px;
+        }
+
+        .input-section label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 0.85em;
+            padding: 16px;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea::placeholder { color: var(--text-dim); }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        button {
+            padding: 10px 24px;
+            border-radius: var(--radius);
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .btn-primary:hover {
+            background: #79c0ff;
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-dim);
+        }
+
+        /* ── Result Panel ── */
+        #result {
+            display: none;
+        }
+
+        #result.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .verdict {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .verdict.pass {
+            background: rgba(63, 185, 80, 0.12);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+            color: var(--green);
+        }
+
+        .verdict.fail {
+            background: rgba(248, 81, 73, 0.12);
+            border: 1px solid rgba(248, 81, 73, 0.3);
+            color: var(--red);
+        }
+
+        .verdict.error {
+            background: rgba(210, 153, 34, 0.12);
+            border: 1px solid rgba(210, 153, 34, 0.3);
+            color: var(--yellow);
+        }
+
+        .verdict-icon { font-size: 1.4em; }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .detail-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+        }
+
+        .detail-card h3 {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+
+        .detail-card .value {
+            font-size: 1em;
+            word-break: break-all;
+        }
+
+        .detail-card .value.mono {
+            font-family: var(--font-mono);
+            font-size: 0.85em;
+        }
+
+        .detail-card .ai-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .ai-badge.ai-yes {
+            background: rgba(88, 166, 255, 0.15);
+            color: var(--accent);
+        }
+
+        .ai-badge.ai-no {
+            background: rgba(139, 148, 158, 0.15);
+            color: var(--text-dim);
+        }
+
+        .signals-list {
+            list-style: none;
+            margin-top: 8px;
+        }
+
+        .signals-list li {
+            padding: 4px 0;
+            font-size: 0.85em;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .signals-list li:last-child { border-bottom: none; }
+
+        .signal-type {
+            display: inline-block;
+            background: var(--bg);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.85em;
+            margin-right: 4px;
+        }
+
+        .hash-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .hash-section h3 {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+        }
+
+        .hash-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            font-family: var(--font-mono);
+            font-size: 0.8em;
+        }
+
+        .hash-row .label {
+            color: var(--text-dim);
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .hash-match { color: var(--green); }
+        .hash-mismatch { color: var(--red); }
+
+        .files-list {
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 0.8em;
+        }
+
+        .files-list div {
+            padding: 3px 0;
+            color: var(--text-dim);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            color: var(--text-dim);
+            font-size: 0.85em;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover { text-decoration: underline; }
+
+        /* ── Sample receipt button ── */
+        .sample-note {
+            font-size: 0.8em;
+            color: var(--text-dim);
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ <span>AIIR</span> Receipt Viewer</h1>
+            <p>Paste an AIIR commit receipt to verify its cryptographic integrity</p>
+            <div class="badge">🔒 All verification runs locally in your browser — no data is sent anywhere</div>
+        </header>
+
+        <div class="input-section">
+            <label for="receipt-input">Receipt JSON</label>
+            <textarea id="receipt-input" placeholder='Paste an AIIR receipt JSON here...
+
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  ...
+}'></textarea>
+            <p class="sample-note">Don't have a receipt? <a href="#" id="load-sample">Load a sample receipt</a></p>
+        </div>
+
+        <div class="actions">
+            <button class="btn-primary" id="verify-btn">🔍 Verify Receipt</button>
+            <button class="btn-secondary" id="clear-btn">Clear</button>
+        </div>
+
+        <div id="result">
+            <div id="verdict" class="verdict"></div>
+            <div id="details-grid" class="details-grid"></div>
+            <div id="hash-section"></div>
+            <div id="signals-section"></div>
+            <div id="files-section"></div>
+        </div>
+
+        <footer>
+            <p>
+                <a href="https://github.com/invariant-systems-ai/aiir">AIIR on GitHub</a> ·
+                <a href="https://pypi.org/project/aiir/">PyPI</a> ·
+                <a href="https://invariantsystems.io">Invariant Systems</a> ·
+                <a href="https://invariantsystems.io/spec">Specification</a>
+            </p>
+            <p style="margin-top: 8px;">Apache-2.0 · Zero dependencies · Works offline</p>
+        </footer>
+    </div>
+
+    <script>
+    // ── AIIR Verification (embedded from sdks/js/aiir-verify.js) ──────
+
+    const CORE_KEYS = new Set(['type', 'schema', 'version', 'commit', 'ai_attestation', 'provenance']);
+    const MAX_DEPTH = 64;
+    const VERSION_RE = /^[0-9]+\.[0-9]+\.[0-9]+([.+\-][0-9a-zA-Z.+\-]*)?$/;
+
+    function _encode(val, depth) {
+        if (depth > MAX_DEPTH) throw new Error('canonical JSON depth limit exceeded');
+        if (val === null) return 'null';
+        if (val === undefined) return undefined;
+        const t = typeof val;
+        if (t === 'boolean') return val ? 'true' : 'false';
+        if (t === 'number') {
+            if (!isFinite(val)) throw new Error('NaN/Infinity not allowed');
+            return JSON.stringify(val);
+        }
+        if (t === 'string') {
+            let out = '"';
+            for (let i = 0; i < val.length; i++) {
+                const c = val.charCodeAt(i);
+                if (c === 0x22) out += '\\"';
+                else if (c === 0x5c) out += '\\\\';
+                else if (c === 0x08) out += '\\b';
+                else if (c === 0x0c) out += '\\f';
+                else if (c === 0x0a) out += '\\n';
+                else if (c === 0x0d) out += '\\r';
+                else if (c === 0x09) out += '\\t';
+                else if (c < 0x20) out += '\\u' + c.toString(16).padStart(4, '0');
+                else if (c > 0x7e) {
+                    if (c >= 0xd800 && c <= 0xdbff && i + 1 < val.length) {
+                        const lo = val.charCodeAt(i + 1);
+                        if (lo >= 0xdc00 && lo <= 0xdfff) {
+                            out += '\\u' + c.toString(16).padStart(4, '0');
+                            out += '\\u' + lo.toString(16).padStart(4, '0');
+                            i++;
+                            continue;
+                        }
+                    }
+                    out += '\\u' + c.toString(16).padStart(4, '0');
+                } else out += val[i];
+            }
+            return out + '"';
+        }
+        if (Array.isArray(val)) {
+            return '[' + val.map(v => { const e = _encode(v, depth+1); return e === undefined ? 'null' : e; }).join(',') + ']';
+        }
+        if (t === 'object') {
+            const keys = Object.keys(val).sort();
+            const pairs = [];
+            for (const k of keys) {
+                const v = _encode(val[k], depth+1);
+                if (v !== undefined) pairs.push(_encode(k, depth+1) + ':' + v);
+            }
+            return '{' + pairs.join(',') + '}';
+        }
+        throw new Error('cannot encode type: ' + t);
+    }
+
+    function canonicalJson(obj) { return _encode(obj, 0); }
+
+    async function sha256(str) {
+        const bytes = new TextEncoder().encode(str);
+        const buf = await crypto.subtle.digest('SHA-256', bytes);
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function constantTimeEqual(a, b) {
+        if (typeof a !== 'string' || typeof b !== 'string') return false;
+        if (a.length !== b.length) return false;
+        let diff = 0;
+        for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+        return diff === 0;
+    }
+
+    async function verify(receipt) {
+        const errors = [];
+        if (receipt === null || typeof receipt !== 'object' || Array.isArray(receipt))
+            return { valid: false, errors: ['receipt is not a dict'] };
+        if (receipt.type !== 'aiir.commit_receipt')
+            return { valid: false, errors: [`unknown receipt type: '${receipt.type}'`] };
+        if (typeof receipt.schema !== 'string' || !receipt.schema.startsWith('aiir/'))
+            return { valid: false, errors: [`unknown schema: '${receipt.schema}'`] };
+        if (typeof receipt.version !== 'string' || !VERSION_RE.test(receipt.version))
+            return { valid: false, errors: [`invalid version format: '${receipt.version}'`] };
+
+        const core = {};
+        for (const key of Object.keys(receipt)) {
+            if (CORE_KEYS.has(key)) core[key] = receipt[key];
+        }
+        const coreJson = canonicalJson(core);
+        const hash = await sha256(coreJson);
+        const expectedHash = 'sha256:' + hash;
+        const expectedId = 'g1-' + hash.slice(0, 32);
+
+        if (!constantTimeEqual(expectedHash, receipt.content_hash || ''))
+            errors.push('content hash mismatch');
+        if (!constantTimeEqual(expectedId, receipt.receipt_id || ''))
+            errors.push('receipt_id mismatch');
+
+        return { valid: errors.length === 0, errors, expectedHash, expectedId };
+    }
+
+    // ── Sample receipt for demo ───────────────────────────────────────
+
+    const SAMPLE_RECEIPT = {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "1.2.0",
+        "commit": {
+            "sha": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+            "author": { "name": "Jane Developer", "email": "jane@example.com" },
+            "committer": { "name": "Jane Developer", "email": "jane@example.com" },
+            "subject": "feat: add user authentication module",
+            "message_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "diff_hash": "sha256:abc123def456789012345678901234567890123456789012345678901234abcd",
+            "files_changed": 3,
+            "files": ["src/auth.py", "tests/test_auth.py", "docs/auth.md"]
+        },
+        "ai_attestation": {
+            "ai_authored": true,
+            "confidence": "high",
+            "signals": [
+                { "type": "trailer", "source": "commit_message", "value": "Generated by: GitHub Copilot" },
+                { "type": "co-author", "source": "commit_message", "value": "Co-authored-by: Copilot <copilot@github.com>" }
+            ],
+            "signal_count": 2
+        },
+        "provenance": {
+            "generator": "aiir.cli",
+            "generator_version": "1.2.0",
+            "repository": "https://github.com/example/my-project"
+        }
+    };
+
+    // Pre-compute hash for sample so it verifies correctly
+    async function buildSample() {
+        const coreJson = canonicalJson(SAMPLE_RECEIPT);
+        const hash = await sha256(coreJson);
+        SAMPLE_RECEIPT.receipt_id = 'g1-' + hash.slice(0, 32);
+        SAMPLE_RECEIPT.content_hash = 'sha256:' + hash;
+        SAMPLE_RECEIPT.timestamp = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+        SAMPLE_RECEIPT.extensions = {};
+    }
+
+    // ── UI Logic ──────────────────────────────────────────────────────
+
+    const textarea = document.getElementById('receipt-input');
+    const resultDiv = document.getElementById('result');
+
+    document.getElementById('verify-btn').addEventListener('click', async () => {
+        const text = textarea.value.trim();
+        if (!text) {
+            showError('Please paste a receipt JSON');
+            return;
+        }
+
+        let receipt;
+        try {
+            receipt = JSON.parse(text);
+        } catch (e) {
+            showError('Invalid JSON: ' + e.message);
+            return;
+        }
+
+        try {
+            const result = await verify(receipt);
+            renderResult(receipt, result);
+        } catch (e) {
+            showError('Verification error: ' + e.message);
+        }
+    });
+
+    document.getElementById('clear-btn').addEventListener('click', () => {
+        textarea.value = '';
+        resultDiv.classList.remove('show');
+    });
+
+    document.getElementById('load-sample').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await buildSample();
+        textarea.value = JSON.stringify(SAMPLE_RECEIPT, null, 2);
+    });
+
+    function showError(msg) {
+        resultDiv.classList.add('show');
+        document.getElementById('verdict').className = 'verdict error';
+        document.getElementById('verdict').innerHTML = `<span class="verdict-icon">⚠️</span> ${escapeHtml(msg)}`;
+        document.getElementById('details-grid').innerHTML = '';
+        document.getElementById('hash-section').innerHTML = '';
+        document.getElementById('signals-section').innerHTML = '';
+        document.getElementById('files-section').innerHTML = '';
+    }
+
+    function renderResult(receipt, result) {
+        resultDiv.classList.add('show');
+
+        // Verdict
+        const verdict = document.getElementById('verdict');
+        if (result.valid) {
+            verdict.className = 'verdict pass';
+            verdict.innerHTML = '<span class="verdict-icon">✅</span> Receipt Verified — cryptographic integrity intact';
+        } else {
+            verdict.className = 'verdict fail';
+            verdict.innerHTML = `<span class="verdict-icon">❌</span> Verification Failed — ${escapeHtml(result.errors.join(', '))}`;
+        }
+
+        // Details grid
+        const isAI = receipt.ai_attestation?.ai_authored;
+        const signals = receipt.ai_attestation?.signal_count ?? 0;
+        const grid = document.getElementById('details-grid');
+        grid.innerHTML = `
+            <div class="detail-card">
+                <h3>Commit</h3>
+                <div class="value mono">${escapeHtml(receipt.commit?.sha || '—')}</div>
+                <div style="margin-top:8px;color:var(--text-dim);font-size:0.9em">${escapeHtml(receipt.commit?.subject || '')}</div>
+            </div>
+            <div class="detail-card">
+                <h3>AI Authorship</h3>
+                <div class="value">
+                    <span class="ai-badge ${isAI ? 'ai-yes' : 'ai-no'}">
+                        ${isAI ? '🤖 AI-Authored' : '👤 Human-Authored'}
+                    </span>
+                </div>
+                <div style="margin-top:8px;color:var(--text-dim);font-size:0.85em">${signals} signal${signals !== 1 ? 's' : ''} detected</div>
+            </div>
+            <div class="detail-card">
+                <h3>Author</h3>
+                <div class="value">${escapeHtml(receipt.commit?.author?.name || '—')}</div>
+                <div style="color:var(--text-dim);font-size:0.85em">${escapeHtml(receipt.commit?.author?.email || '')}</div>
+            </div>
+            <div class="detail-card">
+                <h3>Provenance</h3>
+                <div class="value" style="font-size:0.9em">${escapeHtml(receipt.provenance?.generator || '—')}</div>
+                <div style="color:var(--text-dim);font-size:0.85em;margin-top:4px">${escapeHtml(receipt.provenance?.repository || '')}</div>
+            </div>
+            <div class="detail-card">
+                <h3>Receipt ID</h3>
+                <div class="value mono" style="font-size:0.8em">${escapeHtml(receipt.receipt_id || '—')}</div>
+            </div>
+            <div class="detail-card">
+                <h3>Timestamp</h3>
+                <div class="value">${escapeHtml(receipt.timestamp || '—')}</div>
+                <div style="color:var(--text-dim);font-size:0.85em">Schema: ${escapeHtml(receipt.schema || '—')}</div>
+            </div>
+        `;
+
+        // Hash verification detail
+        const hashSection = document.getElementById('hash-section');
+        const hashMatch = result.valid || !result.errors.includes('content hash mismatch');
+        const idMatch = result.valid || !result.errors.includes('receipt_id mismatch');
+        hashSection.innerHTML = `
+            <div class="hash-section">
+                <h3>Cryptographic Verification</h3>
+                <div class="hash-row">
+                    <span class="label">content_hash</span>
+                    <span class="${hashMatch ? 'hash-match' : 'hash-mismatch'}">${hashMatch ? '✅ Match' : '❌ Mismatch'}</span>
+                </div>
+                <div class="hash-row">
+                    <span class="label" style="word-break:break-all">${escapeHtml(receipt.content_hash || '(missing)')}</span>
+                </div>
+                <div class="hash-row" style="margin-top:8px">
+                    <span class="label">receipt_id</span>
+                    <span class="${idMatch ? 'hash-match' : 'hash-mismatch'}">${idMatch ? '✅ Match' : '❌ Mismatch'}</span>
+                </div>
+                <div class="hash-row">
+                    <span class="label" style="word-break:break-all">${escapeHtml(receipt.receipt_id || '(missing)')}</span>
+                </div>
+            </div>
+        `;
+
+        // Signals
+        const signalsSection = document.getElementById('signals-section');
+        const signalsList = receipt.ai_attestation?.signals || [];
+        if (signalsList.length > 0) {
+            signalsSection.innerHTML = `
+                <div class="hash-section">
+                    <h3>AI Detection Signals</h3>
+                    <ul class="signals-list">
+                        ${signalsList.map(s => `
+                            <li>
+                                <span class="signal-type">${escapeHtml(s.type || '?')}</span>
+                                ${escapeHtml(s.value || s.source || '')}
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+        } else {
+            signalsSection.innerHTML = '';
+        }
+
+        // Files
+        const filesSection = document.getElementById('files-section');
+        const files = receipt.commit?.files || [];
+        if (files.length > 0) {
+            filesSection.innerHTML = `
+                <div class="hash-section">
+                    <h3>Files Changed (${receipt.commit?.files_changed || files.length})</h3>
+                    <div class="files-list">
+                        ${files.map(f => `<div>📄 ${escapeHtml(f)}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+        } else if (receipt.commit?.files_redacted) {
+            filesSection.innerHTML = `
+                <div class="hash-section">
+                    <h3>Files Changed (${receipt.commit?.files_changed || '?'})</h3>
+                    <div style="color:var(--text-dim);font-size:0.85em">🔒 File paths redacted</div>
+                </div>
+            `;
+        } else {
+            filesSection.innerHTML = '';
+        }
+    }
+
+    function escapeHtml(str) {
+        if (typeof str !== 'string') return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    </script>
+</body>
+</html>

@@ -10,17 +10,36 @@
     "url": "https://github.com/invariant-systems-ai/aiir",
     "directory": "sdks/js"
   },
-  "homepage": "https://invariantsystems.io",
-  "keywords": ["aiir", "ai", "receipts", "verification", "integrity", "sha256"],
+  "homepage": "https://github.com/invariant-systems-ai/aiir/tree/main/sdks/js#readme",
+  "bugs": {
+    "url": "https://github.com/invariant-systems-ai/aiir/issues"
+  },
+  "keywords": [
+    "aiir",
+    "ai",
+    "receipts",
+    "verification",
+    "integrity",
+    "sha256",
+    "cryptographic",
+    "audit",
+    "compliance",
+    "copilot",
+    "chatgpt",
+    "claude",
+    "eu-ai-act"
+  ],
   "author": "Invariant Systems, Inc. <noah@invariantsystems.io>",
   "engines": {
     "node": ">=18"
   },
   "files": [
     "aiir-verify.js",
-    "aiir-verify.d.ts"
+    "aiir-verify.d.ts",
+    "README.md"
   ],
   "scripts": {
     "test": "node test.js"
-  }
+  },
+  "sideEffects": false
 }

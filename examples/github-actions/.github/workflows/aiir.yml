@@ -1,0 +1,85 @@
+# AIIR Receipts — generate and verify AI integrity receipts on every push.
+#
+# This workflow demonstrates AIIR in a real CI pipeline:
+#   1. Scans commits for AI authorship signals (Copilot, ChatGPT, Claude, etc.)
+#   2. Generates content-addressed JSON receipts
+#   3. Signs receipts with Sigstore (keyless OIDC)
+#   4. Uploads receipts as artifacts
+#   5. Optionally enforces policy gates
+#
+# Usage: Copy this file to .github/workflows/aiir.yml in your repository.
+#
+# Docs: https://github.com/invariant-systems-ai/aiir
+
+name: AIIR Receipts
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write   # Required for Sigstore keyless signing
+
+jobs:
+  # ── Generate receipts for every push/PR ──────────────────────────────
+  receipt:
+    name: Generate AI Integrity Receipts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history is needed for accurate commit range detection.
+          # Without this, the Action falls back to HEAD~1..HEAD.
+          fetch-depth: 0
+
+      - name: Generate AIIR receipts
+        id: aiir
+        uses: invariant-systems-ai/aiir@v1
+        with:
+          # Sign receipts with Sigstore (keyless, OIDC-based).
+          # Requires id-token: write permission above.
+          sign: "true"
+
+          # Write individual receipt JSON files to this directory.
+          # These are uploaded as artifacts in the next step.
+          output-dir: ".aiir-receipts"
+
+          # Uncomment to only receipt AI-authored commits:
+          # ai-only: "true"
+
+      - name: Summary
+        run: |
+          echo "### AIIR Receipt Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Receipts generated**: ${{ steps.aiir.outputs.receipt_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **AI-authored commits**: ${{ steps.aiir.outputs.ai_commit_count }}" >> $GITHUB_STEP_SUMMARY
+
+  # ── (Optional) Policy enforcement ────────────────────────────────────
+  # Uncomment this job to enforce AI authorship policies in CI.
+  #
+  # policy:
+  #   name: AIIR Policy Check
+  #   runs-on: ubuntu-latest
+  #   needs: receipt
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #
+  #     - name: Install AIIR
+  #       run: pip install aiir
+  #
+  #     - name: Check policy
+  #       run: |
+  #         aiir --check --policy balanced \
+  #           --range ${{ github.event.before }}..${{ github.event.after }}
+  #
+  #     # Policy presets:
+  #     #   strict     — max 50% AI commits, signing required, hard-fail
+  #     #   balanced   — signing recommended, soft-fail
+  #     #   permissive — warn-only

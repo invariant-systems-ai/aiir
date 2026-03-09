@@ -158,7 +158,7 @@ The `--in-toto` flag wraps every AIIR receipt in a standard
 {
   "_type": "https://in-toto.io/Statement/v1",
   "subject": [{"name": "repo@sha", "digest": {"gitCommit": "abc..."}}],
-  "predicateType": "https://aiir.dev/commit_receipt/v1",
+  "predicateType": "https://invariantsystems.io/predicates/aiir/commit_receipt/v1",
   "predicate": { "...the full AIIR receipt..." }
 }
 ```
@@ -166,7 +166,7 @@ The `--in-toto` flag wraps every AIIR receipt in a standard
 This makes AIIR receipts a **native citizen** of the supply-chain
 attestation ecosystem. Every tool from Sigstore policy-controller to
 Tekton Chains to OPA/Gatekeeper understands this shape. The predicate
-type URI (`https://aiir.dev/commit_receipt/v1`) allows routing policies
+type URI (`https://invariantsystems.io/predicates/aiir/commit_receipt/v1`) allows routing policies
 to match on AIIR-specific content without parsing the inner receipt.
 
 ---

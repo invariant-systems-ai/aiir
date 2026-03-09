@@ -50,7 +50,7 @@ class TestInTotoWrapper(unittest.TestCase):
 
         self.assertEqual(stmt["_type"], "https://in-toto.io/Statement/v1")
         self.assertEqual(stmt["predicateType"], INTOTO_PREDICATE_TYPE)
-        self.assertEqual(stmt["predicateType"], "https://aiir.dev/commit_receipt/v1")
+        self.assertEqual(stmt["predicateType"], "https://invariantsystems.io/predicates/aiir/commit_receipt/v1")
         self.assertIsInstance(stmt["subject"], list)
         self.assertEqual(len(stmt["subject"]), 1)
         self.assertIs(stmt["predicate"], receipt)
@@ -148,7 +148,7 @@ class TestInTotoWrapper(unittest.TestCase):
 
     def test_predicate_type_is_stable_uri(self):
         """Predicate type URI is the documented stable value."""
-        self.assertEqual(INTOTO_PREDICATE_TYPE, "https://aiir.dev/commit_receipt/v1")
+        self.assertEqual(INTOTO_PREDICATE_TYPE, "https://invariantsystems.io/predicates/aiir/commit_receipt/v1")
 
     def test_cli_flag_accepted(self):
         """CLI accepts --in-toto without error (basic smoke test)."""

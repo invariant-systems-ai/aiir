@@ -225,7 +225,7 @@ def generate_receipts_for_range(
 
 # Predicate type URI registered for AIIR commit receipts.
 # Format: https://in-toto.io/attestation/v1#predicateType
-INTOTO_PREDICATE_TYPE = "https://aiir.dev/commit_receipt/v1"
+INTOTO_PREDICATE_TYPE = "https://invariantsystems.io/predicates/aiir/commit_receipt/v1"
 
 
 def wrap_in_toto_statement(receipt: Dict[str, Any]) -> Dict[str, Any]:
@@ -247,7 +247,7 @@ def wrap_in_toto_statement(receipt: Dict[str, Any]) -> Dict[str, Any]:
               "digest": { "gitCommit": "<full_sha>" }
             }
           ],
-          "predicateType": "https://aiir.dev/commit_receipt/v1",
+          "predicateType": "https://invariantsystems.io/predicates/aiir/commit_receipt/v1",
           "predicate": { <the receipt> }
         }
 

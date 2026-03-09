@@ -469,16 +469,13 @@ The following media type registration is prepared per
 The in-toto predicate type URI is:
 
 ```
-https://aiir.dev/commit_receipt/v1
+https://invariantsystems.io/predicates/aiir/commit_receipt/v1
 ```
 
 This URI identifies AIIR commit receipt predicates within
 [in-toto Statement v1](https://in-toto.io/Statement/v1) envelopes.
 It resolves to a human-readable description of the predicate format
 with links to the specification and schema.
-
-Canonical alias (until `aiir.dev` DNS is delegated):
-`https://invariantsystems.io/predicates/aiir/commit_receipt/v1`
 
 ### 14.3 Schema URI
 

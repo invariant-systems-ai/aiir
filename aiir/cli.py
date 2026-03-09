@@ -84,6 +84,7 @@ from aiir._receipt import (  # noqa: F401
     generate_receipt,
     generate_receipts_for_range,
     format_receipt_pretty,
+    format_receipt_detail,
     write_receipt,
 )
 
@@ -190,6 +191,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "examples:\n"
             "  aiir                        Receipt HEAD → .aiir/receipts.jsonl\n"
             "  aiir --pretty               Same, plus human-readable summary\n"
+            "  aiir --detail               Full receipt details (all fields)\n"
             "  aiir -r origin/main..HEAD   Receipt every commit in a range\n"
             "  aiir --ai-only              Only AI-authored commits\n"
             "  aiir --json                 Print JSON to stdout (for piping)\n"
@@ -263,6 +265,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--pretty",
         action="store_true",
         help="Print human-readable summary (combines with ledger by default)",
+    )
+    parser.add_argument(
+        "--detail",
+        action="store_true",
+        help="Print detailed human-readable receipt (all fields, combines with any mode)",
     )
     parser.add_argument(
         "--github-action",
@@ -745,7 +752,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _signed_display = "YES (sigstore)" if args.sign else "none"
 
     # Pretty-print (always goes to stderr so it can combine with any mode).
-    if args.pretty:
+    # --detail implies --pretty (superset); if both given, detail wins.
+    if args.detail:
+        for receipt in receipts:
+            print(format_receipt_detail(receipt, signed=_signed_display), file=sys.stderr)
+    elif args.pretty:
         for receipt in receipts:
             print(format_receipt_pretty(receipt, signed=_signed_display), file=sys.stderr)
 

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.11] — 2026-03-08
+
+### Added
+
+- **`--detail` flag**: New detailed human-readable receipt view showing all fields — schema identity, full commit SHA, committer, message/diff hashes, file list, authorship class, detection method, signal counts, bot attestation, provenance, and extensions. Combines with any output mode (`--output`, `--json`, `--jsonl`). File list capped at 20 entries for terminal safety.
+
 ## [1.0.10] — 2026-03-08
 
 ### Added

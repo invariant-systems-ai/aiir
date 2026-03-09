@@ -48,31 +48,28 @@ pages:
     - pip install --quiet aiir
     - mkdir -p public
     - |
-      python3 << 'PYEOF'
-import json
-import glob
+      python3 -c "
+      import json, glob, os
+      from aiir._gitlab import generate_dashboard_html
 
-from aiir._gitlab import generate_dashboard_html
+      receipts = []
+      for f in sorted(glob.glob('.aiir-receipts/*.json')):
+          try:
+              with open(f) as fh:
+                  data = json.load(fh)
+                  if isinstance(data, dict):
+                      receipts.append(data)
+          except (json.JSONDecodeError, OSError):
+              continue
 
-receipts = []
-for f in sorted(glob.glob('.aiir-receipts/*.json')):
-    try:
-        with open(f) as fh:
-            data = json.load(fh)
-            if isinstance(data, dict):
-                receipts.append(data)
-    except (json.JSONDecodeError, OSError):
-        continue
+      project_name = os.environ.get('CI_PROJECT_NAME', 'Project')
+      html = generate_dashboard_html(receipts, project_name=project_name)
 
-import os
-project_name = os.environ.get("CI_PROJECT_NAME", "Project")
-html = generate_dashboard_html(receipts, project_name=project_name)
+      with open('public/index.html', 'w') as fh:
+          fh.write(html)
 
-with open("public/index.html", "w") as fh:
-    fh.write(html)
-
-print(f"Dashboard generated: {len(receipts)} receipts")
-PYEOF
+      print(f'Dashboard generated: {len(receipts)} receipts')
+      "
   artifacts:
     paths:
       - public

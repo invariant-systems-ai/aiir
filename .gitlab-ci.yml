@@ -56,48 +56,41 @@ test:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 # --- Publish release to CI/CD Catalog ---
-# Idempotent: if the release already exists (e.g. from a re-synced tag),
-# the job succeeds immediately.  This prevents cascading failures when
-# the GitHub→GitLab sync workflow force-pushes tags.
+# Uses the release: keyword (declarative), which GitLab's runner handles
+# via release-cli with built-in authentication.
 #
-# Uses release-cli (not REST API) because CI_JOB_TOKEN lacks api scope
-# for the Releases endpoint.  release-cli has special internal auth.
+# If the release already exists (re-synced tag), GitLab returns an error
+# and the job will fail — this is expected and harmless since the prior
+# release is already correct.  Use allow_failure for idempotency.
 create-release:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   script:
-    - |
-      VERSION="${CI_COMMIT_TAG#v}"
-      echo "Publishing release $CI_COMMIT_TAG to CI/CD Catalog"
-
-      release-cli create \
-        --name "AIIR $CI_COMMIT_TAG" \
-        --tag-name "$CI_COMMIT_TAG" \
-        --description "## AIIR ${CI_COMMIT_TAG}
+    - echo "Publishing release $CI_COMMIT_TAG to CI/CD Catalog"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "AIIR $CI_COMMIT_TAG"
+    description: |
+      ## AIIR $CI_COMMIT_TAG
 
       AI Integrity Receipts — tamper-evident cryptographic receipts for every AI-generated commit.
 
       ### Install
 
-      \`\`\`
-      pip install aiir==${VERSION}
-      \`\`\`
+      ```
+      pip install aiir==${CI_COMMIT_TAG#v}
+      ```
 
       ### Use as CI/CD Component
 
-      \`\`\`yaml
+      ```yaml
       include:
-        - component: gitlab.com/invariant-systems/aiir/receipt@${CI_COMMIT_TAG}
-      \`\`\`
+        - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/receipt@$CI_COMMIT_TAG
+      ```
 
       ### Changelog
 
-      See [CHANGELOG.md](https://github.com/invariant-systems-ai/aiir/blob/main/CHANGELOG.md)" \
-      && echo "✅ Release $CI_COMMIT_TAG created" \
-      || {
-        echo "⚠️  release-cli returned non-zero (release likely already exists)"
-        echo "✅ Treating as success — idempotent for re-synced tags"
-      }
+      See [CHANGELOG.md](https://github.com/invariant-systems-ai/aiir/blob/main/CHANGELOG.md)
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+$/
   allow_failure: false

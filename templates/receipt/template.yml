@@ -47,12 +47,27 @@ spec:
     job-prefix:
       description: "Prefix for job names (use to include the component multiple times)"
       default: "aiir"
+    sign:
+      description: "Enable Sigstore keyless signing (uses GitLab OIDC id_tokens)"
+      type: boolean
+      default: false
+    gl-sast-report:
+      description: "Generate gl-sast-report.json for Security Dashboard (AI findings as informational)"
+      type: boolean
+      default: false
+    approval-threshold:
+      description: "AI% threshold to add extra MR approval rules (0 = disabled)"
+      type: number
+      default: 0
 ---
 
 # --- Receipt on push ---
 "$[[ inputs.job-prefix ]]-receipt-push":
   image: $[[ inputs.python-image ]]
   stage: $[[ inputs.stage ]]
+  id_tokens:
+    SIGSTORE_ID_TOKEN:
+      aud: sigstore
   before_script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
     - |
@@ -61,17 +76,31 @@ spec:
       else
         pip install --quiet "aiir==$[[ inputs.version ]]"
       fi
+    - |
+      if [ "$[[ inputs.sign ]]" = "true" ]; then
+        pip install --quiet sigstore
+      fi
   script:
     - |
       AI_FLAG=""
       if [ "$[[ inputs.ai-only ]]" = "true" ]; then
         AI_FLAG="--ai-only"
       fi
+      SIGN_FLAG=""
+      if [ "$[[ inputs.sign ]]" = "true" ]; then
+        SIGN_FLAG="--sign"
+      fi
+      SAST_FLAG=""
+      if [ "$[[ inputs.gl-sast-report ]]" = "true" ]; then
+        SAST_FLAG="--gl-sast-report gl-sast-report.json"
+      fi
       if [ -n "$CI_COMMIT_BEFORE_SHA" ] && [ "$CI_COMMIT_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
         aiir --range "${CI_COMMIT_BEFORE_SHA}..${CI_COMMIT_SHA}" \
-          --output "$[[ inputs.output-dir ]]/" --pretty $AI_FLAG $[[ inputs.extra-args ]]
+          --output "$[[ inputs.output-dir ]]/" --pretty --gitlab-ci \
+          $AI_FLAG $SIGN_FLAG $SAST_FLAG $[[ inputs.extra-args ]]
       else
-        aiir --output "$[[ inputs.output-dir ]]/" --pretty $AI_FLAG $[[ inputs.extra-args ]]
+        aiir --output "$[[ inputs.output-dir ]]/" --pretty --gitlab-ci \
+          $AI_FLAG $SIGN_FLAG $SAST_FLAG $[[ inputs.extra-args ]]
       fi
     # Print summary
     - |
@@ -83,6 +112,9 @@ spec:
   artifacts:
     paths:
       - $[[ inputs.output-dir ]]/
+    reports:
+      dotenv: aiir.env
+      sast: gl-sast-report.json
     expire_in: $[[ inputs.artifact-expiry ]]
     when: always
   rules:
@@ -94,6 +126,9 @@ spec:
 "$[[ inputs.job-prefix ]]-receipt-mr":
   image: $[[ inputs.python-image ]]
   stage: $[[ inputs.stage ]]
+  id_tokens:
+    SIGSTORE_ID_TOKEN:
+      aud: sigstore
   before_script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
     - |
@@ -102,6 +137,10 @@ spec:
       else
         pip install --quiet "aiir==$[[ inputs.version ]]"
       fi
+    - |
+      if [ "$[[ inputs.sign ]]" = "true" ]; then
+        pip install --quiet sigstore
+      fi
   script:
     - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --depth=100
     - |
@@ -109,8 +148,17 @@ spec:
       if [ "$[[ inputs.ai-only ]]" = "true" ]; then
         AI_FLAG="--ai-only"
       fi
+      SIGN_FLAG=""
+      if [ "$[[ inputs.sign ]]" = "true" ]; then
+        SIGN_FLAG="--sign"
+      fi
+      SAST_FLAG=""
+      if [ "$[[ inputs.gl-sast-report ]]" = "true" ]; then
+        SAST_FLAG="--gl-sast-report gl-sast-report.json"
+      fi
       aiir --range "origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}..${CI_COMMIT_SHA}" \
-        --output "$[[ inputs.output-dir ]]/" --pretty $AI_FLAG $[[ inputs.extra-args ]]
+        --output "$[[ inputs.output-dir ]]/" --pretty --gitlab-ci \
+        $AI_FLAG $SIGN_FLAG $SAST_FLAG $[[ inputs.extra-args ]]
     # Print summary
     - |
       RECEIPT_COUNT=$(ls -1 "$[[ inputs.output-dir ]]"/*.json 2>/dev/null | wc -l)
@@ -121,6 +169,9 @@ spec:
   artifacts:
     paths:
       - $[[ inputs.output-dir ]]/
+    reports:
+      dotenv: aiir.env
+      sast: gl-sast-report.json
     expire_in: $[[ inputs.artifact-expiry ]]
     when: always
   rules:

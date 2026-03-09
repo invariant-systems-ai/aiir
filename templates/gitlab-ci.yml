@@ -57,9 +57,9 @@ aiir-receipt-push:
     - |
       if [ -n "$CI_COMMIT_BEFORE_SHA" ] && [ "$CI_COMMIT_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
         aiir --range "${CI_COMMIT_BEFORE_SHA}..${CI_COMMIT_SHA}" \
-          --output .aiir-receipts/ --pretty ${AIIR_AI_ONLY:+"$AIIR_AI_ONLY"} ${AIIR_EXTRA_ARGS:+"$AIIR_EXTRA_ARGS"}
+          --output .aiir-receipts/ --pretty --gitlab-ci ${AIIR_AI_ONLY:+"$AIIR_AI_ONLY"} ${AIIR_EXTRA_ARGS:+"$AIIR_EXTRA_ARGS"}
       else
-        aiir --output .aiir-receipts/ --pretty ${AIIR_AI_ONLY:+"$AIIR_AI_ONLY"} ${AIIR_EXTRA_ARGS:+"$AIIR_EXTRA_ARGS"}
+        aiir --output .aiir-receipts/ --pretty --gitlab-ci ${AIIR_AI_ONLY:+"$AIIR_AI_ONLY"} ${AIIR_EXTRA_ARGS:+"$AIIR_EXTRA_ARGS"}
       fi
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
@@ -72,8 +72,8 @@ aiir-receipt-mr:
     - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --depth=100
     - |
       aiir --range "origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}..${CI_COMMIT_SHA}" \
-        --output .aiir-receipts/ --pretty ${AIIR_AI_ONLY:+"$AIIR_AI_ONLY"} ${AIIR_EXTRA_ARGS:+"$AIIR_EXTRA_ARGS"}
-    # Summary for MR notes (optional — pipe to MR comment via API)
+        --output .aiir-receipts/ --pretty --gitlab-ci ${AIIR_AI_ONLY:+"$AIIR_AI_ONLY"} ${AIIR_EXTRA_ARGS:+"$AIIR_EXTRA_ARGS"}
+    # Summary for MR notes (auto-posted by --gitlab-ci when CI_MERGE_REQUEST_IID is set)
     - |
       RECEIPT_COUNT=$(ls -1 .aiir-receipts/*.json 2>/dev/null | wc -l)
       AI_COUNT=$(grep -l '"is_ai_authored": true' .aiir-receipts/*.json 2>/dev/null | wc -l)

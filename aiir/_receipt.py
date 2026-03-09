@@ -77,6 +77,7 @@ def build_commit_receipt(
     instance_id: Optional[str] = None,
     namespace: Optional[str] = None,
     agent_attestation: Optional[Dict[str, Any]] = None,
+    generator: str = "aiir.cli",
 ) -> Dict[str, Any]:
     """Build a cryptographic receipt for a git commit.
 
@@ -139,7 +140,7 @@ def build_commit_receipt(
             "repository": repo_url,
             # URI-based tool identifier for SLSA/in-toto compatibility.
             "tool": f"https://github.com/invariant-systems-ai/aiir@{CLI_VERSION}",
-            "generator": "aiir.cli",
+            "generator": generator,
         },
     }
 
@@ -176,6 +177,7 @@ def generate_receipt(
     instance_id: Optional[str] = None,
     namespace: Optional[str] = None,
     agent_attestation: Optional[Dict[str, Any]] = None,
+    generator: str = "aiir.cli",
 ) -> Optional[Dict[str, Any]]:
     """Generate a receipt for a single commit. Returns None if skipped."""
     _validate_ref(commit_ref)
@@ -188,6 +190,7 @@ def generate_receipt(
         commit, repo_root=cwd, redact_files=redact_files,
         instance_id=instance_id, namespace=namespace,
         agent_attestation=agent_attestation,
+        generator=generator,
     )
 
 
@@ -199,6 +202,7 @@ def generate_receipts_for_range(
     instance_id: Optional[str] = None,
     namespace: Optional[str] = None,
     agent_attestation: Optional[Dict[str, Any]] = None,
+    generator: str = "aiir.cli",
 ) -> List[Dict[str, Any]]:
     """Generate receipts for all commits in a range."""
     shas = list_commits_in_range(range_spec, cwd=cwd)
@@ -208,6 +212,7 @@ def generate_receipts_for_range(
             sha, cwd=cwd, ai_only=ai_only, redact_files=redact_files,
             instance_id=instance_id, namespace=namespace,
             agent_attestation=agent_attestation,
+            generator=generator,
         )
         if receipt is not None:
             receipts.append(receipt)

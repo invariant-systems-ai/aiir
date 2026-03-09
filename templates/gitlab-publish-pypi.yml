@@ -1,0 +1,78 @@
+# AIIR — GitLab Package Registry Publishing Template
+# https://github.com/invariant-systems-ai/aiir
+#
+# Publishes AIIR to a GitLab instance's PyPI registry for self-hosted
+# environments that cannot reach pypi.org.
+#
+# Usage (in your GitLab mirror of AIIR):
+#   include:
+#     - local: '/templates/gitlab-publish-pypi.yml'
+#
+# The published package is then installable behind the firewall:
+#   pip install aiir --index-url https://gitlab.example.com/api/v4/projects/<id>/packages/pypi/simple
+#
+# Requirements:
+#   - GitLab 14.0+ with Package Registry enabled
+#   - CI_JOB_TOKEN has write_package scope (default for CI jobs)
+
+stages:
+  - build
+  - publish
+
+# Build the wheel + sdist
+aiir-build:
+  stage: build
+  image: python:3.11-slim
+  script:
+    - pip install --quiet build
+    - python -m build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 7 days
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/'
+
+# Publish to GitLab PyPI Registry
+aiir-publish-gitlab-pypi:
+  stage: publish
+  image: python:3.11-slim
+  dependencies:
+    - aiir-build
+  script:
+    - pip install --quiet twine
+    - |
+      TWINE_PASSWORD=${CI_JOB_TOKEN} \
+      TWINE_USERNAME=gitlab-ci-token \
+      python -m twine upload \
+        --repository-url "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi" \
+        dist/*
+    - |
+      echo "────────────────────────────────────────"
+      echo "Published to GitLab PyPI Registry"
+      echo "Install: pip install aiir --index-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi/simple"
+      echo "────────────────────────────────────────"
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/'
+
+# Optional: also publish receipts as generic packages for archival
+aiir-publish-receipts:
+  stage: publish
+  image: python:3.11-slim
+  script:
+    - pip install --quiet "aiir==${CI_COMMIT_TAG#v}"
+    # Generate receipts for all commits since last tag
+    - |
+      PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
+      aiir --range "${PREV_TAG}..HEAD" --output .aiir-receipts/ --pretty --gitlab-ci
+    # Upload receipt bundle as a generic package
+    - |
+      cd .aiir-receipts
+      tar czf ../aiir-receipts-${CI_COMMIT_TAG}.tar.gz *.json
+      cd ..
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+        --upload-file "aiir-receipts-${CI_COMMIT_TAG}.tar.gz" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/aiir-receipts/${CI_COMMIT_TAG#v}/receipts.tar.gz"
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/'
+  allow_failure: true

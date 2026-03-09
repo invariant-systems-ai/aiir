@@ -1,0 +1,80 @@
+# AIIR — GitLab Pages Dashboard Template
+# https://github.com/invariant-systems-ai/aiir
+#
+# Generates and deploys a static AI authorship dashboard to GitLab Pages.
+# Shows receipt history, AI % trends, and authorship class breakdown.
+#
+# Usage:
+#   include:
+#     - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1/templates/gitlab-pages-dashboard.yml'
+#
+# Dashboard will be at: https://<group>.gitlab.io/<project>/
+
+stages:
+  - receipt
+  - deploy
+
+# Generate receipts (uses the main AIIR template)
+aiir-pages-receipt:
+  stage: receipt
+  image: python:3.11-slim
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
+    - pip install --quiet aiir
+  script:
+    - |
+      if [ -n "$CI_COMMIT_BEFORE_SHA" ] && [ "$CI_COMMIT_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+        aiir --range "${CI_COMMIT_BEFORE_SHA}..${CI_COMMIT_SHA}" \
+          --output .aiir-receipts/ --pretty --gitlab-ci
+      else
+        aiir --output .aiir-receipts/ --pretty --gitlab-ci
+      fi
+  artifacts:
+    paths:
+      - .aiir-receipts/
+    reports:
+      dotenv: aiir.env
+    expire_in: 30 days
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# Deploy dashboard to GitLab Pages
+pages:
+  stage: deploy
+  image: python:3.11-slim
+  dependencies:
+    - aiir-pages-receipt
+  script:
+    - pip install --quiet aiir
+    - mkdir -p public
+    - |
+      python3 << 'PYEOF'
+import json
+import glob
+
+from aiir._gitlab import generate_dashboard_html
+
+receipts = []
+for f in sorted(glob.glob('.aiir-receipts/*.json')):
+    try:
+        with open(f) as fh:
+            data = json.load(fh)
+            if isinstance(data, dict):
+                receipts.append(data)
+    except (json.JSONDecodeError, OSError):
+        continue
+
+import os
+project_name = os.environ.get("CI_PROJECT_NAME", "Project")
+html = generate_dashboard_html(receipts, project_name=project_name)
+
+with open("public/index.html", "w") as fh:
+    fh.write(html)
+
+print(f"Dashboard generated: {len(receipts)} receipts")
+PYEOF
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

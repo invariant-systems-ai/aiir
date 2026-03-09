@@ -123,6 +123,19 @@ from aiir._github import (  # noqa: F401
     format_github_summary,
 )
 
+from aiir._gitlab import (  # noqa: F401
+    set_gitlab_ci_output,
+    format_gitlab_summary,
+    format_gl_sast_report,
+    post_mr_comment,
+    enforce_approval_rules,
+    parse_webhook_event,
+    validate_webhook_token,
+    build_receipts_graphql_query,
+    query_gitlab_graphql,
+    generate_dashboard_html,
+)
+
 from aiir._verify import (  # noqa: F401
     verify_receipt,
     verify_receipt_file,
@@ -291,6 +304,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--github-action",
         action="store_true",
         help="Run in GitHub Actions mode (set outputs + step summary)",
+    )
+    parser.add_argument(
+        "--gitlab-ci",
+        action="store_true",
+        help=(
+            "Run in GitLab CI mode (post MR comments, write dotenv outputs, "
+            "set generator to 'aiir.gitlab')"
+        ),
+    )
+    parser.add_argument(
+        "--gl-sast-report",
+        nargs="?",
+        const="gl-sast-report.json",
+        default=None,
+        metavar="FILE",
+        help=(
+            "Write a GitLab SAST report (gl-sast-report.json) for Security "
+            "Dashboard integration. AI-authored commits appear as "
+            "informational findings."
+        ),
     )
     # --quiet and --verbose are mutually exclusive.
     verbosity_group = parser.add_mutually_exclusive_group()
@@ -753,7 +786,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Determine output mode early — config loading creates .aiir/ so
     # we only load it when the ledger (or explicit --namespace) is active.
     explicit_stdout = args.json_stdout or args.jsonl
-    use_ledger = not explicit_stdout and not args.output and not args.github_action
+    use_ledger = not explicit_stdout and not args.output and not args.github_action and not args.gitlab_ci
     if args.ledger is not None:
         use_ledger = True
 
@@ -789,6 +822,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             agent_attestation["run_context"] = args.agent_context
         agent_attestation["confidence"] = "declared"
 
+    # Determine generator ID based on integration mode
+    generator = "aiir.cli"
+    if args.github_action:
+        generator = "aiir.github"
+    elif args.gitlab_ci:
+        generator = "aiir.gitlab"
+
     try:
         if args.range_spec:
             receipts = generate_receipts_for_range(
@@ -796,6 +836,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 redact_files=args.redact_files,
                 instance_id=instance_id, namespace=namespace,
                 agent_attestation=agent_attestation,
+                generator=generator,
             )
         else:
             commit_ref = args.commit or "HEAD"
@@ -804,6 +845,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 redact_files=args.redact_files,
                 instance_id=instance_id, namespace=namespace,
                 agent_attestation=agent_attestation,
+                generator=generator,
             )
             if receipt:
                 receipts = [receipt]
@@ -869,6 +911,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.github_action:
             set_github_output("receipt_count", "0")
             set_github_output("ai_commit_count", "0")
+        if args.gitlab_ci:
+            set_gitlab_ci_output("AIIR_RECEIPT_COUNT", "0")
+            set_gitlab_ci_output("AIIR_AI_COMMIT_COUNT", "0")
         return 0
 
     # ── in-toto envelope wrapping ──────────────────────────────────
@@ -1050,6 +1095,48 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         summary = format_github_summary(receipts)
         set_github_summary(summary)
+
+    # GitLab CI integration
+    if args.gitlab_ci:
+        set_gitlab_ci_output("AIIR_RECEIPT_COUNT", str(len(receipts)))
+        set_gitlab_ci_output("AIIR_AI_COMMIT_COUNT", str(ai_count))
+        ai_pct = (ai_count / len(receipts) * 100) if receipts else 0
+        set_gitlab_ci_output("AIIR_AI_PERCENT", f"{ai_pct:.1f}")
+
+        # Post MR comment (only in merge_request_event context)
+        if os.environ.get("CI_MERGE_REQUEST_IID"):
+            try:
+                summary = format_gitlab_summary(receipts)
+                post_mr_comment(summary)
+                if not args.quiet:
+                    print(
+                        f"   {_e('ok')} Posted receipt summary to MR !{os.environ.get('CI_MERGE_REQUEST_IID')}",
+                        file=sys.stderr,
+                    )
+            except RuntimeError as e:
+                # Non-fatal — MR comment is best-effort
+                if not args.quiet:
+                    print(
+                        f"   {_e('hint')} Could not post MR comment: {_strip_terminal_escapes(str(e))[:200]}",
+                        file=sys.stderr,
+                    )
+
+    # GitLab SAST report (--gl-sast-report)
+    if getattr(args, "gl_sast_report", None):
+        from pathlib import Path as _Path
+        sast_report = format_gl_sast_report(receipts)
+        sast_path = _Path(args.gl_sast_report)
+        sast_path.parent.mkdir(parents=True, exist_ok=True)
+        sast_path.write_text(
+            json.dumps(sast_report, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        if not args.quiet:
+            vuln_count = len(sast_report.get("vulnerabilities", []))
+            print(
+                f"   {_e('ok')} SAST report: {vuln_count} AI-authored finding{'s' if vuln_count != 1 else ''} → {args.gl_sast_report}",
+                file=sys.stderr,
+            )
 
     return 0
 

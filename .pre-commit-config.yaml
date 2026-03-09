@@ -32,6 +32,17 @@ repos:
         args: [-r, -ll, --skip, B101]  # -ll = MEDIUM+, skip assert warnings
         files: ^aiir/
 
+  # ── Version drift check ────────────────────────────────────────────
+  - repo: local
+    hooks:
+      - id: sync-version
+        name: sync-version — check version drift
+        entry: python scripts/sync-version.py --check
+        language: python
+        always_run: true
+        stages: [pre-commit]
+        pass_filenames: false
+
   # ── AIIR dogfood ─────────────────────────────────────────────────
   - repo: local
     hooks:

@@ -1,0 +1,208 @@
+# Security scanning — SAST, secret detection, and dependency audit.
+# Part of the NIST SSDF 1.1 / SLSA v1.0 hardening plan.
+#
+# Jobs:
+#   gitleaks     — scan for leaked secrets (API keys, tokens, etc.)
+#   sast         — static analysis with Bandit (Python security linter)
+#   semgrep      — taint-tracking SAST (crypto, injection, secrets rules)
+#   lint         — style + correctness with Ruff
+#   dep-audit    — vulnerability scan on all extras with pip-audit
+#   license-check — verify all transitive deps are Apache-2.0 / MIT / BSD
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly Monday 05:30 UTC — catch new CVEs even without code changes
+    - cron: '30 5 * * 1'
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Secret scanning ────────────────────────────────────────────────
+  gitleaks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install gitleaks
+        run: |
+          GITLEAKS_VERSION="8.21.2"
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar xz -C /usr/local/bin gitleaks
+          gitleaks version
+      - name: Scan for secrets
+        run: gitleaks detect --source . --verbose --redact --exit-code 1
+
+  # ── Static Application Security Testing ────────────────────────────
+  sast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.13"
+      - name: Install SAST tools
+        run: pip install bandit[toml]
+      - name: Run Bandit (security linter)
+        run: |
+          # -ll = fail on MEDIUM severity and above
+          # -r  = recursive scan
+          bandit -r aiir/ -ll --format json --output bandit-report.json || true
+          # Pretty-print for logs, then fail on MEDIUM+
+          bandit -r aiir/ -ll
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        if: always()
+        with:
+          name: bandit-report
+          path: bandit-report.json
+          retention-days: 30
+
+  # ── Semgrep (taint-tracking SAST) ─────────────────────────────────
+  semgrep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.13"
+      - name: Install Semgrep
+        run: pip install semgrep
+      - name: Run Semgrep (security + crypto rules)
+        run: |
+          # p/python         — Python-specific security rules (2,500+)
+          # p/security-audit  — cross-language security patterns
+          # p/secrets         — hardcoded credentials (complements gitleaks)
+          #
+          # Two passes: first captures JSON report (always), second fails
+          # the step on findings (--error) with human-readable output.
+          semgrep scan \
+            --config p/python \
+            --config p/security-audit \
+            --config p/secrets \
+            --json --output semgrep-report.json \
+            aiir/ || true
+          semgrep scan \
+            --config p/python \
+            --config p/security-audit \
+            --config p/secrets \
+            --error \
+            aiir/
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        if: always()
+        with:
+          name: semgrep-report
+          path: semgrep-report.json
+          retention-days: 30
+
+  # ── Lint (Ruff) ────────────────────────────────────────────────────
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.13"
+      - name: Install Ruff
+        run: pip install ruff
+      - name: Run Ruff (lint + format check)
+        run: |
+          ruff check aiir/ tests/ scripts/
+          ruff format --check aiir/ tests/ scripts/
+
+  # ── Dependency vulnerability audit ─────────────────────────────────
+  dep-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.13"
+      - name: Install pip-audit and project extras
+        run: |
+          pip install pip-audit
+          pip install -e ".[dev,sign]"
+      - name: Audit dependencies
+        run: |
+          # --strict = fail on ANY known vulnerability
+          # --desc   = include vulnerability descriptions in output
+          pip-audit --strict --desc --format json --output pip-audit-report.json || true
+          pip-audit --strict --desc
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        if: always()
+        with:
+          name: pip-audit-report
+          path: pip-audit-report.json
+          retention-days: 30
+
+  # ── License policy check ───────────────────────────────────────────
+  license-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.13"
+      - name: Install license checker
+        run: |
+          pip install pip-licenses
+          pip install -e ".[dev,sign]"
+      - name: Verify license policy
+        run: |
+          # Allow-list: only OSI-approved permissive licenses
+          pip-licenses --format=json --output-file=licenses.json
+          pip-licenses --allow-only="Apache Software License;MIT License;BSD License;ISC License (ISCL);Python Software Foundation License;Mozilla Public License 2.0 (MPL 2.0)"
+          echo "✅ All dependency licenses are policy-compliant"
+
+  # ── Summary gate ───────────────────────────────────────────────────
+  security-ok:
+    if: always()
+    needs: [gitleaks, sast, semgrep, lint, dep-audit, license-check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check all security jobs passed
+        run: |
+          echo "gitleaks:      ${{ needs.gitleaks.result }}"
+          echo "sast:          ${{ needs.sast.result }}"
+          echo "semgrep:       ${{ needs.semgrep.result }}"
+          echo "lint:          ${{ needs.lint.result }}"
+          echo "dep-audit:     ${{ needs.dep-audit.result }}"
+          echo "license-check: ${{ needs.license-check.result }}"
+
+          if [[ "${{ needs.gitleaks.result }}" != "success" ]] || \
+             [[ "${{ needs.sast.result }}" != "success" ]] || \
+             [[ "${{ needs.semgrep.result }}" != "success" ]] || \
+             [[ "${{ needs.lint.result }}" != "success" ]] || \
+             [[ "${{ needs.dep-audit.result }}" != "success" ]] || \
+             [[ "${{ needs.license-check.result }}" != "success" ]]; then
+            echo "::error::One or more security checks failed"
+            exit 1
+          fi
+          echo "✅ All security checks passed"

@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.1] — 2026-03-09
+
+### Fixed
+
+- **`--verify-release` crash**: `list_commits_in_range()` returns plain SHA strings but the caller attempted `.sha` attribute access, causing `AttributeError` on every invocation. Fixed by removing the incorrect attribute dereference.
+- **Signing footgun**: When `--sign` failed (missing `sigstore`, network error), the unsigned receipt was left on disk. Now cleaned up on failure with a clear error message.
+- **MCP manifest description**: Aligned with canonical one-liner ("Tamper-evident receipts for commits with declared AI involvement").
+- **Positioning audit**: Updated GitHub repo description, contrib posts, and examples to use "declared AI involvement" consistently. Feature-level labels (`ai_commit_count`, `is_ai_authored`) intentionally unchanged — they describe detection results.
+
 ## [1.2.0] — 2026-03-09
 
 ### Added

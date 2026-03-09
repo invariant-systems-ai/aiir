@@ -1,6 +1,6 @@
 # AIIR Python API Reference
 
-> **Module**: `aiir` · **Version**: 1.2.0 · **License**: Apache 2.0
+> **Module**: `aiir` · **Version**: 1.2.1 · **License**: Apache 2.0
 >
 > Zero dependencies — Python standard library only.
 

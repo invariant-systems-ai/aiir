@@ -177,8 +177,13 @@ def generate_receipts_for_range(
 # ---------------------------------------------------------------------------
 
 
-def format_receipt_pretty(receipt: Dict[str, Any]) -> str:
-    """Human-readable receipt summary."""
+def format_receipt_pretty(receipt: Dict[str, Any], signed: str = "none") -> str:
+    """Human-readable receipt summary.
+
+    Args:
+        receipt: The receipt dict.
+        signed: Signing status to display (e.g. 'YES (sigstore)' or 'none').
+    """
     commit = receipt.get("commit", {})
     ai = receipt.get("ai_attestation", {})
     # Guard against non-dict commit/ai_attestation — a crafted
@@ -240,6 +245,7 @@ def format_receipt_pretty(receipt: Dict[str, Any]) -> str:
         ),
         f"{vl}  Hash:    {content_hash}",
         f"{vl}  Time:    {timestamp}",
+        f"{vl}  Signed:  {_strip_terminal_escapes(signed)}",
         f"{bl}{hl * 42}",
     ]
     return "\n".join(lines)

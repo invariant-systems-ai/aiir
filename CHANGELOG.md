@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.10] — 2026-03-08
+
+### Added
+
+- **`Signed` line in pretty-print output**: `format_receipt_pretty()` now accepts an optional `signed` parameter (default `"none"`). When `--sign` is active, the pretty receipt displays `Signed:  YES (sigstore)`. Display-only — receipt JSON is unchanged.
+
+### Changed
+
+- **Bottom border width**: Pretty-print bottom border now uses 42 dashes (`└` + 42×`─`) for visual consistency with the header.
+
 ## [1.0.9] — 2026-03-08
 
 ### Fixed

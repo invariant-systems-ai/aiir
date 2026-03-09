@@ -739,10 +739,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     signed_count = 0
     stdout_json_receipts: List[Dict[str, Any]] = []
 
+    # Determine signing display status for --pretty.
+    # This runs after --sign validation, so if args.sign is True
+    # we know sigstore is available and --output is set.
+    _signed_display = "YES (sigstore)" if args.sign else "none"
+
     # Pretty-print (always goes to stderr so it can combine with any mode).
     if args.pretty:
         for receipt in receipts:
-            print(format_receipt_pretty(receipt), file=sys.stderr)
+            print(format_receipt_pretty(receipt, signed=_signed_display), file=sys.stderr)
 
     # Mode A: individual files (--output / --sign)
     if args.output or args.sign:

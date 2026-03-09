@@ -9,3 +9,6 @@ dist/
 .aiir/
 .coverage
 htmlcov/
+
+# Workstation-local files (never committed)
+.local/

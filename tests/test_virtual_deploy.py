@@ -344,7 +344,7 @@ class TestCLILedgerError(_CLIBase):
     """Cover cli.py lines 975-977: ledger append error."""
 
     @unittest.skipIf(os.name == "nt", "os.chmod read-only is advisory on Windows")
-    @unittest.skipIf(os.getuid() == 0, "root bypasses filesystem permission checks")
+    @unittest.skipIf(getattr(os, "getuid", lambda: -1)() == 0, "root bypasses filesystem permission checks")
     def test_ledger_write_to_readonly_dir(self):
         from aiir.cli import main as cli_main
 

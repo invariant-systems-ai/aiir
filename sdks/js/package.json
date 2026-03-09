@@ -1,0 +1,26 @@
+{
+  "name": "@aiir/verify",
+  "version": "1.0.0",
+  "description": "AIIR commit receipt verification — zero dependencies, browser + Node.js",
+  "main": "aiir-verify.js",
+  "types": "aiir-verify.d.ts",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/invariant-systems-ai/aiir",
+    "directory": "sdks/js"
+  },
+  "homepage": "https://invariantsystems.io",
+  "keywords": ["aiir", "ai", "receipts", "verification", "integrity", "sha256"],
+  "author": "Invariant Systems, Inc. <noah@invariantsystems.io>",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "aiir-verify.js",
+    "aiir-verify.d.ts"
+  ],
+  "scripts": {
+    "test": "node test.js"
+  }
+}

@@ -1,0 +1,120 @@
+# Reusable workflow: Verify AIIR receipts in CI and post results
+# as a GitHub Check Run (visible on the PR "Checks" tab).
+#
+# Usage in your .github/workflows/verify-receipts.yml:
+#
+#   name: Verify AIIR Receipts
+#   on: [push, pull_request]
+#   jobs:
+#     verify:
+#       uses: invariant-systems-ai/aiir/.github/workflows/verify-receipts.yml@v1
+#       with:
+#         receipt-dir: ".receipts"        # directory containing .json receipts
+#
+# Or as a step in your own workflow:
+#
+#   - name: Generate receipts
+#     uses: invariant-systems-ai/aiir@v1
+#     with:
+#       output-dir: .receipts
+#
+#   - name: Verify receipts
+#     run: |
+#       pip install aiir
+#       aiir --verify .receipts/ --strict
+#       echo "✅ All receipts verified"
+#
+# The --strict flag exits non-zero if any receipt fails verification,
+# which causes the check run to fail and show on the PR.
+
+name: Verify AIIR Receipts
+
+on:
+  workflow_call:
+    inputs:
+      receipt-dir:
+        description: "Directory containing receipt JSON files to verify"
+        required: false
+        default: ".receipts"
+        type: string
+      python-version:
+        description: "Python version for verification"
+        required: false
+        default: "3.12"
+        type: string
+
+permissions:
+  contents: read
+  checks: write    # Required to create Check Run annotations
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install AIIR
+        run: pip install aiir
+
+      - name: Verify receipts
+        id: verify
+        run: |
+          DIR="${{ inputs.receipt-dir }}"
+          if [ ! -d "$DIR" ]; then
+            echo "::warning::Receipt directory '$DIR' not found — skipping verification"
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            echo "failed=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          TOTAL=0
+          FAILED=0
+          PASSED=0
+
+          for f in "$DIR"/*.json; do
+            [ -f "$f" ] || continue
+            TOTAL=$((TOTAL + 1))
+            if aiir --verify "$f" > /dev/null 2>&1; then
+              PASSED=$((PASSED + 1))
+              echo "  ✅ $(basename "$f")"
+            else
+              FAILED=$((FAILED + 1))
+              echo "  ❌ $(basename "$f")"
+              echo "::error file=$f::AIIR receipt verification failed"
+            fi
+          done
+
+          echo "count=$TOTAL" >> "$GITHUB_OUTPUT"
+          echo "passed=$PASSED" >> "$GITHUB_OUTPUT"
+          echo "failed=$FAILED" >> "$GITHUB_OUTPUT"
+
+          echo ""
+          echo "─────────────────────────────────────"
+          echo "Total:  $TOTAL"
+          echo "Passed: $PASSED"
+          echo "Failed: $FAILED"
+
+          if [ "$FAILED" -gt 0 ]; then
+            echo "::error::$FAILED receipt(s) failed verification"
+            exit 1
+          fi
+
+          echo "✅ All $TOTAL receipt(s) verified"
+
+      - name: Post summary
+        if: always()
+        run: |
+          echo "### AIIR Receipt Verification" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.verify.outputs.failed }}" = "0" ]; then
+            echo "✅ **${{ steps.verify.outputs.count }}** receipt(s) verified successfully" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ **${{ steps.verify.outputs.failed }}** of **${{ steps.verify.outputs.count }}** receipt(s) failed" >> "$GITHUB_STEP_SUMMARY"
+          fi

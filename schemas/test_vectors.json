@@ -2,7 +2,7 @@
   "$schema": "https://invariantsystems.io/schemas/aiir/test_vectors.v1",
   "description": "AIIR commit receipt conformance test vectors. Each vector has a receipt and expected verification result. Conforming implementations MUST pass all vectors.",
   "spec_version": "1.0.0",
-  "generated_by": "aiir reference implementation 1.0.12",
+  "generated_by": "aiir reference implementation 1.0.15",
   "generated_at": "2026-03-09T00:00:00Z",
   "vectors": [
     {
@@ -763,6 +763,644 @@
         "valid": false,
         "errors": [
           "unknown schema: 42"
+        ]
+      }
+    },
+    {
+      "id": "tv-16-valid-ai-plus-bot",
+      "description": "Valid receipt with ai+bot authorship class \u2014 dual AI and bot signals from copilot[bot]",
+      "receipt": {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "1.0.15",
+        "commit": {
+          "sha": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "author": {
+            "name": "copilot[bot]",
+            "email": "198282+copilot[bot]@users.noreply.github.com",
+            "date": "2026-03-10T00:00:00Z"
+          },
+          "committer": {
+            "name": "GitHub",
+            "email": "noreply@github.com",
+            "date": "2026-03-10T00:00:00Z"
+          },
+          "subject": "refactor: extract helper function",
+          "message_hash": "sha256:aabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccddaabbccdd",
+          "diff_hash": "sha256:1122334411223344112233441122334411223344112233441122334411223344",
+          "files_changed": 3,
+          "files": [
+            "utils.py",
+            "helper.py",
+            "tests/test_helper.py"
+          ]
+        },
+        "ai_attestation": {
+          "is_ai_authored": true,
+          "signals_detected": [
+            "author:copilot[bot]"
+          ],
+          "signal_count": 1,
+          "is_bot_authored": true,
+          "bot_signals_detected": [
+            "author:copilot[bot]"
+          ],
+          "bot_signal_count": 1,
+          "authorship_class": "ai+bot",
+          "detection_method": "heuristic_v2"
+        },
+        "provenance": {
+          "repository": "https://github.com/example/repo",
+          "tool": "https://github.com/invariant-systems-ai/aiir@1.0.15",
+          "generator": "aiir.action"
+        },
+        "receipt_id": "g1-2aa9497e8d718918c56968436acbf786",
+        "content_hash": "sha256:2aa9497e8d718918c56968436acbf7863ab711b038dac6247f72478622ae9441",
+        "timestamp": "2026-03-10T00:00:00Z",
+        "extensions": {}
+      },
+      "expected": {
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "id": "tv-17-valid-mcp-generator",
+      "description": "Valid receipt from MCP generator with ai_assisted authorship class",
+      "receipt": {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "1.0.15",
+        "commit": {
+          "sha": "ffffffffffffffffffffffffffffffffffffffff",
+          "author": {
+            "name": "Dave",
+            "email": "dave@example.com",
+            "date": "2026-03-10T01:00:00Z"
+          },
+          "committer": {
+            "name": "Dave",
+            "email": "dave@example.com",
+            "date": "2026-03-10T01:00:00Z"
+          },
+          "subject": "docs: update API reference",
+          "message_hash": "sha256:5566778855667788556677885566778855667788556677885566778855667788",
+          "diff_hash": "sha256:99aabb0099aabb0099aabb0099aabb0099aabb0099aabb0099aabb0099aabb00",
+          "files_changed": 1,
+          "files": [
+            "docs/api.md"
+          ]
+        },
+        "ai_attestation": {
+          "is_ai_authored": true,
+          "signals_detected": [
+            "co-authored-by: claude"
+          ],
+          "signal_count": 1,
+          "is_bot_authored": false,
+          "bot_signals_detected": [],
+          "bot_signal_count": 0,
+          "authorship_class": "ai_assisted",
+          "detection_method": "heuristic_v2"
+        },
+        "provenance": {
+          "repository": "https://github.com/example/repo",
+          "tool": "https://github.com/invariant-systems-ai/aiir@1.0.15",
+          "generator": "aiir.mcp"
+        },
+        "receipt_id": "g1-c208cb94ccc1cbc7921299c4570c1dc5",
+        "content_hash": "sha256:c208cb94ccc1cbc7921299c4570c1dc567b97b07be24fc38507803f82c9b2aad",
+        "timestamp": "2026-03-10T01:00:00Z",
+        "extensions": {}
+      },
+      "expected": {
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "id": "tv-18-invalid-tampered-ai-flag",
+      "description": "Receipt with tampered ai_attestation (flipped is_ai_authored from false to true) \u2014 hash from tv-01 no longer matches",
+      "receipt": {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "1.0.12",
+        "commit": {
+          "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "author": {
+            "name": "Alice",
+            "email": "alice@example.com",
+            "date": "2026-03-09T00:00:00Z"
+          },
+          "committer": {
+            "name": "Alice",
+            "email": "alice@example.com",
+            "date": "2026-03-09T00:00:00Z"
+          },
+          "subject": "feat: add widget",
+          "message_hash": "sha256:375aca2c5a71c7ffaaa0c3602ed0f82d27986ce0776b5c5c1bc2d2a5638b18bb",
+          "diff_hash": "sha256:a9b7bc7b29f22a8b1ae213c4105d73c39b9e3f218d75bb6a288207c1d86b96fe",
+          "files_changed": 1,
+          "files": [
+            "widget.py"
+          ]
+        },
+        "ai_attestation": {
+          "is_ai_authored": true,
+          "signals_detected": [
+            "fake_signal"
+          ],
+          "signal_count": 1,
+          "is_bot_authored": false,
+          "bot_signals_detected": [],
+          "bot_signal_count": 0,
+          "authorship_class": "ai_assisted",
+          "detection_method": "heuristic_v2"
+        },
+        "provenance": {
+          "repository": "https://github.com/example/repo",
+          "tool": "https://github.com/invariant-systems-ai/aiir@1.0.12",
+          "generator": "aiir.cli"
+        },
+        "receipt_id": "g1-ff76d2a88adff37fcd3a37fa42bb52b8",
+        "content_hash": "sha256:ff76d2a88adff37fcd3a37fa42bb52b8eec24750e123a6e9d6925ef9f5e719da",
+        "timestamp": "2026-03-09T00:00:00Z",
+        "extensions": {}
+      },
+      "expected": {
+        "valid": false,
+        "errors": [
+          "content hash mismatch",
+          "receipt_id mismatch"
+        ]
+      }
+    },
+    {
+      "id": "tv-19-invalid-missing-receipt-id",
+      "description": "Receipt with valid content_hash but missing receipt_id field entirely \u2014 MUST be rejected",
+      "receipt": {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "1.0.12",
+        "commit": {
+          "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "author": {
+            "name": "Alice",
+            "email": "alice@example.com",
+            "date": "2026-03-09T00:00:00Z"
+          },
+          "committer": {
+            "name": "Alice",
+            "email": "alice@example.com",
+            "date": "2026-03-09T00:00:00Z"
+          },
+          "subject": "feat: add widget",
+          "message_hash": "sha256:375aca2c5a71c7ffaaa0c3602ed0f82d27986ce0776b5c5c1bc2d2a5638b18bb",
+          "diff_hash": "sha256:a9b7bc7b29f22a8b1ae213c4105d73c39b9e3f218d75bb6a288207c1d86b96fe",
+          "files_changed": 1,
+          "files": [
+            "widget.py"
+          ]
+        },
+        "ai_attestation": {
+          "is_ai_authored": false,
+          "signals_detected": [],
+          "signal_count": 0,
+          "is_bot_authored": false,
+          "bot_signals_detected": [],
+          "bot_signal_count": 0,
+          "authorship_class": "human",
+          "detection_method": "heuristic_v2"
+        },
+        "provenance": {
+          "repository": "https://github.com/example/repo",
+          "tool": "https://github.com/invariant-systems-ai/aiir@1.0.12",
+          "generator": "aiir.cli"
+        },
+        "content_hash": "sha256:ff76d2a88adff37fcd3a37fa42bb52b8eec24750e123a6e9d6925ef9f5e719da",
+        "timestamp": "2026-03-09T00:00:00Z",
+        "extensions": {}
+      },
+      "expected": {
+        "valid": false,
+        "errors": [
+          "receipt_id mismatch"
+        ]
+      }
+    },
+    {
+      "id": "tv-20-valid-files-capped",
+      "description": "Valid receipt where files list is capped at 100 (files_capped: true, files_changed: 150)",
+      "receipt": {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "1.0.15",
+        "commit": {
+          "sha": "1111111111111111111111111111111111111111",
+          "author": {
+            "name": "Eve",
+            "email": "eve@example.com",
+            "date": "2026-03-10T02:00:00Z"
+          },
+          "committer": {
+            "name": "Eve",
+            "email": "eve@example.com",
+            "date": "2026-03-10T02:00:00Z"
+          },
+          "subject": "chore: mass rename",
+          "message_hash": "sha256:ccddeeaaccddeeaaccddeeaaccddeeaaccddeeaaccddeeaaccddeeaaccddeeaa",
+          "diff_hash": "sha256:ffaa00bbffaa00bbffaa00bbffaa00bbffaa00bbffaa00bbffaa00bbffaa00bb",
+          "files_changed": 150,
+          "files": [
+            "src/file_000.py",
+            "src/file_001.py",
+            "src/file_002.py",
+            "src/file_003.py",
+            "src/file_004.py",
+            "src/file_005.py",
+            "src/file_006.py",
+            "src/file_007.py",
+            "src/file_008.py",
+            "src/file_009.py",
+            "src/file_010.py",
+            "src/file_011.py",
+            "src/file_012.py",
+            "src/file_013.py",
+            "src/file_014.py",
+            "src/file_015.py",
+            "src/file_016.py",
+            "src/file_017.py",
+            "src/file_018.py",
+            "src/file_019.py",
+            "src/file_020.py",
+            "src/file_021.py",
+            "src/file_022.py",
+            "src/file_023.py",
+            "src/file_024.py",
+            "src/file_025.py",
+            "src/file_026.py",
+            "src/file_027.py",
+            "src/file_028.py",
+            "src/file_029.py",
+            "src/file_030.py",
+            "src/file_031.py",
+            "src/file_032.py",
+            "src/file_033.py",
+            "src/file_034.py",
+            "src/file_035.py",
+            "src/file_036.py",
+            "src/file_037.py",
+            "src/file_038.py",
+            "src/file_039.py",
+            "src/file_040.py",
+            "src/file_041.py",
+            "src/file_042.py",
+            "src/file_043.py",
+            "src/file_044.py",
+            "src/file_045.py",
+            "src/file_046.py",
+            "src/file_047.py",
+            "src/file_048.py",
+            "src/file_049.py",
+            "src/file_050.py",
+            "src/file_051.py",
+            "src/file_052.py",
+            "src/file_053.py",
+            "src/file_054.py",
+            "src/file_055.py",
+            "src/file_056.py",
+            "src/file_057.py",
+            "src/file_058.py",
+            "src/file_059.py",
+            "src/file_060.py",
+            "src/file_061.py",
+            "src/file_062.py",
+            "src/file_063.py",
+            "src/file_064.py",
+            "src/file_065.py",
+            "src/file_066.py",
+            "src/file_067.py",
+            "src/file_068.py",
+            "src/file_069.py",
+            "src/file_070.py",
+            "src/file_071.py",
+            "src/file_072.py",
+            "src/file_073.py",
+            "src/file_074.py",
+            "src/file_075.py",
+            "src/file_076.py",
+            "src/file_077.py",
+            "src/file_078.py",
+            "src/file_079.py",
+            "src/file_080.py",
+            "src/file_081.py",
+            "src/file_082.py",
+            "src/file_083.py",
+            "src/file_084.py",
+            "src/file_085.py",
+            "src/file_086.py",
+            "src/file_087.py",
+            "src/file_088.py",
+            "src/file_089.py",
+            "src/file_090.py",
+            "src/file_091.py",
+            "src/file_092.py",
+            "src/file_093.py",
+            "src/file_094.py",
+            "src/file_095.py",
+            "src/file_096.py",
+            "src/file_097.py",
+            "src/file_098.py",
+            "src/file_099.py"
+          ],
+          "files_capped": true
+        },
+        "ai_attestation": {
+          "is_ai_authored": false,
+          "signals_detected": [],
+          "signal_count": 0,
+          "is_bot_authored": false,
+          "bot_signals_detected": [],
+          "bot_signal_count": 0,
+          "authorship_class": "human",
+          "detection_method": "heuristic_v2"
+        },
+        "provenance": {
+          "repository": "https://github.com/example/repo",
+          "tool": "https://github.com/invariant-systems-ai/aiir@1.0.15",
+          "generator": "aiir.cli"
+        },
+        "receipt_id": "g1-4a3ab91b7c04666ebb4eaaf638c32b78",
+        "content_hash": "sha256:4a3ab91b7c04666ebb4eaaf638c32b78204893940779565b6bec84d2348c17de",
+        "timestamp": "2026-03-10T02:00:00Z",
+        "extensions": {}
+      },
+      "expected": {
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "id": "tv-21-valid-unicode-fields",
+      "description": "Valid receipt with Unicode characters in author name, subject, and file paths (ensure_ascii canonical JSON)",
+      "receipt": {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "1.0.15",
+        "commit": {
+          "sha": "2222222222222222222222222222222222222222",
+          "author": {
+            "name": "Jos\u00e9 Garc\u00eda",
+            "email": "jose@example.com",
+            "date": "2026-03-10T03:00:00Z"
+          },
+          "committer": {
+            "name": "Jos\u00e9 Garc\u00eda",
+            "email": "jose@example.com",
+            "date": "2026-03-10T03:00:00Z"
+          },
+          "subject": "fix: r\u00e9sum\u00e9 parsing \u2014 handle na\u00efve encodings",
+          "message_hash": "sha256:00112233001122330011223300112233001122330011223300112233001122ee",
+          "diff_hash": "sha256:aabb00ccaabb00ccaabb00ccaabb00ccaabb00ccaabb00ccaabb00ccaabb00cc",
+          "files_changed": 2,
+          "files": [
+            "r\u00e9sum\u00e9_parser.py",
+            "tests/test_r\u00e9sum\u00e9.py"
+          ]
+        },
+        "ai_attestation": {
+          "is_ai_authored": false,
+          "signals_detected": [],
+          "signal_count": 0,
+          "is_bot_authored": false,
+          "bot_signals_detected": [],
+          "bot_signal_count": 0,
+          "authorship_class": "human",
+          "detection_method": "heuristic_v2"
+        },
+        "provenance": {
+          "repository": "https://github.com/example/repo",
+          "tool": "https://github.com/invariant-systems-ai/aiir@1.0.15",
+          "generator": "aiir.cli"
+        },
+        "receipt_id": "g1-bf091978f5caad08804e12254c73650e",
+        "content_hash": "sha256:bf091978f5caad08804e12254c73650e4310376a72b9cc1d16f1d066ba7f0840",
+        "timestamp": "2026-03-10T03:00:00Z",
+        "extensions": {}
+      },
+      "expected": {
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "id": "tv-22-valid-prerelease-version",
+      "description": "Valid receipt with pre-release semver version (99.0.0-alpha.1) \u2014 version format accepts pre-release suffixes",
+      "receipt": {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "99.0.0-alpha.1",
+        "commit": {
+          "sha": "3333333333333333333333333333333333333333",
+          "author": {
+            "name": "Mallory",
+            "email": "mal@example.com",
+            "date": "2026-03-10T04:00:00Z"
+          },
+          "committer": {
+            "name": "Mallory",
+            "email": "mal@example.com",
+            "date": "2026-03-10T04:00:00Z"
+          },
+          "subject": "test: boundary version",
+          "message_hash": "sha256:deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+          "diff_hash": "sha256:cafebabecafebabecafebabecafebabecafebabecafebabecafebabecafebabe",
+          "files_changed": 1,
+          "files": [
+            "test.py"
+          ]
+        },
+        "ai_attestation": {
+          "is_ai_authored": false,
+          "signals_detected": [],
+          "signal_count": 0,
+          "is_bot_authored": false,
+          "bot_signals_detected": [],
+          "bot_signal_count": 0,
+          "authorship_class": "human",
+          "detection_method": "heuristic_v2"
+        },
+        "provenance": {
+          "repository": "https://github.com/example/repo",
+          "tool": "https://github.com/invariant-systems-ai/aiir@99.0.0-alpha.1",
+          "generator": "aiir.cli"
+        },
+        "receipt_id": "g1-47cf15f17531b0d763ca7d992e983f64",
+        "content_hash": "sha256:47cf15f17531b0d763ca7d992e983f6429202146cb5e0afcdc51f478da35020c",
+        "timestamp": "2026-03-10T04:00:00Z",
+        "extensions": {}
+      },
+      "expected": {
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "id": "tv-23-valid-extra-top-level-key",
+      "description": "Valid receipt with extra non-core top-level key (injected_admin) \u2014 extra keys are ignored during hash computation per \u00a76",
+      "receipt": {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "1.0.15",
+        "commit": {
+          "sha": "4444444444444444444444444444444444444444",
+          "author": {
+            "name": "Trudy",
+            "email": "trudy@example.com",
+            "date": "2026-03-10T05:00:00Z"
+          },
+          "committer": {
+            "name": "Trudy",
+            "email": "trudy@example.com",
+            "date": "2026-03-10T05:00:00Z"
+          },
+          "subject": "fix: injection test",
+          "message_hash": "sha256:aabb11ccaabb11ccaabb11ccaabb11ccaabb11ccaabb11ccaabb11ccaabb11cc",
+          "diff_hash": "sha256:1100ff001100ff001100ff001100ff001100ff001100ff001100ff001100ff00",
+          "files_changed": 1,
+          "files": [
+            "inject.py"
+          ]
+        },
+        "ai_attestation": {
+          "is_ai_authored": false,
+          "signals_detected": [],
+          "signal_count": 0,
+          "is_bot_authored": false,
+          "bot_signals_detected": [],
+          "bot_signal_count": 0,
+          "authorship_class": "human",
+          "detection_method": "heuristic_v2"
+        },
+        "provenance": {
+          "repository": "https://github.com/example/repo",
+          "tool": "https://github.com/invariant-systems-ai/aiir@1.0.15",
+          "generator": "aiir.cli"
+        },
+        "injected_admin": true,
+        "receipt_id": "g1-9c965bba7eb1389098b34c9a1a7cf61e",
+        "content_hash": "sha256:9c965bba7eb1389098b34c9a1a7cf61e19680ff221bbd9bd4ec3a411b211e84e",
+        "timestamp": "2026-03-10T05:00:00Z",
+        "extensions": {}
+      },
+      "expected": {
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "id": "tv-24-valid-empty-extensions",
+      "description": "Valid receipt with explicit empty extensions object \u2014 extensions={} does not affect core hash",
+      "receipt": {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "1.0.15",
+        "commit": {
+          "sha": "5555555555555555555555555555555555555555",
+          "author": {
+            "name": "Bob",
+            "email": "bob@example.com",
+            "date": "2026-03-10T06:00:00Z"
+          },
+          "committer": {
+            "name": "Bob",
+            "email": "bob@example.com",
+            "date": "2026-03-10T06:00:00Z"
+          },
+          "subject": "chore: empty extensions test",
+          "message_hash": "sha256:ee11ff22ee11ff22ee11ff22ee11ff22ee11ff22ee11ff22ee11ff22ee11ff22",
+          "diff_hash": "sha256:99887766998877669988776699887766998877669988776699887766998877ee",
+          "files_changed": 1,
+          "files": [
+            "noop.py"
+          ]
+        },
+        "ai_attestation": {
+          "is_ai_authored": false,
+          "signals_detected": [],
+          "signal_count": 0,
+          "is_bot_authored": false,
+          "bot_signals_detected": [],
+          "bot_signal_count": 0,
+          "authorship_class": "human",
+          "detection_method": "heuristic_v2"
+        },
+        "provenance": {
+          "repository": "https://github.com/example/repo",
+          "tool": "https://github.com/invariant-systems-ai/aiir@1.0.15",
+          "generator": "aiir.cli"
+        },
+        "receipt_id": "g1-eeb28592a7db425a7e5778c228a49b88",
+        "content_hash": "sha256:eeb28592a7db425a7e5778c228a49b883514c8e84ffee1c68a2ddec4c0c820fe",
+        "timestamp": "2026-03-10T06:00:00Z",
+        "extensions": {}
+      },
+      "expected": {
+        "valid": true,
+        "errors": []
+      }
+    },
+    {
+      "id": "tv-25-invalid-empty-version",
+      "description": "Receipt with empty string version \u2014 MUST be rejected by version regex",
+      "receipt": {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "",
+        "commit": {
+          "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "author": {
+            "name": "Alice",
+            "email": "alice@example.com",
+            "date": "2026-03-09T00:00:00Z"
+          },
+          "committer": {
+            "name": "Alice",
+            "email": "alice@example.com",
+            "date": "2026-03-09T00:00:00Z"
+          },
+          "subject": "feat: add widget",
+          "message_hash": "sha256:375aca2c5a71c7ffaaa0c3602ed0f82d27986ce0776b5c5c1bc2d2a5638b18bb",
+          "diff_hash": "sha256:a9b7bc7b29f22a8b1ae213c4105d73c39b9e3f218d75bb6a288207c1d86b96fe",
+          "files_changed": 1,
+          "files": [
+            "widget.py"
+          ]
+        },
+        "ai_attestation": {
+          "is_ai_authored": false,
+          "signals_detected": [],
+          "signal_count": 0,
+          "is_bot_authored": false,
+          "bot_signals_detected": [],
+          "bot_signal_count": 0,
+          "authorship_class": "human",
+          "detection_method": "heuristic_v2"
+        },
+        "provenance": {
+          "repository": "https://github.com/example/repo",
+          "tool": "https://github.com/invariant-systems-ai/aiir@1.0.12",
+          "generator": "aiir.cli"
+        },
+        "receipt_id": "g1-ff76d2a88adff37fcd3a37fa42bb52b8",
+        "content_hash": "sha256:ff76d2a88adff37fcd3a37fa42bb52b8eec24750e123a6e9d6925ef9f5e719da",
+        "timestamp": "2026-03-09T00:00:00Z",
+        "extensions": {}
+      },
+      "expected": {
+        "valid": false,
+        "errors": [
+          "invalid version format: ''"
         ]
       }
     }

@@ -1,6 +1,38 @@
-# AIIR eats its own dogfood: every commit to this repo is receipted.
-# Run `pre-commit install --hook-type post-commit` to enable.
+# AIIR pre-commit hooks — security scanning + dogfood receipting.
+# Install:  pre-commit install && pre-commit install --hook-type post-commit
+#
+# Hooks run in two phases:
+#   pre-commit:  gitleaks (secret scan) + ruff (lint/format) + bandit (SAST)
+#   post-commit: AIIR receipt generation (dogfood)
 repos:
+  # ── Secret scanning ──────────────────────────────────────────────
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+        name: gitleaks — secret scanning
+        stages: [pre-commit]
+
+  # ── Linting + formatting ─────────────────────────────────────────
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.6
+    hooks:
+      - id: ruff
+        name: ruff — lint
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+        name: ruff — format check
+
+  # ── Static security analysis ─────────────────────────────────────
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.3
+    hooks:
+      - id: bandit
+        name: bandit — SAST
+        args: [-r, -ll, --skip, B101]  # -ll = MEDIUM+, skip assert warnings
+        files: ^aiir/
+
+  # ── AIIR dogfood ─────────────────────────────────────────────────
   - repo: local
     hooks:
       - id: aiir

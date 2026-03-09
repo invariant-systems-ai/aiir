@@ -149,6 +149,28 @@ jobs:
             echo "✅ Release $GITHUB_REF_NAME created"
           fi
 
+  # ── Step 1b: Attach SBOM to release ────────────────────────────────
+  attach-sbom:
+    needs: [release, build]
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3  # v8.0.0
+        with:
+          name: dist
+          path: dist/
+      - name: Upload SBOM to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f dist/aiir-sbom.cdx.json ]; then
+            gh release upload "$GITHUB_REF_NAME" dist/aiir-sbom.cdx.json \
+              --clobber
+            echo "✅ SBOM attached to release $GITHUB_REF_NAME"
+          else
+            echo "::warning::SBOM file not found — skipping"
+          fi
+
   # ── Step 2: Build sdist + wheel ────────────────────────────────────
   build:
     needs: preflight
@@ -163,6 +185,16 @@ jobs:
           python-version: "3.12"
       - name: Build
         run: pip install build && python -m build
+      - name: Generate SBOM (CycloneDX)
+        run: |
+          pip install cyclonedx-bom
+          # Generate SBOM from the built wheel — covers the package + all
+          # declared dependencies (which is zero for aiir, but proves it).
+          cyclonedx-py environment \
+            --output-format json \
+            --output-file dist/aiir-sbom.cdx.json \
+            --schema-version 1.5
+          echo "✅ SBOM generated: $(wc -c < dist/aiir-sbom.cdx.json) bytes"
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: dist
@@ -176,7 +208,8 @@ jobs:
     environment: pypi
     permissions:
       contents: read
-      id-token: write  # Required for OIDC Trusted Publisher
+      id-token: write       # Required for OIDC Trusted Publisher
+      attestations: write   # Required for SLSA provenance attestation
     steps:
       - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3  # v8.0.0
         with:
@@ -190,9 +223,28 @@ jobs:
           skip-existing: true
         # No API token needed — uses OIDC via Trusted Publisher config on PyPI
 
+  # ── Step 3b: SLSA Provenance Attestation ───────────────────────────
+  attest:
+    needs: publish
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3  # v8.0.0
+        with:
+          name: dist
+          path: dist/
+      - name: Generate SLSA provenance attestation
+        uses: actions/attest-build-provenance@db473fddc028af60658334401dc6fa3ffd8669fd  # v2.3.0
+        with:
+          subject-path: 'dist/*.whl'
+
   # ── Step 4: Verify PyPI ────────────────────────────────────────────
   verify:
-    needs: publish
+    needs: [publish, attest]
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:

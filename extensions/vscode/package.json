@@ -1,0 +1,87 @@
+{
+  "name": "aiir",
+  "displayName": "AIIR — AI Integrity Receipts",
+  "description": "Verify AIIR commit receipts directly in VS Code. Content-addressed integrity checks for AI-assisted commits.",
+  "version": "0.1.0",
+  "publisher": "invariant-systems",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/invariant-systems-ai/aiir"
+  },
+  "homepage": "https://invariantsystems.io",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "aiir",
+    "ai",
+    "receipts",
+    "verification",
+    "integrity",
+    "compliance",
+    "audit"
+  ],
+  "activationEvents": [
+    "onLanguage:json",
+    "workspaceContains:**/*.aiir.json"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "aiir.verifyFile",
+        "title": "AIIR: Verify Receipt",
+        "category": "AIIR"
+      },
+      {
+        "command": "aiir.verifySelection",
+        "title": "AIIR: Verify Selected Receipt",
+        "category": "AIIR"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "aiir.verifyFile",
+          "when": "resourceExtname == .json",
+          "group": "aiir@1"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "aiir.verifySelection",
+          "when": "editorHasSelection",
+          "group": "aiir@1"
+        }
+      ]
+    },
+    "languages": [
+      {
+        "id": "aiir-receipt",
+        "aliases": [
+          "AIIR Receipt"
+        ],
+        "extensions": [
+          ".aiir.json"
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0",
+    "@vscode/vsce": "^3.0.0"
+  }
+}

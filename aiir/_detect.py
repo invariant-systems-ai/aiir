@@ -68,6 +68,16 @@ AI_SIGNALS = [
     "google gemini",
     "tabnine",
     "codegen by gemini",
+    # Newer AI coding tools (2024-2025 wave) — market entrants that must be
+    # detected to maintain credibility.  Addresses red-team finding A2-08.
+    "replit agent",
+    "bolt.new",
+    "lovable",
+    "jetbrains ai",
+    "supermaven",
+    "continue.dev",
+    "double.bot",
+    "codestral",
 ]
 
 
@@ -227,9 +237,9 @@ def get_commit_info(
     if is_ai and is_bot:
         authorship_class = "ai+bot"
     elif is_ai:
-        authorship_class = "ai-assisted"
+        authorship_class = "ai_assisted"
     elif is_bot:
-        authorship_class = "bot-generated"
+        authorship_class = "bot"
     else:
         authorship_class = "human"
 

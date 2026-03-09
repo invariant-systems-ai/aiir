@@ -92,7 +92,10 @@ class TestServeStdioToolsList(unittest.TestCase):
         names = {t["name"] for t in tools}
         self.assertIn("aiir_receipt", names)
         self.assertIn("aiir_verify", names)
-        self.assertEqual(len(tools), 2)
+        self.assertIn("aiir_stats", names)
+        self.assertIn("aiir_explain", names)
+        self.assertIn("aiir_policy_check", names)
+        self.assertEqual(len(tools), 5)
 
 
 class TestServeStdioToolsCall(unittest.TestCase):

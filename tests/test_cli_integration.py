@@ -272,7 +272,7 @@ class TestFormatReceiptDetail(unittest.TestCase):
             "is_bot_authored": False,
             "bot_signals_detected": [],
             "bot_signal_count": 0,
-            "authorship_class": "ai-assisted",
+            "authorship_class": "ai_assisted",
             "detection_method": "heuristic_v2",
         },
         "provenance": {
@@ -315,7 +315,7 @@ class TestFormatReceiptDetail(unittest.TestCase):
 
     def test_includes_authorship_class(self):
         output = cli.format_receipt_detail(self.FULL_RECEIPT)
-        self.assertIn("ai-assisted", output)
+        self.assertIn("ai_assisted", output)
 
     def test_includes_detection_method(self):
         output = cli.format_receipt_detail(self.FULL_RECEIPT)
@@ -685,9 +685,11 @@ class TestReadmeStats(unittest.TestCase):
         self.assertNotIn("564 tests", readme)
         self.assertNotIn("604 tests", readme)
         self.assertNotIn("660+ tests", readme)
+        self.assertNotIn("710+ tests", readme)
+        self.assertNotIn("760+ tests", readme)
         # Should have current content
         self.assertIn("security controls", readme)
-        self.assertIn("710+ tests", readme)
+        self.assertIn("840+ tests", readme)
 
 
 class TestThreatModelR03Consistency(unittest.TestCase):

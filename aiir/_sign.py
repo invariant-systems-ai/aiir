@@ -138,10 +138,24 @@ def sign_receipt_file(receipt_path: str) -> str:
             f"Receipt file is not valid JSON (refusing to sign): {receipt_path}"
         )
 
+    # Check for existing bundle BEFORE expensive OIDC signing — avoids
+    # wasting the token if the bundle already exists.
+    bundle_path = str(path) + ".sigstore"
+    if os.path.exists(bundle_path):
+        raise FileExistsError(
+            f"Sigstore bundle already exists: {bundle_path} — "
+            f"remove it first or use a different receipt path"
+        )
+
     bundle_json = sign_receipt(receipt_bytes)
 
-    bundle_path = str(path) + ".sigstore"
-    fd = os.open(bundle_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+    try:
+        fd = os.open(bundle_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+    except FileExistsError:
+        raise FileExistsError(
+            f"Sigstore bundle already exists: {bundle_path} — "
+            f"remove it first or use a different receipt path"
+        )
     if _HAS_FCHMOD:
         os.fchmod(fd, 0o644)  # Force permissions regardless of umask
     with os.fdopen(fd, "w", encoding="utf-8") as f:

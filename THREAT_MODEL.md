@@ -1,7 +1,7 @@
 # Threat Model — AIIR (AI Integrity Receipts)
 
 **Document version**: 3.0.0
-**CLI version**: 1.0.9
+**CLI version**: 1.0.14
 **Date**: 2025-07-15 (updated 2026-03-08)
 **Methodology**: STRIDE-per-element · DREAD risk scoring · Attack trees
 **Author**: Invariant Systems Security Team (supplemented by Hypothesis property-based fuzzing)
@@ -91,7 +91,7 @@ AI authorship signals, hashes the diff, and produces a JSON receipt whose
 | ID | Element | Threat | Mitigation | Status |
 |----|---------|--------|------------|--------|
 | S-01 | `detect_ai_signals` | Attacker inserts zero-width Unicode (ZWJ, ZWNJ) into "Copilot" to evade detection | R3-09: Strip `Cf` category chars before matching | ✅ Mitigated |
-| S-02 | `detect_ai_signals` | Attacker uses visually-identical homoglyphs (Cyrillic "С" for Latin "C") | R7-03: Confusable character map + NFKC normalization; 36 Cyrillic/Greek mappings | ✅ Partially mitigated |
+| S-02 | `detect_ai_signals` | Attacker uses visually-identical homoglyphs (Cyrillic "С" for Latin "C") | R7-03: Full Unicode TR39 confusable map (669 entries, 69 scripts) + NFKC normalization | ✅ Mitigated |
 | S-03 | Sigstore signing | Stolen OIDC token used to sign receipts under victim's identity | Ambient credential detection; short-lived tokens (10 min); identity policy in verification | ✅ Mitigated (defense in depth) |
 | S-04 | `verify_receipt` | Forged receipt with matching content_hash but different semantics | SHA-256 content addressing; no known preimage attacks | ✅ Mitigated |
 
@@ -157,7 +157,7 @@ AI authorship signals, hashes the diff, and produces a JSON receipt whose
 Goal: Produce a valid receipt that says is_ai_authored=false for an AI commit
 ├── 1. Evade AI signal detection
 │   ├── 1a. Zero-width char insertion in "Copilot" → BLOCKED (R3-09 strip Cf)
-│   ├── 1b. Homoglyph substitution (Cyrillic) → PARTIAL (not detected)
+│   ├── 1b. Homoglyph substitution (single-char) → BLOCKED (TR39 map, 669 entries)
 │   ├── 1c. Use unrecognized AI tool name → PARTIAL (heuristic limitation)
 │   └── 1d. Remove Co-authored-by trailer before push → WORKS (commit rewrite)
 ├── 2. Tamper with receipt after generation
@@ -272,7 +272,7 @@ Scoring: 1 (low) – 3 (high) per dimension.  Total = sum / 5.
 
 | Threat | D | R | E | A | D | Score | Level |
 |--------|---|---|---|---|---|-------|-------|
-| S-02: Homoglyph evasion | 1 | 2 | 2 | 1 | 2 | 1.6 | Low |
+| S-02: Homoglyph evasion (multi-char only) | 1 | 1 | 1 | 1 | 1 | 1.0 | Low |
 | R-03: Unsigned receipt fabrication | 2 | 2 | 2 | 2 | 2 | 2.0 | Medium |
 | Commit history rewrite (external) | 2 | 2 | 2 | 2 | 2 | 2.0 | Medium |
 
@@ -498,5 +498,6 @@ inputs per test run**.
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 3.1.0 | 2026-03-09 | Full Unicode TR39 confusable map — 669 entries across 69 scripts (was 36 hand-curated); S-02 upgraded to Mitigated; 842 tests, 39 AI signals; hostile red-team R9 (80 adversarial tests) |
 | 3.0.0 | 2026-03-07 | v1.0.0 release — 142 security controls, 504 tests, 52 fuzz tests; 36 confusable mappings, 31 AI signals; comprehensive STRIDE/DREAD analysis |
 

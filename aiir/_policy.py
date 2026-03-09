@@ -205,8 +205,15 @@ def evaluate_receipt_policy(
         if not isinstance(ai, dict):
             ai = {}
         authorship = ai.get("authorship_class", "human")
-        # Normalize: "bot-generated" in receipt maps to "bot" in policy
-        authorship_normalized = authorship.replace("-generated", "")
+        # Normalize legacy hyphenated forms (v1.0.4–v1.0.13) to canonical
+        # underscore forms used by SPEC, schema, and policy presets.
+        # Current _detect.py (v1.0.14+) emits canonical forms directly.
+        _AUTHORSHIP_NORMALIZE = {
+            "ai-assisted": "ai_assisted",
+            "ai-generated": "ai_generated",
+            "bot-generated": "bot",
+        }
+        authorship_normalized = _AUTHORSHIP_NORMALIZE.get(authorship, authorship)
         if authorship_normalized not in allowed and authorship not in allowed:
             violations.append(PolicyViolation(
                 rule="allowed_authorship_classes",
@@ -240,6 +247,13 @@ def evaluate_ledger_policy(
 
     # Max AI percentage
     max_ai = policy.get("max_ai_percent")
+    if max_ai is not None:
+        # Coerce to float to prevent TypeError from string/non-numeric values
+        # in crafted policy files (red-team finding A4-07).
+        try:
+            max_ai = float(max_ai)
+        except (TypeError, ValueError):
+            max_ai = None
     if max_ai is not None:
         ai_pct = index.get("ai_percentage", 0.0)
         total = index.get("receipt_count", 0)

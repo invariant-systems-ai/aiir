@@ -14,5 +14,5 @@
 - [ ] I have read the [CONTRIBUTING](CONTRIBUTING.md) guide
 - [ ] My code follows the project's style (zero runtime dependencies, all inputs validated)
 - [ ] I have added tests that prove my fix/feature works
-- [ ] All tests pass (`python -m pytest test_cli.py fuzz_cli.py -v`)
+- [ ] All tests pass (`python -m pytest tests/ -q`)
 - [ ] I have updated documentation if needed

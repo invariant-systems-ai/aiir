@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.15] — 2026-03-10
+
+### Added
+
+- **Public Python API** (`__init__.py`): Added `__all__` with 21 re-exported symbols — `generate_receipt`, `verify_receipt`, `detect_ai_signals`, `explain_verification`, `validate_receipt`, `check_policy`, `format_stats`, and more. Enables `from aiir import generate_receipt` one-liner usage for SDK consumers.
+- **3 new MCP tools**: `aiir_stats` (ledger statistics), `aiir_explain` (human-readable verification explanation), `aiir_policy_check` (AI percentage policy enforcement). Expands MCP surface from 2 to 5 tools.
+- **Full Unicode TR39 confusable detection**: Expanded `_CONFUSABLE_TO_ASCII` map from 182 to 669 entries covering 69 scripts. Hardens receipt verification against homoglyph attacks across Arabic, Cyrillic, Greek, Georgian, Armenian, Cherokee, Ethiopic, CJK, and 60+ additional Unicode blocks.
+- **Red team adversarial suite**: 80 new hostile tests targeting MCP injection, path traversal, Unicode abuse, resource exhaustion, symlink attacks, and signal-count forgery. All passing.
+
+### Changed
+
+- **MCP protocol version**: Updated from `2024-11-05` to `2025-03-26` (latest stable MCP specification).
+- **Website version fallbacks**: Updated all `v1.0.11` fallbacks to `v1.0.15` in `index.html` and `docs.html`.
+- **PR template**: Fixed stale test command (`test_cli.py fuzz_cli.py -v` → `tests/ -q`).
+- **CONTRIBUTING.md**: Updated test count to 840+.
+
+### Fixed
+
+- **14 security vulnerabilities** identified during adversarial red-team review: path traversal in `--check`, ReDoS in commit message parsing, Unicode homoglyph bypasses, MCP argument injection, resource exhaustion via oversized inputs, and more. All hardened with bounds checks, input validation, and safe defaults.
+
 ## [1.0.14] — 2026-03-09
 
 ### Added
@@ -131,7 +151,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
-- **`authorship_class` field**: Receipts now include a structured `authorship_class` in `ai_attestation` — one of `"human"`, `"ai-assisted"`, `"bot-generated"`, or `"ai+bot"`. This gives downstream tools a single enum-like field for classification, eliminating the need to interpret boolean pairs.
+- **`authorship_class` field**: Receipts now include a structured `authorship_class` in `ai_attestation` — one of `"human"`, `"ai_assisted"`, `"bot"`, or `"ai+bot"`. This gives downstream tools a single enum-like field for classification, eliminating the need to interpret boolean pairs. *(v1.0.14 aligned values with SPEC; legacy hyphenated forms from v1.0.4–v1.0.13 are accepted by the validator for backward compatibility.)*
 - **Trust stack architecture**: Website now includes a concrete OSS → Hub → Fortress diagram showing what each layer provides.
 
 ### Changed

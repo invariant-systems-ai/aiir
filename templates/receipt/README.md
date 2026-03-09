@@ -26,7 +26,7 @@ That's it. Every push and merge request now generates receipts, uploaded as CI a
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
 | `stage` | string | `test` | Pipeline stage for the receipt job |
-| `version` | string | `1.0.9` | AIIR version to install |
+| `version` | string | `1.0.14` | AIIR version to install |
 | `ai-only` | boolean | `false` | Only receipt AI-authored commits |
 | `artifact-expiry` | string | `90 days` | How long to keep receipt artifacts |
 | `output-dir` | string | `.aiir-receipts` | Directory for receipt JSON files |
@@ -76,8 +76,7 @@ include:
 - **Zero dependencies** — Python standard library only
 - **Apache 2.0** — free forever, no usage limits
 - **EU AI Act** — supports transparency and provenance evidence
-- **604 tests** — 552 unit + 52 property-based fuzz tests
-
+- **760+ tests** — unit + property-based fuzz tests
 Built by [Invariant Systems, Inc.](https://invariantsystems.io)
 
 - [Full documentation](https://github.com/invariant-systems-ai/aiir)

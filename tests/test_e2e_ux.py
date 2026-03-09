@@ -19,7 +19,7 @@ and exercises every CLI path documented in README.md:
   13. Content-addressability            → receipt_id = hash(canonical JSON)
   14. AI detection                      → Copilot / ChatGPT / Claude signals
   15. Bot detection                     → dependabot / github-actions
-  16. authorship_class values           → human / ai-assisted / bot-generated
+  16. authorship_class values           → human / ai_assisted / bot
   17. --redact-files                    → files omitted, files_redacted present
   18. --github-action                   → outputs set correctly
   19. --version                         → prints current version
@@ -54,8 +54,8 @@ from aiir._core import _canonical_json, _sha256
 class TestE2EUXContract(unittest.TestCase):
     """Full end-to-end UX contract test against a real git repo.
 
-    Creates 6 diverse commits (human, Copilot, ChatGPT, Claude,
-    Dependabot, github-actions) and validates every documented CLI path.
+    Creates 7 diverse commits (human, Copilot, ChatGPT, Claude,
+    Dependabot, github-actions, bot+AI) and validates every documented CLI path.
     """
 
     # ── Fixture ─────────────────────────────────────────────────────────
@@ -134,13 +134,24 @@ class TestE2EUXContract(unittest.TestCase):
         _git("commit", "-m", "chore: update version to 1.2.3")
         cls.sha_github_actions = _git("rev-parse", "HEAD")
 
+        # ── Commit 7: bot + AI (bot author WITH AI co-authored-by) ────
+        _git("config", "user.name", "dependabot[bot]")
+        _git("config", "user.email", "dependabot[bot]@users.noreply.github.com")
+        Path(cls._tmpdir, "ai_bot.py").write_text("# AI-assisted bot commit\n")
+        _git("add", ".")
+        _git(
+            "commit", "-m",
+            "build(deps): AI-assisted update\n\nCo-authored-by: Copilot <copilot@github.com>",
+        )
+        cls.sha_ai_and_bot = _git("rev-parse", "HEAD")
+
         # Restore author for any further git ops
         _git("config", "user.name", "Test User")
         _git("config", "user.email", "test@example.com")
 
         # Store first and last SHAs for range tests
         cls.sha_first = cls.sha_human
-        cls.sha_last = cls.sha_github_actions
+        cls.sha_last = cls.sha_ai_and_bot
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -389,7 +400,7 @@ class TestE2EUXContract(unittest.TestCase):
         self.assertIsInstance(ai["bot_signals_detected"], list)
         self.assertIsInstance(ai["bot_signal_count"], int)
         self.assertIn(ai["authorship_class"], [
-            "human", "ai-assisted", "bot-generated", "ai+bot",
+            "human", "ai_assisted", "bot", "ai+bot",
         ])
         self.assertEqual(ai["detection_method"], "heuristic_v2")
 
@@ -426,7 +437,7 @@ class TestE2EUXContract(unittest.TestCase):
         receipt = json.loads(stdout)
         ai = receipt["ai_attestation"]
         self.assertTrue(ai["is_ai_authored"])
-        self.assertEqual(ai["authorship_class"], "ai-assisted")
+        self.assertEqual(ai["authorship_class"], "ai_assisted")
         # Should mention copilot in signals
         signals_str = " ".join(ai["signals_detected"]).lower()
         self.assertIn("copilot", signals_str)
@@ -438,7 +449,7 @@ class TestE2EUXContract(unittest.TestCase):
         receipt = json.loads(stdout)
         ai = receipt["ai_attestation"]
         self.assertTrue(ai["is_ai_authored"])
-        self.assertEqual(ai["authorship_class"], "ai-assisted")
+        self.assertEqual(ai["authorship_class"], "ai_assisted")
         signals_str = " ".join(ai["signals_detected"]).lower()
         self.assertIn("chatgpt", signals_str)
 
@@ -449,31 +460,31 @@ class TestE2EUXContract(unittest.TestCase):
         receipt = json.loads(stdout)
         ai = receipt["ai_attestation"]
         self.assertTrue(ai["is_ai_authored"])
-        self.assertEqual(ai["authorship_class"], "ai-assisted")
+        self.assertEqual(ai["authorship_class"], "ai_assisted")
         signals_str = " ".join(ai["signals_detected"]).lower()
         self.assertIn("claude", signals_str)
 
     # ── 15. Bot detection ───────────────────────────────────────────────
 
     def test_15_bot_detection_dependabot(self):
-        """dependabot[bot] author is classified as bot-generated."""
+        """dependabot[bot] author is classified as bot."""
         rc, stdout, _ = self._run_cli("--commit", self.sha_dependabot, "--json")
         self.assertEqual(rc, 0)
         receipt = json.loads(stdout)
         ai = receipt["ai_attestation"]
         self.assertTrue(ai["is_bot_authored"])
         self.assertFalse(ai["is_ai_authored"], "Dependabot is bot, not AI")
-        self.assertEqual(ai["authorship_class"], "bot-generated")
+        self.assertEqual(ai["authorship_class"], "bot")
 
     def test_15_bot_detection_github_actions(self):
-        """github-actions[bot] author is classified as bot-generated."""
+        """github-actions[bot] author is classified as bot."""
         rc, stdout, _ = self._run_cli("--commit", self.sha_github_actions, "--json")
         self.assertEqual(rc, 0)
         receipt = json.loads(stdout)
         ai = receipt["ai_attestation"]
         self.assertTrue(ai["is_bot_authored"])
         self.assertFalse(ai["is_ai_authored"], "github-actions is bot, not AI")
-        self.assertEqual(ai["authorship_class"], "bot-generated")
+        self.assertEqual(ai["authorship_class"], "bot")
 
     # ── 16. authorship_class values ─────────────────────────────────────
 
@@ -486,6 +497,16 @@ class TestE2EUXContract(unittest.TestCase):
         self.assertFalse(ai["is_ai_authored"])
         self.assertFalse(ai["is_bot_authored"])
         self.assertEqual(ai["authorship_class"], "human")
+
+    def test_16b_authorship_class_ai_and_bot(self):
+        """Bot author + AI co-authored-by gets authorship_class='ai+bot'."""
+        rc, stdout, _ = self._run_cli("--commit", self.sha_ai_and_bot, "--json")
+        self.assertEqual(rc, 0)
+        receipt = json.loads(stdout)
+        ai = receipt["ai_attestation"]
+        self.assertTrue(ai["is_ai_authored"], "Should detect AI co-authored-by")
+        self.assertTrue(ai["is_bot_authored"], "Should detect bot author")
+        self.assertEqual(ai["authorship_class"], "ai+bot")
 
     # ── 17. --redact-files ──────────────────────────────────────────────
 
@@ -688,14 +709,14 @@ class TestE2EUXContract(unittest.TestCase):
         # Get root commit separately (sha~1 doesn't work on root)
         rc0, stdout0, _ = self._run_cli("--commit", self.sha_first, "--json")
         self.assertEqual(rc0, 0)
-        # Get remaining 5 via range
+        # Get remaining 6 via range
         range_spec = f"{self.sha_first}..{self.sha_last}"
         rc, stdout, _ = self._run_cli("--range", range_spec, "--json")
         self.assertEqual(rc, 0)
         receipts = json.loads(stdout)
         self.assertIsInstance(receipts, list)
         receipts.insert(0, json.loads(stdout0))  # prepend root
-        self.assertEqual(len(receipts), 6, "Should have 6 receipts")
+        self.assertEqual(len(receipts), 7, "Should have 7 receipts")
 
         # Build a sha→receipt map
         by_sha = {r["commit"]["sha"]: r for r in receipts}
@@ -708,27 +729,32 @@ class TestE2EUXContract(unittest.TestCase):
         # Copilot
         self.assertEqual(
             by_sha[self.sha_copilot]["ai_attestation"]["authorship_class"],
-            "ai-assisted",
+            "ai_assisted",
         )
         # ChatGPT
         self.assertEqual(
             by_sha[self.sha_chatgpt]["ai_attestation"]["authorship_class"],
-            "ai-assisted",
+            "ai_assisted",
         )
         # Claude
         self.assertEqual(
             by_sha[self.sha_claude]["ai_attestation"]["authorship_class"],
-            "ai-assisted",
+            "ai_assisted",
         )
         # Dependabot
         self.assertEqual(
             by_sha[self.sha_dependabot]["ai_attestation"]["authorship_class"],
-            "bot-generated",
+            "bot",
         )
         # github-actions
         self.assertEqual(
             by_sha[self.sha_github_actions]["ai_attestation"]["authorship_class"],
-            "bot-generated",
+            "bot",
+        )
+        # AI + bot (dependabot with Copilot co-authored-by)
+        self.assertEqual(
+            by_sha[self.sha_ai_and_bot]["ai_attestation"]["authorship_class"],
+            "ai+bot",
         )
 
     # ── 28. Quiet mode suppresses tips ──────────────────────────────────

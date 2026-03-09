@@ -87,10 +87,11 @@
         "diff_hash",
         "files_changed"
       ],
+      "additionalProperties": false,
       "properties": {
         "sha": {
           "type": "string",
-          "pattern": "^[0-9a-f]{40,64}$",
+          "pattern": "^[0-9a-f]{40}$|^[0-9a-f]{64}$",
           "description": "Full hex SHA of the git commit (40 chars for SHA-1, 64 for SHA-256)."
         },
         "author": {
@@ -207,8 +208,8 @@
         },
         "authorship_class": {
           "type": "string",
-          "enum": ["human", "ai_assisted", "ai_generated", "bot"],
-          "description": "Classification of commit authorship."
+          "enum": ["human", "ai_assisted", "bot", "ai+bot"],
+          "description": "Classification of commit authorship. The Python validator additionally accepts legacy forms (ai-assisted, bot-generated, ai_generated) for backward compatibility with v1.0.4\u20131.0.13 receipts."
         },
         "detection_method": {
           "type": "string",

@@ -45,7 +45,7 @@ def verify_receipt(receipt: Dict[str, Any]) -> Dict[str, Any]:
     # Validate version field — reject non-string or strings with
     # HTML/control chars that could be rendered unsafely in downstream contexts.
     version = receipt.get("version")
-    if not isinstance(version, str) or not re.match(r'^[0-9a-zA-Z.+-]+$', version):
+    if not isinstance(version, str) or not re.match(r'^[0-9]+\.[0-9]+\.[0-9]+([.+\-][0-9a-zA-Z.+\-]*)?$', version):
         errors.append(f"invalid version format: {version!r}")
     if errors:
         return {"valid": False, "errors": errors}

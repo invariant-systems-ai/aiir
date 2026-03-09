@@ -1,7 +1,7 @@
 # Claude Code Hooks → AIIR Receipt
 
 > Auto-generate an AIIR receipt every time Claude Code writes code.
-> Uses Claude Code's [hooks system](https://docs.anthropic.com/en/docs/claude-code/hooks)
+> Uses Claude Code's [hooks system](https://code.claude.com/docs/en/hooks)
 > to run `aiir --pretty` after every tool use that modifies files.
 
 ## Quick Setup
@@ -14,17 +14,21 @@ pip install aiir
 
 ### 2. Add the hook
 
-Create or edit `.claude/hooks.json` in your project root:
+Add the following to `.claude/settings.json` in your project root
+(or `~/.claude/settings.json` for all projects):
 
 ```json
 {
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": {
-          "tool_name": "write_file|edit_file|create_file|replace_string_in_file|multi_replace_string_in_file"
-        },
-        "command": "cd \"$PROJECT_DIR\" && git diff --quiet || (git add -A && git commit -m \"claude: auto-commit\" --no-verify && aiir --pretty)"
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && git diff --quiet || (git add -A && git commit -m \"claude: auto-commit\" --no-verify && aiir --pretty)"
+          }
+        ]
       }
     ]
   }
@@ -33,7 +37,7 @@ Create or edit `.claude/hooks.json` in your project root:
 
 ### What this does
 
-Every time Claude Code uses a file-writing tool:
+Every time Claude Code uses the `Write` or `Edit` tool:
 
 1. Checks if there are uncommitted changes (`git diff --quiet`)
 2. If yes — stages everything, commits with a `claude:` prefix
@@ -67,10 +71,13 @@ detector will flag it as AI-assisted.
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": {
-          "tool_name": "write_file|edit_file|create_file|replace_string_in_file|multi_replace_string_in_file"
-        },
-        "command": "cd \"$PROJECT_DIR\" && git diff --quiet || (git add -A && git commit -m \"claude: auto-commit\" --no-verify && aiir --sign --output .receipts/)"
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && git diff --quiet || (git add -A && git commit -m \"claude: auto-commit\" --no-verify && aiir --sign --output .receipts/)"
+          }
+        ]
       }
     ]
   }
@@ -87,10 +94,13 @@ most environments).
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": {
-          "tool_name": "write_file|edit_file|create_file|replace_string_in_file|multi_replace_string_in_file"
-        },
-        "command": "cd \"$PROJECT_DIR\" && git diff --quiet || (git add -A && git commit -m \"claude: auto-commit\" --no-verify && aiir --pretty --agent-tool claude-code --agent-model claude-sonnet --agent-context ide)"
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && git diff --quiet || (git add -A && git commit -m \"claude: auto-commit\" --no-verify && aiir --pretty --agent-tool claude-code --agent-model claude-sonnet --agent-context ide)"
+          }
+        ]
       }
     ]
   }
@@ -119,10 +129,13 @@ This adds structured metadata to `extensions.agent_attestation`:
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": {
-          "tool_name": "write_file|edit_file|create_file|replace_string_in_file|multi_replace_string_in_file"
-        },
-        "command": "cd \"$PROJECT_DIR\" && git diff --quiet || (git add -A && git commit -m \"claude: auto-commit\" --no-verify && aiir --in-toto --json > .receipts/latest-intoto.json)"
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && git diff --quiet || (git add -A && git commit -m \"claude: auto-commit\" --no-verify && aiir --in-toto --json > .receipts/latest-intoto.json)"
+          }
+        ]
       }
     ]
   }
@@ -140,10 +153,13 @@ can consume directly.
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": {
-          "tool_name": "write_file|edit_file|create_file|replace_string_in_file|multi_replace_string_in_file"
-        },
-        "command": "cd \"$PROJECT_DIR\" && git diff --quiet || (git add -A && git commit -m \"claude: auto-commit\" --no-verify && aiir --ai-only --pretty)"
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && git diff --quiet || (git add -A && git commit -m \"claude: auto-commit\" --no-verify && aiir --ai-only --pretty)"
+          }
+        ]
       }
     ]
   }
@@ -157,10 +173,13 @@ can consume directly.
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": {
-          "tool_name": "write_file|edit_file|create_file|replace_string_in_file|multi_replace_string_in_file"
-        },
-        "command": "cd \"$PROJECT_DIR\" && git diff --quiet || (git add -A && git commit -m \"claude: auto-commit\" --no-verify && aiir --quiet)"
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && git diff --quiet || (git add -A && git commit -m \"claude: auto-commit\" --no-verify && aiir --quiet)"
+          }
+        ]
       }
     ]
   }
@@ -218,4 +237,4 @@ aiir --check --policy strict
 
 **Links**: [AIIR on PyPI](https://pypi.org/project/aiir/) ·
 [AIIR on GitHub](https://github.com/invariant-systems-ai/aiir) ·
-[Claude Code Hooks docs](https://docs.anthropic.com/en/docs/claude-code/hooks)
+[Claude Code Hooks docs](https://code.claude.com/docs/en/hooks)

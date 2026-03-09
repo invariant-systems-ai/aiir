@@ -132,7 +132,7 @@ All three fields are REQUIRED. No additional properties are permitted.
 | `is_bot_authored` | boolean | Optional | True if bot pattern matched |
 | `bot_signals_detected` | string[] | Optional | Bot signal list |
 | `bot_signal_count` | integer | Optional | `len(bot_signals_detected)` |
-| `authorship_class` | string | Optional | One of: `"human"`, `"ai_assisted"`, `"ai_generated"`, `"bot"` |
+| `authorship_class` | string | Optional | One of: `"human"`, `"ai_assisted"`, `"bot"`, `"ai+bot"` |
 | `detection_method` | string | ✅ | Algorithm identifier (e.g., `"heuristic_v2"`) |
 
 ### 4.1 Detection Method
@@ -155,8 +155,13 @@ identify them with a distinct `detection_method` value.
 |-------|----------|
 | `human` | No AI or bot signals detected |
 | `ai_assisted` | AI signals detected, human author |
-| `ai_generated` | AI signals detected, bot author |
 | `bot` | Bot signals detected, no AI signals |
+| `ai+bot` | AI signals detected AND bot author |
+
+> **Note:** `ai_generated` appeared in schema versions ≤ 1.0.13 but was
+> never emitted by the reference implementation. It is accepted by the
+> validator for backward compatibility but SHOULD NOT be produced.
+> Use `ai+bot` for commits with both AI and bot signals.
 
 ---
 
@@ -295,7 +300,7 @@ To verify a receipt, an implementation MUST:
 
 3. **Schema version check**: Verify `schema` starts with `"aiir/"`.
 
-4. **Version format check**: Verify `version` matches `^[0-9a-zA-Z.+-]+$`.
+4. **Version format check**: Verify `version` matches `^[0-9]+\.[0-9]+\.[0-9]+([.+\-][0-9a-zA-Z.+\-]*)?$` (SemVer).
 
 5. **Core extraction**: Extract `core = {k: v for k, v in receipt.items() if k in CORE_KEYS}`.
 

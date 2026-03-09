@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -151,11 +152,19 @@ class TestInTotoWrapper(unittest.TestCase):
 
     def test_cli_flag_accepted(self):
         """CLI accepts --in-toto without error (basic smoke test)."""
+        # Explicit cwd ensures `python -m aiir` can find the package
+        # regardless of what previous tests did to os.getcwd().
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         result = subprocess.run(
             [sys.executable, "-m", "aiir", "--in-toto", "--help"],
             capture_output=True,
             text=True,
             timeout=10,
+            cwd=repo_root,
+        )
+        self.assertEqual(
+            result.returncode, 0,
+            f"CLI exited {result.returncode}; stderr: {result.stderr[:500]}",
         )
         self.assertIn("--in-toto", result.stdout)
 

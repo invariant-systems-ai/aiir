@@ -129,7 +129,7 @@ class TestMcpParamsValidation(unittest.TestCase):
         # handle_tools_list ignores params, so any coerced value works
         result = handle_tools_list({})
         self.assertIn("tools", result)
-        self.assertEqual(len(result["tools"]), 2)
+        self.assertEqual(len(result["tools"]), 5)
 
     def test_null_params_default_to_dict(self):
         """None params (JSON null) should default to empty dict."""

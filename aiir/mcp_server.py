@@ -52,9 +52,14 @@ from typing import Any, Dict, Optional
 from aiir.cli import (
     CLI_VERSION,
     format_receipt_pretty,
+    format_stats,
+    check_policy,
     generate_receipt,
     generate_receipts_for_range,
     verify_receipt_file,
+    explain_verification,
+    _load_index,
+    _ledger_paths,
 )
 
 # ---------------------------------------------------------------------------
@@ -63,7 +68,7 @@ from aiir.cli import (
 
 SERVER_NAME = "aiir"
 SERVER_VERSION = CLI_VERSION
-PROTOCOL_VERSION = "2024-11-05"
+PROTOCOL_VERSION = "2025-03-26"
 
 # ---------------------------------------------------------------------------
 # Security: Path restriction for verify
@@ -216,6 +221,66 @@ TOOLS = [
             "required": ["file"],
         },
     },
+    {
+        "name": "aiir_stats",
+        "description": (
+            "Show statistics for the AIIR receipt ledger in the current repository. "
+            "Returns receipt count, AI-authored percentage, unique authors, and "
+            "date range. Reads from the .aiir/ ledger directory in the current "
+            "working directory. If no ledger exists, returns a helpful message."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    {
+        "name": "aiir_explain",
+        "description": (
+            "Provide a human-readable explanation of a receipt verification result. "
+            "Takes a receipt file path, verifies it, and returns a plain-English "
+            "explanation of what was checked, what passed or failed, and what to do. "
+            "Designed for non-cryptography users who need to understand a verification "
+            "outcome. The file MUST be within the current working directory."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "file": {
+                    "type": "string",
+                    "description": (
+                        "Relative path to the receipt JSON file to explain. "
+                        "Must be within the current working directory."
+                    ),
+                },
+            },
+            "required": ["file"],
+        },
+    },
+    {
+        "name": "aiir_policy_check",
+        "description": (
+            "Check the current AIIR ledger against policy constraints. "
+            "Evaluates the AI-authored commit percentage against a configurable "
+            "threshold. Returns PASS/FAIL with details. Use this to enforce "
+            "org-level AI usage policies in CI or during code review. "
+            "Reads from the .aiir/ ledger in the current working directory."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "max_ai_percent": {
+                    "type": "number",
+                    "description": (
+                        "Maximum allowed AI-authored commit percentage (0-100). "
+                        "Default: 50. The check fails if the ledger's AI percentage "
+                        "exceeds this threshold."
+                    ),
+                    "default": 50,
+                },
+            },
+        },
+    },
 ]
 
 # ---------------------------------------------------------------------------
@@ -293,6 +358,63 @@ def _handle_aiir_verify(args: Dict[str, Any]) -> Dict[str, Any]:
         return _error_result(_sanitize_error(e))
 
 
+def _handle_aiir_stats(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Return ledger statistics for the current repository."""
+    try:
+        ledger_dir = Path.cwd() / ".aiir"
+        _, index_path = _ledger_paths(str(ledger_dir))
+        if not Path(index_path).is_file():
+            return _text_result(
+                "No AIIR ledger found in this repository.\n"
+                "Run 'aiir --pretty' to generate your first receipt."
+            )
+        index = _load_index(index_path)
+        text = format_stats(index)
+        return _text_result(text)
+    except Exception as e:
+        return _error_result(_sanitize_error(e))
+
+
+def _handle_aiir_explain(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Verify a receipt and return a human-readable explanation."""
+    filepath = args.get("file")
+    if not filepath:
+        return _error_result("'file' parameter is required.")
+
+    try:
+        safe_path = _safe_verify_path(filepath)
+        result = verify_receipt_file(safe_path)
+        explanation = explain_verification(result)
+        return _text_result(explanation)
+    except ValueError as e:
+        return _error_result(str(e))
+    except Exception as e:
+        return _error_result(_sanitize_error(e))
+
+
+def _handle_aiir_policy_check(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Check ledger against AI percentage policy threshold."""
+    max_ai_pct = args.get("max_ai_percent", 50)
+    try:
+        max_ai_pct = float(max_ai_pct)
+    except (TypeError, ValueError):
+        max_ai_pct = 50.0
+
+    try:
+        ledger_dir = Path.cwd() / ".aiir"
+        _, index_path = _ledger_paths(str(ledger_dir))
+        if not Path(index_path).is_file():
+            return _text_result(
+                "No AIIR ledger found — run 'aiir' first to generate receipts."
+            )
+        index = _load_index(index_path)
+        passed, message = check_policy(index, max_ai_percent=max_ai_pct)
+        icon = "✅" if passed else "❌"
+        return _text_result(f"{icon} {message}")
+    except Exception as e:
+        return _error_result(_sanitize_error(e))
+
+
 # ---------------------------------------------------------------------------
 # MCP response helpers
 # ---------------------------------------------------------------------------
@@ -313,6 +435,9 @@ def _error_result(message: str) -> Dict[str, Any]:
 TOOL_HANDLERS = {
     "aiir_receipt": _handle_aiir_receipt,
     "aiir_verify": _handle_aiir_verify,
+    "aiir_stats": _handle_aiir_stats,
+    "aiir_explain": _handle_aiir_explain,
+    "aiir_policy_check": _handle_aiir_policy_check,
 }
 
 

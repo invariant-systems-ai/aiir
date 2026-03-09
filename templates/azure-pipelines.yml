@@ -20,7 +20,7 @@ pr:
       - '*'
 
 variables:
-  AIIR_VERSION: '1.0.9'
+  AIIR_VERSION: '1.0.14'
 
 pool:
   vmImage: 'ubuntu-latest'

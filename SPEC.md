@@ -1,0 +1,412 @@
+# AIIR Commit Receipt Specification
+
+**Specification version**: 1.0.0
+**Schema identifier**: `aiir/commit_receipt.v1`
+**Status**: Stable
+**Date**: 2026-03-09
+**Author**: Invariant Systems, Inc.
+**License**: Apache-2.0
+
+---
+
+## 1. Introduction
+
+This document is the **normative specification** for the AIIR commit receipt
+format (`aiir/commit_receipt.v1`). It defines the receipt structure, field
+semantics, canonical JSON encoding, content-addressing algorithm, verification
+procedure, and extension mechanism.
+
+An independent implementation that follows this specification MUST produce
+identical `content_hash` and `receipt_id` values for the same input data, and
+MUST accept or reject receipts identically to the reference implementation.
+
+### 1.1 Terminology
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
+"SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as
+described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
+
+### 1.2 Reference Implementation
+
+The reference implementation is the `aiir` Python package:
+- Repository: <https://github.com/invariant-systems-ai/aiir>
+- PyPI: <https://pypi.org/project/aiir/>
+- License: Apache-2.0
+
+### 1.3 Machine-Readable Schema
+
+A JSON Schema (draft 2020-12) is provided at:
+- [`schemas/commit_receipt.v1.schema.json`](schemas/commit_receipt.v1.schema.json)
+
+---
+
+## 2. Receipt Structure
+
+A receipt is a JSON object with the following top-level fields:
+
+| Field | Type | In CORE | Description |
+|-------|------|---------|-------------|
+| `type` | string (const) | ✅ | `"aiir.commit_receipt"` |
+| `schema` | string (const) | ✅ | `"aiir/commit_receipt.v1"` |
+| `version` | string | ✅ | SemVer version of the generating tool |
+| `commit` | object | ✅ | Git commit metadata (§3) |
+| `ai_attestation` | object | ✅ | AI authorship detection results (§4) |
+| `provenance` | object | ✅ | Tool and repository metadata (§5) |
+| `receipt_id` | string | ❌ | Content-addressed identifier (§7) |
+| `content_hash` | string | ❌ | SHA-256 of canonical core (§7) |
+| `timestamp` | string | ❌ | RFC 3339 UTC generation time |
+| `extensions` | object | ❌ | Extension point (§8) |
+
+### 2.1 CORE_KEYS
+
+The **core** of a receipt is the subset of fields that contribute to the
+content hash. The core keys are exactly:
+
+```
+CORE_KEYS = {"type", "schema", "version", "commit", "ai_attestation", "provenance"}
+```
+
+These six keys — and ONLY these six — form the hash input. All other fields
+(`receipt_id`, `content_hash`, `timestamp`, `extensions`) are **derived** or
+**non-content** and MUST NOT affect the hash.
+
+> **Forward-compatibility**: New top-level fields added in future schema
+> versions MUST NOT be included in CORE_KEYS unless the schema identifier
+> changes (e.g., `aiir/commit_receipt.v2`). The CORE_KEYS set is an explicit
+> allowlist, not a denylist.
+
+---
+
+## 3. Commit Object
+
+The `commit` field is a JSON object with the following structure:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `sha` | string | ✅ | Full hex SHA of the git commit (40 or 64 chars) |
+| `author` | GitIdentity | ✅ | Author identity |
+| `committer` | GitIdentity | ✅ | Committer identity |
+| `subject` | string | ✅ | First line of commit message |
+| `message_hash` | string | ✅ | `"sha256:" + SHA-256(message_body)` |
+| `diff_hash` | string | ✅ | `"sha256:" + SHA-256(full_diff)` |
+| `files_changed` | integer | ✅ | Number of files changed |
+| `files` | string[] | Conditional | File paths (max 100). Present when not redacted. |
+| `files_redacted` | `true` | Conditional | Present when `--redact-files` active. Mutually exclusive with `files`. |
+| `files_capped` | `true` | Optional | Present when file list was truncated at 100. |
+
+### 3.1 GitIdentity
+
+```json
+{
+  "name": "string",
+  "email": "string",
+  "date": "string (RFC 3339 or git default format)"
+}
+```
+
+All three fields are REQUIRED. No additional properties are permitted.
+
+### 3.2 Hash Computation
+
+- **message_hash**: `"sha256:" + hex(SHA-256(body.encode("utf-8")))` where
+  `body` is the full commit message body (everything after the subject line,
+  including trailers).
+
+- **diff_hash**: `"sha256:" + hex(SHA-256(diff_bytes))` where `diff_bytes` is
+  the raw output of `git diff <parent> <sha>` with flags:
+  - `--no-ext-diff` (prevent custom diff drivers)
+  - `--no-textconv` (prevent text conversion filters)
+  - `--no-optional-locks` (prevent lock contention)
+
+  For root commits (no parent), the diff is computed against the empty tree.
+
+---
+
+## 4. AI Attestation Object
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `is_ai_authored` | boolean | ✅ | True if any AI signal detected |
+| `signals_detected` | string[] | ✅ | List of detected AI signals |
+| `signal_count` | integer | ✅ | `len(signals_detected)` |
+| `is_bot_authored` | boolean | Optional | True if bot pattern matched |
+| `bot_signals_detected` | string[] | Optional | Bot signal list |
+| `bot_signal_count` | integer | Optional | `len(bot_signals_detected)` |
+| `authorship_class` | string | Optional | One of: `"human"`, `"ai_assisted"`, `"ai_generated"`, `"bot"` |
+| `detection_method` | string | ✅ | Algorithm identifier (e.g., `"heuristic_v2"`) |
+
+### 4.1 Detection Method
+
+The `detection_method` field identifies the algorithm used. The reference
+implementation uses `"heuristic_v2"`, which performs:
+
+1. NFKC normalization of all text fields
+2. Confusable character resolution (Cyrillic/Greek → Latin)
+3. Unicode category Cf (format) and Mn/Me (mark) stripping
+4. Case-insensitive pattern matching against known AI tool signatures
+5. Bot author/committer pattern matching
+
+Third-party implementations MAY use different detection methods and SHOULD
+identify them with a distinct `detection_method` value.
+
+### 4.2 Authorship Classification
+
+| Class | Criteria |
+|-------|----------|
+| `human` | No AI or bot signals detected |
+| `ai_assisted` | AI signals detected, human author |
+| `ai_generated` | AI signals detected, bot author |
+| `bot` | Bot signals detected, no AI signals |
+
+---
+
+## 5. Provenance Object
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `repository` | string \| null | ✅ | Git remote URL (credentials stripped). Null if no remote. |
+| `tool` | string | ✅ | URI identifier: `"https://github.com/invariant-systems-ai/aiir@{version}"` |
+| `generator` | string | ✅ | Generator ID: `"aiir.cli"`, `"aiir.action"`, `"aiir.mcp"`, or custom |
+
+### 5.1 Credential Stripping
+
+The `repository` field MUST have all credentials removed:
+- Userinfo component of the URL (e.g., `https://token@github.com/...` → `https://github.com/...`)
+- Query parameters (may contain tokens)
+- URL fragments
+
+Implementations MUST strip credentials before including the URL in the receipt.
+
+---
+
+## 6. Canonical JSON Encoding
+
+The canonical JSON encoding is the **sole deterministic serialization** used
+for content addressing. All implementations MUST produce byte-identical output
+for the same input object.
+
+### 6.1 Algorithm
+
+```
+canonical_json(obj) → UTF-8 string
+```
+
+1. Serialize `obj` to JSON with:
+   - **Sorted keys**: All object keys are sorted lexicographically (by Unicode code point)
+   - **No whitespace**: No spaces after `:` or `,` separators
+   - **ASCII-safe**: All non-ASCII characters are escaped as `\uXXXX`
+   - **No NaN/Infinity**: `NaN` and `Infinity` are rejected (not valid JSON per RFC 8259)
+2. The separators MUST be exactly `(",", ":")`
+3. Key sorting MUST be recursive (all nested objects are also sorted)
+
+### 6.2 Reference
+
+In Python's `json` module:
+
+```python
+json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False)
+```
+
+### 6.3 Depth Limit
+
+Implementations MUST reject JSON structures exceeding 64 levels of nesting
+to prevent stack overflow attacks. The depth check SHOULD be iterative
+(stack-based), not recursive.
+
+### 6.4 Examples
+
+Input:
+```json
+{"b": 1, "a": {"d": 2, "c": 3}}
+```
+
+Canonical output:
+```
+{"a":{"c":3,"d":2},"b":1}
+```
+
+---
+
+## 7. Content Addressing
+
+### 7.1 Content Hash
+
+```
+content_hash = "sha256:" + hex(SHA-256(canonical_json(core)))
+```
+
+Where `core` is the receipt object filtered to only CORE_KEYS:
+
+```python
+core = {k: v for k, v in receipt.items() if k in CORE_KEYS}
+```
+
+The SHA-256 is computed over the UTF-8 encoding of the canonical JSON string.
+
+### 7.2 Receipt ID
+
+```
+receipt_id = "g1-" + hex(SHA-256(canonical_json(core)))[:32]
+```
+
+The `g1-` prefix denotes **generation 1** of the ID scheme. Future ID
+schemes (e.g., using different hash functions or encoding) would use
+`g2-`, `g3-`, etc.
+
+The receipt ID is a **truncated** hash (128 bits / 16 bytes). It is
+sufficient for uniqueness within practical receipt sets but MUST NOT be
+used alone for tamper detection — use `content_hash` for integrity
+verification.
+
+### 7.3 Determinism
+
+Given identical CORE_KEYS values, any conforming implementation MUST produce
+the same `content_hash` and `receipt_id`. This is the fundamental
+interoperability guarantee.
+
+---
+
+## 8. Extensions
+
+The `extensions` field is a JSON object that MAY contain arbitrary keys.
+It is NOT part of CORE_KEYS and does NOT affect `content_hash` or
+`receipt_id`.
+
+Known extension keys:
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `instance_id` | string | User-supplied instance identifier |
+| `namespace` | string | Organizational grouping label |
+
+Implementations SHOULD preserve unknown extension keys when round-tripping
+receipts.
+
+---
+
+## 9. Verification Algorithm
+
+To verify a receipt, an implementation MUST:
+
+1. **Schema validation**: Verify the receipt is a JSON object containing all
+   required fields with correct types (see JSON Schema).
+
+2. **Type check**: Verify `type == "aiir.commit_receipt"`.
+
+3. **Schema version check**: Verify `schema` starts with `"aiir/"`.
+
+4. **Version format check**: Verify `version` matches `^[0-9a-zA-Z.+-]+$`.
+
+5. **Core extraction**: Extract `core = {k: v for k, v in receipt.items() if k in CORE_KEYS}`.
+
+6. **Canonical encoding**: Compute `core_json = canonical_json(core)`.
+
+7. **Hash computation**: Compute:
+   - `expected_hash = "sha256:" + hex(SHA-256(core_json.encode("utf-8")))`
+   - `expected_id = "g1-" + hex(SHA-256(core_json.encode("utf-8")))[:32]`
+
+8. **Constant-time comparison**: Compare `expected_hash` against
+   `receipt["content_hash"]` and `expected_id` against
+   `receipt["receipt_id"]` using constant-time comparison
+   (e.g., `hmac.compare_digest`).
+
+9. **Result**: The receipt is valid if and only if BOTH comparisons succeed.
+
+### 9.1 Error Reporting
+
+On failure, implementations SHOULD report which check failed:
+- `"content hash mismatch"` — core fields were modified after generation
+- `"receipt_id mismatch"` — receipt ID was modified
+- `"unknown receipt type"` — not an AIIR receipt
+- `"unknown schema"` — unrecognized schema version
+- `"invalid version format"` — version string contains prohibited characters
+
+### 9.2 Security Considerations
+
+- **No expected hash on failure**: On verification failure, implementations
+  MUST NOT expose the expected hash values. Doing so would be a **forgery
+  oracle** — an attacker could extract the correct hash and splice it in.
+
+- **Constant-time comparison**: String comparison MUST use constant-time
+  algorithms to prevent timing side-channel attacks.
+
+- **Depth limit**: The canonical JSON encoder MUST enforce a depth limit
+  (64 levels) to prevent stack overflow from crafted receipts.
+
+---
+
+## 10. File Verification
+
+When verifying a receipt from a file, implementations MUST:
+
+1. Reject symlinks (prevent filesystem probing)
+2. Reject files larger than 50 MB (prevent memory exhaustion)
+3. Parse as UTF-8 JSON
+4. Handle both single receipt (JSON object) and batch (JSON array)
+5. Cap array length at 1000 entries (prevent quadratic DoS)
+
+---
+
+## 11. Sigstore Signing (Optional)
+
+Receipts MAY be cryptographically signed using [Sigstore](https://sigstore.dev)
+keyless signing. Signing adds:
+
+- Non-repudiation (proves who generated the receipt)
+- Tamper-proof integrity (beyond self-attested content addressing)
+- Transparency log entry (public audit trail via Rekor)
+
+Without signing, receipts are **tamper-evident** (modification is detectable)
+but not **tamper-proof** (a new valid receipt can be fabricated by anyone who
+can run the tool on the same commit).
+
+Signing is RECOMMENDED for compliance-critical workflows.
+
+---
+
+## 12. Security Surfaces
+
+The AIIR tool operates across multiple security surfaces with different
+threat models:
+
+| Surface | Read restriction | Write restriction | Rationale |
+|---------|-----------------|-------------------|-----------|
+| CLI `--verify` | None (user-explicit path) | N/A (read-only) | User typed the path. No oracle risk. |
+| CLI `--output` | N/A | CWD boundary enforced | Prevent writes outside project. |
+| MCP `aiir_verify` | CWD boundary enforced | N/A (read-only) | AI assistant could be tricked into using verify as a filesystem oracle (F4-02). |
+| MCP `aiir_generate` | N/A | CWD boundary enforced | Prevent AI-directed writes outside project. |
+| GitHub Action | Runner workspace | Runner workspace | Sandboxed by Actions runtime. |
+
+See [THREAT_MODEL.md](THREAT_MODEL.md) for the full STRIDE analysis (142 controls).
+
+---
+
+## 13. Test Vectors
+
+Machine-readable test vectors are provided at:
+- [`schemas/test_vectors.json`](schemas/test_vectors.json)
+
+Each test vector includes:
+- A complete receipt JSON
+- Expected verification result (`valid: true/false`)
+- Expected error messages (if invalid)
+- A human-readable description
+
+Conforming implementations MUST pass all test vectors.
+
+---
+
+## 14. IANA Considerations
+
+This specification does not currently register any IANA media types or URIs.
+Future versions may register:
+- Media type: `application/vnd.aiir.commit-receipt+json`
+- Schema URI: `https://invariantsystems.io/schemas/aiir/commit_receipt.v1.schema.json`
+
+---
+
+## 15. Changelog
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0.0 | 2026-03-09 | Initial specification extracted from reference implementation |

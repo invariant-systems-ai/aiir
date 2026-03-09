@@ -725,9 +725,22 @@ on every push to `main` and commits them back to the repo. Locally, the
 
 ## Security
 
-Extensive [security controls](THREAT_MODEL.md). 660+ tests. Zero dependencies.
+Extensive [security controls](THREAT_MODEL.md). 710+ tests. Zero dependencies.
 
 See [SECURITY.md](SECURITY.md) and [THREAT_MODEL.md](THREAT_MODEL.md).
+
+---
+
+## Specification & Schemas
+
+AIIR publishes a formal specification and machine-readable schema for third-party implementors:
+
+| Document | Purpose |
+|----------|---------|
+| [SPEC.md](SPEC.md) | Normative specification — canonical JSON, content addressing, verification algorithm (RFC 2119) |
+| [schemas/commit_receipt.v1.schema.json](schemas/commit_receipt.v1.schema.json) | JSON Schema (draft 2020-12) for `aiir/commit_receipt.v1` |
+| [schemas/test_vectors.json](schemas/test_vectors.json) | 15 conformance test vectors with precomputed hashes |
+| [THREAT_MODEL.md](THREAT_MODEL.md) | STRIDE/DREAD threat model, 142 security controls |
 
 ---
 

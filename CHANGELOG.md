@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.12] — 2026-03-08
+
+### Added
+
+- **Formal JSON Schema** (`schemas/commit_receipt.v1.schema.json`): Machine-readable JSON Schema (draft 2020-12) describing the `aiir/commit_receipt.v1` structure — all fields, types, regex patterns, `$defs` for Commit, GitIdentity, AIAttestation, Provenance. `oneOf` constraint for `files` vs `files_redacted` mutual exclusivity. Published `$id`: `https://invariantsystems.io/schemas/aiir/commit_receipt.v1.schema.json`.
+- **Normative specification** (`SPEC.md`): 15-section specification using RFC 2119 language covering receipt structure, canonical JSON encoding algorithm, content addressing, verification algorithm, file verification, Sigstore signing integration, security surfaces, and IANA considerations. Intended for third-party implementors.
+- **Conformance test vectors** (`schemas/test_vectors.json`): 15 test vectors with computed hashes — 5 valid (human, AI-assisted, redacted files, null repo, extensions) and 10 invalid (tampered subject, wrong type, wrong schema, wrong content_hash, wrong receipt_id, missing content_hash, version injection, bot commit, not-a-dict, non-string schema). All verified against reference implementation.
+- **Schema validation module** (`aiir/_schema.py`): Zero-dependency structural validator checking all required fields, types, const values, regex patterns, signal count consistency, files/files_redacted mutual exclusivity, authorship_class enum, and Python `bool`/`int` subclass distinction. Returns list of human-readable error strings.
+- **`schema_errors` in verification result**: `verify_receipt()` now runs structural schema validation after hash verification and includes a `schema_errors` list in the result when violations are found. Supplementary — does not override hash-based verdict for backward compatibility.
+
 ## [1.0.11] — 2026-03-08
 
 ### Added

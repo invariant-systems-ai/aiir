@@ -19,6 +19,7 @@ from aiir._core import (
     _canonical_json,
     _sha256,
 )
+from aiir._schema import validate_receipt_schema
 
 
 def verify_receipt(receipt: Dict[str, Any]) -> Dict[str, Any]:
@@ -94,6 +95,12 @@ def verify_receipt(receipt: Dict[str, Any]) -> Dict[str, Any]:
         result["errors"].append("content hash mismatch")
     if not id_ok:
         result["errors"].append("receipt_id mismatch")
+    # Schema validation — structural check independent of hash integrity.
+    # Reported as supplementary info; does NOT override hash verdict.
+    schema_errors = validate_receipt_schema(receipt)
+    if schema_errors:
+        result["schema_errors"] = schema_errors
+
     # Only expose expected hashes on valid receipts — on failure they
     # would be a forgery oracle.
     if valid:

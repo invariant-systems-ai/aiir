@@ -22,7 +22,6 @@ Zero dependencies — standard library only.
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import sys
 from pathlib import Path
@@ -37,6 +36,7 @@ INIT_PY = REPO_ROOT / "aiir" / "__init__.py"
 # The regex MUST have a single named group `(?P<ver>...)` that captures
 # the old version string.  The replacement_template uses {version} for
 # the new version.
+
 
 class Rule(NamedTuple):
     path: str
@@ -163,6 +163,7 @@ WEBSITE_RULES: list[Rule] = [
 
 # ── Helpers ──────────────────────────────────────────────────────────
 
+
 def get_version() -> str:
     """Read __version__ from aiir/__init__.py."""
     text = INIT_PY.read_text(encoding="utf-8")
@@ -224,6 +225,7 @@ def apply_rules(
 
 # ── Main ─────────────────────────────────────────────────────────────
 
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Synchronise version strings across the AIIR repo.",
@@ -278,9 +280,7 @@ def main() -> int:
             print(f"\n✅ All version references updated to {version}")
             return 0
         else:
-            print(
-                f"\nRun `python scripts/sync-version.py --fix` to auto-correct."
-            )
+            print("\nRun `python scripts/sync-version.py --fix` to auto-correct.")
             return 1
     else:
         print(f"✅ All version references are at {version}")

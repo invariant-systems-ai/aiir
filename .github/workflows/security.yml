@@ -177,7 +177,7 @@ jobs:
         run: |
           # Allow-list: only OSI-approved permissive licenses
           pip-licenses --format=json --output-file=licenses.json
-          pip-licenses --allow-only="Apache Software License;MIT License;MIT;BSD License;ISC License (ISCL);Python Software Foundation License;Mozilla Public License 2.0 (MPL 2.0)"
+          pip-licenses --allow-only="Apache Software License;MIT License;MIT;BSD License;BSD-3-Clause;ISC License (ISCL);Python Software Foundation License;Mozilla Public License 2.0 (MPL 2.0)"
           echo "✅ All dependency licenses are policy-compliant"
 
   # ── Summary gate ───────────────────────────────────────────────────

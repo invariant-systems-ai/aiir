@@ -4,4 +4,4 @@
 #
 # Fingerprint format: <commit>:<file>:<rule>:<line>
 0f45a0c7e2dc4ba0f30738ecda30f58abe9f9ffc:tests/test_redteam.py:generic-api-key:216
-0f45a0c7e2dc4ba0f30738ecda30f58abe9f9ffc:test_cli.py:generic-api-key:216
+b4553eda2d644c887b30e79bf638bc225e5d4560:test_cli.py:generic-api-key:840

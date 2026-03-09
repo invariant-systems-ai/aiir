@@ -187,13 +187,14 @@ jobs:
         run: pip install build && python -m build
       - name: Generate SBOM (CycloneDX)
         run: |
-          pip install cyclonedx-bom
+          pip install 'cyclonedx-bom>=7,<8'
           # Generate SBOM from the built wheel — covers the package + all
           # declared dependencies (which is zero for aiir, but proves it).
+          # NOTE: --schema-version was removed in cyclonedx-bom v7; the tool
+          # now emits the latest CycloneDX schema version automatically.
           cyclonedx-py environment \
             --output-format json \
-            --output-file dist/aiir-sbom.cdx.json \
-            --schema-version 1.5
+            --output-file dist/aiir-sbom.cdx.json
           echo "✅ SBOM generated: $(wc -c < dist/aiir-sbom.cdx.json) bytes"
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:

@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.13] — 2026-03-08
+
+### Added
+
+- **Explainable verification** (`--explain`): Human-readable verification output for non-crypto users. Categorizes failures (hash mismatch, unknown type/schema, invalid version, malformed input) with plain-English problem descriptions, common causes, and remediation steps. Schema warnings displayed independently of hash verdict.
+- **Org policy engine** (`--policy PRESET`, `--policy-init PRESET`): Three enforcement presets — `strict` (hard-fail, signing required, max 50% AI commits), `balanced` (soft-fail, signing recommended), `permissive` (warn-only). Policies stored in `.aiir/policy.json`. Per-receipt checks: signing status, provenance repo, authorship class, schema validity. Aggregate ledger check: AI commit percentage cap. Integrates with `--check` for CI enforcement.
+- **Agent attestation envelope** (`--agent-tool`, `--agent-model`, `--agent-context`): Structured metadata for AI-agent-generated commits stored in `extensions.agent_attestation`. Six allowlisted keys (`tool_id`, `model_class`, `session_id`, `run_context`, `tool_version`, `confidence`) with sanitization — string coercion, 200-char cap, no core hash impact.
+- **Architecture document** (`ARCHITECTURE.md`): Target architecture overview with module responsibilities, 3-phase evolution roadmap (Assurance Baseline → Provenance Depth → AI-First Experience), schema evolution policy, and backward compatibility guarantees.
+
+### Changed
+
+- **CONTRIBUTING.md**: Fixed stale test commands (`test_cli.py fuzz_cli.py` → `tests/ -q`), added hypothesis dependency note explaining graceful degradation, updated test count from 500+ to 710+.
+- **README.md**: Updated test count to 710+. Specification & Schemas table no longer hardcodes security control count.
+
 ## [1.0.12] — 2026-03-08
 
 ### Added

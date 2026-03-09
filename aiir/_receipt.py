@@ -35,11 +35,48 @@ from aiir._detect import (
 )
 
 
+# ---------------------------------------------------------------------------
+# Agent attestation helpers
+# ---------------------------------------------------------------------------
+
+# Allowed keys in agent_attestation — prevents arbitrary data injection.
+_AGENT_ATTESTATION_KEYS = frozenset({
+    "tool_id",          # e.g. "copilot", "cursor", "claude-code"
+    "model_class",      # e.g. "gpt-4o", "claude-sonnet-4-20250514", "gemini-2.5-pro"
+    "session_id",       # opaque session identifier
+    "run_context",      # e.g. "ide", "cli", "ci", "mcp"
+    "tool_version",     # e.g. "1.2.3"
+    "confidence",       # e.g. "declared", "inferred", "verified"
+})
+
+
+def _sanitize_agent_attestation(
+    attestation: Optional[Dict[str, Any]],
+) -> Dict[str, str]:
+    """Sanitize and validate agent attestation fields.
+
+    Only allows known keys with string values, capped at safe lengths.
+    Returns a clean dict.
+    """
+    if not isinstance(attestation, dict):
+        return {}
+    clean: Dict[str, str] = {}
+    for key in _AGENT_ATTESTATION_KEYS:
+        val = attestation.get(key)
+        if val is not None:
+            # Coerce to string, strip terminal escapes, cap length
+            s = _strip_terminal_escapes(str(val))[:200]
+            if s:
+                clean[key] = s
+    return clean
+
+
 def build_commit_receipt(
     commit: CommitInfo, repo_root: Optional[str] = None,
     redact_files: bool = False,
     instance_id: Optional[str] = None,
     namespace: Optional[str] = None,
+    agent_attestation: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Build a cryptographic receipt for a git commit.
 
@@ -124,6 +161,7 @@ def build_commit_receipt(
         "extensions": {
             **(({"instance_id": instance_id}) if instance_id else {}),
             **(({"namespace": namespace}) if namespace else {}),
+            **(({"agent_attestation": _sanitize_agent_attestation(agent_attestation)}) if agent_attestation else {}),
         },
     }
 
@@ -137,6 +175,7 @@ def generate_receipt(
     redact_files: bool = False,
     instance_id: Optional[str] = None,
     namespace: Optional[str] = None,
+    agent_attestation: Optional[Dict[str, Any]] = None,
 ) -> Optional[Dict[str, Any]]:
     """Generate a receipt for a single commit. Returns None if skipped."""
     _validate_ref(commit_ref)
@@ -148,6 +187,7 @@ def generate_receipt(
     return build_commit_receipt(
         commit, repo_root=cwd, redact_files=redact_files,
         instance_id=instance_id, namespace=namespace,
+        agent_attestation=agent_attestation,
     )
 
 
@@ -158,6 +198,7 @@ def generate_receipts_for_range(
     redact_files: bool = False,
     instance_id: Optional[str] = None,
     namespace: Optional[str] = None,
+    agent_attestation: Optional[Dict[str, Any]] = None,
 ) -> List[Dict[str, Any]]:
     """Generate receipts for all commits in a range."""
     shas = list_commits_in_range(range_spec, cwd=cwd)
@@ -166,6 +207,7 @@ def generate_receipts_for_range(
         receipt = generate_receipt(
             sha, cwd=cwd, ai_only=ai_only, redact_files=redact_files,
             instance_id=instance_id, namespace=namespace,
+            agent_attestation=agent_attestation,
         )
         if receipt is not None:
             receipts.append(receipt)

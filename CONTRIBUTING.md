@@ -8,9 +8,14 @@ Thank you for your interest in AIIR! We welcome contributions from the community
 git clone https://github.com/invariant-systems-ai/aiir.git
 cd aiir
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-python -m pytest test_cli.py fuzz_cli.py -v
+pip install -e ".[dev]"    # installs pytest + hypothesis
+python -m pytest tests/ -q  # 710+ tests, ~2 min
 ```
+
+> **Note**: `pip install -e ".[dev]"` installs `hypothesis` (property-based fuzz
+> testing) and `pytest`. If you install only `pytest`, fuzz tests in
+> `tests/test_fuzz.py` will be skipped gracefully — all other tests pass
+> without `hypothesis`. CI always installs both.
 
 ## Ways to contribute
 
@@ -23,7 +28,7 @@ python -m pytest test_cli.py fuzz_cli.py -v
 
 1. Fork the repo and create a feature branch from `main`
 2. Write tests for any new functionality
-3. Run the full test suite: `python -m pytest test_cli.py fuzz_cli.py -v`
+3. Run the full test suite: `python -m pytest tests/ -q`
 4. Ensure zero lint errors and all tests pass
 5. **Sign off every commit** (see DCO below)
 6. Open a PR with a clear description of the change
@@ -54,7 +59,7 @@ Use clear, descriptive commit messages. Examples:
 ## Code standards
 
 - **Zero runtime dependencies.** This is a hard rule. AIIR ships with nothing but the Python standard library.
-- **Test everything.** We maintain 500+ tests across unit and fuzz suites.
+- **Test everything.** We maintain 710+ tests across unit, integration, security, and fuzz suites.
 - **Security-first.** All inputs are validated. All outputs are deterministic. See the [Threat Model](THREAT_MODEL.md).
 
 ## Development setup

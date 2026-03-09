@@ -105,6 +105,16 @@ from aiir._stats import (  # noqa: F401
     check_policy,
 )
 
+from aiir._policy import (  # noqa: F401
+    POLICY_PRESETS,
+    load_policy,
+    save_policy,
+    init_policy,
+    evaluate_receipt_policy,
+    evaluate_ledger_policy,
+    format_policy_report,
+)
+
 from aiir._github import (  # noqa: F401
     set_github_output,
     set_github_summary,
@@ -114,6 +124,10 @@ from aiir._github import (  # noqa: F401
 from aiir._verify import (  # noqa: F401
     verify_receipt,
     verify_receipt_file,
+)
+
+from aiir._explain import (  # noqa: F401
+    explain_verification,
 )
 
 from aiir._sign import (  # noqa: F401
@@ -303,6 +317,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="Verify a receipt JSON file's content-addressed integrity",
     )
     parser.add_argument(
+        "--explain",
+        action="store_true",
+        help="Show human-readable explanation of verification result (use with --verify)",
+    )
+    parser.add_argument(
         "--sign",
         action="store_true",
         help="Sign receipts using Sigstore keyless signing (requires pip install sigstore)",
@@ -340,6 +359,33 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ),
     )
     parser.add_argument(
+        "--agent-tool",
+        default=None,
+        metavar="TOOL",
+        help=(
+            "Declare the AI tool identity (e.g., 'copilot', 'cursor', 'claude-code'). "
+            "Stored in extensions.agent_attestation — not part of the content hash."
+        ),
+    )
+    parser.add_argument(
+        "--agent-model",
+        default=None,
+        metavar="MODEL",
+        help=(
+            "Declare the AI model class (e.g., 'gpt-4o', 'claude-sonnet-4-20250514'). "
+            "Stored in extensions.agent_attestation."
+        ),
+    )
+    parser.add_argument(
+        "--agent-context",
+        default=None,
+        metavar="CTX",
+        help=(
+            "Declare the run context (e.g., 'ide', 'cli', 'ci', 'mcp'). "
+            "Stored in extensions.agent_attestation."
+        ),
+    )
+    parser.add_argument(
         "--export",
         nargs="?",
         const="aiir-export.json",
@@ -372,6 +418,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         metavar="N",
         help="Policy gate: fail if AI-authored percentage exceeds N (use with --check)",
     )
+    parser.add_argument(
+        "--policy",
+        default=None,
+        metavar="PRESET",
+        help=(
+            "Apply a policy preset or load .aiir/policy.json. "
+            "Presets: strict, balanced, permissive. "
+            "Use with --check for aggregate policy evaluation."
+        ),
+    )
+    parser.add_argument(
+        "--policy-init",
+        default=None,
+        metavar="PRESET",
+        help=(
+            "Initialize .aiir/policy.json from a preset (strict, balanced, permissive). "
+            "Creates the file and exits."
+        ),
+    )
 
     args = parser.parse_args(argv)
 
@@ -382,6 +447,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         format="%(name)s %(levelname)s: %(message)s",
         stream=sys.stderr,
     )
+
+    # --- Policy init mode (no git repo needed) ---
+    if args.policy_init:
+        try:
+            policy, policy_path = init_policy(
+                preset=args.policy_init,
+                ledger_dir=args.ledger if args.ledger else _LEDGER_DIR,
+            )
+            print(
+                f"{_e('ok')} Policy initialized: {policy_path}"
+                f" (preset: {args.policy_init})",
+                file=sys.stderr,
+            )
+            print(
+                f"   {_e('hint')} Enforcement: {policy.get('enforcement', 'warn')}"
+                f" | Signing: {'required' if policy.get('require_signing') else 'optional'}"
+                f" | Max AI: {policy.get('max_ai_percent', 100)}%",
+                file=sys.stderr,
+            )
+            return 0
+        except ValueError as e:
+            print(f"{_e('error')} {e}", file=sys.stderr)
+            return 1
 
     # --- Verify mode (no git repo needed) ---
     if args.verify:
@@ -426,9 +514,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         f"{_e('error')} Signature FAILED: {sig_err}",
                         file=sys.stderr,
                     )
+                    if getattr(args, 'explain', False):
+                        print("", file=sys.stderr)
+                        print(explain_verification(result), file=sys.stderr)
                     print(json.dumps(result, indent=2))
                     return 1
 
+            if getattr(args, 'explain', False):
+                print("", file=sys.stderr)
+                print(explain_verification(result), file=sys.stderr)
             print(json.dumps(result, indent=2))
             return 0
         else:
@@ -482,6 +576,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     " or it wasn't generated by aiir.",
                     file=sys.stderr,
                 )
+            if getattr(args, 'explain', False):
+                print("", file=sys.stderr)
+                print(explain_verification(result), file=sys.stderr)
             print(json.dumps(result, indent=2))
             return 1
 
@@ -562,11 +659,42 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 0
 
     # --- Check / policy gate mode (no git repo needed) ---
-    if args.check or args.max_ai_percent is not None:
+    if args.check or args.max_ai_percent is not None or args.policy:
         try:
             idx = _load_index(_ledger_paths(args.ledger)[2])
         except OSError:  # pragma: no cover — filesystem error
             idx = {}
+
+        # If --policy is set, use the policy engine
+        if args.policy:
+            try:
+                policy = load_policy(
+                    ledger_dir=args.ledger if args.ledger else _LEDGER_DIR,
+                    preset=args.policy if args.policy in POLICY_PRESETS else None,
+                )
+            except ValueError as e:
+                print(f"{_e('error')} {e}", file=sys.stderr)
+                return 1
+
+            # Override max_ai_percent from CLI if given
+            if args.max_ai_percent is not None:
+                policy["max_ai_percent"] = args.max_ai_percent
+
+            passed, message, violations = evaluate_ledger_policy(idx, policy)
+            if violations:
+                report = format_policy_report(
+                    violations,
+                    enforcement=policy.get("enforcement", "warn"),
+                )
+                print(report, file=sys.stderr)
+            if passed:
+                print(f"{_e('ok')} {message}", file=sys.stderr)
+                return 0
+            else:
+                print(f"{_e('error')} {message}", file=sys.stderr)
+                return 1
+
+        # Legacy --check / --max-ai-percent path (no policy file)
         passed, message = check_policy(
             idx, max_ai_percent=args.max_ai_percent,
         )
@@ -636,12 +764,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             except OSError:  # pragma: no cover — filesystem error
                 pass
 
+    # Build agent attestation from CLI flags (if any).
+    agent_attestation = None
+    if getattr(args, "agent_tool", None) or getattr(args, "agent_model", None) or getattr(args, "agent_context", None):
+        agent_attestation = {}
+        if args.agent_tool:
+            agent_attestation["tool_id"] = args.agent_tool
+        if args.agent_model:
+            agent_attestation["model_class"] = args.agent_model
+        if args.agent_context:
+            agent_attestation["run_context"] = args.agent_context
+        agent_attestation["confidence"] = "declared"
+
     try:
         if args.range_spec:
             receipts = generate_receipts_for_range(
                 args.range_spec, cwd=cwd, ai_only=args.ai_only,
                 redact_files=args.redact_files,
                 instance_id=instance_id, namespace=namespace,
+                agent_attestation=agent_attestation,
             )
         else:
             commit_ref = args.commit or "HEAD"
@@ -649,6 +790,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 commit_ref, cwd=cwd, ai_only=args.ai_only,
                 redact_files=args.redact_files,
                 instance_id=instance_id, namespace=namespace,
+                agent_attestation=agent_attestation,
             )
             if receipt:
                 receipts = [receipt]

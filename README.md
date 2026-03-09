@@ -740,7 +740,7 @@ AIIR publishes a formal specification and machine-readable schema for third-part
 | [SPEC.md](SPEC.md) | Normative specification — canonical JSON, content addressing, verification algorithm (RFC 2119) |
 | [schemas/commit_receipt.v1.schema.json](schemas/commit_receipt.v1.schema.json) | JSON Schema (draft 2020-12) for `aiir/commit_receipt.v1` |
 | [schemas/test_vectors.json](schemas/test_vectors.json) | 15 conformance test vectors with precomputed hashes |
-| [THREAT_MODEL.md](THREAT_MODEL.md) | STRIDE/DREAD threat model, 142 security controls |
+| [THREAT_MODEL.md](THREAT_MODEL.md) | STRIDE/DREAD threat model with comprehensive security controls |
 
 ---
 

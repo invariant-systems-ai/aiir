@@ -21,19 +21,21 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
-import os
 import sys
 from pathlib import Path
 from typing import Any
 
 # ── Constants ──────────────────────────────────────────────────────────
 
-CORE_KEYS = frozenset({"type", "schema", "version", "commit", "ai_attestation", "provenance"})
+CORE_KEYS = frozenset(
+    {"type", "schema", "version", "commit", "ai_attestation", "provenance"}
+)
 MAX_DEPTH = 64
 VERSION_RE = r"^[0-9]+\.[0-9]+\.[0-9]+([.+\-][0-9a-zA-Z.+\-]*)?$"
 
 
 # ── Canonical JSON (SPEC.md §6) ───────────────────────────────────────
+
 
 def canonical_json(obj: Any, _depth: int = 0) -> str:
     """Produce canonical JSON per SPEC.md §6.
@@ -66,13 +68,16 @@ def canonical_json(obj: Any, _depth: int = 0) -> str:
         pairs = []
         for k in sorted(obj.keys()):
             pairs.append(
-                json.dumps(k, ensure_ascii=True) + ":" + canonical_json(obj[k], _depth + 1)
+                json.dumps(k, ensure_ascii=True)
+                + ":"
+                + canonical_json(obj[k], _depth + 1)
             )
         return "{" + ",".join(pairs) + "}"
     raise TypeError(f"Cannot encode type {type(obj).__name__} to canonical JSON")
 
 
 # ── Verification (SPEC.md §9) ─────────────────────────────────────────
+
 
 def verify(receipt: Any) -> tuple[bool, list[str]]:
     """Verify an AIIR commit receipt. Returns (valid, errors)."""
@@ -123,6 +128,7 @@ def verify(receipt: Any) -> tuple[bool, list[str]]:
 
 # ── Test runner ────────────────────────────────────────────────────────
 
+
 def run_vectors(path: Path) -> tuple[int, int, list[str]]:
     """Run all test vectors from a JSON file. Returns (passed, total, failures)."""
     data = json.loads(path.read_text("utf-8"))
@@ -145,11 +151,14 @@ def run_vectors(path: Path) -> tuple[int, int, list[str]]:
                 f"  {vid}: expected valid={expected_valid}, got valid={valid} "
                 f"(errors={errors})"
             )
-        elif not expected_valid and expected_errors and not expected_errors.issubset(actual_errors):
+        elif (
+            not expected_valid
+            and expected_errors
+            and not expected_errors.issubset(actual_errors)
+        ):
             missing = expected_errors - actual_errors
             failures.append(
-                f"  {vid}: missing expected errors: {missing} "
-                f"(got: {actual_errors})"
+                f"  {vid}: missing expected errors: {missing} (got: {actual_errors})"
             )
         else:
             passed += 1
@@ -175,10 +184,13 @@ def main() -> int:
                 break
         if vectors_path is None:
             print("ERROR: Cannot find test_vectors.json", file=sys.stderr)
-            print("Usage: python conformance.py [path/to/test_vectors.json]", file=sys.stderr)
+            print(
+                "Usage: python conformance.py [path/to/test_vectors.json]",
+                file=sys.stderr,
+            )
             return 1
 
-    print(f"AIIR Conformance Test Runner")
+    print("AIIR Conformance Test Runner")
     print(f"Vectors: {vectors_path}")
     print(f"{'─' * 60}")
 

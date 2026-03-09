@@ -25,7 +25,6 @@ def explain_verification(result: Dict[str, Any]) -> str:
     valid = result.get("valid", False)
     errors = result.get("errors", [])
     schema_errors = result.get("schema_errors", [])
-    receipt_id = result.get("receipt_id", "unknown")
 
     if valid:
         lines.append("VERIFICATION PASSED")
@@ -39,9 +38,7 @@ def explain_verification(result: Dict[str, Any]) -> str:
             "  2. Compared the recomputed content_hash against the stored value"
             " — they match."
         )
-        lines.append(
-            "  3. Derived receipt_id from the same hash — it matches."
-        )
+        lines.append("  3. Derived receipt_id from the same hash — it matches.")
         lines.append("")
         lines.append("What this means:")
         lines.append(
@@ -91,9 +88,7 @@ def explain_verification(result: Dict[str, Any]) -> str:
                 for e in errors:
                     if "unknown receipt type" in e:
                         rtype = e.split(":")[-1].strip().strip("'\"")
-                lines.append(
-                    f"  Expected type 'aiir.commit_receipt', found: {rtype}"
-                )
+                lines.append(f"  Expected type 'aiir.commit_receipt', found: {rtype}")
             if has_schema_error:
                 lines.append(
                     "  The schema field is missing or doesn't start with 'aiir/'."
@@ -165,9 +160,7 @@ def explain_verification(result: Dict[str, Any]) -> str:
     # Schema warnings (independent of hash validity)
     if schema_errors:
         lines.append("")
-        lines.append(
-            f"Schema warnings ({len(schema_errors)}):"
-        )
+        lines.append(f"Schema warnings ({len(schema_errors)}):")
         lines.append(
             "  These are structural issues that don't affect hash integrity"
             " but indicate the receipt may not conform to the specification."

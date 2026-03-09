@@ -1,11 +1,11 @@
 """Tests for core utilities (hashing, sanitisation, helpers)."""
+
 from __future__ import annotations
 
 import json
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
 import uuid
@@ -19,15 +19,20 @@ import aiir.cli as cli
 def _make_test_receipt():
     """Create a minimal valid receipt for testing."""
     commit = cli.CommitInfo(
-        sha="deadbeef12345678", author_name="Test User",
+        sha="deadbeef12345678",
+        author_name="Test User",
         author_email="test@example.com",
-        author_date="2026-01-01T00:00:00Z", committer_name="Test User",
+        author_date="2026-01-01T00:00:00Z",
+        committer_name="Test User",
         committer_email="test@example.com",
         committer_date="2026-01-01T00:00:00Z",
-        subject="test: cross-platform", body="test: cross-platform\n",
+        subject="test: cross-platform",
+        body="test: cross-platform\n",
         diff_stat="1 file changed, 1 insertion(+)",
-        diff_hash="sha256:0000", files_changed=["test.py"],
-        is_ai_authored=False, ai_signals_detected=[],
+        diff_hash="sha256:0000",
+        files_changed=["test.py"],
+        is_ai_authored=False,
+        ai_signals_detected=[],
     )
     with patch.object(cli, "_run_git", return_value="https://example.com/repo"):
         return cli.build_commit_receipt(commit)
@@ -62,14 +67,10 @@ class TestValidateRef(unittest.TestCase):
             cli._validate_ref("  --all")
 
     def test_allows_range_with_dots(self):
-        self.assertEqual(
-            cli._validate_ref("origin/main..HEAD"), "origin/main..HEAD"
-        )
+        self.assertEqual(cli._validate_ref("origin/main..HEAD"), "origin/main..HEAD")
 
     def test_allows_triple_dot_range(self):
-        self.assertEqual(
-            cli._validate_ref("main...HEAD"), "main...HEAD"
-        )
+        self.assertEqual(cli._validate_ref("main...HEAD"), "main...HEAD")
 
     def test_rejects_path_traversal(self):
         with self.assertRaises(ValueError):
@@ -172,7 +173,7 @@ class TestNormalizeHelper(unittest.TestCase):
 
     def test_strips_zwj(self):
         """Zero-width joiner (Cf) must be removed."""
-        result = cli._normalize_for_detection("Co\u200Dpilot")
+        result = cli._normalize_for_detection("Co\u200dpilot")
         self.assertEqual(result, "Copilot")
 
     def test_resolves_cyrillic_homoglyphs(self):
@@ -190,7 +191,7 @@ class TestNormalizeHelper(unittest.TestCase):
 
     def test_message_and_name_field_consistency(self):
         """Message body path and name field path must produce same result."""
-        test_input = "\u200DC\u0336\u0441ilot"  # ZWJ + combining overlay + cyrillic с
+        test_input = "\u200dC\u0336\u0441ilot"  # ZWJ + combining overlay + cyrillic с
         msg_result = cli._normalize_for_detection(test_input)
         name_result = cli._normalize_for_detection(test_input)
         self.assertEqual(msg_result, name_result)
@@ -200,7 +201,7 @@ class TestNormalizeHelper(unittest.TestCase):
     def test_fullwidth_collapsed(self):
         """NFKC must collapse fullwidth characters."""
         # Fullwidth C = U+FF23
-        result = cli._normalize_for_detection("\uFF23opilot")
+        result = cli._normalize_for_detection("\uff23opilot")
         self.assertEqual(result, "Copilot")
 
     def test_empty_string(self):
@@ -223,8 +224,9 @@ class TestSanitizeMdBackslash(unittest.TestCase):
                 while j >= 0 and result[j] == "\\":
                     count += 1
                     j -= 1
-                self.assertEqual(count % 2, 1,
-                    f"Unescaped | at position {i} in {result!r}")
+                self.assertEqual(
+                    count % 2, 1, f"Unescaped | at position {i} in {result!r}"
+                )
 
     def test_backslash_emphasis_bypass(self):
         r"""Input \*bold\* must NOT bypass emphasis escaping."""
@@ -245,8 +247,9 @@ class TestSanitizeMdBackslash(unittest.TestCase):
                 while j >= 0 and result[j] == "\\":
                     count += 1
                     j -= 1
-                self.assertEqual(count % 2, 1,
-                    f"Unescaped | at position {i} in {result!r}")
+                self.assertEqual(
+                    count % 2, 1, f"Unescaped | at position {i} in {result!r}"
+                )
 
     def test_backslash_only(self):
         r"""A standalone backslash must be doubled."""
@@ -366,7 +369,7 @@ class TestAsciiFallbackIntegration(unittest.TestCase):
     def test_verify_fail_ascii_mode(self):
         """Verify failure in ASCII mode should use [error] and [hint]."""
         import tempfile
-        import shutil
+
         tmpdir = tempfile.mkdtemp()
         try:
             tampered = Path(tmpdir, "bad.json")
@@ -379,6 +382,7 @@ class TestAsciiFallbackIntegration(unittest.TestCase):
             try:
                 cli._USE_EMOJI = False
                 from io import StringIO
+
                 captured_err = StringIO()
                 with patch("sys.stderr", captured_err):
                     rc = cli.main(["--verify", str(tampered)])
@@ -389,8 +393,9 @@ class TestAsciiFallbackIntegration(unittest.TestCase):
                 # Must NOT contain any emoji codepoints
                 for ch in stderr_text:
                     self.assertLess(
-                        ord(ch), 0x2700,
-                        f"Non-ASCII symbol U+{ord(ch):04X} in fallback output"
+                        ord(ch),
+                        0x2700,
+                        f"Non-ASCII symbol U+{ord(ch):04X} in fallback output",
                     )
             finally:
                 cli._USE_EMOJI = orig_emoji
@@ -423,16 +428,14 @@ class TestAsciiFallbackIntegration(unittest.TestCase):
             for ch in result:
                 code = ord(ch)
                 if 0x2500 <= code <= 0x257F:
-                    self.fail(
-                        f"Box-drawing char U+{code:04X} in fallback output"
-                    )
+                    self.fail(f"Box-drawing char U+{code:04X} in fallback output")
         finally:
             cli._USE_BOXDRAW = orig_box
 
     def test_full_output_encodable_as_ascii(self):
         """In full ASCII fallback mode, verify-fail output must encode as ASCII."""
         import tempfile
-        import shutil
+
         tmpdir = tempfile.mkdtemp()
         try:
             tampered = Path(tmpdir, "bad.json")
@@ -445,6 +448,7 @@ class TestAsciiFallbackIntegration(unittest.TestCase):
             try:
                 cli._USE_EMOJI = False
                 from io import StringIO
+
                 captured_err = StringIO()
                 with patch("sys.stderr", captured_err):
                     cli.main(["--verify", str(tampered)])
@@ -465,8 +469,9 @@ class TestNoRawEmojiInTerminalPaths(unittest.TestCase):
 
     def test_no_raw_emoji_outside_emoji_dict(self):
         """cli.py should have no raw emoji in code outside the _EMOJI/_BOX dicts."""
-        import re
-        src = (Path(__file__).parent.parent / "aiir" / "cli.py").read_text(encoding="utf-8")
+        src = (Path(__file__).parent.parent / "aiir" / "cli.py").read_text(
+            encoding="utf-8"
+        )
         # Strip the _EMOJI and _BOX dict blocks (they legitimately contain emoji)
         # and format_github_summary (GitHub Markdown, not terminal output).
         # We look for any character above U+2700 outside those safe zones.
@@ -486,7 +491,11 @@ class TestNoRawEmojiInTerminalPaths(unittest.TestCase):
             # Detect format_github_summary (GitHub Markdown — emoji safe there)
             if "def format_github_summary" in line:
                 in_safe_zone = True
-            if in_safe_zone and line.startswith("def ") and "format_github_summary" not in line:
+            if (
+                in_safe_zone
+                and line.startswith("def ")
+                and "format_github_summary" not in line
+            ):
                 in_safe_zone = False
             if in_safe_zone:
                 continue
@@ -495,8 +504,14 @@ class TestNoRawEmojiInTerminalPaths(unittest.TestCase):
                 continue
             for ch in line:
                 if ord(ch) >= 0x2700:
-                    violations.append(f"Line {i}: U+{ord(ch):04X} in: {line.strip()[:80]}")
-        self.assertEqual(violations, [], f"Raw emoji found outside safe zones:\n" + "\n".join(violations))
+                    violations.append(
+                        f"Line {i}: U+{ord(ch):04X} in: {line.strip()[:80]}"
+                    )
+        self.assertEqual(
+            violations,
+            [],
+            "Raw emoji found outside safe zones:\n" + "\n".join(violations),
+        )
 
 
 class TestSummaryByteTruncation(unittest.TestCase):
@@ -509,6 +524,7 @@ class TestSummaryByteTruncation(unittest.TestCase):
         self.assertGreater(len(text.encode("utf-8")), cli.MAX_SUMMARY_SIZE)
 
         import tempfile
+
         f = tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False)
         fname = f.name
         f.close()
@@ -529,6 +545,7 @@ class TestSummaryByteTruncation(unittest.TestCase):
         self.assertGreater(len(text.encode("utf-8")), cli.MAX_SUMMARY_SIZE)
 
         import tempfile
+
         f = tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False)
         fname = f.name
         f.close()
@@ -545,6 +562,7 @@ class TestSummaryByteTruncation(unittest.TestCase):
         """Truncated summary must include the truncation notice."""
         text = "X" * (cli.MAX_SUMMARY_SIZE + 100)
         import tempfile
+
         f = tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False)
         fname = f.name
         f.close()
@@ -561,6 +579,7 @@ class TestSummaryByteTruncation(unittest.TestCase):
         """ASCII text below 1 MB must not be truncated."""
         text = "x" * 1000
         import tempfile
+
         f = tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False)
         fname = f.name
         f.close()
@@ -589,24 +608,28 @@ class TestGitEnvHardening(unittest.TestCase):
     def test_run_git_uses_no_optional_locks(self):
         """_run_git must pass --no-optional-locks to git."""
         import inspect
+
         src = inspect.getsource(cli._run_git)
         self.assertIn("--no-optional-locks", src)
 
     def test_hash_diff_streaming_uses_no_optional_locks(self):
         """_hash_diff_streaming must pass --no-optional-locks to git."""
         import inspect
+
         src = inspect.getsource(cli._hash_diff_streaming)
         self.assertIn("--no-optional-locks", src)
 
     def test_hash_diff_streaming_uses_safe_env(self):
         """_hash_diff_streaming must use _GIT_SAFE_ENV."""
         import inspect
+
         src = inspect.getsource(cli._hash_diff_streaming)
         self.assertIn("_GIT_SAFE_ENV", src)
 
     def test_run_git_uses_safe_env(self):
         """_run_git must use _GIT_SAFE_ENV."""
         import inspect
+
         src = inspect.getsource(cli._run_git)
         self.assertIn("_GIT_SAFE_ENV", src)
 
@@ -711,7 +734,7 @@ class TestByteCountCap(unittest.TestCase):
     def test_multibyte_value_byte_cap(self):
         """A value with multi-byte chars should be capped by byte size, not char count."""
         # Each emoji is 4 bytes in UTF-8
-        emoji = "\U0001F600"  # 😀
+        emoji = "\U0001f600"  # 😀
         # 1M emojis = 1M chars but 4M bytes — should be rejected at 4MB byte cap
         big_value = emoji * (1024 * 1024)
         byte_size = len(big_value.encode("utf-8"))
@@ -727,7 +750,7 @@ class TestByteCountCap(unittest.TestCase):
 
     def test_multibyte_value_over_cap_rejected(self):
         """A value exceeding 4 MB in bytes should be rejected."""
-        emoji = "\U0001F600"  # 4 bytes each
+        emoji = "\U0001f600"  # 4 bytes each
         big_value = emoji * (1024 * 1024 + 1)  # 4MB + 4 bytes
         with self.assertRaises(ValueError) as ctx:
             cli.set_github_output("k", big_value)
@@ -778,6 +801,7 @@ class TestDeadParameter(unittest.TestCase):
     def test_no_current_parameter(self):
         """_check_json_depth signature should not include _current."""
         import inspect
+
         sig = inspect.signature(cli._check_json_depth)
         self.assertNotIn("_current", sig.parameters)
 
@@ -823,11 +847,13 @@ class TestSanitizeMdEmphasis(unittest.TestCase):
 
     def test_emphasis_in_github_summary(self):
         """Emphasis markers in commit subjects must not render in summary table."""
-        receipts = [{
-            "commit": {"sha": "abc123", "subject": "*bold* _italic_ ~~strike~~"},
-            "ai_attestation": {"is_ai_authored": False, "signals_detected": []},
-            "receipt_id": "g1-test",
-        }]
+        receipts = [
+            {
+                "commit": {"sha": "abc123", "subject": "*bold* _italic_ ~~strike~~"},
+                "ai_attestation": {"is_ai_authored": False, "signals_detected": []},
+                "receipt_id": "g1-test",
+            }
+        ]
         result = cli.format_github_summary(receipts)
         # In the data row, emphasis markers should be escaped
         for line in result.split("\n"):
@@ -847,11 +873,11 @@ class TestShaValidation(unittest.TestCase):
         sha = "a" * 40
         fmt_line = f"{sha}\x00Author\x00a@e\x00date\x00CN\x00c@e\x00date\x00subject"
         mock_git.side_effect = [
-            fmt_line + "\n",    # git log --format
-            "body\n",           # git log --format=%B
-            "parent\n",         # git rev-parse --verify
-            "stat\n",           # git diff --stat
-            "",                 # git diff --name-only
+            fmt_line + "\n",  # git log --format
+            "body\n",  # git log --format=%B
+            "parent\n",  # git rev-parse --verify
+            "stat\n",  # git diff --stat
+            "",  # git diff --name-only
         ]
         with patch("aiir._detect._hash_diff_streaming", return_value="sha256:abc"):
             info = cli.get_commit_info("HEAD")
@@ -899,8 +925,12 @@ class TestPrettySignalsGuard(unittest.TestCase):
 
     def _make_receipt(self, signals):
         return {
-            "commit": {"sha": "abc123", "subject": "test", "author": {"name": "A", "email": "a@e"},
-                       "files_changed": 1},
+            "commit": {
+                "sha": "abc123",
+                "subject": "test",
+                "author": {"name": "A", "email": "a@e"},
+                "files_changed": 1,
+            },
             "ai_attestation": {"is_ai_authored": True, "signals_detected": signals},
             "receipt_id": "g1-test",
             "content_hash": "sha256:abc",
@@ -938,11 +968,14 @@ class TestPrettyAuthorGuard(unittest.TestCase):
 
     def _make_receipt(self, author_val):
         return {
-            "receipt_id": "g1-test", "content_hash": "sha256:abc",
+            "receipt_id": "g1-test",
+            "content_hash": "sha256:abc",
             "timestamp": "2026-01-01T00:00:00Z",
             "commit": {
-                "sha": "abc123", "subject": "test",
-                "author": author_val, "files_changed": 1,
+                "sha": "abc123",
+                "subject": "test",
+                "author": author_val,
+                "files_changed": 1,
             },
             "ai_attestation": {"is_ai_authored": False, "signals_detected": []},
         }
@@ -978,7 +1011,8 @@ class TestPrettyAndSummaryGuard(unittest.TestCase):
     def test_pretty_non_dict_commit(self):
         """format_receipt_pretty must not crash when commit is a string."""
         receipt = {
-            "receipt_id": "g1-test", "content_hash": "sha256:abc",
+            "receipt_id": "g1-test",
+            "content_hash": "sha256:abc",
             "timestamp": "2026-01-01T00:00:00Z",
             "commit": "not-a-dict",
             "ai_attestation": {"is_ai_authored": False, "signals_detected": []},
@@ -989,10 +1023,15 @@ class TestPrettyAndSummaryGuard(unittest.TestCase):
     def test_pretty_non_dict_ai(self):
         """format_receipt_pretty must not crash when ai_attestation is a list."""
         receipt = {
-            "receipt_id": "g1-test", "content_hash": "sha256:abc",
+            "receipt_id": "g1-test",
+            "content_hash": "sha256:abc",
             "timestamp": "2026-01-01T00:00:00Z",
-            "commit": {"sha": "abc123", "subject": "test",
-                       "author": {"name": "T", "email": "t@t"}, "files_changed": 1},
+            "commit": {
+                "sha": "abc123",
+                "subject": "test",
+                "author": {"name": "T", "email": "t@t"},
+                "files_changed": 1,
+            },
             "ai_attestation": [1, 2, 3],
         }
         result = cli.format_receipt_pretty(receipt)
@@ -1000,21 +1039,25 @@ class TestPrettyAndSummaryGuard(unittest.TestCase):
 
     def test_summary_non_dict_commit(self):
         """format_github_summary must not crash when commit is an int."""
-        receipts = [{
-            "receipt_id": "g1-test",
-            "commit": 42,
-            "ai_attestation": {"is_ai_authored": False},
-        }]
+        receipts = [
+            {
+                "receipt_id": "g1-test",
+                "commit": 42,
+                "ai_attestation": {"is_ai_authored": False},
+            }
+        ]
         result = cli.format_github_summary(receipts)
         self.assertIn("AIIR Receipt Summary", result)
 
     def test_summary_non_dict_ai(self):
         """format_github_summary must not crash when ai_attestation is a string."""
-        receipts = [{
-            "receipt_id": "g1-test",
-            "commit": {"sha": "abcdef1234567890", "subject": "test"},
-            "ai_attestation": "not-a-dict",
-        }]
+        receipts = [
+            {
+                "receipt_id": "g1-test",
+                "commit": {"sha": "abcdef1234567890", "subject": "test"},
+                "ai_attestation": "not-a-dict",
+            }
+        ]
         result = cli.format_github_summary(receipts)
         self.assertIn("AIIR Receipt Summary", result)
 
@@ -1030,6 +1073,7 @@ class TestWriteReceiptShaSanitize(unittest.TestCase):
             "content_hash": "sha256:abc",
         }
         import tempfile
+
         with tempfile.TemporaryDirectory() as _tmpdir:
             tmpdir = os.path.realpath(_tmpdir)
             # write_receipt checks cwd, so we chdir temporarily
@@ -1053,6 +1097,7 @@ class TestWriteReceiptShaSanitize(unittest.TestCase):
             "content_hash": "sha256:abc",
         }
         import tempfile
+
         with tempfile.TemporaryDirectory() as _tmpdir:
             tmpdir = os.path.realpath(_tmpdir)
             old_cwd = os.getcwd()
@@ -1074,6 +1119,7 @@ class TestPipeCleanup(unittest.TestCase):
     def test_stdout_closed_on_timeout(self, mock_popen):
         """proc.stdout.close() must be called even when diff times out."""
         import io
+
         mock_stdout = unittest.mock.MagicMock(spec=io.BufferedReader)
         # read() blocks forever — simulates a stalled process
         mock_stdout.read.side_effect = lambda n: b"x" * n
@@ -1092,6 +1138,7 @@ class TestPipeCleanup(unittest.TestCase):
     def test_stdout_closed_on_io_error(self, mock_popen):
         """proc.stdout.close() must be called on IOError during read."""
         import io
+
         mock_stdout = unittest.mock.MagicMock(spec=io.BufferedReader)
         mock_stdout.read.side_effect = IOError("disk failure")
         mock_proc = unittest.mock.MagicMock()
@@ -1111,6 +1158,7 @@ class TestHashDiffWaitZombie(unittest.TestCase):
     def test_final_wait_timeout_kills_process(self, mock_popen):
         """If proc.wait(30) times out after stdout drain, proc must be killed."""
         import io
+
         mock_stdout = unittest.mock.MagicMock(spec=io.BufferedReader)
         # Normal read: return some data then EOF
         mock_stdout.read.side_effect = [b"data", b""]
@@ -1128,6 +1176,7 @@ class TestHashDiffWaitZombie(unittest.TestCase):
         # After kill, returncode might be -9; we need to set it after kill
         def kill_side_effect():
             mock_proc.returncode = -9
+
         mock_proc.kill.side_effect = kill_side_effect
         # Reset wait to succeed after kill
         mock_proc.wait.side_effect = [
@@ -1150,6 +1199,7 @@ class TestHashDiffCleanupKill(unittest.TestCase):
     def test_cleanup_kill_returns_valid_hash(self, mock_popen):
         """When final wait times out and process is killed, hash is still valid."""
         import io
+
         mock_stdout = unittest.mock.MagicMock(spec=io.BufferedReader)
         mock_stdout.read.side_effect = [b"some diff content", b""]
         mock_proc = unittest.mock.MagicMock()
@@ -1157,6 +1207,7 @@ class TestHashDiffCleanupKill(unittest.TestCase):
 
         def kill_effect():
             mock_proc.returncode = -9
+
         mock_proc.kill.side_effect = kill_effect
         mock_proc.wait.side_effect = [
             subprocess.TimeoutExpired("git", 30),
@@ -1210,9 +1261,16 @@ class TestCrossPlatformFchmod(unittest.TestCase):
         """_save_index should succeed when os.fchmod is unavailable."""
         with tempfile.TemporaryDirectory() as tmpdir:
             idx_path = Path(tmpdir) / "index.json"
-            index = {"version": 1, "receipt_count": 0, "ai_commit_count": 0,
-                     "ai_percentage": 0.0, "first_receipt": None,
-                     "latest_timestamp": None, "unique_authors": 0, "commits": {}}
+            index = {
+                "version": 1,
+                "receipt_count": 0,
+                "ai_commit_count": 0,
+                "ai_percentage": 0.0,
+                "first_receipt": None,
+                "latest_timestamp": None,
+                "unique_authors": 0,
+                "commits": {},
+            }
             with patch.object(cli, "_HAS_FCHMOD", False):
                 cli._save_index(idx_path, index)
             self.assertTrue(idx_path.exists())
@@ -1283,13 +1341,19 @@ class TestCrossPlatformPaths(unittest.TestCase):
     def test_receipt_id_deterministic_across_calls(self):
         """Same input must produce same receipt_id every time."""
         commit = cli.CommitInfo(
-            sha="abc123def456", author_name="Test", author_email="t@t.com",
-            author_date="2026-01-01T00:00:00Z", committer_name="Test",
-            committer_email="t@t.com", committer_date="2026-01-01T00:00:00Z",
-            subject="test", body="test\n",
+            sha="abc123def456",
+            author_name="Test",
+            author_email="t@t.com",
+            author_date="2026-01-01T00:00:00Z",
+            committer_name="Test",
+            committer_email="t@t.com",
+            committer_date="2026-01-01T00:00:00Z",
+            subject="test",
+            body="test\n",
             diff_stat="1 file changed",
             diff_hash="sha256:aaa",
-            files_changed=["f.py"], is_ai_authored=True,
+            files_changed=["f.py"],
+            is_ai_authored=True,
             ai_signals_detected=["copilot"],
         )
         with patch.object(cli, "_run_git", return_value="https://example.com/repo"):
@@ -1305,15 +1369,20 @@ class TestCrossPlatformEncoding(unittest.TestCase):
     def test_ledger_writes_utf8(self):
         """Ledger should handle non-ASCII author names."""
         commit = cli.CommitInfo(
-            sha="utf8test123456", author_name="Ñoño 日本語",
+            sha="utf8test123456",
+            author_name="Ñoño 日本語",
             author_email="intl@test.com",
-            author_date="2026-01-01T00:00:00Z", committer_name="Ñoño",
+            author_date="2026-01-01T00:00:00Z",
+            committer_name="Ñoño",
             committer_email="intl@test.com",
             committer_date="2026-01-01T00:00:00Z",
-            subject="intl: unicode test", body="intl: unicode test\n",
+            subject="intl: unicode test",
+            body="intl: unicode test\n",
             diff_stat="1 file changed",
-            diff_hash="sha256:bbb", files_changed=["ñ.py"],
-            is_ai_authored=False, ai_signals_detected=[],
+            diff_hash="sha256:bbb",
+            files_changed=["ñ.py"],
+            is_ai_authored=False,
+            ai_signals_detected=[],
         )
         with patch.object(cli, "_run_git", return_value="https://example.com/repo"):
             receipt = cli.build_commit_receipt(commit)
@@ -1334,15 +1403,20 @@ class TestCrossPlatformEncoding(unittest.TestCase):
     def test_export_preserves_unicode(self):
         """Export bundle should preserve non-ASCII data."""
         commit = cli.CommitInfo(
-            sha="exportutf8test1", author_name="André",
+            sha="exportutf8test1",
+            author_name="André",
             author_email="a@test.com",
-            author_date="2026-01-01T00:00:00Z", committer_name="André",
+            author_date="2026-01-01T00:00:00Z",
+            committer_name="André",
             committer_email="a@test.com",
             committer_date="2026-01-01T00:00:00Z",
-            subject="feat: café", body="feat: café\n",
+            subject="feat: café",
+            body="feat: café\n",
             diff_stat="1 file changed",
-            diff_hash="sha256:ccc", files_changed=["café.py"],
-            is_ai_authored=True, ai_signals_detected=["copilot"],
+            diff_hash="sha256:ccc",
+            files_changed=["café.py"],
+            is_ai_authored=True,
+            ai_signals_detected=["copilot"],
         )
         with patch.object(cli, "_run_git", return_value="https://example.com/repo"):
             receipt = cli.build_commit_receipt(commit)
@@ -1360,9 +1434,11 @@ class TestCrossPlatformEncoding(unittest.TestCase):
         """Config should preserve unicode namespace values."""
         with tempfile.TemporaryDirectory() as tmpdir:
             cfg_path = Path(tmpdir) / "config.json"
-            config = {"instance_id": str(uuid.uuid4()),
-                      "namespace": "société-générale",
-                      "created": "2026-01-01T00:00:00Z"}
+            config = {
+                "instance_id": str(uuid.uuid4()),
+                "namespace": "société-générale",
+                "created": "2026-01-01T00:00:00Z",
+            }
             cli._save_config(cfg_path, config)
             loaded = json.loads(cfg_path.read_text(encoding="utf-8"))
             self.assertEqual(loaded["namespace"], "société-générale")
@@ -1386,10 +1462,16 @@ class TestAtomicWriteSemantics(unittest.TestCase):
         """_save_index should leave no .tmp files behind."""
         with tempfile.TemporaryDirectory() as tmpdir:
             idx_path = Path(tmpdir) / "index.json"
-            index = {"version": 1, "receipt_count": 5, "ai_commit_count": 2,
-                     "ai_percentage": 40.0, "first_receipt": "2026-01-01T00:00:00Z",
-                     "latest_timestamp": "2026-01-01T00:00:00Z",
-                     "unique_authors": 1, "commits": {}}
+            index = {
+                "version": 1,
+                "receipt_count": 5,
+                "ai_commit_count": 2,
+                "ai_percentage": 40.0,
+                "first_receipt": "2026-01-01T00:00:00Z",
+                "latest_timestamp": "2026-01-01T00:00:00Z",
+                "unique_authors": 1,
+                "commits": {},
+            }
             cli._save_index(idx_path, index)
             tmp_files = list(Path(tmpdir).glob("*.tmp"))
             self.assertEqual(len(tmp_files), 0)
@@ -1411,15 +1493,20 @@ class TestAtomicWriteSemantics(unittest.TestCase):
 def _make_test_receipt():
     """Create a minimal valid receipt for testing."""
     commit = cli.CommitInfo(
-        sha="deadbeef12345678", author_name="Test User",
+        sha="deadbeef12345678",
+        author_name="Test User",
         author_email="test@example.com",
-        author_date="2026-01-01T00:00:00Z", committer_name="Test User",
+        author_date="2026-01-01T00:00:00Z",
+        committer_name="Test User",
         committer_email="test@example.com",
         committer_date="2026-01-01T00:00:00Z",
-        subject="test: cross-platform", body="test: cross-platform\n",
+        subject="test: cross-platform",
+        body="test: cross-platform\n",
         diff_stat="1 file changed, 1 insertion(+)",
-        diff_hash="sha256:0000", files_changed=["test.py"],
-        is_ai_authored=False, ai_signals_detected=[],
+        diff_hash="sha256:0000",
+        files_changed=["test.py"],
+        is_ai_authored=False,
+        ai_signals_detected=[],
     )
     with patch.object(cli, "_run_git", return_value="https://example.com/repo"):
         return cli.build_commit_receipt(commit)
@@ -1437,7 +1524,11 @@ class TestMultiReceiptJsonArray(unittest.TestCase):
             "commit": {
                 "sha": "abcdef1234567890" * 2 + sha_suffix * 8,
                 "author": {"name": "A", "email": "a@b", "date": "2026-01-01T00:00:00Z"},
-                "committer": {"name": "A", "email": "a@b", "date": "2026-01-01T00:00:00Z"},
+                "committer": {
+                    "name": "A",
+                    "email": "a@b",
+                    "date": "2026-01-01T00:00:00Z",
+                },
                 "subject": "test",
                 "message_hash": "sha256:0" * 64,
                 "diff_hash": "sha256:0" * 64,
@@ -1461,14 +1552,21 @@ class TestMultiReceiptJsonArray(unittest.TestCase):
     @patch("aiir.cli.generate_receipts_for_range")
     def test_multi_receipt_stdout_is_json_array(self, mock_gen, mock_root):
         """Two receipts to stdout must parse as a JSON list."""
-        r1 = cli.build_commit_receipt.__wrapped__(self._make_receipt("a")["commit"]) if hasattr(cli.build_commit_receipt, '__wrapped__') else self._make_receipt("a")
+        r1 = (
+            cli.build_commit_receipt.__wrapped__(self._make_receipt("a")["commit"])
+            if hasattr(cli.build_commit_receipt, "__wrapped__")
+            else self._make_receipt("a")
+        )
         r2 = self._make_receipt("b")
         mock_gen.return_value = [r1, r2]
 
         import io
+
         captured = io.StringIO()
-        with patch("sys.stdout", captured), \
-             patch("sys.argv", ["aiir", "--range", "HEAD~2..HEAD", "--quiet", "--json"]):
+        with (
+            patch("sys.stdout", captured),
+            patch("sys.argv", ["aiir", "--range", "HEAD~2..HEAD", "--quiet", "--json"]),
+        ):
             cli.main()
 
         output = captured.getvalue()
@@ -1487,9 +1585,12 @@ class TestMultiReceiptJsonArray(unittest.TestCase):
         mock_gen.return_value = r
 
         import io
+
         captured = io.StringIO()
-        with patch("sys.stdout", captured), \
-             patch("sys.argv", ["aiir", "--quiet", "--json"]):
+        with (
+            patch("sys.stdout", captured),
+            patch("sys.argv", ["aiir", "--quiet", "--json"]),
+        ):
             cli.main()
 
         output = captured.getvalue()
@@ -1507,21 +1608,28 @@ class TestPrettyPlusOutput(unittest.TestCase):
         subprocess.run(["git", "init", self.tmpdir], capture_output=True, check=True)
         subprocess.run(
             ["git", "config", "user.email", "test@test.com"],
-            cwd=self.tmpdir, capture_output=True, check=True,
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
         subprocess.run(
             ["git", "config", "user.name", "Test User"],
-            cwd=self.tmpdir, capture_output=True, check=True,
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
         Path(self.tmpdir, "file.txt").write_text("hello")
-        subprocess.run(["git", "add", "."], cwd=self.tmpdir, capture_output=True, check=True)
+        subprocess.run(
+            ["git", "add", "."], cwd=self.tmpdir, capture_output=True, check=True
+        )
         subprocess.run(
             ["git", "commit", "-m", "init"],
-            cwd=self.tmpdir, capture_output=True, check=True,
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
 
     def tearDown(self):
-        import shutil
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def test_pretty_and_output_both_work(self):
@@ -1531,17 +1639,21 @@ class TestPrettyPlusOutput(unittest.TestCase):
         try:
             os.chdir(self.tmpdir)
             import io
+
             captured_err = io.StringIO()
-            with patch("sys.stderr", captured_err), \
-                 patch("sys.stdout", io.StringIO()):
+            with patch("sys.stderr", captured_err), patch("sys.stdout", io.StringIO()):
                 rc = cli.main(["--pretty", "--output", out_dir])
             self.assertEqual(rc, 0)
             # Pretty output should be on stderr
             stderr_text = captured_err.getvalue()
-            self.assertIn("┌", stderr_text, "Pretty box-drawing should appear on stderr")
+            self.assertIn(
+                "┌", stderr_text, "Pretty box-drawing should appear on stderr"
+            )
             # File should also be written to disk
             files = list(Path(out_dir).glob("receipt_*.json"))
-            self.assertGreaterEqual(len(files), 1, "Receipt file must be written when --output is set")
+            self.assertGreaterEqual(
+                len(files), 1, "Receipt file must be written when --output is set"
+            )
             # File content should be valid JSON
             content = files[0].read_text()
             receipt = json.loads(content)
@@ -1555,19 +1667,25 @@ class TestPrettyPlusOutput(unittest.TestCase):
         try:
             os.chdir(self.tmpdir)
             import io
+
             captured_err = io.StringIO()
-            with patch("sys.stderr", captured_err), \
-                 patch("sys.stdout", io.StringIO()):
+            with patch("sys.stderr", captured_err), patch("sys.stdout", io.StringIO()):
                 rc = cli.main(["--pretty"])
             self.assertEqual(rc, 0)
             stderr_text = captured_err.getvalue()
             self.assertIn("┌", stderr_text)
             # Default mode creates .aiir/receipts.jsonl (ledger), not individual files
             receipt_files = list(Path(self.tmpdir).rglob("receipt_*.json"))
-            self.assertEqual(len(receipt_files), 0, "--pretty must not write individual receipt files")
+            self.assertEqual(
+                len(receipt_files),
+                0,
+                "--pretty must not write individual receipt files",
+            )
             # But the ledger should exist
             ledger = Path(self.tmpdir) / ".aiir" / "receipts.jsonl"
-            self.assertTrue(ledger.exists(), "default mode should create .aiir/receipts.jsonl")
+            self.assertTrue(
+                ledger.exists(), "default mode should create .aiir/receipts.jsonl"
+            )
         finally:
             os.chdir(old_cwd)
 
@@ -1578,6 +1696,7 @@ class TestPrettyPlusOutput(unittest.TestCase):
         try:
             os.chdir(self.tmpdir)
             from io import StringIO
+
             captured = StringIO()
             with patch("sys.stdout", captured):
                 rc = cli.main(["--output", out_dir])
@@ -1587,7 +1706,8 @@ class TestPrettyPlusOutput(unittest.TestCase):
             self.assertGreaterEqual(len(files), 1)
             # stdout should NOT contain pretty box-drawing
             stdout_text = captured.getvalue()
-            self.assertNotIn("┌", stdout_text, "Box-drawing should not appear without --pretty")
+            self.assertNotIn(
+                "┌", stdout_text, "Box-drawing should not appear without --pretty"
+            )
         finally:
             os.chdir(old_cwd)
-

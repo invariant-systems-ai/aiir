@@ -18,8 +18,6 @@ from aiir._core import (
     RECEIPT_SCHEMA_VERSION,
     CommitInfo,
     _HAS_FCHMOD,
-    _USE_BOXDRAW,
-    _b,
     _canonical_json,
     _now_rfc3339,
     _run_git,
@@ -29,7 +27,6 @@ from aiir._core import (
     _validate_ref,
 )
 from aiir._detect import (
-    detect_ai_signals,
     get_commit_info,
     list_commits_in_range,
 )
@@ -40,14 +37,16 @@ from aiir._detect import (
 # ---------------------------------------------------------------------------
 
 # Allowed keys in agent_attestation — prevents arbitrary data injection.
-_AGENT_ATTESTATION_KEYS = frozenset({
-    "tool_id",          # e.g. "copilot", "cursor", "claude-code"
-    "model_class",      # e.g. "gpt-4o", "claude-sonnet-4-20250514", "gemini-2.5-pro"
-    "session_id",       # opaque session identifier
-    "run_context",      # e.g. "ide", "cli", "ci", "mcp"
-    "tool_version",     # e.g. "1.2.3"
-    "confidence",       # e.g. "declared", "inferred", "verified"
-})
+_AGENT_ATTESTATION_KEYS = frozenset(
+    {
+        "tool_id",  # e.g. "copilot", "cursor", "claude-code"
+        "model_class",  # e.g. "gpt-4o", "claude-sonnet-4-20250514", "gemini-2.5-pro"
+        "session_id",  # opaque session identifier
+        "run_context",  # e.g. "ide", "cli", "ci", "mcp"
+        "tool_version",  # e.g. "1.2.3"
+        "confidence",  # e.g. "declared", "inferred", "verified"
+    }
+)
 
 
 def _sanitize_agent_attestation(
@@ -72,7 +71,8 @@ def _sanitize_agent_attestation(
 
 
 def build_commit_receipt(
-    commit: CommitInfo, repo_root: Optional[str] = None,
+    commit: CommitInfo,
+    repo_root: Optional[str] = None,
     redact_files: bool = False,
     instance_id: Optional[str] = None,
     namespace: Optional[str] = None,
@@ -90,9 +90,9 @@ def build_commit_receipt(
     # Determine repo identity (None when no remote configured)
     repo_url: Optional[str] = None
     try:
-        repo_url = _run_git(
-            ["remote", "get-url", "origin"], cwd=repo_root
-        ).strip() or None
+        repo_url = (
+            _run_git(["remote", "get-url", "origin"], cwd=repo_root).strip() or None
+        )
         if repo_url:
             repo_url = _strip_url_credentials(repo_url)
     except RuntimeError:
@@ -121,10 +121,18 @@ def build_commit_receipt(
             "files_changed": len(commit.files_changed),
             # When --redact-files is set, omit individual file paths
             # to prevent internal project structure enumeration.
-            **({"files": commit.files_changed[:100]} if not redact_files else {"files_redacted": True}),
+            **(
+                {"files": commit.files_changed[:100]}
+                if not redact_files
+                else {"files_redacted": True}
+            ),
             # Indicate when file list was truncated so verifiers know
             # the full list is not present.
-            **({"files_capped": True} if not redact_files and len(commit.files_changed) > 100 else {}),
+            **(
+                {"files_capped": True}
+                if not redact_files and len(commit.files_changed) > 100
+                else {}
+            ),
         },
         "ai_attestation": {
             "is_ai_authored": commit.is_ai_authored,
@@ -162,7 +170,11 @@ def build_commit_receipt(
         "extensions": {
             **(({"instance_id": instance_id}) if instance_id else {}),
             **(({"namespace": namespace}) if namespace else {}),
-            **(({"agent_attestation": _sanitize_agent_attestation(agent_attestation)}) if agent_attestation else {}),
+            **(
+                ({"agent_attestation": _sanitize_agent_attestation(agent_attestation)})
+                if agent_attestation
+                else {}
+            ),
         },
     }
 
@@ -187,8 +199,11 @@ def generate_receipt(
         return None
 
     return build_commit_receipt(
-        commit, repo_root=cwd, redact_files=redact_files,
-        instance_id=instance_id, namespace=namespace,
+        commit,
+        repo_root=cwd,
+        redact_files=redact_files,
+        instance_id=instance_id,
+        namespace=namespace,
         agent_attestation=agent_attestation,
         generator=generator,
     )
@@ -209,8 +224,12 @@ def generate_receipts_for_range(
     receipts = []
     for sha in shas:
         receipt = generate_receipt(
-            sha, cwd=cwd, ai_only=ai_only, redact_files=redact_files,
-            instance_id=instance_id, namespace=namespace,
+            sha,
+            cwd=cwd,
+            ai_only=ai_only,
+            redact_files=redact_files,
+            instance_id=instance_id,
+            namespace=namespace,
             agent_attestation=agent_attestation,
             generator=generator,
         )
@@ -307,36 +326,37 @@ def format_receipt_pretty(receipt: Dict[str, Any], signed: str = "none") -> str:
         ai = {}
     # Sanitize ALL user-controlled or display fields
     # against terminal escape injection.
-    subject = _strip_terminal_escapes(commit.get('subject', ''))
+    subject = _strip_terminal_escapes(commit.get("subject", ""))
     # Guard author sub-field type — extends defensive pattern to
     # nested fields.  A crafted receipt with author as string/int/list/None
     # would crash the .get('name', '') call with AttributeError.
-    author = commit.get('author', {})
+    author = commit.get("author", {})
     if not isinstance(author, dict):
         author = {}
-    author_name = _strip_terminal_escapes(author.get('name', ''))
-    author_email = _strip_terminal_escapes(author.get('email', ''))
-    receipt_id = _strip_terminal_escapes(str(receipt.get('receipt_id', 'unknown')))
-    commit_sha = _strip_terminal_escapes(str(commit.get('sha', 'unknown'))[:12])
-    content_hash = _strip_terminal_escapes(str(receipt.get('content_hash', '')))
-    timestamp = _strip_terminal_escapes(str(receipt.get('timestamp', '')))
+    author_name = _strip_terminal_escapes(author.get("name", ""))
+    author_email = _strip_terminal_escapes(author.get("email", ""))
+    receipt_id = _strip_terminal_escapes(str(receipt.get("receipt_id", "unknown")))
+    commit_sha = _strip_terminal_escapes(str(commit.get("sha", "unknown"))[:12])
+    content_hash = _strip_terminal_escapes(str(receipt.get("content_hash", "")))
+    timestamp = _strip_terminal_escapes(str(receipt.get("timestamp", "")))
     # Coerce files_changed to int — a crafted receipt could
     # inject arbitrary strings via this field into terminal output.
     # Also catch OverflowError — int(float('inf')) raises
     # OverflowError, and json.loads('1e999') produces float('inf').
     try:
-        files_count = int(commit.get('files_changed', 0))
+        files_count = int(commit.get("files_changed", 0))
     except (TypeError, ValueError, OverflowError):
         files_count = 0
     # Guard against non-list signals_detected — a crafted
     # receipt with signals_detected as a dict or string would crash on
     # slicing (dict[:3] raises TypeError).  Coerce to empty list.
-    signals = ai.get('signals_detected', [])
+    signals = ai.get("signals_detected", [])
     if not isinstance(signals, (list, tuple)):
         signals = []
     # Box-drawing chars → _b() for encoding safety.
     # Lazy-import cli._b so that tests toggling cli._USE_BOXDRAW are respected.
     from aiir.cli import _b as _box  # noqa: C0415 — lazy to avoid circular import
+
     tl, vl, bl, hl = _box("tl"), _box("vl"), _box("bl"), _box("hl")
     lines = [
         f"{tl}{hl} Receipt: {receipt_id}",
@@ -420,6 +440,7 @@ def format_receipt_detail(receipt: Dict[str, Any], signed: str = "none") -> str:
 
     # Box-drawing chars
     from aiir.cli import _b as _box  # noqa: C0415
+
     tl, vl, bl_char, hl = _box("tl"), _box("vl"), _box("bl"), _box("hl")
     sec = f"{vl}{'─' * 44}"  # section separator
 
@@ -449,15 +470,9 @@ def format_receipt_detail(receipt: Dict[str, Any], signed: str = "none") -> str:
         lines.append(f"{vl}               ... and {len(files) - 20} more")
 
     lines.append(sec)
-    lines.append(
-        f"{vl}  AI:           {'YES' if ai.get('is_ai_authored') else 'no'}"
-    )
-    lines.append(
-        f"{vl}  Class:        {_safe(ai, 'authorship_class', 'unknown')}"
-    )
-    lines.append(
-        f"{vl}  Method:       {_safe(ai, 'detection_method', 'unknown')}"
-    )
+    lines.append(f"{vl}  AI:           {'YES' if ai.get('is_ai_authored') else 'no'}")
+    lines.append(f"{vl}  Class:        {_safe(ai, 'authorship_class', 'unknown')}")
+    lines.append(f"{vl}  Method:       {_safe(ai, 'detection_method', 'unknown')}")
 
     # Signals
     if signals:
@@ -477,9 +492,7 @@ def format_receipt_detail(receipt: Dict[str, Any], signed: str = "none") -> str:
     lines.append(f"{vl}  Signal count: {sig_count}")
 
     # Bot attestation
-    lines.append(
-        f"{vl}  Bot:          {'YES' if ai.get('is_bot_authored') else 'no'}"
-    )
+    lines.append(f"{vl}  Bot:          {'YES' if ai.get('is_bot_authored') else 'no'}")
     if bot_signals:
         bot_str = ", ".join(
             _strip_terminal_escapes(str(s))[:80]
@@ -491,7 +504,9 @@ def format_receipt_detail(receipt: Dict[str, Any], signed: str = "none") -> str:
     lines.append(sec)
     lines.append(f"{vl}  Repo:     {_safe(provenance, 'repository')}")
     lines.append(f"{vl}  Tool:     {_safe(provenance, 'tool')}")
-    lines.append(f"{vl}  Generator:{' ' if _safe(provenance, 'generator') else ''}{_safe(provenance, 'generator')}")
+    lines.append(
+        f"{vl}  Generator:{' ' if _safe(provenance, 'generator') else ''}{_safe(provenance, 'generator')}"
+    )
 
     lines.append(sec)
     lines.append(f"{vl}  Hash:    {_safe(receipt, 'content_hash')}")
@@ -544,11 +559,11 @@ def write_receipt(
                 "(possible symlink attack)"
             )
         commit_sha = receipt.get("commit", {}).get("sha", "unknown")[:12]
-        commit_sha = re.sub(r'[^a-zA-Z0-9_-]', '_', commit_sha)
+        commit_sha = re.sub(r"[^a-zA-Z0-9_-]", "_", commit_sha)
         # Deterministic filename from content_hash — makes it easy to
         # check if a receipt already exists for a given commit.
         chash = receipt.get("content_hash", "")
-        chash_short = re.sub(r'[^a-fA-F0-9]', '', chash)[:16]
+        chash_short = re.sub(r"[^a-fA-F0-9]", "", chash)[:16]
         filename = f"receipt_{commit_sha}_{chash_short}.json"
         filepath = out_path / filename
         # If this exact receipt already exists, return existing path

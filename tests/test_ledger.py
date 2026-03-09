@@ -1,4 +1,5 @@
 """Tests for ledger append, dedup, index, config, namespace, export, badge, stats, check."""
+
 from __future__ import annotations
 
 import json
@@ -27,6 +28,7 @@ class TestLedgerAppend(unittest.TestCase):
     def tearDown(self):
         os.chdir(self.old_cwd)
         import shutil
+
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def _make_receipt(self, sha="abc123def456"):
@@ -102,7 +104,9 @@ class TestLedgerAppend(unittest.TestCase):
         with self.assertRaises(ValueError):
             cli.append_to_ledger([r], ledger_dir="/tmp")
 
-    @unittest.skipIf(sys.platform == "win32", "Unix file permissions not applicable on Windows")
+    @unittest.skipIf(
+        sys.platform == "win32", "Unix file permissions not applicable on Windows"
+    )
     def test_ledger_file_permissions(self):
         """Ledger and index should be 0o644."""
         r = self._make_receipt()
@@ -145,25 +149,37 @@ class TestLedgerDefaultMode(unittest.TestCase):
         os.chdir(self.tmpdir)
         # Set up a minimal git repo
         subprocess.run(["git", "init", self.tmpdir], capture_output=True, check=True)
-        subprocess.run(["git", "-C", self.tmpdir, "config", "user.email", "t@t"],
-                        capture_output=True, check=True)
-        subprocess.run(["git", "-C", self.tmpdir, "config", "user.name", "T"],
-                        capture_output=True, check=True)
+        subprocess.run(
+            ["git", "-C", self.tmpdir, "config", "user.email", "t@t"],
+            capture_output=True,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "-C", self.tmpdir, "config", "user.name", "T"],
+            capture_output=True,
+            check=True,
+        )
         Path(self.tmpdir, "f.txt").write_text("x\n")
-        subprocess.run(["git", "-C", self.tmpdir, "add", "."], capture_output=True, check=True)
-        subprocess.run(["git", "-C", self.tmpdir, "commit", "-m", "init"],
-                        capture_output=True, check=True)
+        subprocess.run(
+            ["git", "-C", self.tmpdir, "add", "."], capture_output=True, check=True
+        )
+        subprocess.run(
+            ["git", "-C", self.tmpdir, "commit", "-m", "init"],
+            capture_output=True,
+            check=True,
+        )
 
     def tearDown(self):
         os.chdir(self.old_cwd)
         import shutil
+
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def test_bare_aiir_writes_ledger(self):
         """Running `aiir` with no flags should create .aiir/receipts.jsonl."""
         import io
-        with patch("sys.stderr", io.StringIO()), \
-             patch("sys.stdout", io.StringIO()):
+
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             rc = cli.main([])
         self.assertEqual(rc, 0)
         self.assertTrue(Path(".aiir/receipts.jsonl").exists())
@@ -172,9 +188,9 @@ class TestLedgerDefaultMode(unittest.TestCase):
     def test_json_flag_bypasses_ledger(self):
         """Running `aiir --json` should NOT create .aiir/."""
         import io
+
         captured = io.StringIO()
-        with patch("sys.stderr", io.StringIO()), \
-             patch("sys.stdout", captured):
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", captured):
             rc = cli.main(["--json"])
         self.assertEqual(rc, 0)
         self.assertFalse(Path(".aiir").exists())
@@ -185,8 +201,8 @@ class TestLedgerDefaultMode(unittest.TestCase):
     def test_output_flag_bypasses_ledger(self):
         """Running `aiir --output .receipts` should NOT create .aiir/."""
         import io
-        with patch("sys.stderr", io.StringIO()), \
-             patch("sys.stdout", io.StringIO()):
+
+        with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             rc = cli.main(["--output", ".receipts"])
         self.assertEqual(rc, 0)
         self.assertFalse(Path(".aiir").exists())
@@ -219,6 +235,7 @@ class TestConfigAndInstanceId(unittest.TestCase):
     def test_config_created_on_first_ledger_run(self):
         """First `aiir` run (ledger mode) creates config.json with instance_id."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
         cfg = json.loads(Path(".aiir/config.json").read_text())
@@ -230,6 +247,7 @@ class TestConfigAndInstanceId(unittest.TestCase):
     def test_instance_id_persists_across_runs(self):
         """instance_id stays the same on second run."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
         first_id = json.loads(Path(".aiir/config.json").read_text())["instance_id"]
@@ -245,6 +263,7 @@ class TestConfigAndInstanceId(unittest.TestCase):
     def test_instance_id_in_receipt_extensions(self):
         """Receipt extensions should contain the instance_id in ledger mode."""
         import io
+
         captured = io.StringIO()
         # Use ledger mode (default) — then read the JSONL
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", captured):
@@ -257,6 +276,7 @@ class TestConfigAndInstanceId(unittest.TestCase):
     def test_json_mode_no_instance_id(self):
         """--json mode should NOT populate instance_id (no config loaded)."""
         import io
+
         captured = io.StringIO()
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", captured):
             cli.main(["--json"])
@@ -267,12 +287,21 @@ class TestConfigAndInstanceId(unittest.TestCase):
     def test_instance_id_excluded_from_content_hash(self):
         """instance_id in extensions must not affect content_hash."""
         commit = cli.CommitInfo(
-            sha="abc123", author_name="Test", author_email="test@test.com",
-            author_date="2026-01-01T00:00:00Z", committer_name="Test",
-            committer_email="test@test.com", committer_date="2026-01-01T00:00:00Z",
-            subject="test", body="test", diff_stat="", diff_hash="sha256:abc",
+            sha="abc123",
+            author_name="Test",
+            author_email="test@test.com",
+            author_date="2026-01-01T00:00:00Z",
+            committer_name="Test",
+            committer_email="test@test.com",
+            committer_date="2026-01-01T00:00:00Z",
+            subject="test",
+            body="test",
+            diff_stat="",
+            diff_hash="sha256:abc",
         )
-        with patch("aiir.cli._run_git", return_value="https://github.com/org/repo.git\n"):
+        with patch(
+            "aiir.cli._run_git", return_value="https://github.com/org/repo.git\n"
+        ):
             r1 = cli.build_commit_receipt(commit)
             r2 = cli.build_commit_receipt(commit, instance_id="test-uuid-1234")
         self.assertEqual(r1["content_hash"], r2["content_hash"])
@@ -301,6 +330,7 @@ class TestNamespace(unittest.TestCase):
     def test_namespace_in_receipt_extensions(self):
         """--namespace should appear in receipt extensions."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main(["--namespace", "acme-corp"])
         receipt = json.loads(Path(".aiir/receipts.jsonl").read_text().strip())
@@ -309,6 +339,7 @@ class TestNamespace(unittest.TestCase):
     def test_namespace_persisted_to_config(self):
         """--namespace should be saved to config.json."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main(["--namespace", "acme-corp"])
         cfg = json.loads(Path(".aiir/config.json").read_text())
@@ -317,12 +348,21 @@ class TestNamespace(unittest.TestCase):
     def test_namespace_excluded_from_content_hash(self):
         """namespace in extensions must not affect content_hash."""
         commit = cli.CommitInfo(
-            sha="abc123", author_name="Test", author_email="test@test.com",
-            author_date="2026-01-01T00:00:00Z", committer_name="Test",
-            committer_email="test@test.com", committer_date="2026-01-01T00:00:00Z",
-            subject="test", body="test", diff_stat="", diff_hash="sha256:abc",
+            sha="abc123",
+            author_name="Test",
+            author_email="test@test.com",
+            author_date="2026-01-01T00:00:00Z",
+            committer_name="Test",
+            committer_email="test@test.com",
+            committer_date="2026-01-01T00:00:00Z",
+            subject="test",
+            body="test",
+            diff_stat="",
+            diff_hash="sha256:abc",
         )
-        with patch("aiir.cli._run_git", return_value="https://github.com/org/repo.git\n"):
+        with patch(
+            "aiir.cli._run_git", return_value="https://github.com/org/repo.git\n"
+        ):
             r1 = cli.build_commit_receipt(commit)
             r2 = cli.build_commit_receipt(commit, namespace="acme-corp")
         self.assertEqual(r1["content_hash"], r2["content_hash"])
@@ -350,6 +390,7 @@ class TestRicherIndex(unittest.TestCase):
     def test_index_has_richer_stats(self):
         """index.json should contain first_receipt, unique_authors, ai_percentage."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
         idx = json.loads(Path(".aiir/index.json").read_text())
@@ -363,12 +404,15 @@ class TestRicherIndex(unittest.TestCase):
     def test_index_tracks_multiple_authors(self):
         """unique_authors should count distinct commit authors."""
         import io
+
         # First commit already done in setUp by "Test <t@t.com>"
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
         # Second commit with different author
         subprocess.run(["git", "config", "user.name", "Other"], capture_output=True)
-        subprocess.run(["git", "config", "user.email", "other@test.com"], capture_output=True)
+        subprocess.run(
+            ["git", "config", "user.email", "other@test.com"], capture_output=True
+        )
         Path("g.txt").write_text("y")
         subprocess.run(["git", "add", "."], capture_output=True)
         subprocess.run(["git", "commit", "-m", "second"], capture_output=True)
@@ -399,6 +443,7 @@ class TestExport(unittest.TestCase):
     def test_export_creates_bundle(self):
         """--export should create a JSON bundle with all receipts."""
         import io
+
         # Generate receipts first
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
@@ -417,6 +462,7 @@ class TestExport(unittest.TestCase):
     def test_export_default_filename(self):
         """--export with no arg should use 'aiir-export.json'."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
@@ -427,6 +473,7 @@ class TestExport(unittest.TestCase):
     def test_export_rejects_path_traversal(self):
         """--export should reject paths with '..'."""
         import io
+
         # Must generate a ledger first so we reach the path validation check.
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
@@ -439,6 +486,7 @@ class TestExport(unittest.TestCase):
     def test_export_rejects_absolute_path(self):
         """--export should reject absolute paths."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
         stderr = io.StringIO()
@@ -450,11 +498,15 @@ class TestExport(unittest.TestCase):
     def test_export_failure_error_path(self):
         """--export should handle export_ledger() failure gracefully."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
         stderr = io.StringIO()
-        with patch("aiir.cli.export_ledger", side_effect=RuntimeError("disk full")), \
-             patch("sys.stderr", stderr), patch("sys.stdout", io.StringIO()):
+        with (
+            patch("aiir.cli.export_ledger", side_effect=RuntimeError("disk full")),
+            patch("sys.stderr", stderr),
+            patch("sys.stdout", io.StringIO()),
+        ):
             rc = cli.main(["--export", "bundle.json"])
         self.assertEqual(rc, 1)
         self.assertIn("Export failed", stderr.getvalue())
@@ -462,6 +514,7 @@ class TestExport(unittest.TestCase):
     def test_export_includes_namespace(self):
         """Export bundle should include namespace from config."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main(["--namespace", "acme-corp"])
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
@@ -473,6 +526,7 @@ class TestExport(unittest.TestCase):
     def test_export_no_ledger_fails(self):
         """--export with no ledger should fail gracefully (not create .aiir/)."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             rc = cli.main(["--export", "bundle.json"])
         self.assertEqual(rc, 1)
@@ -498,11 +552,13 @@ class TestLedgerJsonCombo(unittest.TestCase):
     def tearDown(self):
         os.chdir(self._orig)
         import shutil
+
         shutil.rmtree(self._tmp, ignore_errors=True)
 
     def test_ledger_plus_json_writes_both(self):
         """--ledger --json should write to ledger AND print to stdout."""
         import io
+
         stdout = io.StringIO()
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", stdout):
             rc = cli.main(["--ledger", "--json"])
@@ -516,6 +572,7 @@ class TestLedgerJsonCombo(unittest.TestCase):
     def test_ledger_plus_output_writes_both(self):
         """--ledger --output should write to ledger AND individual files."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             rc = cli.main(["--ledger", "--output", ".receipts"])
         self.assertEqual(rc, 0)
@@ -550,6 +607,7 @@ class TestBadge(unittest.TestCase):
     def test_badge_outputs_markdown(self):
         """--badge should print a shields.io Markdown snippet to stdout."""
         import io
+
         # Generate a receipt first (creates ledger).
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
@@ -564,6 +622,7 @@ class TestBadge(unittest.TestCase):
     def test_badge_no_ledger_fails(self):
         """--badge with no ledger should fail gracefully."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             rc = cli.main(["--badge"])
         self.assertEqual(rc, 1)
@@ -611,6 +670,7 @@ class TestStats(unittest.TestCase):
     def test_stats_output(self):
         """--stats should print a summary dashboard to stderr."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
         stderr = io.StringIO()
@@ -625,15 +685,21 @@ class TestStats(unittest.TestCase):
     def test_stats_no_ledger_fails(self):
         """--stats with no ledger should fail gracefully."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             rc = cli.main(["--stats"])
         self.assertEqual(rc, 1)
 
     def test_format_stats_includes_namespace(self):
         """format_stats should include namespace when present in config."""
-        index = {"receipt_count": 5, "ai_commit_count": 1, "ai_percentage": 20.0,
-                 "unique_authors": 2, "first_receipt": "2026-01-01T00:00:00Z",
-                 "latest_timestamp": "2026-03-07T00:00:00Z"}
+        index = {
+            "receipt_count": 5,
+            "ai_commit_count": 1,
+            "ai_percentage": 20.0,
+            "unique_authors": 2,
+            "first_receipt": "2026-01-01T00:00:00Z",
+            "latest_timestamp": "2026-03-07T00:00:00Z",
+        }
         config = {"namespace": "acme-corp", "instance_id": "abc12345-xxxx"}
         output = cli.format_stats(index, config=config)
         self.assertIn("acme-corp", output)
@@ -668,6 +734,7 @@ class TestCheck(unittest.TestCase):
     def test_check_passes_within_threshold(self):
         """--check --max-ai-percent 50 should pass when AI% is 0."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
@@ -692,6 +759,7 @@ class TestCheck(unittest.TestCase):
     def test_check_no_ledger_fails(self):
         """--check with no ledger should fail gracefully."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             rc = cli.main(["--check", "--max-ai-percent", "50"])
         self.assertEqual(rc, 1)
@@ -699,6 +767,7 @@ class TestCheck(unittest.TestCase):
     def test_check_no_threshold_ok(self):
         """--check without --max-ai-percent should just report status."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
@@ -708,6 +777,7 @@ class TestCheck(unittest.TestCase):
     def test_max_ai_percent_implies_check(self):
         """--max-ai-percent alone (without --check) should still run the gate."""
         import io
+
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
             cli.main([])
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
@@ -718,4 +788,3 @@ class TestCheck(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # Cross-platform / OS-portability tests
 # ---------------------------------------------------------------------------
-

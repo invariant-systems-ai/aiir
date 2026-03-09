@@ -165,7 +165,9 @@ def append_to_ledger(
 
             is_ai = receipt.get("ai_attestation", {}).get("is_ai_authored", False)
             is_bot = receipt.get("ai_attestation", {}).get("is_bot_authored", False)
-            authorship = receipt.get("ai_attestation", {}).get("authorship_class", "human")
+            authorship = receipt.get("ai_attestation", {}).get(
+                "authorship_class", "human"
+            )
             rid = receipt.get("receipt_id", "")
             ts = receipt.get("timestamp", "")
 
@@ -189,10 +191,16 @@ def append_to_ledger(
     index["receipt_count"] = index.get("receipt_count", 0) + appended
     index["commits"] = known_commits
     # Compute derived stats.
-    authors = {v.get("author", "") for v in known_commits.values() if isinstance(v, dict) and v.get("author")}
+    authors = {
+        v.get("author", "")
+        for v in known_commits.values()
+        if isinstance(v, dict) and v.get("author")
+    }
     index["unique_authors"] = len(authors)
     total = index["receipt_count"]
-    index["ai_percentage"] = round(index.get("ai_commit_count", 0) / total * 100, 1) if total > 0 else 0.0
+    index["ai_percentage"] = (
+        round(index.get("ai_commit_count", 0) / total * 100, 1) if total > 0 else 0.0
+    )
     _save_index(index_path, index)
 
     return appended, skipped, str(ledger_path)

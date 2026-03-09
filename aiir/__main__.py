@@ -1,4 +1,5 @@
 """Allow running aiir as `python -m aiir`."""
+
 import sys
 
 from aiir.cli import main

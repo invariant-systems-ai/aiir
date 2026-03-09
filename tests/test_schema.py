@@ -11,10 +11,9 @@ SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
 import json
-import os
 import unittest
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from aiir._schema import validate_receipt_schema
 from aiir._verify import verify_receipt
@@ -24,6 +23,7 @@ from aiir._verify import verify_receipt
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_valid_receipt(**overrides: Any) -> Dict[str, Any]:
     """Build a structurally valid receipt for testing."""
     import hashlib
@@ -32,8 +32,13 @@ def _make_valid_receipt(**overrides: Any) -> Dict[str, Any]:
         return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
     def _canonical_json(obj: Any) -> str:
-        return json.dumps(obj, sort_keys=True, separators=(",", ":"),
-                          ensure_ascii=True, allow_nan=False)
+        return json.dumps(
+            obj,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        )
 
     core = {
         "type": "aiir.commit_receipt",
@@ -41,10 +46,16 @@ def _make_valid_receipt(**overrides: Any) -> Dict[str, Any]:
         "version": "1.0.12",
         "commit": {
             "sha": "a" * 40,
-            "author": {"name": "Test", "email": "test@example.com",
-                       "date": "2026-01-01T00:00:00Z"},
-            "committer": {"name": "Test", "email": "test@example.com",
-                          "date": "2026-01-01T00:00:00Z"},
+            "author": {
+                "name": "Test",
+                "email": "test@example.com",
+                "date": "2026-01-01T00:00:00Z",
+            },
+            "committer": {
+                "name": "Test",
+                "email": "test@example.com",
+                "date": "2026-01-01T00:00:00Z",
+            },
             "subject": "test commit",
             "message_hash": "sha256:" + _sha256("test"),
             "diff_hash": "sha256:" + _sha256("diff"),
@@ -85,6 +96,7 @@ def _make_valid_receipt(**overrides: Any) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Schema validation tests
 # ---------------------------------------------------------------------------
+
 
 class TestValidateReceiptSchema(unittest.TestCase):
     """Tests for validate_receipt_schema()."""
@@ -208,8 +220,16 @@ class TestValidateReceiptSchema(unittest.TestCase):
 
     def test_valid_authorship_classes(self):
         # Canonical forms + legacy forms accepted for backward compat
-        for cls in ("human", "ai_assisted", "ai_generated", "bot", "ai+bot",
-                     "ai-assisted", "ai-generated", "bot-generated"):
+        for cls in (
+            "human",
+            "ai_assisted",
+            "ai_generated",
+            "bot",
+            "ai+bot",
+            "ai-assisted",
+            "ai-generated",
+            "bot-generated",
+        ):
             r = _make_valid_receipt()
             r["ai_attestation"]["authorship_class"] = cls
             errors = validate_receipt_schema(r)
@@ -227,7 +247,9 @@ class TestValidateReceiptSchema(unittest.TestCase):
         r = _make_valid_receipt()
         r["provenance"]["repository"] = 42
         errors = validate_receipt_schema(r)
-        self.assertTrue(any("repository" in e and "string or null" in e for e in errors))
+        self.assertTrue(
+            any("repository" in e and "string or null" in e for e in errors)
+        )
 
     def test_invalid_tool_uri(self):
         r = _make_valid_receipt()
@@ -278,6 +300,7 @@ class TestValidateReceiptSchema(unittest.TestCase):
 # Schema validation integration with verify_receipt
 # ---------------------------------------------------------------------------
 
+
 class TestVerifyReceiptSchemaIntegration(unittest.TestCase):
     """Verify that verify_receipt() includes schema_errors in result."""
 
@@ -301,6 +324,7 @@ class TestVerifyReceiptSchemaIntegration(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # Conformance test vector runner
 # ---------------------------------------------------------------------------
+
 
 class TestConformanceVectors(unittest.TestCase):
     """Run all published conformance test vectors against verify_receipt()."""

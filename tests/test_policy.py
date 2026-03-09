@@ -8,7 +8,6 @@ SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
 import json
-import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -43,7 +42,8 @@ class TestPolicyPresets(unittest.TestCase):
     def test_enforcement_levels_valid(self):
         for name, preset in POLICY_PRESETS.items():
             self.assertIn(
-                preset["enforcement"], ENFORCEMENT_LEVELS,
+                preset["enforcement"],
+                ENFORCEMENT_LEVELS,
                 f"Preset '{name}' has invalid enforcement level",
             )
 
@@ -74,11 +74,15 @@ class TestLoadPolicy(unittest.TestCase):
     def test_load_from_file(self):
         with tempfile.TemporaryDirectory() as td:
             policy_path = Path(td) / "policy.json"
-            policy_path.write_text(json.dumps({
-                "enforcement": "hard-fail",
-                "require_signing": True,
-                "max_ai_percent": 25.0,
-            }))
+            policy_path.write_text(
+                json.dumps(
+                    {
+                        "enforcement": "hard-fail",
+                        "require_signing": True,
+                        "max_ai_percent": 25.0,
+                    }
+                )
+            )
             policy = load_policy(ledger_dir=td)
             self.assertEqual(policy["enforcement"], "hard-fail")
             self.assertTrue(policy["require_signing"])
@@ -87,10 +91,14 @@ class TestLoadPolicy(unittest.TestCase):
     def test_load_file_with_preset_overlay(self):
         with tempfile.TemporaryDirectory() as td:
             policy_path = Path(td) / "policy.json"
-            policy_path.write_text(json.dumps({
-                "preset": "strict",
-                "max_ai_percent": 30.0,  # override strict's 50%
-            }))
+            policy_path.write_text(
+                json.dumps(
+                    {
+                        "preset": "strict",
+                        "max_ai_percent": 30.0,  # override strict's 50%
+                    }
+                )
+            )
             policy = load_policy(ledger_dir=td)
             self.assertTrue(policy["require_signing"])  # from strict
             self.assertEqual(policy["max_ai_percent"], 30.0)  # overridden
@@ -164,27 +172,33 @@ class TestEvaluateReceiptPolicy(unittest.TestCase):
 
     def test_strict_no_repo_fails(self):
         policy = POLICY_PRESETS["strict"]
-        r = self._make_receipt(provenance={"repository": None, "tool": "x", "generator": "y"})
+        r = self._make_receipt(
+            provenance={"repository": None, "tool": "x", "generator": "y"}
+        )
         violations = evaluate_receipt_policy(r, policy, is_signed=True)
         rules = [v.rule for v in violations]
         self.assertIn("require_provenance_repo", rules)
 
     def test_disallowed_authorship_class(self):
         policy = {**POLICY_PRESETS["strict"]}
-        r = self._make_receipt(ai_attestation={
-            "authorship_class": "ai_generated",
-            "is_ai_authored": True,
-        })
+        r = self._make_receipt(
+            ai_attestation={
+                "authorship_class": "ai_generated",
+                "is_ai_authored": True,
+            }
+        )
         violations = evaluate_receipt_policy(r, policy, is_signed=True)
         rules = [v.rule for v in violations]
         self.assertIn("allowed_authorship_classes", rules)
 
     def test_permissive_allows_everything(self):
         policy = POLICY_PRESETS["permissive"]
-        r = self._make_receipt(ai_attestation={
-            "authorship_class": "ai_generated",
-            "is_ai_authored": True,
-        })
+        r = self._make_receipt(
+            ai_attestation={
+                "authorship_class": "ai_generated",
+                "is_ai_authored": True,
+            }
+        )
         violations = evaluate_receipt_policy(r, policy, is_signed=False)
         self.assertEqual(violations, [])
 
@@ -192,7 +206,9 @@ class TestEvaluateReceiptPolicy(unittest.TestCase):
         policy = {**POLICY_PRESETS["strict"]}
         r = self._make_receipt()
         violations = evaluate_receipt_policy(
-            r, policy, is_signed=True,
+            r,
+            policy,
+            is_signed=True,
             schema_errors=["some error"],
         )
         rules = [v.rule for v in violations]
@@ -218,7 +234,9 @@ class TestEvaluateLedgerPolicy(unittest.TestCase):
 
     def test_warn_enforcement_passes_with_violations(self):
         index = {"receipt_count": 100, "ai_commit_count": 90, "ai_percentage": 90.0}
-        policy = {**POLICY_PRESETS["permissive"]}  # enforcement=warn, max_ai_percent=100
+        policy = {
+            **POLICY_PRESETS["permissive"]
+        }  # enforcement=warn, max_ai_percent=100
         # Manually lower threshold to trigger violation
         policy["max_ai_percent"] = 50.0
         passed, msg, violations = evaluate_ledger_policy(index, policy)

@@ -8,6 +8,7 @@ post_mr_comment, GitLab Duo signal detection, and generator ID differentiation.
 Copyright 2025-2026 Invariant Systems, Inc.
 SPDX-License-Identifier: Apache-2.0
 """
+
 from __future__ import annotations
 
 import json
@@ -15,9 +16,8 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import aiir.cli as cli
 from aiir._core import CLI_VERSION
 from aiir._detect import detect_ai_signals
 from aiir._gitlab import (
@@ -38,6 +38,7 @@ from aiir._receipt import build_commit_receipt
 # Fixture helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_receipt(
     sha: str = "abc123def456",
     subject: str = "feat: add feature",
@@ -55,8 +56,16 @@ def _make_receipt(
         "version": CLI_VERSION,
         "commit": {
             "sha": sha,
-            "author": {"name": "Test", "email": "test@example.com", "date": "2026-01-01T00:00:00Z"},
-            "committer": {"name": "Test", "email": "test@example.com", "date": "2026-01-01T00:00:00Z"},
+            "author": {
+                "name": "Test",
+                "email": "test@example.com",
+                "date": "2026-01-01T00:00:00Z",
+            },
+            "committer": {
+                "name": "Test",
+                "email": "test@example.com",
+                "date": "2026-01-01T00:00:00Z",
+            },
             "subject": subject,
             "message_hash": "sha256:aaa",
             "diff_hash": "sha256:bbb",
@@ -65,8 +74,11 @@ def _make_receipt(
         },
         "ai_attestation": {
             "is_ai_authored": is_ai,
-            "signals_detected": signals or (["message_match:github copilot"] if is_ai else []),
-            "signal_count": len(signals or (["message_match:github copilot"] if is_ai else [])),
+            "signals_detected": signals
+            or (["message_match:github copilot"] if is_ai else []),
+            "signal_count": len(
+                signals or (["message_match:github copilot"] if is_ai else [])
+            ),
             "is_bot_authored": False,
             "bot_signals_detected": [],
             "bot_signal_count": 0,
@@ -89,18 +101,23 @@ def _make_receipt(
 # Test: GitLab Duo signal detection (Item 1)
 # ---------------------------------------------------------------------------
 
+
 class TestGitLabDuoDetection(unittest.TestCase):
     """Verify that GitLab Duo AI coding signals are detected."""
 
     def test_duo_code_suggestions_detected(self):
         """'gitlab duo' in commit message triggers AI signal."""
-        ai_signals, bot_signals = detect_ai_signals("feat: implement auth\n\nUsed GitLab Duo for code completion")
+        ai_signals, bot_signals = detect_ai_signals(
+            "feat: implement auth\n\nUsed GitLab Duo for code completion"
+        )
         self.assertTrue(len(ai_signals) > 0)
         self.assertTrue(any("gitlab duo" in s for s in ai_signals))
 
     def test_duo_code_suggestions_keyword(self):
         """'duo code suggestions' triggers AI signal."""
-        ai_signals, _ = detect_ai_signals("refactor: clean up\n\nDuo Code Suggestions helped here")
+        ai_signals, _ = detect_ai_signals(
+            "refactor: clean up\n\nDuo Code Suggestions helped here"
+        )
         self.assertTrue(len(ai_signals) > 0)
 
     def test_suggested_by_gitlab_duo(self):
@@ -110,23 +127,30 @@ class TestGitLabDuoDetection(unittest.TestCase):
 
     def test_duo_chat_detected(self):
         """'duo chat' in commit message triggers AI signal."""
-        ai_signals, _ = detect_ai_signals("docs: update readme\n\nGenerated with Duo Chat")
+        ai_signals, _ = detect_ai_signals(
+            "docs: update readme\n\nGenerated with Duo Chat"
+        )
         self.assertTrue(len(ai_signals) > 0)
 
     def test_duo_enterprise_detected(self):
         """'duo enterprise' in commit message triggers AI signal."""
-        ai_signals, _ = detect_ai_signals("feat: impl\n\nUsing Duo Enterprise for suggestions")
+        ai_signals, _ = detect_ai_signals(
+            "feat: impl\n\nUsing Duo Enterprise for suggestions"
+        )
         self.assertTrue(len(ai_signals) > 0)
 
     def test_co_authored_by_gitlab_duo(self):
         """Co-authored-by: GitLab Duo trailer detected."""
-        ai_signals, _ = detect_ai_signals("feat: new feature\n\nCo-authored-by: GitLab Duo")
+        ai_signals, _ = detect_ai_signals(
+            "feat: new feature\n\nCo-authored-by: GitLab Duo"
+        )
         self.assertTrue(len(ai_signals) > 0)
 
     def test_gitlab_duo_author_pattern(self):
         """gitlab-duo in author name triggers AI author signal."""
         ai_signals, _ = detect_ai_signals(
-            "feat: auto", author_name="gitlab-duo",
+            "feat: auto",
+            author_name="gitlab-duo",
         )
         self.assertTrue(len(ai_signals) > 0)
         self.assertTrue(any("gitlab-duo" in s for s in ai_signals))
@@ -134,21 +158,25 @@ class TestGitLabDuoDetection(unittest.TestCase):
     def test_duo_bot_author_pattern(self):
         """duo[bot] in author email triggers AI author signal."""
         ai_signals, _ = detect_ai_signals(
-            "feat: auto", author_email="duo[bot]@gitlab.com",
+            "feat: auto",
+            author_email="duo[bot]@gitlab.com",
         )
         self.assertTrue(len(ai_signals) > 0)
 
     def test_gitlab_bot_detected_as_bot(self):
         """gitlab-bot in committer name triggers bot signal (not AI)."""
         _, bot_signals = detect_ai_signals(
-            "chore: update deps", committer_name="gitlab-bot",
+            "chore: update deps",
+            committer_name="gitlab-bot",
         )
         self.assertTrue(len(bot_signals) > 0)
         self.assertTrue(any("gitlab-bot" in s for s in bot_signals))
 
     def test_duo_workflow_detected(self):
         """'duo workflow' keyword detected."""
-        ai_signals, _ = detect_ai_signals("feat: pipeline\n\nDuo Workflow automated this")
+        ai_signals, _ = detect_ai_signals(
+            "feat: pipeline\n\nDuo Workflow automated this"
+        )
         self.assertTrue(len(ai_signals) > 0)
 
 
@@ -156,12 +184,16 @@ class TestGitLabDuoDetection(unittest.TestCase):
 # Test: format_gitlab_summary (Item 2)
 # ---------------------------------------------------------------------------
 
+
 class TestFormatGitLabSummary(unittest.TestCase):
     """Test GitLab-flavored Markdown summary formatting."""
 
     def test_basic_summary(self):
         """Summary contains AIIR header and commit table."""
-        receipts = [_make_receipt(), _make_receipt(sha="def789", is_ai=False, authorship_class="human")]
+        receipts = [
+            _make_receipt(),
+            _make_receipt(sha="def789", is_ai=False, authorship_class="human"),
+        ]
         summary = format_gitlab_summary(receipts)
         self.assertIn("AIIR Receipt Summary", summary)
         self.assertIn("2", summary)  # 2 commits
@@ -203,6 +235,7 @@ class TestFormatGitLabSummary(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # Test: set_gitlab_ci_output (Item 2)
 # ---------------------------------------------------------------------------
+
 
 class TestSetGitLabCIOutput(unittest.TestCase):
     """Test dotenv artifact output for GitLab CI."""
@@ -246,12 +279,16 @@ class TestSetGitLabCIOutput(unittest.TestCase):
 # Test: format_gl_sast_report (Item 5)
 # ---------------------------------------------------------------------------
 
+
 class TestFormatGLSASTReport(unittest.TestCase):
     """Test GitLab SAST report generation."""
 
     def test_basic_report_structure(self):
         """SAST report has correct top-level structure."""
-        receipts = [_make_receipt(), _make_receipt(sha="def789", is_ai=False, authorship_class="human")]
+        receipts = [
+            _make_receipt(),
+            _make_receipt(sha="def789", is_ai=False, authorship_class="human"),
+        ]
         report = format_gl_sast_report(receipts)
         self.assertEqual(report["version"], "15.1.1")
         self.assertIn("scan", report)
@@ -299,6 +336,7 @@ class TestFormatGLSASTReport(unittest.TestCase):
 # Test: enforce_approval_rules (Item 8)
 # ---------------------------------------------------------------------------
 
+
 class TestEnforceApprovalRules(unittest.TestCase):
     """Test MR approval rule enforcement."""
 
@@ -317,12 +355,15 @@ class TestEnforceApprovalRules(unittest.TestCase):
 
     def test_api_call_made_above_threshold(self):
         """API call attempted when above threshold and in MR context."""
-        with patch.dict(os.environ, {
-            "CI_PROJECT_ID": "123",
-            "CI_MERGE_REQUEST_IID": "42",
-            "CI_API_V4_URL": "https://gitlab.example.com/api/v4",
-            "GITLAB_TOKEN": "test-token",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "CI_PROJECT_ID": "123",
+                "CI_MERGE_REQUEST_IID": "42",
+                "CI_API_V4_URL": "https://gitlab.example.com/api/v4",
+                "GITLAB_TOKEN": "test-token",
+            },
+        ):
             with patch("aiir._gitlab._gitlab_api_request") as mock_api:
                 mock_api.return_value = {"id": 99}
                 result = enforce_approval_rules(75.0, threshold=50.0)
@@ -332,13 +373,19 @@ class TestEnforceApprovalRules(unittest.TestCase):
 
     def test_api_failure_handled(self):
         """API failure is caught and returned gracefully."""
-        with patch.dict(os.environ, {
-            "CI_PROJECT_ID": "123",
-            "CI_MERGE_REQUEST_IID": "42",
-            "CI_API_V4_URL": "https://gitlab.example.com/api/v4",
-            "GITLAB_TOKEN": "test-token",
-        }):
-            with patch("aiir._gitlab._gitlab_api_request", side_effect=RuntimeError("API error")):
+        with patch.dict(
+            os.environ,
+            {
+                "CI_PROJECT_ID": "123",
+                "CI_MERGE_REQUEST_IID": "42",
+                "CI_API_V4_URL": "https://gitlab.example.com/api/v4",
+                "GITLAB_TOKEN": "test-token",
+            },
+        ):
+            with patch(
+                "aiir._gitlab._gitlab_api_request",
+                side_effect=RuntimeError("API error"),
+            ):
                 result = enforce_approval_rules(75.0, threshold=50.0)
                 self.assertEqual(result["action"], "failed")
                 self.assertIn("API error", result["error"])
@@ -347,6 +394,7 @@ class TestEnforceApprovalRules(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # Test: parse_webhook_event (Item 10)
 # ---------------------------------------------------------------------------
+
 
 class TestParseWebhookEvent(unittest.TestCase):
     """Test webhook event parsing."""
@@ -417,6 +465,7 @@ class TestParseWebhookEvent(unittest.TestCase):
 # Test: validate_webhook_token (Item 10)
 # ---------------------------------------------------------------------------
 
+
 class TestValidateWebhookToken(unittest.TestCase):
     """Test webhook token validation."""
 
@@ -446,6 +495,7 @@ class TestValidateWebhookToken(unittest.TestCase):
 # Test: build_receipts_graphql_query (Item 11)
 # ---------------------------------------------------------------------------
 
+
 class TestGraphQLQuery(unittest.TestCase):
     """Test GraphQL query building."""
 
@@ -474,6 +524,7 @@ class TestGraphQLQuery(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # Test: generate_dashboard_html (Item 9)
 # ---------------------------------------------------------------------------
+
 
 class TestGenerateDashboardHTML(unittest.TestCase):
     """Test GitLab Pages dashboard generation."""
@@ -512,12 +563,14 @@ class TestGenerateDashboardHTML(unittest.TestCase):
 # Test: Generator ID differentiation (Item 12)
 # ---------------------------------------------------------------------------
 
+
 class TestGeneratorID(unittest.TestCase):
     """Test that generator field differs by integration mode."""
 
     def _make_commit_info(self):
         """Build a minimal CommitInfo for testing."""
         from aiir._core import CommitInfo
+
         return CommitInfo(
             sha="a" * 40,
             author_name="Test",
@@ -569,6 +622,7 @@ class TestGeneratorID(unittest.TestCase):
 # Test: --gitlab-ci CLI flag (Item 3)
 # ---------------------------------------------------------------------------
 
+
 class TestGitLabCIFlag(unittest.TestCase):
     """Test --gitlab-ci CLI argument parsing."""
 
@@ -576,6 +630,7 @@ class TestGitLabCIFlag(unittest.TestCase):
         """--gitlab-ci flag is recognized by argparse."""
         # Just test that the argument is accepted without error.
         import argparse
+
         parser = argparse.ArgumentParser()
         parser.add_argument("--gitlab-ci", action="store_true")
         args = parser.parse_args(["--gitlab-ci"])
@@ -584,8 +639,11 @@ class TestGitLabCIFlag(unittest.TestCase):
     def test_gl_sast_report_flag(self):
         """--gl-sast-report flag is recognized."""
         import argparse
+
         parser = argparse.ArgumentParser()
-        parser.add_argument("--gl-sast-report", nargs="?", const="gl-sast-report.json", default=None)
+        parser.add_argument(
+            "--gl-sast-report", nargs="?", const="gl-sast-report.json", default=None
+        )
         args = parser.parse_args(["--gl-sast-report"])
         self.assertEqual(args.gl_sast_report, "gl-sast-report.json")
         args = parser.parse_args(["--gl-sast-report", "custom.json"])
@@ -595,6 +653,7 @@ class TestGitLabCIFlag(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # Test: SAST report written via CLI --gl-sast-report
 # ---------------------------------------------------------------------------
+
 
 class TestGLSASTReportCLI(unittest.TestCase):
     """Test end-to-end --gl-sast-report file output."""
@@ -619,6 +678,7 @@ class TestGLSASTReportCLI(unittest.TestCase):
 # Test: _safe_iso_now helper
 # ---------------------------------------------------------------------------
 
+
 class TestSafeIsoNow(unittest.TestCase):
     """Test the ISO timestamp helper."""
 
@@ -632,6 +692,7 @@ class TestSafeIsoNow(unittest.TestCase):
 # Test: post_mr_comment (Item 2 — mock API)
 # ---------------------------------------------------------------------------
 
+
 class TestPostMRComment(unittest.TestCase):
     """Test MR comment posting (mocked API)."""
 
@@ -640,20 +701,25 @@ class TestPostMRComment(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True):
             with self.assertRaises(RuntimeError) as ctx:
                 from aiir._gitlab import post_mr_comment
+
                 post_mr_comment("test comment")
             self.assertIn("merge request context", str(ctx.exception).lower())
 
     def test_comment_posted_with_mock(self):
         """Comment posted successfully via mocked API."""
-        with patch.dict(os.environ, {
-            "CI_PROJECT_ID": "123",
-            "CI_MERGE_REQUEST_IID": "42",
-            "CI_API_V4_URL": "https://gitlab.example.com/api/v4",
-            "GITLAB_TOKEN": "test-token",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "CI_PROJECT_ID": "123",
+                "CI_MERGE_REQUEST_IID": "42",
+                "CI_API_V4_URL": "https://gitlab.example.com/api/v4",
+                "GITLAB_TOKEN": "test-token",
+            },
+        ):
             with patch("aiir._gitlab._gitlab_api_request") as mock_api:
                 mock_api.return_value = {"id": 1, "body": "test"}
                 from aiir._gitlab import post_mr_comment
+
                 result = post_mr_comment("## AIIR Summary\n\nTest")
                 mock_api.assert_called_once()
                 self.assertEqual(result["id"], 1)

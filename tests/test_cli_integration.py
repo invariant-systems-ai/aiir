@@ -1,14 +1,13 @@
 """Tests for CLI parsing, integration, and UX."""
+
 from __future__ import annotations
 
 import json
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
-import uuid
 from pathlib import Path
 from unittest.mock import patch
 
@@ -39,9 +38,7 @@ class TestCLIParsing(unittest.TestCase):
             is_ai_authored=False,
         )
         receipt = cli.build_commit_receipt(commit)
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".json", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(receipt, f)
             tmppath = f.name
 
@@ -71,9 +68,7 @@ class TestCLIParsing(unittest.TestCase):
         )
         receipt = cli.build_commit_receipt(commit)
         receipt["commit"]["subject"] = "TAMPERED"
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".json", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(receipt, f)
             tmppath = f.name
 
@@ -104,8 +99,6 @@ class TestIntegrationWithGit(unittest.TestCase):
         self._git(["commit", "-m", "initial commit"])
 
     def tearDown(self):
-        import shutil
-
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def _git(self, args):
@@ -170,9 +163,7 @@ class TestIntegrationWithGit(unittest.TestCase):
             self._git(["add", f"file{i}.txt"])
             self._git(["commit", "-m", f"commit {i}"])
 
-        receipts = cli.generate_receipts_for_range(
-            "HEAD~3..HEAD", cwd=self.tmpdir
-        )
+        receipts = cli.generate_receipts_for_range("HEAD~3..HEAD", cwd=self.tmpdir)
         self.assertEqual(len(receipts), 3)
 
     def test_option_injection_rejected(self):
@@ -257,8 +248,16 @@ class TestFormatReceiptDetail(unittest.TestCase):
         "version": "1.0.10",
         "commit": {
             "sha": "abcdef1234567890abcdef1234567890abcdef12",
-            "author": {"name": "Jane Dev", "email": "jane@example.com", "date": "2026-03-08T10:00:00-05:00"},
-            "committer": {"name": "CI Bot", "email": "ci@example.com", "date": "2026-03-08T10:01:00-05:00"},
+            "author": {
+                "name": "Jane Dev",
+                "email": "jane@example.com",
+                "date": "2026-03-08T10:00:00-05:00",
+            },
+            "committer": {
+                "name": "CI Bot",
+                "email": "ci@example.com",
+                "date": "2026-03-08T10:01:00-05:00",
+            },
             "subject": "feat: add auth middleware",
             "message_hash": "sha256:aaa111",
             "diff_hash": "sha256:bbb222",
@@ -409,7 +408,9 @@ class TestRedactFilesFlag(unittest.TestCase):
         commit = self._make_commit_info()
         receipt = cli.build_commit_receipt(commit, redact_files=False)
         self.assertIn("files", receipt["commit"])
-        self.assertEqual(receipt["commit"]["files"], ["secret/internal.py", "another/path.py"])
+        self.assertEqual(
+            receipt["commit"]["files"], ["secret/internal.py", "another/path.py"]
+        )
         self.assertNotIn("files_redacted", receipt["commit"])
 
     def test_redact_files_omits_paths(self):
@@ -428,6 +429,7 @@ class TestExitCodeDocumentation(unittest.TestCase):
     def test_help_contains_exit_codes(self):
         """--help output should document exit codes."""
         import io
+
         buf = io.StringIO()
         try:
             with unittest.mock.patch("sys.stdout", buf):
@@ -448,6 +450,7 @@ class TestUnsignedReceiptWarning(unittest.TestCase):
     def test_unsigned_warning_printed(self, mock_gen, mock_root):
         """When not signing, a warning about unsigned receipts should appear."""
         import io
+
         mock_gen.return_value = {
             "type": "aiir.commit_receipt",
             "receipt_id": "g1-test",
@@ -467,6 +470,7 @@ class TestUnsignedReceiptWarning(unittest.TestCase):
     def test_quiet_suppresses_unsigned_warning(self, mock_gen, mock_root):
         """With --quiet, no unsigned warning should appear."""
         import io
+
         mock_gen.return_value = {
             "type": "aiir.commit_receipt",
             "receipt_id": "g1-test",
@@ -491,38 +495,51 @@ class TestStdoutClose(unittest.TestCase):
             subprocess.run(["git", "init", tmpdir], capture_output=True, check=True)
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.email", "test@test.com"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.name", "Test"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             Path(tmpdir, "file.txt").write_text("hello\n")
-            subprocess.run(["git", "-C", tmpdir, "add", "."], capture_output=True, check=True)
+            subprocess.run(
+                ["git", "-C", tmpdir, "add", "."], capture_output=True, check=True
+            )
             subprocess.run(
                 ["git", "-C", tmpdir, "commit", "-m", "first"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             # Create a second commit so there's a real parent
             Path(tmpdir, "file.txt").write_text("hello world\n")
-            subprocess.run(["git", "-C", tmpdir, "add", "."], capture_output=True, check=True)
+            subprocess.run(
+                ["git", "-C", tmpdir, "add", "."], capture_output=True, check=True
+            )
             subprocess.run(
                 ["git", "-C", tmpdir, "commit", "-m", "second"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             sha = subprocess.run(
                 ["git", "-C", tmpdir, "rev-parse", "HEAD"],
-                capture_output=True, text=True, check=True,
+                capture_output=True,
+                text=True,
+                check=True,
             ).stdout.strip()
             parent = subprocess.run(
                 ["git", "-C", tmpdir, "rev-parse", "HEAD~1"],
-                capture_output=True, text=True, check=True,
+                capture_output=True,
+                text=True,
+                check=True,
             ).stdout.strip()
             # Should succeed without fd leaks
             result = cli._hash_diff_streaming(parent, sha, cwd=tmpdir)
             self.assertTrue(result.startswith("sha256:"))
         finally:
             import shutil
+
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
@@ -554,6 +571,7 @@ class TestCfStripping(unittest.TestCase):
     def test_variation_selector_stripped(self):
         """Variation selectors (U+FE0F etc) are Mn/Me but Cf chars like U+200B must also go."""
         import unicodedata
+
         # Verify ZWS is category Cf
         self.assertEqual(unicodedata.category("\u200b"), "Cf")
         # Verify it's stripped in the field cleaning
@@ -563,7 +581,9 @@ class TestCfStripping(unittest.TestCase):
             committer_name="GitHub",
         )
         bot_found = any("dependabot" in s for s in bot_signals)
-        self.assertTrue(bot_found, f"ZWS (Cf) in bot name evaded detection: {bot_signals}")
+        self.assertTrue(
+            bot_found, f"ZWS (Cf) in bot name evaded detection: {bot_signals}"
+        )
 
 
 class TestTerminalEscapeSosDcs(unittest.TestCase):
@@ -617,6 +637,7 @@ class TestStripUrlCredentialsSafeFallback(unittest.TestCase):
         """If URL reconstruction fails, a safe placeholder is returned (not the original)."""
         # Monkeypatch urlunparse to raise
         import aiir._core as _core_mod
+
         original = _core_mod.urlunparse
 
         def broken_unparse(*args, **kwargs):
@@ -638,6 +659,7 @@ class TestMainCatchesOSError(unittest.TestCase):
     def test_oserror_returns_1(self, mock_root):
         """OSError during receipt generation should return exit code 1."""
         import io
+
         mock_root.side_effect = OSError("Permission denied: .git/HEAD")
         with unittest.mock.patch("sys.stderr", new_callable=io.StringIO) as mock_err:
             exit_code = cli.main([])
@@ -650,7 +672,9 @@ class TestReadmeStats(unittest.TestCase):
 
     def test_readme_stats_not_stale(self):
         """The README security line should have correct stats."""
-        readme = (Path(__file__).parent.parent / "README.md").read_text(encoding="utf-8")
+        readme = (Path(__file__).parent.parent / "README.md").read_text(
+            encoding="utf-8"
+        )
         # Should NOT have old stale numbers
         self.assertNotIn("73 security controls", readme)
         self.assertNotIn("285 tests", readme)
@@ -699,7 +723,9 @@ class TestThreatModelR03Consistency(unittest.TestCase):
 
     def test_r03_not_fully_mitigated(self):
         """R-03 should say 'Partially mitigated' since DREAD rates it Medium."""
-        tm = (Path(__file__).parent.parent / "THREAT_MODEL.md").read_text(encoding="utf-8")
+        tm = (Path(__file__).parent.parent / "THREAT_MODEL.md").read_text(
+            encoding="utf-8"
+        )
         # Find the R-03 row in Section 3.3
         for line in tm.split("\n"):
             if "| R-03 |" in line and "Unsigned receipts" in line:
@@ -720,6 +746,7 @@ class TestHashDiffStreamingCleanup(unittest.TestCase):
     def test_cleanup_comment_present(self):
         """The function should have exception cleanup logic."""
         import inspect
+
         source = inspect.getsource(cli._hash_diff_streaming)
         self.assertIn("proc.kill()", source)
         self.assertIn("try:", source)
@@ -735,21 +762,28 @@ class TestFriendlyPathError(unittest.TestCase):
         subprocess.run(["git", "init", self.tmpdir], capture_output=True, check=True)
         subprocess.run(
             ["git", "config", "user.email", "test@test.com"],
-            cwd=self.tmpdir, capture_output=True, check=True,
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
         subprocess.run(
             ["git", "config", "user.name", "Test User"],
-            cwd=self.tmpdir, capture_output=True, check=True,
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
         Path(self.tmpdir, "file.txt").write_text("hello")
-        subprocess.run(["git", "add", "."], cwd=self.tmpdir, capture_output=True, check=True)
+        subprocess.run(
+            ["git", "add", "."], cwd=self.tmpdir, capture_output=True, check=True
+        )
         subprocess.run(
             ["git", "commit", "-m", "init"],
-            cwd=self.tmpdir, capture_output=True, check=True,
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
 
     def tearDown(self):
-        import shutil
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def test_outside_cwd_output_shows_friendly_error(self):
@@ -758,6 +792,7 @@ class TestFriendlyPathError(unittest.TestCase):
         try:
             os.chdir(self.tmpdir)
             from io import StringIO
+
             captured_err = StringIO()
             with patch("sys.stderr", captured_err):
                 rc = cli.main(["--output", "/tmp/evil-outside-repo"])
@@ -775,6 +810,7 @@ class TestFriendlyPathError(unittest.TestCase):
         try:
             os.chdir(self.tmpdir)
             from io import StringIO
+
             captured_err = StringIO()
             with patch("sys.stderr", captured_err):
                 rc = cli.main(["--pretty", "--output", "/tmp/evil-outside-repo"])
@@ -819,12 +855,13 @@ class TestFriendlyErrors(unittest.TestCase):
     def test_not_a_git_repo_shows_emoji_and_hint(self):
         """Running aiir outside a git repo should show ❌ + 💡 hint."""
         import tempfile
-        import shutil
+
         tmpdir = tempfile.mkdtemp()
         old_cwd = os.getcwd()
         try:
             os.chdir(tmpdir)
             from io import StringIO
+
             captured_err = StringIO()
             with patch("sys.stderr", captured_err):
                 rc = cli.main([])
@@ -840,6 +877,7 @@ class TestFriendlyErrors(unittest.TestCase):
     def test_no_git_binary_shows_emoji_and_hint(self):
         """If git is not on PATH, should show ❌ + 💡 with install link."""
         from io import StringIO
+
         captured_err = StringIO()
         with patch("aiir.cli.get_repo_root", side_effect=FileNotFoundError("git")):
             with patch("sys.stderr", captured_err):
@@ -852,19 +890,37 @@ class TestFriendlyErrors(unittest.TestCase):
     def test_sign_without_output_shows_emoji_and_hint(self):
         """--sign without --output should show ❌ + 💡 Try: ..."""
         import tempfile
-        import shutil
+
         tmpdir = tempfile.mkdtemp()
         old_cwd = os.getcwd()
         try:
             os.chdir(tmpdir)
             subprocess.run(["git", "init"], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "config", "user.email", "t@t.t"], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "config", "user.name", "T"], cwd=tmpdir, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "t@t.t"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "T"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
             Path(tmpdir, "f.txt").write_text("x")
-            subprocess.run(["git", "add", "."], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "commit", "-m", "init"], cwd=tmpdir, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "add", "."], cwd=tmpdir, capture_output=True, check=True
+            )
+            subprocess.run(
+                ["git", "commit", "-m", "init"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
 
             from io import StringIO
+
             captured_err = StringIO()
             with patch("sys.stderr", captured_err):
                 rc = cli.main(["--sign"])
@@ -879,9 +935,13 @@ class TestFriendlyErrors(unittest.TestCase):
     def test_timeout_shows_emoji_and_hint(self):
         """Git timeout should show ❌ + 💡 hint."""
         from io import StringIO
+
         captured_err = StringIO()
         with patch("aiir.cli.get_repo_root", return_value="/tmp"):
-            with patch("aiir.cli.generate_receipt", side_effect=subprocess.TimeoutExpired("git", 300)):
+            with patch(
+                "aiir.cli.generate_receipt",
+                side_effect=subprocess.TimeoutExpired("git", 300),
+            ):
                 with patch("sys.stderr", captured_err):
                     rc = cli.main([])
         self.assertEqual(rc, 1)
@@ -896,6 +956,7 @@ class TestFriendlyNoReceipts(unittest.TestCase):
     def test_no_commits_ai_only_shows_hint(self):
         """--ai-only with no AI commits should show remove hint."""
         from io import StringIO
+
         captured_err = StringIO()
         with patch("aiir.cli.get_repo_root", return_value="/tmp"):
             with patch("aiir.cli.generate_receipt", return_value=None):
@@ -909,6 +970,7 @@ class TestFriendlyNoReceipts(unittest.TestCase):
     def test_no_commits_no_flags_shows_hint(self):
         """No commits (no flags) should suggest checking git log."""
         from io import StringIO
+
         captured_err = StringIO()
         with patch("aiir.cli.get_repo_root", return_value="/tmp"):
             with patch("aiir.cli.generate_receipt", return_value=None):
@@ -926,6 +988,7 @@ class TestDidYouMean(unittest.TestCase):
     def test_prettty_suggests_pretty(self):
         """--prettty should suggest --pretty."""
         from io import StringIO
+
         captured_err = StringIO()
         with self.assertRaises(SystemExit) as ctx:
             with patch("sys.stderr", captured_err):
@@ -937,6 +1000,7 @@ class TestDidYouMean(unittest.TestCase):
     def test_verfy_suggests_verify(self):
         """--verfy should suggest --verify."""
         from io import StringIO
+
         captured_err = StringIO()
         with self.assertRaises(SystemExit) as ctx:
             with patch("sys.stderr", captured_err):
@@ -958,6 +1022,7 @@ class TestHelpEpilog(unittest.TestCase):
     def test_help_shows_examples(self):
         """--help should contain example commands."""
         from io import StringIO
+
         captured_out = StringIO()
         with self.assertRaises(SystemExit) as ctx:
             with patch("sys.stdout", captured_out):
@@ -975,19 +1040,37 @@ class TestFriendlySummary(unittest.TestCase):
     def test_summary_has_checkmark(self):
         """Summary line should contain ✅."""
         import tempfile
-        import shutil
+
         tmpdir = tempfile.mkdtemp()
         old_cwd = os.getcwd()
         try:
             os.chdir(tmpdir)
             subprocess.run(["git", "init"], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "config", "user.email", "t@t.t"], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "config", "user.name", "T"], cwd=tmpdir, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "t@t.t"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "T"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
             Path(tmpdir, "f.txt").write_text("x")
-            subprocess.run(["git", "add", "."], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "commit", "-m", "init"], cwd=tmpdir, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "add", "."], cwd=tmpdir, capture_output=True, check=True
+            )
+            subprocess.run(
+                ["git", "commit", "-m", "init"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
 
             from io import StringIO
+
             captured_err = StringIO()
             with patch("sys.stderr", captured_err):
                 rc = cli.main(["--pretty"])
@@ -1002,19 +1085,37 @@ class TestFriendlySummary(unittest.TestCase):
     def test_unsigned_tip_has_emoji(self):
         """Unsigned-receipt tip should contain 📝."""
         import tempfile
-        import shutil
+
         tmpdir = tempfile.mkdtemp()
         old_cwd = os.getcwd()
         try:
             os.chdir(tmpdir)
             subprocess.run(["git", "init"], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "config", "user.email", "t@t.t"], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "config", "user.name", "T"], cwd=tmpdir, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "t@t.t"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "T"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
             Path(tmpdir, "f.txt").write_text("x")
-            subprocess.run(["git", "add", "."], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "commit", "-m", "init"], cwd=tmpdir, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "add", "."], cwd=tmpdir, capture_output=True, check=True
+            )
+            subprocess.run(
+                ["git", "commit", "-m", "init"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
 
             from io import StringIO
+
             captured_err = StringIO()
             with patch("sys.stderr", captured_err):
                 rc = cli.main(["--pretty"])
@@ -1033,21 +1134,39 @@ class TestFriendlyVerify(unittest.TestCase):
     def test_verify_pass_says_all_good(self):
         """Successful verify should say 'All good!'."""
         import tempfile
-        import shutil
+
         tmpdir = tempfile.mkdtemp()
         old_cwd = os.getcwd()
         try:
             os.chdir(tmpdir)
             subprocess.run(["git", "init"], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "config", "user.email", "t@t.t"], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "config", "user.name", "T"], cwd=tmpdir, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "t@t.t"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "T"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
             Path(tmpdir, "f.txt").write_text("x")
-            subprocess.run(["git", "add", "."], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "commit", "-m", "init"], cwd=tmpdir, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "add", "."], cwd=tmpdir, capture_output=True, check=True
+            )
+            subprocess.run(
+                ["git", "commit", "-m", "init"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
 
             # Generate a receipt to a file
             out_dir = Path(tmpdir, ".receipts")
             from io import StringIO
+
             captured_err = StringIO()
             with patch("sys.stderr", captured_err):
                 rc = cli.main(["--output", str(out_dir)])
@@ -1071,12 +1190,15 @@ class TestFriendlyVerify(unittest.TestCase):
     def test_verify_fail_shows_hint(self):
         """Failed verify should show 💡 hint."""
         import tempfile
-        import shutil
+
         tmpdir = tempfile.mkdtemp()
         try:
             tampered = Path(tmpdir, "bad.json")
-            tampered.write_text('{"type":"aiir.commit_receipt","schema":"aiir/commit_receipt.v1","version":"1.0.0","commit":{"sha":"abc"},"ai_attestation":{},"provenance":{},"receipt_id":"g1-wrong","content_hash":"sha256:wrong"}')
+            tampered.write_text(
+                '{"type":"aiir.commit_receipt","schema":"aiir/commit_receipt.v1","version":"1.0.0","commit":{"sha":"abc"},"ai_attestation":{},"provenance":{},"receipt_id":"g1-wrong","content_hash":"sha256:wrong"}'
+            )
             from io import StringIO
+
             captured_err = StringIO()
             with patch("sys.stderr", captured_err):
                 rc = cli.main(["--verify", str(tampered)])
@@ -1100,7 +1222,6 @@ class TestVerifyPathBoundary(unittest.TestCase):
     def test_verify_outside_cwd_is_allowed(self):
         """CLI --verify should accept valid receipts from any readable path."""
         import tempfile
-        import shutil
 
         parent = tempfile.mkdtemp()
         project_dir = Path(parent, "project")
@@ -1112,15 +1233,34 @@ class TestVerifyPathBoundary(unittest.TestCase):
             "type": "aiir.commit_receipt",
             "schema": "aiir/commit_receipt.v1",
             "version": "1.0.0",
-            "commit": {"sha": "a" * 40, "author": {}, "committer": {},
-                       "subject": "test", "message_hash": "", "diff_hash": "",
-                       "files_changed": 0, "files": []},
-            "ai_attestation": {"is_ai_authored": False, "signals_detected": [],
-                               "signal_count": 0, "detection_method": "heuristic_v2"},
+            "commit": {
+                "sha": "a" * 40,
+                "author": {},
+                "committer": {},
+                "subject": "test",
+                "message_hash": "",
+                "diff_hash": "",
+                "files_changed": 0,
+                "files": [],
+            },
+            "ai_attestation": {
+                "is_ai_authored": False,
+                "signals_detected": [],
+                "signal_count": 0,
+                "detection_method": "heuristic_v2",
+            },
             "provenance": {"repository": "", "tool": "", "generator": "test"},
         }
         from aiir._core import _canonical_json, _sha256
-        core_keys = {"type", "schema", "version", "commit", "ai_attestation", "provenance"}
+
+        core_keys = {
+            "type",
+            "schema",
+            "version",
+            "commit",
+            "ai_attestation",
+            "provenance",
+        }
         core = {k: v for k, v in receipt.items() if k in core_keys}
         core_json = _canonical_json(core)
         receipt["content_hash"] = "sha256:" + _sha256(core_json)
@@ -1136,8 +1276,10 @@ class TestVerifyPathBoundary(unittest.TestCase):
             os.chdir(project_dir)
             # Should succeed — CLI verify is read-only, no CWD restriction
             result = cli.verify_receipt_file(str(outside_file))
-            self.assertTrue(result["valid"],
-                            f"CLI --verify should allow outside-CWD reads: {result}")
+            self.assertTrue(
+                result["valid"],
+                f"CLI --verify should allow outside-CWD reads: {result}",
+            )
         finally:
             os.chdir(old_cwd)
             shutil.rmtree(parent, ignore_errors=True)
@@ -1146,7 +1288,6 @@ class TestVerifyPathBoundary(unittest.TestCase):
         """MCP verify MUST reject outside-CWD paths (F4-02 oracle prevention)."""
         from aiir.mcp_server import _safe_verify_path
         import tempfile
-        import shutil
 
         parent = tempfile.mkdtemp()
         project_dir = Path(parent, "project")
@@ -1155,7 +1296,7 @@ class TestVerifyPathBoundary(unittest.TestCase):
         outside_dir.mkdir()
 
         outside_file = outside_dir / "receipt.json"
-        outside_file.write_text('{}')
+        outside_file.write_text("{}")
 
         old_cwd = os.getcwd()
         try:
@@ -1174,6 +1315,7 @@ class TestTerminalEscapeInErrors(unittest.TestCase):
     def test_friendly_parser_strips_escapes_from_bad_flag(self):
         """ANSI escapes in an unrecognised flag must not appear in stderr."""
         from io import StringIO
+
         captured_err = StringIO()
         with patch("sys.stderr", captured_err):
             try:
@@ -1186,26 +1328,47 @@ class TestTerminalEscapeInErrors(unittest.TestCase):
 
     def test_range_hint_strips_escapes(self):
         """ANSI escapes in --range spec must not appear in hint message."""
-        import tempfile, shutil
+        import tempfile
+
         tmpdir = tempfile.mkdtemp()
         old_cwd = os.getcwd()
         try:
             os.chdir(tmpdir)
             subprocess.run(["git", "init"], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "config", "user.email", "t@t.t"], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "config", "user.name", "T"], cwd=tmpdir, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "t@t.t"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "T"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
             Path(tmpdir, "f.txt").write_text("x")
-            subprocess.run(["git", "add", "."], cwd=tmpdir, capture_output=True, check=True)
-            subprocess.run(["git", "commit", "-m", "init"], cwd=tmpdir, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "add", "."], cwd=tmpdir, capture_output=True, check=True
+            )
+            subprocess.run(
+                ["git", "commit", "-m", "init"],
+                cwd=tmpdir,
+                capture_output=True,
+                check=True,
+            )
 
             from io import StringIO
+
             captured_err = StringIO()
             # An empty range + escape in the spec
             with patch("sys.stderr", captured_err):
                 rc = cli.main(["--range", "HEAD..HEAD\x1b[31mevil\x1b[0m"])
             stderr_text = captured_err.getvalue()
             # Whether it errors or shows "nothing to receipt", ESC must be gone
-            self.assertNotIn("\x1b", stderr_text, "ANSI escape must be stripped from range hint")
+            self.assertNotIn(
+                "\x1b", stderr_text, "ANSI escape must be stripped from range hint"
+            )
         finally:
             os.chdir(old_cwd)
             shutil.rmtree(tmpdir, ignore_errors=True)
@@ -1222,7 +1385,9 @@ class TestTerminalEscapeInErrors(unittest.TestCase):
                 cli._run_git(["log", "HEAD"])
                 self.fail("Should have raised RuntimeError")
             except RuntimeError as e:
-                self.assertNotIn("\x1b", str(e), "ANSI escape must be stripped from git error")
+                self.assertNotIn(
+                    "\x1b", str(e), "ANSI escape must be stripped from git error"
+                )
 
 
 class TestConsistentFriendlyErrors(unittest.TestCase):
@@ -1231,6 +1396,7 @@ class TestConsistentFriendlyErrors(unittest.TestCase):
     def test_no_match_still_shows_emoji(self):
         """A totally wrong flag should still get the ❌ prefix, not default argparse error."""
         from io import StringIO
+
         captured_err = StringIO()
         with patch("sys.stderr", captured_err):
             try:
@@ -1243,6 +1409,7 @@ class TestConsistentFriendlyErrors(unittest.TestCase):
     def test_close_match_shows_emoji_and_hint(self):
         """A close-but-wrong flag should show ❌ + 💡."""
         from io import StringIO
+
         captured_err = StringIO()
         with patch("sys.stderr", captured_err):
             try:
@@ -1259,16 +1426,20 @@ class TestEmptyRepoMessage(unittest.TestCase):
     """R20-UX-02: Empty repo (no commits) must show a friendly message."""
 
     @patch("aiir.cli.get_repo_root", return_value="/fake")
-    @patch("aiir.cli.generate_receipt", side_effect=RuntimeError(
-        "git log failed: unknown revision or path"
-    ))
+    @patch(
+        "aiir.cli.generate_receipt",
+        side_effect=RuntimeError("git log failed: unknown revision or path"),
+    )
     def test_empty_repo_shows_friendly_message(self, mock_gen, mock_root):
         """Empty repo error must NOT leak raw git stderr."""
         import io
+
         captured_err = io.StringIO()
-        with patch("sys.stderr", captured_err), \
-             patch("sys.stdout", io.StringIO()), \
-             patch("sys.argv", ["aiir"]):
+        with (
+            patch("sys.stderr", captured_err),
+            patch("sys.stdout", io.StringIO()),
+            patch("sys.argv", ["aiir"]),
+        ):
             code = cli.main()
 
         err = captured_err.getvalue()
@@ -1280,16 +1451,20 @@ class TestEmptyRepoMessage(unittest.TestCase):
         self.assertNotIn("ambiguous argument", err)
 
     @patch("aiir.cli.get_repo_root", return_value="/fake")
-    @patch("aiir.cli.generate_receipt", side_effect=RuntimeError(
-        "git log failed: bad default revision 'HEAD'"
-    ))
+    @patch(
+        "aiir.cli.generate_receipt",
+        side_effect=RuntimeError("git log failed: bad default revision 'HEAD'"),
+    )
     def test_bad_default_revision_friendly(self, mock_gen, mock_root):
         """'bad default revision' variant also gets a friendly message."""
         import io
+
         captured_err = io.StringIO()
-        with patch("sys.stderr", captured_err), \
-             patch("sys.stdout", io.StringIO()), \
-             patch("sys.argv", ["aiir"]):
+        with (
+            patch("sys.stderr", captured_err),
+            patch("sys.stdout", io.StringIO()),
+            patch("sys.argv", ["aiir"]),
+        ):
             code = cli.main()
 
         err = captured_err.getvalue()
@@ -1297,20 +1472,23 @@ class TestEmptyRepoMessage(unittest.TestCase):
         self.assertIn("No commits yet", err)
 
     @patch("aiir.cli.get_repo_root", return_value="/fake")
-    @patch("aiir.cli.generate_receipt", side_effect=RuntimeError(
-        "git log failed: permission denied"
-    ))
+    @patch(
+        "aiir.cli.generate_receipt",
+        side_effect=RuntimeError("git log failed: permission denied"),
+    )
     def test_non_empty_repo_error_still_shown(self, mock_gen, mock_root):
         """Other RuntimeErrors must still display the actual error message."""
         import io
+
         captured_err = io.StringIO()
-        with patch("sys.stderr", captured_err), \
-             patch("sys.stdout", io.StringIO()), \
-             patch("sys.argv", ["aiir"]):
+        with (
+            patch("sys.stderr", captured_err),
+            patch("sys.stdout", io.StringIO()),
+            patch("sys.argv", ["aiir"]),
+        ):
             code = cli.main()
 
         err = captured_err.getvalue()
         self.assertEqual(code, 1)
         self.assertIn("permission denied", err)
         self.assertNotIn("No commits yet", err)
-

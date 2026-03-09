@@ -15,6 +15,7 @@ Reference: https://www.unicode.org/reports/tr39/ (Unicode Technical Standard #39
 Copyright 2026 Invariant Systems, Inc.
 SPDX-License-Identifier: Apache-2.0
 """
+
 from __future__ import annotations
 
 import re
@@ -85,7 +86,7 @@ def format_dict(entries: list[tuple[int, str, str, str]]) -> str:
         "# Unicode TR39 confusable map — characters that NFKC does NOT resolve.",
         "# Source: Unicode Security Mechanisms for UTS #39, confusables.txt",
         "# URL: https://www.unicode.org/Public/security/latest/confusables.txt",
-        f"# Version: 17.0.0 (2025-07-22)",
+        "# Version: 17.0.0 (2025-07-22)",
         f"# Scope: {len(entries)} single-codepoint → ASCII letter/digit mappings across",
         f"#         {len(scripts)} scripts (Cyrillic, Greek, Armenian, Cherokee, Coptic,",
         f"#         Lisu, Warang Citi, Mathematical, and {len(scripts) - 8}+ others).",

@@ -21,7 +21,12 @@ from aiir._core import (
 def set_github_output(key: str, value: str) -> None:
     """Set a GitHub Actions output variable."""
     # Reject newlines, '=', control chars, and '<<' in keys
-    if not key or any(c in key for c in '\n\r=') or any(ord(c) < 0x20 for c in key) or '<<' in key:
+    if (
+        not key
+        or any(c in key for c in "\n\r=")
+        or any(ord(c) < 0x20 for c in key)
+        or "<<" in key
+    ):
         raise ValueError(
             f"Invalid GitHub output key (contains forbidden characters): {key!r}"
         )
@@ -36,7 +41,8 @@ def set_github_output(key: str, value: str) -> None:
         with open(output_file, "a", encoding="utf-8") as f:
             # Use heredoc for values with control chars or '<<'
             needs_heredoc = (
-                "\n" in value or "\r" in value
+                "\n" in value
+                or "\r" in value
                 or any(ord(c) < 0x20 for c in value)
                 or "<<" in value
             )
@@ -54,7 +60,9 @@ def set_github_summary(markdown: str) -> None:
     if len(md_bytes) > MAX_SUMMARY_SIZE:
         _SUFFIX = b"\n\n*(truncated \xe2\x80\x94 exceeded 1 MB limit)*"
         budget = MAX_SUMMARY_SIZE - len(_SUFFIX)
-        markdown = md_bytes[:budget].decode("utf-8", errors="ignore") + _SUFFIX.decode("utf-8")
+        markdown = md_bytes[:budget].decode("utf-8", errors="ignore") + _SUFFIX.decode(
+            "utf-8"
+        )
     summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_file:
         with open(summary_file, "a", encoding="utf-8", newline="") as f:

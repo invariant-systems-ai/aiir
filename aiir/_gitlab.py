@@ -20,14 +20,12 @@ import hashlib
 import json
 import logging
 import os
-import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from aiir._core import (
     CLI_VERSION,
-    MAX_SUMMARY_SIZE,
     _sanitize_md,
     _strip_terminal_escapes,
 )
@@ -53,7 +51,10 @@ _API_TIMEOUT = 30
 # CI/CD Output: dotenv artifact for downstream variable passing
 # ---------------------------------------------------------------------------
 
-def set_gitlab_ci_output(key: str, value: str, dotenv_path: Optional[str] = None) -> None:
+
+def set_gitlab_ci_output(
+    key: str, value: str, dotenv_path: Optional[str] = None
+) -> None:
     """Write a key=value pair to a dotenv artifact file for downstream jobs.
 
     GitLab CI passes variables between jobs via dotenv artifacts:
@@ -84,6 +85,7 @@ def set_gitlab_ci_output(key: str, value: str, dotenv_path: Optional[str] = None
 # ---------------------------------------------------------------------------
 # MR Comment posting
 # ---------------------------------------------------------------------------
+
 
 def _gitlab_api_request(
     method: str,
@@ -116,7 +118,9 @@ def _gitlab_api_request(
             "GitLab API URL not available. Set CI_API_V4_URL or run in GitLab CI."
         )
 
-    auth_token = token or os.environ.get("GITLAB_TOKEN") or os.environ.get("CI_JOB_TOKEN")
+    auth_token = (
+        token or os.environ.get("GITLAB_TOKEN") or os.environ.get("CI_JOB_TOKEN")
+    )
     if not auth_token:
         raise RuntimeError(
             "No GitLab authentication token. Set GITLAB_TOKEN or run in GitLab CI "
@@ -136,7 +140,7 @@ def _gitlab_api_request(
     req = Request(url, data=data, headers=headers, method=method)
 
     try:
-        with urlopen(req, timeout=_API_TIMEOUT) as resp:
+        with urlopen(req, timeout=_API_TIMEOUT) as resp:  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected
             return json.loads(resp.read().decode("utf-8"))
     except HTTPError as e:
         error_body = ""
@@ -189,7 +193,9 @@ def post_mr_comment(
     if len(comment.encode("utf-8", errors="replace")) > _MAX_COMMENT_SIZE:
         suffix = "\n\n*(truncated — exceeded 512 KB limit)*"
         budget = _MAX_COMMENT_SIZE - len(suffix.encode("utf-8"))
-        comment = comment.encode("utf-8")[:budget].decode("utf-8", errors="ignore") + suffix
+        comment = (
+            comment.encode("utf-8")[:budget].decode("utf-8", errors="ignore") + suffix
+        )
 
     return _gitlab_api_request(
         "POST",
@@ -203,6 +209,7 @@ def post_mr_comment(
 # ---------------------------------------------------------------------------
 # GitLab-flavored Markdown summary
 # ---------------------------------------------------------------------------
+
 
 def format_gitlab_summary(receipts: List[Dict[str, Any]]) -> str:
     """Format receipts as a GitLab-flavored Markdown summary.
@@ -234,10 +241,12 @@ def format_gitlab_summary(receipts: List[Dict[str, Any]]) -> str:
     ]
 
     # Summary table
-    lines.extend([
-        "| Commit | Subject | Class | Receipt ID |",
-        "|--------|---------|-------|-----------|",
-    ])
+    lines.extend(
+        [
+            "| Commit | Subject | Class | Receipt ID |",
+            "|--------|---------|-------|-----------|",
+        ]
+    )
 
     for r in receipts:
         commit = r.get("commit", {})
@@ -256,12 +265,14 @@ def format_gitlab_summary(receipts: List[Dict[str, Any]]) -> str:
         lines.append(f"| `{sha_short}` | {subject} | {icon} {authorship} | `{rid}` |")
 
     # Detailed view in collapsible block
-    lines.extend([
-        "",
-        "<details>",
-        "<summary>📋 Detailed receipt information</summary>",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "<details>",
+            "<summary>📋 Detailed receipt information</summary>",
+            "",
+        ]
+    )
 
     for r in receipts:
         commit = r.get("commit", {})
@@ -271,20 +282,24 @@ def format_gitlab_summary(receipts: List[Dict[str, Any]]) -> str:
         if not isinstance(ai, dict):
             ai = {}
         sha = commit.get("sha", "unknown")[:12]
-        lines.extend([
-            f"**{sha}** — {_sanitize_md(commit.get('subject', '')[:80])}",
-            f"- Authorship: `{ai.get('authorship_class', 'unknown')}`",
-            f"- AI signals: {ai.get('signal_count', 0)}",
-            f"- Content hash: `{r.get('content_hash', '')[:32]}…`",
-            f"- Receipt ID: `{r.get('receipt_id', '')}`",
-            "",
-        ])
+        lines.extend(
+            [
+                f"**{sha}** — {_sanitize_md(commit.get('subject', '')[:80])}",
+                f"- Authorship: `{ai.get('authorship_class', 'unknown')}`",
+                f"- AI signals: {ai.get('signal_count', 0)}",
+                f"- Content hash: `{r.get('content_hash', '')[:32]}…`",
+                f"- Receipt ID: `{r.get('receipt_id', '')}`",
+                "",
+            ]
+        )
 
-    lines.extend([
-        "</details>",
-        "",
-        f"*Generated by [AIIR](https://github.com/invariant-systems-ai/aiir) v{CLI_VERSION}*",
-    ])
+    lines.extend(
+        [
+            "</details>",
+            "",
+            f"*Generated by [AIIR](https://github.com/invariant-systems-ai/aiir) v{CLI_VERSION}*",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -292,6 +307,7 @@ def format_gitlab_summary(receipts: List[Dict[str, Any]]) -> str:
 # ---------------------------------------------------------------------------
 # Security Dashboard: gl-sast-report.json
 # ---------------------------------------------------------------------------
+
 
 def format_gl_sast_report(receipts: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Format receipts as a GitLab SAST report for Security Dashboard.
@@ -332,45 +348,49 @@ def format_gl_sast_report(receipts: List[Dict[str, Any]]) -> Dict[str, Any]:
             f"aiir:{sha}:{r.get('content_hash', '')}".encode()
         ).hexdigest()
 
-        vulnerabilities.append({
-            "id": vuln_id,
-            "category": "sast",
-            "name": f"AI-authored commit: {sha[:8]}",
-            "message": (
-                f"Commit {sha[:12]} ({subject}) is classified as "
-                f"'{authorship_class}' with {len(signals)} AI signal(s) "
-                f"detected: {signal_str}"
-            ),
-            "description": (
-                f"AIIR detected AI authorship signals in commit {sha}. "
-                f"Authorship class: {authorship_class}. "
-                f"This is an informational finding for audit trail purposes. "
-                f"Receipt ID: {r.get('receipt_id', 'unknown')}."
-            ),
-            "severity": "Info",
-            "confidence": "High" if len(signals) > 1 else "Medium",
-            "scanner": {
-                "id": "aiir",
-                "name": "AIIR — AI Integrity Receipts",
-                "version": CLI_VERSION,
-                "vendor": {
-                    "name": "Invariant Systems, Inc.",
-                },
-                "url": "https://github.com/invariant-systems-ai/aiir",
-            },
-            "identifiers": [
-                {
-                    "type": "aiir_receipt",
-                    "name": f"AIIR Receipt {r.get('receipt_id', '')[:24]}",
-                    "value": r.get("receipt_id", ""),
+        vulnerabilities.append(
+            {
+                "id": vuln_id,
+                "category": "sast",
+                "name": f"AI-authored commit: {sha[:8]}",
+                "message": (
+                    f"Commit {sha[:12]} ({subject}) is classified as "
+                    f"'{authorship_class}' with {len(signals)} AI signal(s) "
+                    f"detected: {signal_str}"
+                ),
+                "description": (
+                    f"AIIR detected AI authorship signals in commit {sha}. "
+                    f"Authorship class: {authorship_class}. "
+                    f"This is an informational finding for audit trail purposes. "
+                    f"Receipt ID: {r.get('receipt_id', 'unknown')}."
+                ),
+                "severity": "Info",
+                "confidence": "High" if len(signals) > 1 else "Medium",
+                "scanner": {
+                    "id": "aiir",
+                    "name": "AIIR — AI Integrity Receipts",
+                    "version": CLI_VERSION,
+                    "vendor": {
+                        "name": "Invariant Systems, Inc.",
+                    },
                     "url": "https://github.com/invariant-systems-ai/aiir",
-                }
-            ],
-            "location": {
-                "file": commit.get("files", ["(redacted)"])[0] if isinstance(commit.get("files"), list) and commit.get("files") else "(see receipt)",
-                "start_line": 1,
-            },
-        })
+                },
+                "identifiers": [
+                    {
+                        "type": "aiir_receipt",
+                        "name": f"AIIR Receipt {r.get('receipt_id', '')[:24]}",
+                        "value": r.get("receipt_id", ""),
+                        "url": "https://github.com/invariant-systems-ai/aiir",
+                    }
+                ],
+                "location": {
+                    "file": commit.get("files", ["(redacted)"])[0]
+                    if isinstance(commit.get("files"), list) and commit.get("files")
+                    else "(see receipt)",
+                    "start_line": 1,
+                },
+            }
+        )
 
     return {
         "version": "15.1.1",
@@ -406,14 +426,14 @@ def format_gl_sast_report(receipts: List[Dict[str, Any]]) -> Dict[str, Any]:
 def _safe_iso_now() -> str:
     """Return current UTC time in ISO 8601 format (no external deps)."""
     import datetime
-    return datetime.datetime.now(datetime.timezone.utc).strftime(
-        "%Y-%m-%dT%H:%M:%S"
-    )
+
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
 
 
 # ---------------------------------------------------------------------------
 # MR Approval Rules enforcement
 # ---------------------------------------------------------------------------
+
 
 def enforce_approval_rules(
     ai_percent: float,
@@ -495,6 +515,7 @@ def enforce_approval_rules(
 # Webhook handler: server-side receipt generation
 # ---------------------------------------------------------------------------
 
+
 def parse_webhook_event(
     payload: Dict[str, Any],
 ) -> Optional[Dict[str, str]]:
@@ -525,7 +546,9 @@ def parse_webhook_event(
         return {
             "event_type": "push",
             "project_id": str(project.get("id", "")),
-            "project_path": _strip_terminal_escapes(str(project.get("path_with_namespace", ""))),
+            "project_path": _strip_terminal_escapes(
+                str(project.get("path_with_namespace", ""))
+            ),
             "ref": _strip_terminal_escapes(str(payload.get("ref", ""))),
             "before": _strip_terminal_escapes(str(payload.get("before", ""))),
             "after": _strip_terminal_escapes(str(payload.get("after", ""))),
@@ -542,14 +565,25 @@ def parse_webhook_event(
         return {
             "event_type": "merge_request",
             "project_id": str(project.get("id", "")),
-            "project_path": _strip_terminal_escapes(str(project.get("path_with_namespace", ""))),
+            "project_path": _strip_terminal_escapes(
+                str(project.get("path_with_namespace", ""))
+            ),
             "mr_iid": str(attrs.get("iid", "")),
             "mr_action": _strip_terminal_escapes(str(attrs.get("action", ""))),
-            "source_branch": _strip_terminal_escapes(str(attrs.get("source_branch", ""))),
-            "target_branch": _strip_terminal_escapes(str(attrs.get("target_branch", ""))),
+            "source_branch": _strip_terminal_escapes(
+                str(attrs.get("source_branch", ""))
+            ),
+            "target_branch": _strip_terminal_escapes(
+                str(attrs.get("target_branch", ""))
+            ),
             "before": _strip_terminal_escapes(str(attrs.get("oldrev", ""))),
-            "after": _strip_terminal_escapes(str(attrs.get("last_commit", {}).get("id", "")
-                                                  if isinstance(attrs.get("last_commit"), dict) else "")),
+            "after": _strip_terminal_escapes(
+                str(
+                    attrs.get("last_commit", {}).get("id", "")
+                    if isinstance(attrs.get("last_commit"), dict)
+                    else ""
+                )
+            ),
         }
 
     # Unrecognized event type
@@ -573,6 +607,7 @@ def validate_webhook_token(
         True if valid, False otherwise.
     """
     import hmac
+
     expected = expected_token or os.environ.get("AIIR_WEBHOOK_SECRET", "")
     if not expected:
         logger.warning("AIIR_WEBHOOK_SECRET not set — webhook validation disabled")
@@ -583,6 +618,7 @@ def validate_webhook_token(
 # ---------------------------------------------------------------------------
 # GraphQL: receipt data queries
 # ---------------------------------------------------------------------------
+
 
 def build_receipts_graphql_query(
     project_path: str,
@@ -662,7 +698,9 @@ def query_gitlab_graphql(
     base = api_url or os.environ.get("CI_SERVER_URL", "https://gitlab.com")
     url = f"{base.rstrip('/')}/api/graphql"
 
-    auth_token = token or os.environ.get("GITLAB_TOKEN") or os.environ.get("CI_JOB_TOKEN")
+    auth_token = (
+        token or os.environ.get("GITLAB_TOKEN") or os.environ.get("CI_JOB_TOKEN")
+    )
     if not auth_token:
         raise RuntimeError("No GitLab auth token for GraphQL query")
 
@@ -675,7 +713,7 @@ def query_gitlab_graphql(
     req = Request(url, data=data, headers=headers, method="POST")
 
     try:
-        with urlopen(req, timeout=_API_TIMEOUT) as resp:
+        with urlopen(req, timeout=_API_TIMEOUT) as resp:  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected
             result = json.loads(resp.read().decode("utf-8"))
             if "errors" in result:
                 raise RuntimeError(
@@ -696,6 +734,7 @@ def query_gitlab_graphql(
 # ---------------------------------------------------------------------------
 # GitLab Pages dashboard: static HTML generation
 # ---------------------------------------------------------------------------
+
 
 def generate_dashboard_html(
     receipts: List[Dict[str, Any]],
@@ -727,12 +766,14 @@ def generate_dashboard_html(
     """
     total = len(receipts)
     ai_count = sum(
-        1 for r in receipts
+        1
+        for r in receipts
         if isinstance(r.get("ai_attestation"), dict)
         and r["ai_attestation"].get("is_ai_authored")
     )
     bot_count = sum(
-        1 for r in receipts
+        1
+        for r in receipts
         if isinstance(r.get("ai_attestation"), dict)
         and r["ai_attestation"].get("is_bot_authored")
     )
@@ -753,7 +794,9 @@ def generate_dashboard_html(
     class_rows = ""
     for cls, count in sorted(classes.items(), key=lambda x: -x[1]):
         pct = count / total * 100 if total > 0 else 0
-        icon = {"human": "👤", "ai_assisted": "🤖", "bot": "⚙️", "ai+bot": "🤖⚙️"}.get(cls, "❓")
+        icon = {"human": "👤", "ai_assisted": "🤖", "bot": "⚙️", "ai+bot": "🤖⚙️"}.get(
+            cls, "❓"
+        )
         class_rows += f"<tr><td>{icon} {_strip_terminal_escapes(cls)}</td><td>{count}</td><td>{pct:.1f}%</td></tr>\n"
 
     # Build recent receipts rows (last 50)

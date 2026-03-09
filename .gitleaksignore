@@ -1,0 +1,7 @@
+# Gitleaks allowlist — false positives from red-team test fixtures.
+# These are INTENTIONALLY planted fake tokens used to test that AIIR
+# correctly strips secrets from repository URLs (see R3-03 in test_redteam.py).
+#
+# Fingerprint format: <commit>:<file>:<rule>:<line>
+0f45a0c7e2dc4ba0f30738ecda30f58abe9f9ffc:tests/test_redteam.py:generic-api-key:216
+0f45a0c7e2dc4ba0f30738ecda30f58abe9f9ffc:test_cli.py:generic-api-key:216

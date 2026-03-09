@@ -41,7 +41,10 @@ POLICY_PRESETS: Dict[str, Dict[str, Any]] = {
         "require_schema_valid": False,
         "enforcement": "soft-fail",
         "allowed_authorship_classes": [
-            "human", "ai_assisted", "ai_generated", "bot",
+            "human",
+            "ai_assisted",
+            "ai_generated",
+            "bot",
         ],
     },
     "permissive": {
@@ -53,7 +56,11 @@ POLICY_PRESETS: Dict[str, Dict[str, Any]] = {
         "require_schema_valid": False,
         "enforcement": "warn",
         "allowed_authorship_classes": [
-            "human", "ai_assisted", "ai_generated", "bot", "ai+bot",
+            "human",
+            "ai_assisted",
+            "ai_generated",
+            "bot",
+            "ai+bot",
         ],
     },
 }
@@ -178,12 +185,14 @@ def evaluate_receipt_policy(
 
     # 1. Signing requirement
     if policy.get("require_signing") and not is_signed:
-        violations.append(PolicyViolation(
-            rule="require_signing",
-            message="Receipt is not signed. Policy requires Sigstore signing.",
-            severity="error" if enforcement == "hard-fail" else "warning",
-            remediation="Regenerate with: aiir --sign -o .receipts",
-        ))
+        violations.append(
+            PolicyViolation(
+                rule="require_signing",
+                message="Receipt is not signed. Policy requires Sigstore signing.",
+                severity="error" if enforcement == "hard-fail" else "warning",
+                remediation="Regenerate with: aiir --sign -o .receipts",
+            )
+        )
 
     # 2. Provenance repository
     if policy.get("require_provenance_repo"):
@@ -191,12 +200,14 @@ def evaluate_receipt_policy(
         if not isinstance(prov, dict):
             prov = {}
         if not prov.get("repository"):
-            violations.append(PolicyViolation(
-                rule="require_provenance_repo",
-                message="Receipt has no provenance repository. Policy requires a git remote.",
-                severity="error" if enforcement == "hard-fail" else "warning",
-                remediation="Configure a git remote: git remote add origin <url>",
-            ))
+            violations.append(
+                PolicyViolation(
+                    rule="require_provenance_repo",
+                    message="Receipt has no provenance repository. Policy requires a git remote.",
+                    severity="error" if enforcement == "hard-fail" else "warning",
+                    remediation="Configure a git remote: git remote add origin <url>",
+                )
+            )
 
     # 3. Allowed authorship classes
     allowed = policy.get("allowed_authorship_classes")
@@ -215,21 +226,25 @@ def evaluate_receipt_policy(
         }
         authorship_normalized = _AUTHORSHIP_NORMALIZE.get(authorship, authorship)
         if authorship_normalized not in allowed and authorship not in allowed:
-            violations.append(PolicyViolation(
-                rule="allowed_authorship_classes",
-                message=f"Authorship class '{authorship}' is not in the allowed list: {allowed}",
-                severity="error",
-                remediation="Review the commit for policy compliance, or update the policy.",
-            ))
+            violations.append(
+                PolicyViolation(
+                    rule="allowed_authorship_classes",
+                    message=f"Authorship class '{authorship}' is not in the allowed list: {allowed}",
+                    severity="error",
+                    remediation="Review the commit for policy compliance, or update the policy.",
+                )
+            )
 
     # 4. Schema validity
     if policy.get("require_schema_valid") and schema_errors:
-        violations.append(PolicyViolation(
-            rule="require_schema_valid",
-            message=f"Receipt has {len(schema_errors)} schema validation error(s).",
-            severity="error" if enforcement == "hard-fail" else "warning",
-            remediation="Fix the receipt to conform to schemas/commit_receipt.v1.schema.json.",
-        ))
+        violations.append(
+            PolicyViolation(
+                rule="require_schema_valid",
+                message=f"Receipt has {len(schema_errors)} schema validation error(s).",
+                severity="error" if enforcement == "hard-fail" else "warning",
+                remediation="Fix the receipt to conform to schemas/commit_receipt.v1.schema.json.",
+            )
+        )
 
     return violations
 
@@ -258,25 +273,31 @@ def evaluate_ledger_policy(
         ai_pct = index.get("ai_percentage", 0.0)
         total = index.get("receipt_count", 0)
         if total > 0 and ai_pct > max_ai:
-            violations.append(PolicyViolation(
-                rule="max_ai_percent",
-                message=(
-                    f"AI-authored percentage {ai_pct}% exceeds policy maximum {max_ai}%"
-                    f" ({index.get('ai_commit_count', 0)}/{total} commits)"
-                ),
-                severity="error",
-                remediation=(
-                    "Increase human-authored commits, or raise the threshold"
-                    " in .aiir/policy.json."
-                ),
-            ))
+            violations.append(
+                PolicyViolation(
+                    rule="max_ai_percent",
+                    message=(
+                        f"AI-authored percentage {ai_pct}% exceeds policy maximum {max_ai}%"
+                        f" ({index.get('ai_commit_count', 0)}/{total} commits)"
+                    ),
+                    severity="error",
+                    remediation=(
+                        "Increase human-authored commits, or raise the threshold"
+                        " in .aiir/policy.json."
+                    ),
+                )
+            )
 
     # Compose result
     if violations:
         if enforcement == "warn":
             return True, f"WARN: {len(violations)} policy warning(s)", violations
         elif enforcement == "soft-fail":
-            return False, f"SOFT-FAIL: {len(violations)} policy violation(s)", violations
+            return (
+                False,
+                f"SOFT-FAIL: {len(violations)} policy violation(s)",
+                violations,
+            )
         else:  # hard-fail
             return False, f"FAIL: {len(violations)} policy violation(s)", violations
     else:

@@ -1,16 +1,12 @@
 """Tests for receipt integrity and construction."""
+
 from __future__ import annotations
 
 import json
 import os
-import shutil
-import subprocess
-import sys
 import tempfile
 import unittest
-import uuid
 from pathlib import Path
-from unittest.mock import patch
 
 # Import the module under test
 import aiir.cli as cli
@@ -102,9 +98,7 @@ class TestReceiptIntegrity(unittest.TestCase):
         """Write receipt to file, then verify via verify_receipt_file."""
         commit = self._make_dummy_commit()
         receipt = cli.build_commit_receipt(commit)
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".json", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(receipt, f, indent=2)
             tmppath = f.name
         try:
@@ -119,9 +113,7 @@ class TestReceiptIntegrity(unittest.TestCase):
         self.assertIn("error", result)
 
     def test_verify_invalid_json(self):
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".json", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             f.write("not json{{{")
             tmppath = f.name
         try:
@@ -204,6 +196,7 @@ class TestPublicBasic(unittest.TestCase):
     def test_r7_pub_01_main_module_handles_keyboard_interrupt(self):
         """python -m aiir must exit cleanly on KeyboardInterrupt, not dump a traceback."""
         import importlib
+
         src = importlib.util.find_spec("aiir.__main__")
         self.assertIsNotNone(src)
         source = Path(src.origin).read_text()
@@ -214,6 +207,7 @@ class TestPublicBasic(unittest.TestCase):
     def test_r7_pub_01_main_module_handles_memory_error(self):
         """python -m aiir must catch MemoryError for clean exit."""
         import importlib
+
         src = importlib.util.find_spec("aiir.__main__")
         source = Path(src.origin).read_text()
         self.assertIn("MemoryError", source)
@@ -223,14 +217,19 @@ class TestPublicBasic(unittest.TestCase):
     def test_r7_pub_02_py_typed_marker_exists(self):
         """PEP 561 py.typed marker must exist for type checker compatibility."""
         marker = Path(__file__).parent.parent / "aiir" / "py.typed"
-        self.assertTrue(marker.exists(), "aiir/py.typed missing — Typing :: Typed classifier is false")
+        self.assertTrue(
+            marker.exists(),
+            "aiir/py.typed missing — Typing :: Typed classifier is false",
+        )
 
     # General public-facing robustness ------------------------------------------
 
     def test_version_format_is_semver(self):
         """Version string must be valid semver (MAJOR.MINOR.PATCH)."""
         parts = cli.CLI_VERSION.split(".")
-        self.assertEqual(len(parts), 3, f"Version {cli.CLI_VERSION!r} is not MAJOR.MINOR.PATCH")
+        self.assertEqual(
+            len(parts), 3, f"Version {cli.CLI_VERSION!r} is not MAJOR.MINOR.PATCH"
+        )
         for part in parts:
             self.assertTrue(part.isdigit(), f"Non-numeric version component: {part!r}")
 
@@ -244,7 +243,8 @@ class TestPublicBasic(unittest.TestCase):
     def test_help_text_contains_url(self):
         """--help epilog should contain the project URL for first-time users."""
         import io
-        from contextlib import redirect_stdout, redirect_stderr
+        from contextlib import redirect_stderr
+
         with self.assertRaises(SystemExit):
             with redirect_stderr(io.StringIO()) as f:
                 cli.main(["--help"])
@@ -253,16 +253,23 @@ class TestPublicBasic(unittest.TestCase):
         parser = cli.argparse.ArgumentParser()  # proxy test
         # Better: check source
         import inspect
+
         source = inspect.getsource(cli.main)
         self.assertIn("invariantsystems.io", source)
 
     def _make_commit(self):
         return cli.CommitInfo(
-            sha="a" * 40, author_name="Test", author_email="t@t.com",
-            author_date="2026-03-07T00:00:00Z", committer_name="Test",
-            committer_email="t@t.com", committer_date="2026-03-07T00:00:00Z",
-            subject="test commit", body="test commit\n\nBody text.",
-            diff_stat="1 file changed", diff_hash="sha256:" + "0" * 64,
+            sha="a" * 40,
+            author_name="Test",
+            author_email="t@t.com",
+            author_date="2026-03-07T00:00:00Z",
+            committer_name="Test",
+            committer_email="t@t.com",
+            committer_date="2026-03-07T00:00:00Z",
+            subject="test commit",
+            body="test commit\n\nBody text.",
+            diff_stat="1 file changed",
+            diff_hash="sha256:" + "0" * 64,
             files_changed=["test.py"],
         )
 
@@ -278,8 +285,10 @@ class TestVerifyNonDictCommit(unittest.TestCase):
             "version": "1.0.0",
             "commit": commit_val,
             "ai_attestation": {
-                "is_ai_authored": False, "signals_detected": [],
-                "signal_count": 0, "detection_method": "heuristic_v1",
+                "is_ai_authored": False,
+                "signals_detected": [],
+                "signal_count": 0,
+                "detection_method": "heuristic_v1",
             },
             "provenance": {"repository": "", "tool": "test", "generator": "test"},
             "receipt_id": "g1-fake",
@@ -333,6 +342,7 @@ class TestSignReceiptSizeCap(unittest.TestCase):
             self.assertIn("too large", str(ctx.exception).lower())
         finally:
             import shutil
+
             shutil.rmtree(tmpdir, ignore_errors=True)
 
     def test_normal_file_passes_size_check(self):
@@ -350,6 +360,7 @@ class TestSignReceiptSizeCap(unittest.TestCase):
                 self.assertNotIn("too large", str(e).lower())
         finally:
             import shutil
+
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
@@ -410,4 +421,3 @@ class TestJsonDepthCheck(unittest.TestCase):
         }
         result = cli.verify_receipt(receipt)
         self.assertFalse(result["valid"])
-

@@ -149,8 +149,8 @@ jobs:
         run: |
           # --strict = fail on ANY known vulnerability
           # --desc   = include vulnerability descriptions in output
-          pip-audit --strict --desc --format json --output pip-audit-report.json || true
-          pip-audit --strict --desc
+          pip-audit --strict --desc --ignore-package aiir --format json --output pip-audit-report.json || true
+          pip-audit --strict --desc --ignore-package aiir
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
@@ -177,7 +177,7 @@ jobs:
         run: |
           # Allow-list: only OSI-approved permissive licenses
           pip-licenses --format=json --output-file=licenses.json
-          pip-licenses --allow-only="Apache Software License;MIT License;BSD License;ISC License (ISCL);Python Software Foundation License;Mozilla Public License 2.0 (MPL 2.0)"
+          pip-licenses --allow-only="Apache Software License;MIT License;MIT;BSD License;ISC License (ISCL);Python Software Foundation License;Mozilla Public License 2.0 (MPL 2.0)"
           echo "✅ All dependency licenses are policy-compliant"
 
   # ── Summary gate ───────────────────────────────────────────────────

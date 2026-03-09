@@ -15,6 +15,7 @@ Design principles:
 Copyright 2025-2026 Invariant Systems, Inc.
 SPDX-License-Identifier: Apache-2.0
 """
+
 from __future__ import annotations
 
 import io
@@ -24,7 +25,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import types
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -65,8 +65,11 @@ def tearDownModule():
 
 def _git(args):
     subprocess.run(
-        ["git"] + args, cwd=_REPO_DIR,
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True,
+        ["git"] + args,
+        cwd=_REPO_DIR,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
     )
 
 
@@ -80,6 +83,7 @@ def _chdir_repo():
 def _base_receipt():
     """Module-level minimal valid receipt for Wave 2 tests."""
     from aiir import __version__
+
     return {
         "type": "aiir.commit_receipt",
         "schema": "aiir/commit_receipt.v1",
@@ -123,7 +127,9 @@ class _CLIBase(unittest.TestCase):
     def setUp(self):
         self._prev_cwd = _chdir_repo()
         # Each test gets its own ledger dir inside the repo
-        self._ledger_dir = os.path.join(_REPO_DIR, ".aiir_test_" + self.id().rsplit(".", 1)[-1])
+        self._ledger_dir = os.path.join(
+            _REPO_DIR, ".aiir_test_" + self.id().rsplit(".", 1)[-1]
+        )
         os.makedirs(self._ledger_dir, exist_ok=True)
 
     def tearDown(self):
@@ -137,6 +143,7 @@ class TestCLIPolicyInit(_CLIBase):
 
     def test_policy_init_strict(self):
         from aiir.cli import main as cli_main
+
         rc = cli_main(["--policy-init", "strict", "--ledger", self._ledger_dir])
         self.assertEqual(rc, 0)
         policy_path = Path(self._ledger_dir, "policy.json")
@@ -146,6 +153,7 @@ class TestCLIPolicyInit(_CLIBase):
 
     def test_policy_init_invalid_preset(self):
         from aiir.cli import main as cli_main
+
         rc = cli_main(["--policy-init", "nonexistent_preset"])
         self.assertEqual(rc, 1)
 
@@ -204,11 +212,16 @@ class TestCLIPolicyCheck(_CLIBase):
         receipt["ai_attestation"]["is_ai_authored"] = True
         append_to_ledger([receipt], ledger_dir=self._ledger_dir)
 
-        rc = cli_main([
-            "--policy", "strict",
-            "--max-ai-percent", "0",
-            "--ledger", self._ledger_dir,
-        ])
+        rc = cli_main(
+            [
+                "--policy",
+                "strict",
+                "--max-ai-percent",
+                "0",
+                "--ledger",
+                self._ledger_dir,
+            ]
+        )
         # strict + 0% AI threshold should fail
         self.assertEqual(rc, 1)
 
@@ -219,14 +232,21 @@ class TestCLIAgentAttestation(_CLIBase):
     def test_agent_attestation_flags(self):
         from aiir.cli import main as cli_main
 
-        rc = cli_main([
-            "-c", "HEAD",
-            "--agent-tool", "copilot",
-            "--agent-model", "gpt-4",
-            "--agent-context", "test-session",
-            "--ledger", self._ledger_dir,
-            "-q",
-        ])
+        rc = cli_main(
+            [
+                "-c",
+                "HEAD",
+                "--agent-tool",
+                "copilot",
+                "--agent-model",
+                "gpt-4",
+                "--agent-context",
+                "test-session",
+                "--ledger",
+                self._ledger_dir,
+                "-q",
+            ]
+        )
         self.assertEqual(rc, 0)
         # Verify the ledger has agent attestation
         ledger_file = Path(self._ledger_dir, "receipts.jsonl")
@@ -244,12 +264,26 @@ class TestCLIGitErrorPaths(_CLIBase):
         from aiir.cli import main as cli_main
 
         with tempfile.TemporaryDirectory(dir=_REPO_DIR) as tmp:
-            subprocess.run(["git", "init", tmp], check=True,
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            subprocess.run(["git", "config", "user.name", "T"], cwd=tmp,
-                           check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            subprocess.run(["git", "config", "user.email", "t@t"], cwd=tmp,
-                           check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(
+                ["git", "init", tmp],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "T"],
+                cwd=tmp,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            subprocess.run(
+                ["git", "config", "user.email", "t@t"],
+                cwd=tmp,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
             os.chdir(tmp)
             try:
                 rc = cli_main(["-q"])
@@ -260,11 +294,15 @@ class TestCLIGitErrorPaths(_CLIBase):
     def test_empty_range_ai_only(self):
         from aiir.cli import main as cli_main
 
-        rc = cli_main([
-            "--range", "HEAD~1..HEAD~1",
-            "--ai-only",
-            "--ledger", self._ledger_dir,
-        ])
+        rc = cli_main(
+            [
+                "--range",
+                "HEAD~1..HEAD~1",
+                "--ai-only",
+                "--ledger",
+                self._ledger_dir,
+            ]
+        )
         self.assertEqual(rc, 0)
 
 
@@ -273,20 +311,32 @@ class TestCLIOutputModes(_CLIBase):
 
     def test_jsonl_stdout(self):
         from aiir.cli import main as cli_main
-        rc = cli_main([
-            "-c", "HEAD",
-            "--jsonl", "-q",
-            "--ledger", self._ledger_dir,
-        ])
+
+        rc = cli_main(
+            [
+                "-c",
+                "HEAD",
+                "--jsonl",
+                "-q",
+                "--ledger",
+                self._ledger_dir,
+            ]
+        )
         self.assertEqual(rc, 0)
 
     def test_json_stdout_single(self):
         from aiir.cli import main as cli_main
-        rc = cli_main([
-            "-c", "HEAD",
-            "--json", "-q",
-            "--ledger", self._ledger_dir,
-        ])
+
+        rc = cli_main(
+            [
+                "-c",
+                "HEAD",
+                "--json",
+                "-q",
+                "--ledger",
+                self._ledger_dir,
+            ]
+        )
         self.assertEqual(rc, 0)
 
 
@@ -301,10 +351,15 @@ class TestCLILedgerError(_CLIBase):
         # The CLI should handle the PermissionError gracefully.
         os.chmod(self._ledger_dir, 0o555)
         try:
-            rc = cli_main([
-                "-c", "HEAD",
-                "--ledger", self._ledger_dir, "-q",
-            ])
+            rc = cli_main(
+                [
+                    "-c",
+                    "HEAD",
+                    "--ledger",
+                    self._ledger_dir,
+                    "-q",
+                ]
+            )
             # Should return 1 on permission error
             self.assertEqual(rc, 1)
         except PermissionError:
@@ -328,12 +383,16 @@ class TestCLIGitHubActionOverflow(_CLIBase):
             "GITHUB_STEP_SUMMARY": gh_summary,
         }
         with patch.dict(os.environ, env):
-            rc = cli_main([
-                "-c", "HEAD",
-                "--github-action",
-                "--ledger", self._ledger_dir,
-                "-q",
-            ])
+            rc = cli_main(
+                [
+                    "-c",
+                    "HEAD",
+                    "--github-action",
+                    "--ledger",
+                    self._ledger_dir,
+                    "-q",
+                ]
+            )
             self.assertEqual(rc, 0)
             content = Path(gh_output).read_text()
             self.assertIn("receipt_count", content)
@@ -349,8 +408,10 @@ class TestCLIMainEntry(_CLIBase):
         result = subprocess.run(
             [sys.executable, "-m", "aiir", "--version"],
             cwd=str(aiir_root),
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, timeout=10,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=10,
         )
         self.assertEqual(result.returncode, 0)
         self.assertIn("aiir", result.stdout)
@@ -396,10 +457,14 @@ class TestCLIExportMode(_CLIBase):
         export_file = "aiir-export-test.json"
         full_path = os.path.join(_REPO_DIR, export_file)
         try:
-            rc = cli_main([
-                "--export", export_file,
-                "--ledger", self._ledger_dir,
-            ])
+            rc = cli_main(
+                [
+                    "--export",
+                    export_file,
+                    "--ledger",
+                    self._ledger_dir,
+                ]
+            )
             self.assertEqual(rc, 0)
             self.assertTrue(os.path.isfile(full_path))
         finally:
@@ -418,11 +483,15 @@ class TestCLICheckMode(_CLIBase):
         self.assertIsNotNone(receipt)
         append_to_ledger([receipt], ledger_dir=self._ledger_dir)
 
-        rc = cli_main([
-            "--check",
-            "--max-ai-percent", "100",
-            "--ledger", self._ledger_dir,
-        ])
+        rc = cli_main(
+            [
+                "--check",
+                "--max-ai-percent",
+                "100",
+                "--ledger",
+                self._ledger_dir,
+            ]
+        )
         self.assertEqual(rc, 0)
 
 
@@ -431,11 +500,16 @@ class TestCLIDetailMode(_CLIBase):
 
     def test_detail_output(self):
         from aiir.cli import main as cli_main
-        rc = cli_main([
-            "-c", "HEAD",
-            "--detail",
-            "--ledger", self._ledger_dir,
-        ])
+
+        rc = cli_main(
+            [
+                "-c",
+                "HEAD",
+                "--detail",
+                "--ledger",
+                self._ledger_dir,
+            ]
+        )
         self.assertEqual(rc, 0)
 
 
@@ -444,12 +518,18 @@ class TestCLINamespace(_CLIBase):
 
     def test_namespace_flag(self):
         from aiir.cli import main as cli_main
-        rc = cli_main([
-            "-c", "HEAD",
-            "--namespace", "acme-corp",
-            "--ledger", self._ledger_dir,
-            "-q",
-        ])
+
+        rc = cli_main(
+            [
+                "-c",
+                "HEAD",
+                "--namespace",
+                "acme-corp",
+                "--ledger",
+                self._ledger_dir,
+                "-q",
+            ]
+        )
         self.assertEqual(rc, 0)
         ledger_file = Path(self._ledger_dir, "receipts.jsonl")
         receipt = json.loads(ledger_file.read_text().strip().split("\n")[0])
@@ -462,12 +542,17 @@ class TestCLIRedactFiles(_CLIBase):
 
     def test_redact_files_flag(self):
         from aiir.cli import main as cli_main
-        rc = cli_main([
-            "-c", "HEAD",
-            "--redact-files",
-            "--ledger", self._ledger_dir,
-            "-q",
-        ])
+
+        rc = cli_main(
+            [
+                "-c",
+                "HEAD",
+                "--redact-files",
+                "--ledger",
+                self._ledger_dir,
+                "-q",
+            ]
+        )
         self.assertEqual(rc, 0)
         ledger_file = Path(self._ledger_dir, "receipts.jsonl")
         receipt = json.loads(ledger_file.read_text().strip().split("\n")[0])
@@ -479,12 +564,16 @@ class TestCLIInToto(_CLIBase):
 
     def test_in_toto_flag(self):
         from aiir.cli import main as cli_main
-        rc = cli_main([
-            "-c", "HEAD",
-            "--in-toto",
-            "--json",
-            "-q",
-        ])
+
+        rc = cli_main(
+            [
+                "-c",
+                "HEAD",
+                "--in-toto",
+                "--json",
+                "-q",
+            ]
+        )
         self.assertEqual(rc, 0)
 
 
@@ -493,6 +582,7 @@ class TestCLIOutputDir(_CLIBase):
 
     def test_output_dir(self):
         from aiir.cli import main as cli_main
+
         out_dir = os.path.join(_REPO_DIR, ".aiir_output_test")
         try:
             rc = cli_main(["-c", "HEAD", "--output", out_dir, "-q"])
@@ -529,6 +619,7 @@ class TestMCPStatsHandler(_MCPBase):
     def test_stats_no_ledger(self):
         """No .aiir/index.json → 'No AIIR ledger'."""
         from aiir.mcp_server import _handle_aiir_stats
+
         # Remove the index so it looks empty
         index_path = Path(self._ledger_dir, "index.json")
         if index_path.exists():
@@ -556,6 +647,7 @@ class TestMCPExplainHandler(_MCPBase):
 
     def test_explain_missing_file_param(self):
         from aiir.mcp_server import _handle_aiir_explain
+
         result = _handle_aiir_explain({})
         self.assertTrue(result.get("isError", False))
 
@@ -581,6 +673,7 @@ class TestMCPPolicyCheckHandler(_MCPBase):
 
     def test_policy_check_no_ledger(self):
         from aiir.mcp_server import _handle_aiir_policy_check
+
         # Remove the index so it looks empty
         index_path = Path(self._ledger_dir, "index.json")
         if index_path.exists():
@@ -591,6 +684,7 @@ class TestMCPPolicyCheckHandler(_MCPBase):
 
     def test_policy_check_invalid_percent_type(self):
         from aiir.mcp_server import _handle_aiir_policy_check
+
         # Non-numeric string — should fall back to 50.0
         result = _handle_aiir_policy_check({"max_ai_percent": "not-a-number"})
         self.assertIn("content", result)
@@ -613,14 +707,18 @@ class TestMCPReceiptHandler(_MCPBase):
 
     def test_receipt_range_spec(self):
         from aiir.mcp_server import _handle_aiir_receipt
-        result = _handle_aiir_receipt({
-            "range": "HEAD~1..HEAD",
-            "pretty": True,
-        })
+
+        result = _handle_aiir_receipt(
+            {
+                "range": "HEAD~1..HEAD",
+                "pretty": True,
+            }
+        )
         self.assertIn("content", result)
 
     def test_receipt_no_commits_ai_only(self):
         from aiir.mcp_server import _handle_aiir_receipt
+
         with patch("aiir.mcp_server.generate_receipt", return_value=None):
             result = _handle_aiir_receipt({"ai_only": True})
             text = result["content"][0]["text"]
@@ -628,7 +726,10 @@ class TestMCPReceiptHandler(_MCPBase):
 
     def test_receipt_exception_handling(self):
         from aiir.mcp_server import _handle_aiir_receipt
-        with patch("aiir.mcp_server.generate_receipt", side_effect=RuntimeError("boom")):
+
+        with patch(
+            "aiir.mcp_server.generate_receipt", side_effect=RuntimeError("boom")
+        ):
             result = _handle_aiir_receipt({})
             self.assertTrue(result.get("isError", False))
 
@@ -638,11 +739,13 @@ class TestMCPVerifyHandler(_MCPBase):
 
     def test_verify_missing_file(self):
         from aiir.mcp_server import _handle_aiir_verify
+
         result = _handle_aiir_verify({})
         self.assertTrue(result.get("isError", False))
 
     def test_verify_path_outside_cwd(self):
         from aiir.mcp_server import _handle_aiir_verify
+
         result = _handle_aiir_verify({"file": "/etc/passwd"})
         self.assertTrue(result.get("isError", False))
 
@@ -696,6 +799,7 @@ class TestMCPServeStdio(unittest.TestCase):
     def test_rate_limiter(self):
         """Exceeding rate limit should return error."""
         from aiir.mcp_server import _RATE_LIMIT_MAX
+
         requests = [
             {"jsonrpc": "2.0", "id": i, "method": "tools/list", "params": {}}
             for i in range(1, _RATE_LIMIT_MAX + 50)
@@ -711,30 +815,39 @@ class TestMCPServeStdio(unittest.TestCase):
     def test_mcp_main_entry(self):
         """Cover mcp_server.py main() entry point (line 632)."""
         from aiir import mcp_server
+
         with patch.object(mcp_server, "serve_stdio"):
             with patch("sys.argv", ["aiir-mcp-server", "--stdio"]):
                 mcp_server.main()
 
     def test_unknown_method(self):
         """Unknown tool method should return error for unknown tool."""
-        msg = {"jsonrpc": "2.0", "id": 1, "method": "tools/call",
-               "params": {"name": "nonexistent_tool_xyz"}}
+        msg = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {"name": "nonexistent_tool_xyz"},
+        }
         responses = self._run_mcp_session([msg])
         self.assertTrue(len(responses) >= 1)
         r = responses[0]
         # May be top-level error or result with isError flag
-        has_error = (
-            "error" in r
-            or r.get("result", {}).get("isError", False)
-        )
+        has_error = "error" in r or r.get("result", {}).get("isError", False)
         self.assertTrue(has_error)
 
     def test_initialize_handshake(self):
         """Cover initialize → initialized flow."""
         requests = [
-            {"jsonrpc": "2.0", "id": 1, "method": "initialize",
-             "params": {"protocolVersion": "2025-03-26",
-                        "capabilities": {}, "clientInfo": {"name": "test"}}},
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": "2025-03-26",
+                    "capabilities": {},
+                    "clientInfo": {"name": "test"},
+                },
+            },
             {"jsonrpc": "2.0", "method": "notifications/initialized"},
             {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
         ]
@@ -756,6 +869,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
     def _base_receipt(self):
         """Minimal valid receipt structure matching _schema.py expectations."""
         from aiir import __version__
+
         return {
             "type": "aiir.commit_receipt",
             "schema": "aiir/commit_receipt.v1",
@@ -770,7 +884,11 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
                 "diff_hash": "sha256:" + "d" * 64,
                 "files_changed": 1,
                 "author": {"name": "T", "email": "t@t", "date": "2026-03-09T00:00:00Z"},
-                "committer": {"name": "T", "email": "t@t", "date": "2026-03-09T00:00:00Z"},
+                "committer": {
+                    "name": "T",
+                    "email": "t@t",
+                    "date": "2026-03-09T00:00:00Z",
+                },
                 "files": ["README.md"],
             },
             "ai_attestation": {
@@ -789,6 +907,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
 
     def test_commit_missing_files_and_redacted(self):
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         del r["commit"]["files"]
         errors = validate_receipt_schema(r)
@@ -796,6 +915,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
 
     def test_commit_files_not_list(self):
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         r["commit"]["files"] = "not-a-list"
         errors = validate_receipt_schema(r)
@@ -803,6 +923,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
 
     def test_commit_file_entry_not_string(self):
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         r["commit"]["files"] = [123, "ok"]
         errors = validate_receipt_schema(r)
@@ -810,6 +931,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
 
     def test_files_redacted_not_true(self):
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         del r["commit"]["files"]
         r["commit"]["files_redacted"] = "yes"
@@ -818,6 +940,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
 
     def test_signal_count_mismatch(self):
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         r["ai_attestation"]["signals_detected"] = ["copilot"]
         r["ai_attestation"]["signal_count"] = 5
@@ -826,6 +949,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
 
     def test_signal_entry_not_string(self):
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         r["ai_attestation"]["signals_detected"] = [123]
         r["ai_attestation"]["signal_count"] = 1
@@ -834,6 +958,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
 
     def test_is_bot_authored_not_bool(self):
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         r["ai_attestation"]["is_bot_authored"] = "yes"
         errors = validate_receipt_schema(r)
@@ -841,6 +966,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
 
     def test_bot_signals_not_list(self):
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         r["ai_attestation"]["bot_signals_detected"] = "not-a-list"
         errors = validate_receipt_schema(r)
@@ -848,6 +974,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
 
     def test_bot_signal_count_mismatch(self):
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         r["ai_attestation"]["bot_signals_detected"] = ["renovate"]
         r["ai_attestation"]["bot_signal_count"] = 99
@@ -856,6 +983,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
 
     def test_provenance_repository_not_string(self):
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         r["provenance"]["repository"] = 42
         errors = validate_receipt_schema(r)
@@ -863,6 +991,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
 
     def test_files_capped_not_true(self):
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         r["commit"]["files_capped"] = "not-true"
         errors = validate_receipt_schema(r)
@@ -870,6 +999,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
 
     def test_identity_wrong_types(self):
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         r["commit"]["author"]["name"] = 42
         errors = validate_receipt_schema(r)
@@ -878,6 +1008,7 @@ class TestSchemaDefensiveBranches(unittest.TestCase):
     def test_bool_int_confusion(self):
         """int where bool expected — Python's bool/int subclass trap."""
         from aiir._schema import validate_receipt_schema
+
         r = self._base_receipt()
         r["ai_attestation"]["is_ai_authored"] = 1  # int, not bool
         errors = validate_receipt_schema(r)
@@ -914,6 +1045,7 @@ class TestPolicyDefensiveBranches(unittest.TestCase):
 
     def test_evaluate_receipt_soft_fail(self):
         from aiir._policy import evaluate_receipt_policy
+
         receipt = {
             "ai_attestation": {"is_ai_authored": True},
             "provenance": {"repository": None},
@@ -926,17 +1058,22 @@ class TestPolicyDefensiveBranches(unittest.TestCase):
             "allowed_authorship_classes": [],
         }
         violations = evaluate_receipt_policy(
-            receipt, policy, is_signed=False, schema_errors=None,
+            receipt,
+            policy,
+            is_signed=False,
+            schema_errors=None,
         )
         self.assertIsInstance(violations, list)
 
     def test_evaluate_receipt_not_dict(self):
         from aiir._policy import evaluate_receipt_policy
+
         violations = evaluate_receipt_policy("not-a-dict", {}, is_signed=False)
         self.assertIsInstance(violations, list)
 
     def test_max_ai_percent_not_float(self):
         from aiir._policy import evaluate_ledger_policy
+
         policy = {"max_ai_percent": "not-a-number", "enforcement": "warn"}
         passed, msg, violations = evaluate_ledger_policy({}, policy)
         self.assertIsInstance(passed, bool)
@@ -952,6 +1089,7 @@ class TestExplainFallback(unittest.TestCase):
 
     def test_explain_generic_error(self):
         from aiir._explain import explain_verification
+
         result = {
             "verified": False,
             "errors": ["some unusual error not matching known patterns"],
@@ -971,6 +1109,7 @@ class TestSignBoundaryMocks(unittest.TestCase):
 
     def test_sign_receipt_file_symlink_rejected(self):
         from aiir._sign import sign_receipt_file
+
         with tempfile.TemporaryDirectory() as tmp:
             real = os.path.join(tmp, "real.json")
             Path(real).write_text("{}")
@@ -981,6 +1120,7 @@ class TestSignBoundaryMocks(unittest.TestCase):
 
     def test_verify_signature_no_bundle(self):
         from aiir._sign import verify_receipt_signature
+
         with tempfile.TemporaryDirectory() as tmp:
             rpath = os.path.join(tmp, "receipt.json")
             Path(rpath).write_text("{}")
@@ -990,6 +1130,7 @@ class TestSignBoundaryMocks(unittest.TestCase):
     def test_verify_signature_oversized_bundle(self):
         """Bundle > MAX_RECEIPT_FILE_SIZE should be rejected before sigstore import."""
         from aiir._sign import verify_receipt_signature, MAX_RECEIPT_FILE_SIZE
+
         with tempfile.TemporaryDirectory() as tmp:
             rpath = os.path.join(tmp, "receipt.json")
             Path(rpath).write_text("{}")
@@ -1003,6 +1144,7 @@ class TestSignBoundaryMocks(unittest.TestCase):
 
     def test_verify_signature_symlink_receipt(self):
         from aiir._sign import verify_receipt_signature
+
         with tempfile.TemporaryDirectory() as tmp:
             real = os.path.join(tmp, "real.json")
             Path(real).write_text("{}")
@@ -1013,6 +1155,7 @@ class TestSignBoundaryMocks(unittest.TestCase):
 
     def test_verify_signature_symlink_bundle(self):
         from aiir._sign import verify_receipt_signature
+
         with tempfile.TemporaryDirectory() as tmp:
             rpath = os.path.join(tmp, "receipt.json")
             Path(rpath).write_text("{}")
@@ -1025,11 +1168,13 @@ class TestSignBoundaryMocks(unittest.TestCase):
 
     def test_sign_receipt_file_not_found(self):
         from aiir._sign import sign_receipt_file
+
         with self.assertRaises(FileNotFoundError):
             sign_receipt_file("/nonexistent/path/to/receipt.json")
 
     def test_sign_receipt_file_not_json(self):
         from aiir._sign import sign_receipt_file
+
         with tempfile.TemporaryDirectory() as tmp:
             rpath = os.path.join(tmp, "receipt.json")
             Path(rpath).write_bytes(b"\x80\x81\x82")  # Invalid UTF-8
@@ -1047,11 +1192,13 @@ class TestCoreDefensiveBranches(unittest.TestCase):
 
     def test_emoji_unknown_name(self):
         from aiir._core import _e
+
         result = _e("nonexistent_emoji_name_xyz")
         self.assertEqual(result, "")
 
     def test_boxdraw_unknown_name(self):
         from aiir._core import _b
+
         result = _b("nonexistent_box_name_xyz")
         self.assertEqual(result, "")
 
@@ -1061,13 +1208,20 @@ class TestCoreDiffHashTimeout(unittest.TestCase):
 
     def test_diff_hash_works_on_valid_repo(self):
         from aiir._core import _hash_diff_streaming
+
         head = subprocess.run(
-            ["git", "rev-parse", "HEAD"], cwd=_REPO_DIR,
-            stdout=subprocess.PIPE, text=True, check=True,
+            ["git", "rev-parse", "HEAD"],
+            cwd=_REPO_DIR,
+            stdout=subprocess.PIPE,
+            text=True,
+            check=True,
         ).stdout.strip()
         parent = subprocess.run(
-            ["git", "rev-parse", "HEAD~1"], cwd=_REPO_DIR,
-            stdout=subprocess.PIPE, text=True, check=True,
+            ["git", "rev-parse", "HEAD~1"],
+            cwd=_REPO_DIR,
+            stdout=subprocess.PIPE,
+            text=True,
+            check=True,
         ).stdout.strip()
         result = _hash_diff_streaming(parent, head, cwd=_REPO_DIR)
         self.assertTrue(result.startswith("sha256:"))
@@ -1083,6 +1237,7 @@ class TestReceiptFormattingPaths(unittest.TestCase):
 
     def _receipt_with_bot(self):
         from aiir import __version__
+
         return {
             "type": "aiir/commit_receipt.v1",
             "schema_version": "aiir/commit_receipt.v1",
@@ -1095,10 +1250,16 @@ class TestReceiptFormattingPaths(unittest.TestCase):
                 "subject": "chore: deps update",
                 "message_hash": "sha256:" + "c" * 64,
                 "diff_hash": "sha256:" + "d" * 64,
-                "author": {"name": "dependabot[bot]", "email": "dependabot@github.com",
-                           "date": "2026-03-09T00:00:00Z"},
-                "committer": {"name": "dependabot[bot]", "email": "dependabot@github.com",
-                              "date": "2026-03-09T00:00:00Z"},
+                "author": {
+                    "name": "dependabot[bot]",
+                    "email": "dependabot@github.com",
+                    "date": "2026-03-09T00:00:00Z",
+                },
+                "committer": {
+                    "name": "dependabot[bot]",
+                    "email": "dependabot@github.com",
+                    "date": "2026-03-09T00:00:00Z",
+                },
                 "files": ["package.json"],
             },
             "ai_attestation": {
@@ -1120,11 +1281,13 @@ class TestReceiptFormattingPaths(unittest.TestCase):
 
     def test_format_detail_with_bot_signals(self):
         from aiir._receipt import format_receipt_detail
+
         text = format_receipt_detail(self._receipt_with_bot())
         self.assertIn("dependabot", text)
 
     def test_format_detail_with_extensions(self):
         from aiir._receipt import format_receipt_detail
+
         receipt = self._receipt_with_bot()
         receipt["extensions"] = {
             "agent_attestation": {"tool_id": "copilot", "model_class": "gpt-4"},
@@ -1142,11 +1305,13 @@ class TestReceiptFormattingPaths(unittest.TestCase):
 # W2-A: _receipt.py uncovered lines
 # ---------------------------------------------------------------------------
 
+
 class TestReceiptSanitizeAgentAttestation(unittest.TestCase):
     """Cover _receipt.py line 62: non-dict attestation returns {}."""
 
     def test_non_dict_returns_empty(self):
         from aiir._receipt import _sanitize_agent_attestation
+
         self.assertEqual(_sanitize_agent_attestation("not a dict"), {})
         self.assertEqual(_sanitize_agent_attestation(42), {})
         self.assertEqual(_sanitize_agent_attestation(None), {})
@@ -1154,6 +1319,7 @@ class TestReceiptSanitizeAgentAttestation(unittest.TestCase):
 
     def test_dict_passes_through(self):
         from aiir._receipt import _sanitize_agent_attestation
+
         result = _sanitize_agent_attestation({"tool_id": "copilot"})
         self.assertIsInstance(result, dict)
 
@@ -1163,6 +1329,7 @@ class TestReceiptFormatDetailMalformed(_CLIBase):
 
     def test_detail_non_dict_commit(self):
         from aiir._receipt import format_receipt_detail
+
         receipt = _base_receipt()
         receipt["commit"] = "not a dict"
         text = format_receipt_detail(receipt)
@@ -1170,6 +1337,7 @@ class TestReceiptFormatDetailMalformed(_CLIBase):
 
     def test_detail_non_dict_ai_attestation(self):
         from aiir._receipt import format_receipt_detail
+
         receipt = _base_receipt()
         receipt["ai_attestation"] = "not a dict"
         text = format_receipt_detail(receipt)
@@ -1177,6 +1345,7 @@ class TestReceiptFormatDetailMalformed(_CLIBase):
 
     def test_detail_non_dict_provenance(self):
         from aiir._receipt import format_receipt_detail
+
         receipt = _base_receipt()
         receipt["provenance"] = 42
         text = format_receipt_detail(receipt)
@@ -1184,6 +1353,7 @@ class TestReceiptFormatDetailMalformed(_CLIBase):
 
     def test_detail_non_dict_extensions(self):
         from aiir._receipt import format_receipt_detail
+
         receipt = _base_receipt()
         receipt["extensions"] = [1, 2, 3]
         text = format_receipt_detail(receipt)
@@ -1192,6 +1362,7 @@ class TestReceiptFormatDetailMalformed(_CLIBase):
     def test_detail_non_list_files(self):
         """Cover line 401: commit.files is not a list."""
         from aiir._receipt import format_receipt_detail
+
         receipt = _base_receipt()
         receipt["commit"]["files"] = "not-a-list"
         text = format_receipt_detail(receipt)
@@ -1200,6 +1371,7 @@ class TestReceiptFormatDetailMalformed(_CLIBase):
     def test_detail_non_list_signals(self):
         """Cover line 406: ai.signals_detected not a list."""
         from aiir._receipt import format_receipt_detail
+
         receipt = _base_receipt()
         receipt["ai_attestation"]["signals_detected"] = "bad"
         text = format_receipt_detail(receipt)
@@ -1208,6 +1380,7 @@ class TestReceiptFormatDetailMalformed(_CLIBase):
     def test_detail_non_list_bot_signals(self):
         """Cover line 409/413-414: ai.bot_signals_detected not a list."""
         from aiir._receipt import format_receipt_detail
+
         receipt = _base_receipt()
         receipt["ai_attestation"]["bot_signals_detected"] = 999
         text = format_receipt_detail(receipt)
@@ -1219,6 +1392,7 @@ class TestReceiptSignalCountNonInt(unittest.TestCase):
 
     def test_non_int_signal_count(self):
         from aiir._receipt import format_receipt_detail
+
         receipt = _base_receipt()
         receipt["ai_attestation"]["signal_count"] = "not-an-int"
         text = format_receipt_detail(receipt)
@@ -1226,6 +1400,7 @@ class TestReceiptSignalCountNonInt(unittest.TestCase):
 
     def test_non_numeric_signal_count(self):
         from aiir._receipt import format_receipt_detail
+
         receipt = _base_receipt()
         receipt["ai_attestation"]["signal_count"] = [1, 2]
         text = format_receipt_detail(receipt)
@@ -1237,6 +1412,7 @@ class TestReceiptExtensionsOverflow(unittest.TestCase):
 
     def test_extensions_overflow(self):
         from aiir._receipt import format_receipt_detail
+
         receipt = _base_receipt()
         receipt["extensions"] = {f"key{i}": f"val{i}" for i in range(15)}
         text = format_receipt_detail(receipt)
@@ -1248,6 +1424,7 @@ class TestReceiptWriteJSONL(unittest.TestCase):
 
     def test_write_receipt_jsonl_stdout(self):
         from aiir._receipt import write_receipt
+
         receipt = _base_receipt()
         with patch("sys.stdout", new_callable=io.StringIO) as mock_out:
             result = write_receipt(receipt, output_dir=None, jsonl=True)
@@ -1262,22 +1439,27 @@ class TestReceiptWriteJSONL(unittest.TestCase):
 # W2-B: _schema.py uncovered lines
 # ---------------------------------------------------------------------------
 
+
 class TestSchemaValidationBranches(unittest.TestCase):
     """Cover _schema.py lines 238-239, 244, 276."""
 
     def test_bot_signals_detected_non_string_element(self):
         """Line 238-239: bot_signals_detected entry is not a string."""
         from aiir._schema import validate_receipt_schema
+
         receipt = _base_receipt()
         receipt["ai_attestation"]["bot_signals_detected"] = [42]
         receipt["ai_attestation"]["bot_signal_count"] = 1
         errors = validate_receipt_schema(receipt)
         found = any("bot_signals_detected[0] must be a string" in e for e in errors)
-        self.assertTrue(found, f"Expected bot_signals_detected type error, got: {errors}")
+        self.assertTrue(
+            found, f"Expected bot_signals_detected type error, got: {errors}"
+        )
 
     def test_bot_signal_count_not_int(self):
         """Line 244: bot_signal_count is not an integer."""
         from aiir._schema import validate_receipt_schema
+
         receipt = _base_receipt()
         receipt["ai_attestation"]["bot_signal_count"] = "three"
         errors = validate_receipt_schema(receipt)
@@ -1287,6 +1469,7 @@ class TestSchemaValidationBranches(unittest.TestCase):
     def test_provenance_repository_non_null_non_string(self):
         """Line 276: provenance.repository is not string or null."""
         from aiir._schema import validate_receipt_schema
+
         receipt = _base_receipt()
         receipt["provenance"]["repository"] = 12345
         errors = validate_receipt_schema(receipt)
@@ -1298,12 +1481,14 @@ class TestSchemaValidationBranches(unittest.TestCase):
 # W2-C: _sign.py uncovered lines
 # ---------------------------------------------------------------------------
 
+
 class TestSignBoundaries(unittest.TestCase):
     """Cover _sign.py lines 124-125, 154-155, 213-214, 237."""
 
     def test_stat_oserror_on_sign(self):
         """Lines 124-125: OSError when stat-ing receipt file."""
         from aiir._sign import sign_receipt_file
+
         with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
             f.write(b'{"test": true}')
             path = f.name
@@ -1315,9 +1500,11 @@ class TestSignBoundaries(unittest.TestCase):
             real_exists = Path(path).exists()
             real_is_symlink = Path(path).is_symlink()
 
-            with patch.object(Path, "exists", return_value=real_exists), \
-                 patch.object(Path, "is_symlink", return_value=real_is_symlink), \
-                 patch.object(Path, "stat", side_effect=OSError("disk error")):
+            with (
+                patch.object(Path, "exists", return_value=real_exists),
+                patch.object(Path, "is_symlink", return_value=real_is_symlink),
+                patch.object(Path, "stat", side_effect=OSError("disk error")),
+            ):
                 with self.assertRaises(ValueError) as ctx:
                     sign_receipt_file(path)
                 self.assertIn("Cannot stat", str(ctx.exception))
@@ -1327,14 +1514,17 @@ class TestSignBoundaries(unittest.TestCase):
     def test_file_exists_race_on_sign(self):
         """Lines 154-155: FileExistsError race condition on os.open."""
         from aiir._sign import sign_receipt_file
+
         with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
             f.write(b'{"test": true}')
             path = f.name
         try:
             # Make it pass initial checks but fail on os.open
-            with patch("aiir._sign.os.path.exists", return_value=False), \
-                 patch("aiir._sign.sign_receipt", return_value='{"sig":"test"}'), \
-                 patch("aiir._sign.os.open", side_effect=FileExistsError("race")):
+            with (
+                patch("aiir._sign.os.path.exists", return_value=False),
+                patch("aiir._sign.sign_receipt", return_value='{"sig":"test"}'),
+                patch("aiir._sign.os.open", side_effect=FileExistsError("race")),
+            ):
                 with self.assertRaises(FileExistsError):
                     sign_receipt_file(path)
         finally:
@@ -1343,6 +1533,7 @@ class TestSignBoundaries(unittest.TestCase):
     def test_stat_oserror_on_verify(self):
         """Lines 213-214: OSError when stat-ing receipt/bundle during verify."""
         from aiir._sign import verify_receipt_signature
+
         with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
             f.write(b'{"test": true}')
             path = f.name
@@ -1360,9 +1551,11 @@ class TestSignBoundaries(unittest.TestCase):
             b_exists = bpath.exists()
             b_sym = bpath.is_symlink()
 
-            with patch.object(Path, "exists", side_effect=[r_exists, b_exists]), \
-                 patch.object(Path, "is_symlink", side_effect=[r_sym, b_sym]), \
-                 patch.object(Path, "stat", side_effect=OSError("disk error")):
+            with (
+                patch.object(Path, "exists", side_effect=[r_exists, b_exists]),
+                patch.object(Path, "is_symlink", side_effect=[r_sym, b_sym]),
+                patch.object(Path, "stat", side_effect=OSError("disk error")),
+            ):
                 result = verify_receipt_signature(path, bundle_path)
             self.assertFalse(result["valid"])
             self.assertIn("Cannot stat", result["error"])
@@ -1373,6 +1566,7 @@ class TestSignBoundaries(unittest.TestCase):
     def test_unsafe_noop_policy_path(self):
         """Line 237: UnsafeNoOp policy when no expected_identity."""
         from aiir._sign import verify_receipt_signature
+
         # This test just confirms the code path runs when Sigstore is available.
         # Without Sigstore installed, it raises RuntimeError on import.
         with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
@@ -1409,6 +1603,7 @@ class TestSignBoundaries(unittest.TestCase):
 # W2-D: cli.py uncovered lines
 # ---------------------------------------------------------------------------
 
+
 class TestCLIVerifySignature(_CLIBase):
     """Cover cli.py lines 531-532: --verify with --signature."""
 
@@ -1416,6 +1611,7 @@ class TestCLIVerifySignature(_CLIBase):
         from aiir.cli import main as cli_main
         from aiir._receipt import write_receipt
         from aiir._receipt import generate_receipt
+
         receipt = generate_receipt("HEAD")
         path = write_receipt(receipt, output_dir=self._ledger_dir)
 
@@ -1432,6 +1628,7 @@ class TestCLIVerifySignature(_CLIBase):
         from aiir.cli import main as cli_main
         from aiir._receipt import write_receipt
         from aiir._receipt import generate_receipt
+
         receipt = generate_receipt("HEAD")
         path = write_receipt(receipt, output_dir=self._ledger_dir)
 
@@ -1451,6 +1648,7 @@ class TestCLIVerifyFail(_CLIBase):
         from aiir.cli import main as cli_main
         from aiir._receipt import write_receipt
         from aiir._receipt import generate_receipt
+
         receipt = generate_receipt("HEAD")
         path = write_receipt(receipt, output_dir=self._ledger_dir)
         # Corrupt the receipt to trigger verification failure
@@ -1466,6 +1664,7 @@ class TestCLIPolicyInitError(_CLIBase):
 
     def test_policy_check_with_load_error(self):
         from aiir.cli import main as cli_main
+
         # Create a corrupt policy file
         policy_path = Path(self._ledger_dir, "policy.json")
         policy_path.write_text("not json at all")
@@ -1478,6 +1677,7 @@ class TestCLIOSError(_CLIBase):
 
     def test_oserror_caught(self):
         from aiir.cli import main as cli_main
+
         with patch("aiir.cli.generate_receipt", side_effect=OSError("disk full")):
             rc = cli_main(["--ledger", self._ledger_dir])
         self.assertEqual(rc, 1)
@@ -1488,11 +1688,15 @@ class TestCLIEmptyResults(_CLIBase):
 
     def test_empty_with_ai_only(self):
         from aiir.cli import main as cli_main
-        rc = cli_main(["--ai-only", "--range", "HEAD~1..HEAD~1", "--ledger", self._ledger_dir])
+
+        rc = cli_main(
+            ["--ai-only", "--range", "HEAD~1..HEAD~1", "--ledger", self._ledger_dir]
+        )
         self.assertEqual(rc, 0)
 
     def test_empty_with_range(self):
         from aiir.cli import main as cli_main
+
         # Use an empty range
         rc = cli_main(["--range", "HEAD..HEAD", "--ledger", self._ledger_dir])
         self.assertEqual(rc, 0)
@@ -1503,6 +1707,7 @@ class TestCLIJSONLOutput(_CLIBase):
 
     def test_jsonl_output(self):
         from aiir.cli import main as cli_main
+
         with patch("sys.stdout", new_callable=io.StringIO) as mock_out:
             rc = cli_main(["--jsonl", "--ledger", self._ledger_dir])
         self.assertEqual(rc, 0)
@@ -1514,6 +1719,7 @@ class TestCLIJSONLOutput(_CLIBase):
     def test_jsonl_write_error(self):
         """Cover lines 958-960: write_receipt raises ValueError in jsonl mode."""
         from aiir.cli import main as cli_main
+
         with patch("aiir.cli.write_receipt", side_effect=ValueError("write failed")):
             rc = cli_main(["--jsonl", "--ledger", self._ledger_dir])
         self.assertEqual(rc, 1)
@@ -1524,7 +1730,10 @@ class TestCLILedgerAppendError(_CLIBase):
 
     def test_ledger_append_value_error(self):
         from aiir.cli import main as cli_main
-        with patch("aiir.cli.append_to_ledger", side_effect=ValueError("ledger corrupt")):
+
+        with patch(
+            "aiir.cli.append_to_ledger", side_effect=ValueError("ledger corrupt")
+        ):
             rc = cli_main(["--ledger", self._ledger_dir])
         self.assertEqual(rc, 1)
 
@@ -1534,12 +1743,15 @@ class TestCLISummaryWithSigned(_CLIBase):
 
     def test_summary_shows_signed(self):
         from aiir.cli import main as cli_main
-        from aiir._sign import sign_receipt_file
 
         # Mock --sign + --output to exercise signed_count path
-        with patch("aiir.cli._sigstore_available", return_value=True), \
-             patch("aiir.cli.sign_receipt_file", return_value="/tmp/fake.sigstore"):
-            rc = cli_main(["--sign", "--output", self._ledger_dir, "--ledger", self._ledger_dir])
+        with (
+            patch("aiir.cli._sigstore_available", return_value=True),
+            patch("aiir.cli.sign_receipt_file", return_value="/tmp/fake.sigstore"),
+        ):
+            rc = cli_main(
+                ["--sign", "--output", self._ledger_dir, "--ledger", self._ledger_dir]
+            )
         self.assertEqual(rc, 0)
 
 
@@ -1548,16 +1760,28 @@ class TestCLIGitHubActionOverflow(_CLIBase):
 
     def test_overflow(self):
         from aiir.cli import main as cli_main
+
         # Generate many receipts to exceed 1MB
         huge_receipt = _base_receipt()
         huge_receipt["extensions"] = {f"k{i}": "x" * 10000 for i in range(200)}
 
-        with patch("aiir.cli.generate_receipts_for_range", return_value=[huge_receipt] * 5), \
-             patch("aiir.cli.append_to_ledger", return_value=(1, 0, "/tmp/ledger")), \
-             patch("aiir.cli.set_github_output") as mock_output, \
-             patch("aiir.cli.set_github_summary"):
-            rc = cli_main(["--github-action", "--range", "HEAD~1..HEAD",
-                           "--ledger", self._ledger_dir])
+        with (
+            patch(
+                "aiir.cli.generate_receipts_for_range", return_value=[huge_receipt] * 5
+            ),
+            patch("aiir.cli.append_to_ledger", return_value=(1, 0, "/tmp/ledger")),
+            patch("aiir.cli.set_github_output") as mock_output,
+            patch("aiir.cli.set_github_summary"),
+        ):
+            rc = cli_main(
+                [
+                    "--github-action",
+                    "--range",
+                    "HEAD~1..HEAD",
+                    "--ledger",
+                    self._ledger_dir,
+                ]
+            )
         self.assertEqual(rc, 0)
         # Check that OVERFLOW was set
         calls = {c[0][0]: c[0][1] for c in mock_output.call_args_list}
@@ -1571,6 +1795,7 @@ class TestCLIStdoutWriteError(_CLIBase):
     def test_json_single_receipt_stdout(self):
         """Cover the single-receipt stdout JSON path."""
         from aiir.cli import main as cli_main
+
         with patch("sys.stdout", new_callable=io.StringIO) as mock_out:
             rc = cli_main(["--json", "--ledger", self._ledger_dir])
         self.assertEqual(rc, 0)
@@ -1582,11 +1807,13 @@ class TestCLIStdoutWriteError(_CLIBase):
 # W2-E: mcp_server.py uncovered lines
 # ---------------------------------------------------------------------------
 
+
 class TestMCPSymlinkVerifyPath(unittest.TestCase):
     """Cover mcp_server.py line 113: symlink in intermediate path."""
 
     def test_intermediate_symlink_rejected(self):
         from aiir.mcp_server import _safe_verify_path
+
         with tempfile.TemporaryDirectory() as tmpdir:
             prev = os.getcwd()
             os.chdir(tmpdir)
@@ -1608,6 +1835,7 @@ class TestMCPVerifyHandlerFailure(_MCPBase):
 
     def test_verify_value_error(self):
         from aiir.mcp_server import _handle_aiir_verify
+
         os.chdir(_REPO_DIR)
         # Path traversal triggers ValueError
         result = _handle_aiir_verify({"file": "../../../etc/passwd"})
@@ -1615,9 +1843,14 @@ class TestMCPVerifyHandlerFailure(_MCPBase):
 
     def test_verify_general_exception(self):
         from aiir.mcp_server import _handle_aiir_verify
+
         os.chdir(_REPO_DIR)
-        with patch("aiir.mcp_server._safe_verify_path", return_value="receipt.json"), \
-             patch("aiir.mcp_server.verify_receipt_file", side_effect=RuntimeError("boom")):
+        with (
+            patch("aiir.mcp_server._safe_verify_path", return_value="receipt.json"),
+            patch(
+                "aiir.mcp_server.verify_receipt_file", side_effect=RuntimeError("boom")
+            ),
+        ):
             result = _handle_aiir_verify({"file": "receipt.json"})
         self.assertTrue(result.get("isError", False))
 
@@ -1627,10 +1860,13 @@ class TestMCPStatsException(_MCPBase):
 
     def test_stats_exception(self):
         from aiir.mcp_server import _handle_aiir_stats
+
         os.chdir(_REPO_DIR)
         with patch("aiir.mcp_server._load_index", side_effect=RuntimeError("corrupt")):
             with patch("aiir.mcp_server.Path") as mock_path:
-                mock_path.cwd.return_value.__truediv__ = MagicMock(return_value=Path(_REPO_DIR) / ".aiir")
+                mock_path.cwd.return_value.__truediv__ = MagicMock(
+                    return_value=Path(_REPO_DIR) / ".aiir"
+                )
                 # Force the index path to exist so it enters the try block
                 mock_index = MagicMock()
                 mock_index.is_file.return_value = True
@@ -1644,15 +1880,21 @@ class TestMCPExplainException(_MCPBase):
 
     def test_explain_value_error(self):
         from aiir.mcp_server import _handle_aiir_explain
+
         os.chdir(_REPO_DIR)
         result = _handle_aiir_explain({"file": "../escape"})
         self.assertTrue(result.get("isError", False))
 
     def test_explain_general_exception(self):
         from aiir.mcp_server import _handle_aiir_explain
+
         os.chdir(_REPO_DIR)
-        with patch("aiir.mcp_server._safe_verify_path", return_value="r.json"), \
-             patch("aiir.mcp_server.verify_receipt_file", side_effect=RuntimeError("fail")):
+        with (
+            patch("aiir.mcp_server._safe_verify_path", return_value="r.json"),
+            patch(
+                "aiir.mcp_server.verify_receipt_file", side_effect=RuntimeError("fail")
+            ),
+        ):
             result = _handle_aiir_explain({"file": "r.json"})
         self.assertTrue(result.get("isError", False))
 
@@ -1662,10 +1904,13 @@ class TestMCPPolicyCheckException(_MCPBase):
 
     def test_policy_check_exception(self):
         from aiir.mcp_server import _handle_aiir_policy_check
+
         os.chdir(_REPO_DIR)
         with patch("aiir.mcp_server._load_index", side_effect=RuntimeError("corrupt")):
-            with patch("aiir.mcp_server._ledger_paths", return_value=("a", "b", "c")), \
-                 patch("pathlib.Path.is_file", return_value=True):
+            with (
+                patch("aiir.mcp_server._ledger_paths", return_value=("a", "b", "c")),
+                patch("pathlib.Path.is_file", return_value=True),
+            ):
                 result = _handle_aiir_policy_check({})
         self.assertTrue(result.get("isError", False))
 
@@ -1675,6 +1920,7 @@ class TestMCPRateLimit(unittest.TestCase):
 
     def test_rate_limit_fires(self):
         from aiir.mcp_server import serve_stdio, _RATE_LIMIT_MAX
+
         # Generate enough requests to trigger rate limiting
         messages = []
         for i in range(_RATE_LIMIT_MAX + 5):
@@ -1683,16 +1929,22 @@ class TestMCPRateLimit(unittest.TestCase):
 
         stdin_data = "\n".join(messages) + "\n"
         responses = []
-        with patch("sys.stdin", io.StringIO(stdin_data)), \
-             patch("sys.stdout", new_callable=io.StringIO) as mock_out:
+        with (
+            patch("sys.stdin", io.StringIO(stdin_data)),
+            patch("sys.stdout", new_callable=io.StringIO) as mock_out,
+        ):
             serve_stdio()
         output = mock_out.getvalue()
         for line in output.strip().split("\n"):
             if line.strip():
                 responses.append(json.loads(line))
         # At least one response should be a rate limit error
-        rate_errors = [r for r in responses if "error" in r and r["error"].get("code") == -32000]
-        self.assertGreater(len(rate_errors), 0, "Expected at least one rate limit error")
+        rate_errors = [
+            r for r in responses if "error" in r and r["error"].get("code") == -32000
+        ]
+        self.assertGreater(
+            len(rate_errors), 0, "Expected at least one rate limit error"
+        )
 
 
 class TestMCPNotificationException(unittest.TestCase):
@@ -1700,14 +1952,22 @@ class TestMCPNotificationException(unittest.TestCase):
 
     def test_notification_handler_exception_swallowed(self):
         from aiir.mcp_server import serve_stdio
+
         # A notification (no id) with a handler that raises should be silently swallowed
         msg = {"jsonrpc": "2.0", "method": "notifications/initialized", "params": {}}
         stdin_data = json.dumps(msg) + "\n"
-        with patch("sys.stdin", io.StringIO(stdin_data)), \
-             patch("sys.stdout", new_callable=io.StringIO) as mock_out, \
-             patch("aiir.mcp_server.HANDLERS", {
-                 "notifications/initialized": MagicMock(side_effect=RuntimeError("boom")),
-             }):
+        with (
+            patch("sys.stdin", io.StringIO(stdin_data)),
+            patch("sys.stdout", new_callable=io.StringIO) as mock_out,
+            patch(
+                "aiir.mcp_server.HANDLERS",
+                {
+                    "notifications/initialized": MagicMock(
+                        side_effect=RuntimeError("boom")
+                    ),
+                },
+            ),
+        ):
             serve_stdio()
         # No response should be produced for notifications
         self.assertEqual(mock_out.getvalue().strip(), "")
@@ -1717,23 +1977,49 @@ class TestMCPNotificationException(unittest.TestCase):
 # W2-F: _core.py uncovered lines
 # ---------------------------------------------------------------------------
 
+
 class TestCoreDiffHashNonZero(unittest.TestCase):
     """Cover _core.py line 1108: git diff exits with non-zero code."""
 
     def test_diff_hash_nonzero_exit(self):
         from aiir._core import _hash_diff_streaming
+
         with tempfile.TemporaryDirectory() as tmpdir:
             prev = os.getcwd()
             os.chdir(tmpdir)
             try:
-                subprocess.run(["git", "init"], cwd=tmpdir, capture_output=True, check=True)
-                subprocess.run(["git", "config", "user.name", "test"], cwd=tmpdir, capture_output=True, check=True)
-                subprocess.run(["git", "config", "user.email", "t@t.com"], cwd=tmpdir, capture_output=True, check=True)
+                subprocess.run(
+                    ["git", "init"], cwd=tmpdir, capture_output=True, check=True
+                )
+                subprocess.run(
+                    ["git", "config", "user.name", "test"],
+                    cwd=tmpdir,
+                    capture_output=True,
+                    check=True,
+                )
+                subprocess.run(
+                    ["git", "config", "user.email", "t@t.com"],
+                    cwd=tmpdir,
+                    capture_output=True,
+                    check=True,
+                )
                 Path(tmpdir, "f.txt").write_text("x")
-                subprocess.run(["git", "add", "."], cwd=tmpdir, capture_output=True, check=True)
-                subprocess.run(["git", "commit", "-m", "init"], cwd=tmpdir, capture_output=True, check=True)
-                sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=tmpdir,
-                                     capture_output=True, text=True, check=True).stdout.strip()
+                subprocess.run(
+                    ["git", "add", "."], cwd=tmpdir, capture_output=True, check=True
+                )
+                subprocess.run(
+                    ["git", "commit", "-m", "init"],
+                    cwd=tmpdir,
+                    capture_output=True,
+                    check=True,
+                )
+                sha = subprocess.run(
+                    ["git", "rev-parse", "HEAD"],
+                    cwd=tmpdir,
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                ).stdout.strip()
                 # Use an invalid parent to force non-zero exit from git diff
                 with self.assertRaises(RuntimeError) as ctx:
                     _hash_diff_streaming("0" * 40, sha, cwd=tmpdir)
@@ -1747,6 +2033,7 @@ class TestCoreURLStrip(unittest.TestCase):
 
     def test_strip_query_and_fragment(self):
         from aiir._core import _strip_url_credentials
+
         result = _strip_url_credentials("https://github.com/repo.git?token=abc#ref")
         self.assertNotIn("token=abc", result)
         self.assertNotIn("#ref", result)
@@ -1754,6 +2041,7 @@ class TestCoreURLStrip(unittest.TestCase):
 
     def test_strip_credentials(self):
         from aiir._core import _strip_url_credentials
+
         result = _strip_url_credentials("https://user:pass@github.com/repo.git")
         self.assertNotIn("user", result)
         self.assertNotIn("pass", result)
@@ -1764,12 +2052,14 @@ class TestCoreURLStrip(unittest.TestCase):
 # W2-G: _policy.py remaining uncovered lines
 # ---------------------------------------------------------------------------
 
+
 class TestPolicyEvaluateBranches(unittest.TestCase):
     """Cover _policy.py lines 192, 206, 279."""
 
     def test_require_provenance_repo_non_dict(self):
         """Line 192: provenance is not a dict."""
         from aiir._policy import evaluate_receipt_policy
+
         receipt = _base_receipt()
         receipt["provenance"] = "not a dict"
         policy = {"require_provenance_repo": True, "enforcement": "hard-fail"}
@@ -1780,10 +2070,13 @@ class TestPolicyEvaluateBranches(unittest.TestCase):
     def test_allowed_authorship_class_violation(self):
         """Line 206: authorship class not in allowed list."""
         from aiir._policy import evaluate_receipt_policy
+
         receipt = _base_receipt()
         receipt["ai_attestation"]["authorship_class"] = "ai_generated"
-        policy = {"allowed_authorship_classes": ["human", "ai_assisted"],
-                  "enforcement": "hard-fail"}
+        policy = {
+            "allowed_authorship_classes": ["human", "ai_assisted"],
+            "enforcement": "hard-fail",
+        }
         violations = evaluate_receipt_policy(receipt, policy)
         found = any(v.rule == "allowed_authorship_classes" for v in violations)
         self.assertTrue(found)
@@ -1791,6 +2084,7 @@ class TestPolicyEvaluateBranches(unittest.TestCase):
     def test_soft_fail_enforcement(self):
         """Line 279: soft-fail returns False."""
         from aiir._policy import evaluate_ledger_policy
+
         # Build an index with high AI percentage
         index = {
             "receipt_count": 10,
@@ -1812,11 +2106,13 @@ if __name__ == "__main__":
 # W2-H: _core.py platform-dependent fallback branches
 # ---------------------------------------------------------------------------
 
+
 class TestCoreEmojiFallback(unittest.TestCase):
     """Cover _core.py lines 121 and 129: ASCII fallback when terminal lacks Unicode."""
 
     def test_emoji_ascii_fallback(self):
         import aiir._core as core
+
         orig = core._USE_EMOJI
         try:
             core._USE_EMOJI = False
@@ -1828,6 +2124,7 @@ class TestCoreEmojiFallback(unittest.TestCase):
 
     def test_boxdraw_ascii_fallback(self):
         import aiir._core as core
+
         orig = core._USE_BOXDRAW
         try:
             core._USE_BOXDRAW = False

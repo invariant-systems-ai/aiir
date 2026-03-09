@@ -21,7 +21,7 @@ import io
 import json
 import sys
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import aiir.mcp_server as mcp
 
@@ -42,8 +42,7 @@ def _run_server(lines: list[str]) -> list[dict]:
     captured = io.StringIO()
     fake_stdin = io.StringIO(stdin_text)
     # Both streams must support reconfigure (or at least not crash)
-    with patch.object(sys, "stdin", fake_stdin), \
-         patch.object(sys, "stdout", captured):
+    with patch.object(sys, "stdin", fake_stdin), patch.object(sys, "stdout", captured):
         mcp.serve_stdio()
     output = captured.getvalue()
     results = []
@@ -75,9 +74,14 @@ class TestServeStdioInitialize(unittest.TestCase):
 
     def test_initialize_with_client_info(self):
         """Client can send clientInfo in params — must not crash."""
-        responses = _run_server([
-            _rpc("initialize", params={"clientInfo": {"name": "test", "version": "1.0"}}),
-        ])
+        responses = _run_server(
+            [
+                _rpc(
+                    "initialize",
+                    params={"clientInfo": {"name": "test", "version": "1.0"}},
+                ),
+            ]
+        )
         self.assertEqual(len(responses), 1)
         self.assertIn("result", responses[0])
 
@@ -102,18 +106,24 @@ class TestServeStdioToolsCall(unittest.TestCase):
     """Test tools/call method dispatch."""
 
     def test_unknown_tool_returns_error(self):
-        responses = _run_server([
-            _rpc("tools/call", params={"name": "nonexistent_tool", "arguments": {}}),
-        ])
+        responses = _run_server(
+            [
+                _rpc(
+                    "tools/call", params={"name": "nonexistent_tool", "arguments": {}}
+                ),
+            ]
+        )
         self.assertEqual(len(responses), 1)
         result = responses[0]["result"]
         self.assertTrue(result.get("isError"))
         self.assertIn("Unknown tool", result["content"][0]["text"])
 
     def test_verify_missing_file_returns_error(self):
-        responses = _run_server([
-            _rpc("tools/call", params={"name": "aiir_verify", "arguments": {}}),
-        ])
+        responses = _run_server(
+            [
+                _rpc("tools/call", params={"name": "aiir_verify", "arguments": {}}),
+            ]
+        )
         result = responses[0]["result"]
         self.assertTrue(result.get("isError"))
         self.assertIn("file", result["content"][0]["text"].lower())
@@ -134,18 +144,22 @@ class TestServeStdioMalformedInput(unittest.TestCase):
 
     def test_invalid_json_ignored(self):
         """Non-JSON lines must be silently skipped."""
-        responses = _run_server([
-            "this is not json",
-            _rpc("tools/list"),
-        ])
+        responses = _run_server(
+            [
+                "this is not json",
+                _rpc("tools/list"),
+            ]
+        )
         self.assertEqual(len(responses), 1)
 
     def test_non_dict_json_returns_error(self):
         """A JSON array is not a valid JSON-RPC request."""
-        responses = _run_server([
-            json.dumps([1, 2, 3]),
-            _rpc("tools/list"),
-        ])
+        responses = _run_server(
+            [
+                json.dumps([1, 2, 3]),
+                _rpc("tools/list"),
+            ]
+        )
         self.assertEqual(len(responses), 2)
         # First response is an error for the array
         err = responses[0]
@@ -155,27 +169,33 @@ class TestServeStdioMalformedInput(unittest.TestCase):
 
     def test_json_string_returns_error(self):
         """A plain JSON string is not a valid request."""
-        responses = _run_server([
-            json.dumps("hello"),
-            _rpc("tools/list"),
-        ])
+        responses = _run_server(
+            [
+                json.dumps("hello"),
+                _rpc("tools/list"),
+            ]
+        )
         self.assertEqual(len(responses), 2)
         self.assertIn("error", responses[0])
 
     def test_json_number_returns_error(self):
         """A JSON number is not a valid request."""
-        responses = _run_server([
-            json.dumps(42),
-            _rpc("tools/list"),
-        ])
+        responses = _run_server(
+            [
+                json.dumps(42),
+                _rpc("tools/list"),
+            ]
+        )
         self.assertEqual(len(responses), 2)
         self.assertIn("error", responses[0])
 
     def test_missing_jsonrpc_field(self):
         """Request without jsonrpc field must be rejected."""
-        responses = _run_server([
-            json.dumps({"method": "tools/list", "id": 1}),
-        ])
+        responses = _run_server(
+            [
+                json.dumps({"method": "tools/list", "id": 1}),
+            ]
+        )
         self.assertEqual(len(responses), 1)
         err = responses[0]
         self.assertIn("error", err)
@@ -184,18 +204,22 @@ class TestServeStdioMalformedInput(unittest.TestCase):
 
     def test_wrong_jsonrpc_version(self):
         """Request with wrong jsonrpc version must be rejected."""
-        responses = _run_server([
-            json.dumps({"jsonrpc": "1.0", "method": "tools/list", "id": 1}),
-        ])
+        responses = _run_server(
+            [
+                json.dumps({"jsonrpc": "1.0", "method": "tools/list", "id": 1}),
+            ]
+        )
         self.assertEqual(len(responses), 1)
         self.assertIn("error", responses[0])
         self.assertEqual(responses[0]["error"]["code"], -32600)
 
     def test_unknown_method_returns_error(self):
         """Unknown method must return -32601."""
-        responses = _run_server([
-            _rpc("nonexistent/method"),
-        ])
+        responses = _run_server(
+            [
+                _rpc("nonexistent/method"),
+            ]
+        )
         self.assertEqual(len(responses), 1)
         err = responses[0]
         self.assertEqual(err["error"]["code"], -32601)
@@ -208,11 +232,20 @@ class TestServeStdioOversizedMessage(unittest.TestCase):
     def test_oversized_message_silently_dropped(self):
         """Messages exceeding 10 MB must be silently dropped."""
         # Create a message just over the limit
-        huge = json.dumps({"jsonrpc": "2.0", "method": "tools/list", "id": 1, "data": "x" * (11 * 1024 * 1024)})
-        responses = _run_server([
-            huge,
-            _rpc("tools/list"),
-        ])
+        huge = json.dumps(
+            {
+                "jsonrpc": "2.0",
+                "method": "tools/list",
+                "id": 1,
+                "data": "x" * (11 * 1024 * 1024),
+            }
+        )
+        responses = _run_server(
+            [
+                huge,
+                _rpc("tools/list"),
+            ]
+        )
         # Only the valid tools/list should produce a response
         self.assertEqual(len(responses), 1)
         self.assertIn("result", responses[0])
@@ -228,32 +261,40 @@ class TestServeStdioNotifications(unittest.TestCase):
 
     def test_initialized_notification_no_response(self):
         """notifications/initialized must not produce a response."""
-        responses = _run_server([
-            _rpc("notifications/initialized", id=None),
-        ])
+        responses = _run_server(
+            [
+                _rpc("notifications/initialized", id=None),
+            ]
+        )
         self.assertEqual(len(responses), 0)
 
     def test_unknown_notification_silently_ignored(self):
         """Unknown notification methods must not produce a response."""
-        responses = _run_server([
-            _rpc("unknown/notification", id=None),
-        ])
+        responses = _run_server(
+            [
+                _rpc("unknown/notification", id=None),
+            ]
+        )
         self.assertEqual(len(responses), 0)
 
     def test_known_method_as_notification(self):
         """A known method sent without id is a notification — no response."""
-        responses = _run_server([
-            _rpc("tools/list", id=None),
-        ])
+        responses = _run_server(
+            [
+                _rpc("tools/list", id=None),
+            ]
+        )
         self.assertEqual(len(responses), 0)
 
     def test_notification_handler_exception_suppressed(self):
         """Exceptions in notification handlers must be swallowed."""
         # initialize as notification (no id) — handler returns a value
         # but since it's a notification, no response should be sent.
-        responses = _run_server([
-            _rpc("initialize", id=None),
-        ])
+        responses = _run_server(
+            [
+                _rpc("initialize", id=None),
+            ]
+        )
         self.assertEqual(len(responses), 0)
 
 
@@ -266,30 +307,38 @@ class TestServeStdioParamsCoercion(unittest.TestCase):
     """Test that non-dict params are coerced to empty dict."""
 
     def test_string_params_coerced(self):
-        responses = _run_server([
-            _rpc("initialize", params="bad"),
-        ])
+        responses = _run_server(
+            [
+                _rpc("initialize", params="bad"),
+            ]
+        )
         self.assertEqual(len(responses), 1)
         self.assertIn("result", responses[0])
 
     def test_list_params_coerced(self):
-        responses = _run_server([
-            _rpc("initialize", params=[1, 2, 3]),
-        ])
+        responses = _run_server(
+            [
+                _rpc("initialize", params=[1, 2, 3]),
+            ]
+        )
         self.assertEqual(len(responses), 1)
         self.assertIn("result", responses[0])
 
     def test_null_params_coerced(self):
         """JSON null params should default to empty dict."""
-        msg = json.dumps({"jsonrpc": "2.0", "method": "initialize", "id": 1, "params": None})
+        msg = json.dumps(
+            {"jsonrpc": "2.0", "method": "initialize", "id": 1, "params": None}
+        )
         responses = _run_server([msg])
         self.assertEqual(len(responses), 1)
         self.assertIn("result", responses[0])
 
     def test_number_params_coerced(self):
-        responses = _run_server([
-            _rpc("initialize", params=42),
-        ])
+        responses = _run_server(
+            [
+                _rpc("initialize", params=42),
+            ]
+        )
         self.assertEqual(len(responses), 1)
         self.assertIn("result", responses[0])
 
@@ -305,7 +354,6 @@ class TestServeStdioRateLimiting(unittest.TestCase):
     def test_rate_limit_rejects_excess_requests(self):
         """Sending >50 requests in <1s should trigger rate limiting."""
         # Patch time.monotonic to return the same time (all in one window)
-        import time as time_mod
 
         # Build 60 requests — first 50 should pass, rest should be rate-limited
         lines = [_rpc("tools/list", id=i) for i in range(1, 61)]
@@ -313,11 +361,15 @@ class TestServeStdioRateLimiting(unittest.TestCase):
 
         # Count successes vs rate-limit errors
         successes = [r for r in responses if "result" in r]
-        rate_errors = [r for r in responses if "error" in r and r["error"]["code"] == -32000]
+        rate_errors = [
+            r for r in responses if "error" in r and r["error"]["code"] == -32000
+        ]
 
         # At least some should be rate-limited (the exact number depends on timing)
         self.assertGreater(len(successes), 0, "Should have some successful responses")
-        self.assertGreater(len(rate_errors), 0, "Should have some rate-limited responses")
+        self.assertGreater(
+            len(rate_errors), 0, "Should have some rate-limited responses"
+        )
 
     def test_rate_limited_notification_not_rejected(self):
         """Notifications (no id) should not get rate-limit error responses."""
@@ -452,15 +504,21 @@ class TestServeStdioConversation(unittest.TestCase):
 
     def test_full_lifecycle(self):
         """initialize → notifications/initialized → tools/list → tools/call."""
-        responses = _run_server([
-            _rpc("initialize", id=1),
-            _rpc("notifications/initialized", id=None),
-            _rpc("tools/list", id=2),
-            _rpc("tools/call", id=3, params={
-                "name": "aiir_verify",
-                "arguments": {"file": "/nonexistent/file.json"},
-            }),
-        ])
+        responses = _run_server(
+            [
+                _rpc("initialize", id=1),
+                _rpc("notifications/initialized", id=None),
+                _rpc("tools/list", id=2),
+                _rpc(
+                    "tools/call",
+                    id=3,
+                    params={
+                        "name": "aiir_verify",
+                        "arguments": {"file": "/nonexistent/file.json"},
+                    },
+                ),
+            ]
+        )
         # Should get 3 responses (notification produces none)
         self.assertEqual(len(responses), 3)
         self.assertEqual(responses[0]["id"], 1)  # initialize
@@ -469,20 +527,22 @@ class TestServeStdioConversation(unittest.TestCase):
 
     def test_interleaved_valid_and_invalid(self):
         """Valid requests mixed with garbage should each be handled correctly."""
-        responses = _run_server([
-            "garbage",
-            _rpc("initialize", id=1),
-            json.dumps([1, 2]),  # non-dict
-            "",
-            _rpc("tools/list", id=2),
-            json.dumps({"method": "x", "id": 3}),  # missing jsonrpc
-        ])
+        responses = _run_server(
+            [
+                "garbage",
+                _rpc("initialize", id=1),
+                json.dumps([1, 2]),  # non-dict
+                "",
+                _rpc("tools/list", id=2),
+                json.dumps({"method": "x", "id": 3}),  # missing jsonrpc
+            ]
+        )
         # 1: initialize result, 2: non-dict error, 3: tools/list result, 4: missing jsonrpc error
         self.assertEqual(len(responses), 4)
-        self.assertIn("result", responses[0])      # initialize
-        self.assertIn("error", responses[1])        # non-dict
-        self.assertIn("result", responses[2])       # tools/list
-        self.assertIn("error", responses[3])        # missing jsonrpc
+        self.assertIn("result", responses[0])  # initialize
+        self.assertIn("error", responses[1])  # non-dict
+        self.assertIn("result", responses[2])  # tools/list
+        self.assertIn("error", responses[3])  # missing jsonrpc
 
 
 # ---------------------------------------------------------------------------
@@ -502,8 +562,10 @@ class TestMcpMain(unittest.TestCase):
 
     def test_main_calls_serve_stdio(self):
         """main() should call serve_stdio()."""
-        with patch("sys.argv", ["aiir-mcp-server"]), \
-             patch.object(mcp, "serve_stdio") as mock_serve:
+        with (
+            patch("sys.argv", ["aiir-mcp-server"]),
+            patch.object(mcp, "serve_stdio") as mock_serve,
+        ):
             mcp.main()
             mock_serve.assert_called_once()
 
@@ -583,36 +645,46 @@ class TestToolsCallNonDictArguments(unittest.TestCase):
     """Non-dict arguments in tools/call must return an error, not be silently coerced."""
 
     def test_string_arguments_returns_error(self):
-        responses = _run_server([
-            _rpc("tools/call", params={"name": "aiir_receipt", "arguments": "bad"}),
-        ])
+        responses = _run_server(
+            [
+                _rpc("tools/call", params={"name": "aiir_receipt", "arguments": "bad"}),
+            ]
+        )
         self.assertEqual(len(responses), 1)
         result = responses[0]["result"]
         self.assertTrue(result.get("isError"), "String arguments should produce error")
         self.assertIn("Invalid", result["content"][0]["text"])
 
     def test_list_arguments_returns_error(self):
-        responses = _run_server([
-            _rpc("tools/call", params={"name": "aiir_receipt", "arguments": [1, 2]}),
-        ])
+        responses = _run_server(
+            [
+                _rpc(
+                    "tools/call", params={"name": "aiir_receipt", "arguments": [1, 2]}
+                ),
+            ]
+        )
         self.assertEqual(len(responses), 1)
         result = responses[0]["result"]
         self.assertTrue(result.get("isError"), "List arguments should produce error")
         self.assertIn("Invalid", result["content"][0]["text"])
 
     def test_number_arguments_returns_error(self):
-        responses = _run_server([
-            _rpc("tools/call", params={"name": "aiir_receipt", "arguments": 42}),
-        ])
+        responses = _run_server(
+            [
+                _rpc("tools/call", params={"name": "aiir_receipt", "arguments": 42}),
+            ]
+        )
         self.assertEqual(len(responses), 1)
         result = responses[0]["result"]
         self.assertTrue(result.get("isError"), "Number arguments should produce error")
 
     def test_null_arguments_defaults_to_empty_dict(self):
         """null/missing arguments should still default to {} (valid per spec)."""
-        responses = _run_server([
-            _rpc("tools/call", params={"name": "nonexistent_tool"}),
-        ])
+        responses = _run_server(
+            [
+                _rpc("tools/call", params={"name": "nonexistent_tool"}),
+            ]
+        )
         self.assertEqual(len(responses), 1)
         result = responses[0]["result"]
         # Should get "Unknown tool" error, not an arguments-type error

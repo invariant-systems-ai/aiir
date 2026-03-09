@@ -1,14 +1,10 @@
 """Tests for sigstore signing and verification."""
+
 from __future__ import annotations
 
-import json
 import os
-import shutil
-import subprocess
-import sys
 import tempfile
 import unittest
-import uuid
 from pathlib import Path
 from unittest.mock import patch
 
@@ -35,27 +31,36 @@ class TestSigstoreAvailability(unittest.TestCase):
 
     def test_sign_receipt_raises_without_sigstore(self):
         """sign_receipt() raises RuntimeError with helpful message when sigstore missing."""
-        with patch.dict("sys.modules", {
-            "sigstore": None,
-            "sigstore.models": None,
-            "sigstore.oidc": None,
-            "sigstore.sign": None,
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "sigstore": None,
+                "sigstore.models": None,
+                "sigstore.oidc": None,
+                "sigstore.sign": None,
+            },
+        ):
             with self.assertRaises(RuntimeError) as ctx:
                 cli.sign_receipt(b'{"test": true}')
             self.assertIn("pip install sigstore", str(ctx.exception))
 
     def test_verify_signature_raises_without_sigstore(self):
         """verify_receipt_signature() raises RuntimeError when sigstore missing."""
-        with patch.dict("sys.modules", {
-            "sigstore": None,
-            "sigstore.models": None,
-            "sigstore.verify": None,
-            "sigstore.verify.policy": None,
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "sigstore": None,
+                "sigstore.models": None,
+                "sigstore.verify": None,
+                "sigstore.verify.policy": None,
+            },
+        ):
             import tempfile
+
             # Use real files so we reach the sigstore import check
-            with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w") as rf:
+            with tempfile.NamedTemporaryFile(
+                suffix=".json", delete=False, mode="w"
+            ) as rf:
                 rf.write("{}")
                 rpath = rf.name
             bpath = rpath + ".sigstore"
@@ -99,23 +104,34 @@ class TestSigstoreSigning(unittest.TestCase):
                 # Create mock modules
                 mock_sigstore_sign = types.ModuleType("sigstore.sign")
                 mock_sigstore_sign.SigningContext = MagicMock()
-                mock_sigstore_sign.SigningContext.from_trust_config.return_value = mock_ctx
+                mock_sigstore_sign.SigningContext.from_trust_config.return_value = (
+                    mock_ctx
+                )
 
                 mock_sigstore_models = types.ModuleType("sigstore.models")
                 mock_sigstore_models.ClientTrustConfig = MagicMock()
-                mock_sigstore_models.ClientTrustConfig.production.return_value = MagicMock()
+                mock_sigstore_models.ClientTrustConfig.production.return_value = (
+                    MagicMock()
+                )
 
                 mock_sigstore_oidc = types.ModuleType("sigstore.oidc")
-                mock_sigstore_oidc.detect_credential = MagicMock(return_value="fake-token")
-                mock_sigstore_oidc.IdentityToken = MagicMock(return_value=mock_identity_token)
+                mock_sigstore_oidc.detect_credential = MagicMock(
+                    return_value="fake-token"
+                )
+                mock_sigstore_oidc.IdentityToken = MagicMock(
+                    return_value=mock_identity_token
+                )
                 mock_sigstore_oidc.Issuer = MagicMock()
 
-                with patch.dict("sys.modules", {
-                    "sigstore": types.ModuleType("sigstore"),
-                    "sigstore.sign": mock_sigstore_sign,
-                    "sigstore.models": mock_sigstore_models,
-                    "sigstore.oidc": mock_sigstore_oidc,
-                }):
+                with patch.dict(
+                    "sys.modules",
+                    {
+                        "sigstore": types.ModuleType("sigstore"),
+                        "sigstore.sign": mock_sigstore_sign,
+                        "sigstore.models": mock_sigstore_models,
+                        "sigstore.oidc": mock_sigstore_oidc,
+                    },
+                ):
                     result = cli.sign_receipt(b'{"test": true}')
                     self.assertEqual(result, fake_bundle_json)
                     mock_signer.sign_artifact.assert_called_once_with(b'{"test": true}')
@@ -174,12 +190,15 @@ class TestSigstoreVerification(unittest.TestCase):
         mock_models = types.ModuleType("sigstore.models")
         mock_models.Bundle = unittest.mock.MagicMock()
 
-        with patch.dict("sys.modules", {
-            "sigstore": mock_sigstore,
-            "sigstore.verify": mock_verify,
-            "sigstore.verify.policy": mock_policy,
-            "sigstore.models": mock_models,
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "sigstore": mock_sigstore,
+                "sigstore.verify": mock_verify,
+                "sigstore.verify.policy": mock_policy,
+                "sigstore.models": mock_models,
+            },
+        ):
             result = cli.verify_receipt_signature("/tmp/no_such_receipt_xyz.json")
         self.assertFalse(result["valid"])
         self.assertIn("not found", result["error"])
@@ -201,12 +220,15 @@ class TestSigstoreVerification(unittest.TestCase):
             receipt_path = os.path.join(tmpdir, "receipt.json")
             Path(receipt_path).write_text("{}", encoding="utf-8")
 
-            with patch.dict("sys.modules", {
-                "sigstore": mock_sigstore,
-                "sigstore.verify": mock_verify,
-                "sigstore.verify.policy": mock_policy,
-                "sigstore.models": mock_models,
-            }):
+            with patch.dict(
+                "sys.modules",
+                {
+                    "sigstore": mock_sigstore,
+                    "sigstore.verify": mock_verify,
+                    "sigstore.verify.policy": mock_policy,
+                    "sigstore.models": mock_models,
+                },
+            ):
                 result = cli.verify_receipt_signature(receipt_path)
             self.assertFalse(result["valid"])
             self.assertIn("bundle not found", result["error"].lower())
@@ -234,12 +256,15 @@ class TestSigstoreVerification(unittest.TestCase):
             Path(receipt_path).write_text('{"type":"test"}', encoding="utf-8")
             Path(bundle_path).write_text('{"mediaType":"bundle"}', encoding="utf-8")
 
-            with patch.dict("sys.modules", {
-                "sigstore": mock_sigstore,
-                "sigstore.verify": mock_verify_mod,
-                "sigstore.verify.policy": mock_policy,
-                "sigstore.models": mock_models,
-            }):
+            with patch.dict(
+                "sys.modules",
+                {
+                    "sigstore": mock_sigstore,
+                    "sigstore.verify": mock_verify_mod,
+                    "sigstore.verify.policy": mock_policy,
+                    "sigstore.models": mock_models,
+                },
+            ):
                 result = cli.verify_receipt_signature(receipt_path)
             self.assertTrue(result["valid"])
             self.assertTrue(result["signature_valid"])
@@ -262,15 +287,25 @@ class TestSignCLIFlags(unittest.TestCase):
         with patch("aiir.cli.get_repo_root", return_value="/tmp"):
             with patch("aiir.cli.generate_receipt", return_value={"type": "test"}):
                 with patch("aiir.cli._sigstore_available", return_value=False):
-                    ret = cli.main(["--commit", "HEAD", "--sign", "--output", "/tmp/out"])
+                    ret = cli.main(
+                        ["--commit", "HEAD", "--sign", "--output", "/tmp/out"]
+                    )
         self.assertEqual(ret, 1)
 
     def test_verify_signature_flag_parsed(self):
         """--verify-signature flag is correctly parsed by argparse."""
         with patch("aiir.cli.verify_receipt_file") as mock_verify:
-            mock_verify.return_value = {"valid": True, "receipt_id": "g1-abc", "commit_sha": "abc123"}
+            mock_verify.return_value = {
+                "valid": True,
+                "receipt_id": "g1-abc",
+                "commit_sha": "abc123",
+            }
             with patch("aiir.cli.verify_receipt_signature") as mock_sig:
-                mock_sig.return_value = {"valid": True, "signature_valid": True, "policy": "any"}
+                mock_sig.return_value = {
+                    "valid": True,
+                    "signature_valid": True,
+                    "policy": "any",
+                }
                 ret = cli.main(["--verify", "/dev/null", "--verify-signature"])
         # verify_receipt_file was called
         mock_verify.assert_called_once()
@@ -280,15 +315,28 @@ class TestSignCLIFlags(unittest.TestCase):
     def test_verify_with_identity_pinning(self):
         """--signer-identity and --signer-issuer are passed through to verification."""
         with patch("aiir.cli.verify_receipt_file") as mock_verify:
-            mock_verify.return_value = {"valid": True, "receipt_id": "g1-abc", "commit_sha": "abc123"}
+            mock_verify.return_value = {
+                "valid": True,
+                "receipt_id": "g1-abc",
+                "commit_sha": "abc123",
+            }
             with patch("aiir.cli.verify_receipt_signature") as mock_sig:
-                mock_sig.return_value = {"valid": True, "signature_valid": True, "policy": "identity"}
-                ret = cli.main([
-                    "--verify", "/dev/null",
-                    "--verify-signature",
-                    "--signer-identity", "user@example.com",
-                    "--signer-issuer", "https://accounts.google.com",
-                ])
+                mock_sig.return_value = {
+                    "valid": True,
+                    "signature_valid": True,
+                    "policy": "identity",
+                }
+                ret = cli.main(
+                    [
+                        "--verify",
+                        "/dev/null",
+                        "--verify-signature",
+                        "--signer-identity",
+                        "user@example.com",
+                        "--signer-issuer",
+                        "https://accounts.google.com",
+                    ]
+                )
         mock_sig.assert_called_once_with(
             "/dev/null",
             expected_identity="user@example.com",
@@ -298,9 +346,17 @@ class TestSignCLIFlags(unittest.TestCase):
     def test_verify_signature_failure_returns_nonzero(self):
         """Failed signature verification returns exit code 1."""
         with patch("aiir.cli.verify_receipt_file") as mock_verify:
-            mock_verify.return_value = {"valid": True, "receipt_id": "g1-abc", "commit_sha": "abc123"}
+            mock_verify.return_value = {
+                "valid": True,
+                "receipt_id": "g1-abc",
+                "commit_sha": "abc123",
+            }
             with patch("aiir.cli.verify_receipt_signature") as mock_sig:
-                mock_sig.return_value = {"valid": False, "signature_valid": False, "error": "bad sig"}
+                mock_sig.return_value = {
+                    "valid": False,
+                    "signature_valid": False,
+                    "error": "bad sig",
+                }
                 ret = cli.main(["--verify", "/dev/null", "--verify-signature"])
         self.assertEqual(ret, 1)
 
@@ -319,17 +375,24 @@ class TestSignCIDetection(unittest.TestCase):
         mock_sigstore_models.ClientTrustConfig = unittest.mock.MagicMock()
 
         mock_sigstore_oidc = types.ModuleType("sigstore.oidc")
-        mock_sigstore_oidc.detect_credential = unittest.mock.MagicMock(return_value=None)
+        mock_sigstore_oidc.detect_credential = unittest.mock.MagicMock(
+            return_value=None
+        )
         mock_sigstore_oidc.IdentityToken = unittest.mock.MagicMock()
         mock_sigstore_oidc.Issuer = unittest.mock.MagicMock()
 
-        with patch.dict("sys.modules", {
-            "sigstore": types.ModuleType("sigstore"),
-            "sigstore.sign": mock_sigstore_sign,
-            "sigstore.models": mock_sigstore_models,
-            "sigstore.oidc": mock_sigstore_oidc,
-        }):
-            with patch.dict("os.environ", {"GITHUB_ACTIONS": "true", "CI": "true"}, clear=False):
+        with patch.dict(
+            "sys.modules",
+            {
+                "sigstore": types.ModuleType("sigstore"),
+                "sigstore.sign": mock_sigstore_sign,
+                "sigstore.models": mock_sigstore_models,
+                "sigstore.oidc": mock_sigstore_oidc,
+            },
+        ):
+            with patch.dict(
+                "os.environ", {"GITHUB_ACTIONS": "true", "CI": "true"}, clear=False
+            ):
                 with self.assertRaises(RuntimeError) as ctx:
                     cli.sign_receipt(b'{"test": true}')
                 self.assertIn("id-token: write", str(ctx.exception))
@@ -346,21 +409,30 @@ class TestSignCIDetection(unittest.TestCase):
         mock_sigstore_models.ClientTrustConfig = unittest.mock.MagicMock()
 
         mock_sigstore_oidc = types.ModuleType("sigstore.oidc")
-        mock_sigstore_oidc.detect_credential = unittest.mock.MagicMock(return_value=None)
+        mock_sigstore_oidc.detect_credential = unittest.mock.MagicMock(
+            return_value=None
+        )
         mock_sigstore_oidc.IdentityToken = unittest.mock.MagicMock()
         mock_sigstore_oidc.Issuer = unittest.mock.MagicMock()
 
-        with patch.dict("sys.modules", {
-            "sigstore": types.ModuleType("sigstore"),
-            "sigstore.sign": mock_sigstore_sign,
-            "sigstore.models": mock_sigstore_models,
-            "sigstore.oidc": mock_sigstore_oidc,
-        }):
-            with patch.dict("os.environ", {
-                "GITHUB_ACTIONS": "true",
-                "CI": "true",
-                "GITHUB_EVENT_NAME": "pull_request",
-            }, clear=False):
+        with patch.dict(
+            "sys.modules",
+            {
+                "sigstore": types.ModuleType("sigstore"),
+                "sigstore.sign": mock_sigstore_sign,
+                "sigstore.models": mock_sigstore_models,
+                "sigstore.oidc": mock_sigstore_oidc,
+            },
+        ):
+            with patch.dict(
+                "os.environ",
+                {
+                    "GITHUB_ACTIONS": "true",
+                    "CI": "true",
+                    "GITHUB_EVENT_NAME": "pull_request",
+                },
+                clear=False,
+            ):
                 with self.assertRaises(RuntimeError) as ctx:
                     cli.sign_receipt(b'{"test": true}')
                 self.assertIn("Fork PRs", str(ctx.exception))
@@ -376,22 +448,31 @@ class TestSignCIDetection(unittest.TestCase):
         mock_sigstore_models.ClientTrustConfig = unittest.mock.MagicMock()
 
         mock_sigstore_oidc = types.ModuleType("sigstore.oidc")
-        mock_sigstore_oidc.detect_credential = unittest.mock.MagicMock(return_value=None)
+        mock_sigstore_oidc.detect_credential = unittest.mock.MagicMock(
+            return_value=None
+        )
         mock_sigstore_oidc.IdentityToken = unittest.mock.MagicMock()
         mock_sigstore_oidc.Issuer = unittest.mock.MagicMock()
 
-        with patch.dict("sys.modules", {
-            "sigstore": types.ModuleType("sigstore"),
-            "sigstore.sign": mock_sigstore_sign,
-            "sigstore.models": mock_sigstore_models,
-            "sigstore.oidc": mock_sigstore_oidc,
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "sigstore": types.ModuleType("sigstore"),
+                "sigstore.sign": mock_sigstore_sign,
+                "sigstore.models": mock_sigstore_models,
+                "sigstore.oidc": mock_sigstore_oidc,
+            },
+        ):
             with patch.dict("os.environ", {"CI": "true"}, clear=False):
                 # Remove GitHub-specific env vars
-                with patch.dict("os.environ", {
-                    "GITHUB_ACTIONS": "",
-                    "GITLAB_CI": "",
-                }, clear=False):
+                with patch.dict(
+                    "os.environ",
+                    {
+                        "GITHUB_ACTIONS": "",
+                        "GITLAB_CI": "",
+                    },
+                    clear=False,
+                ):
                     env_backup = os.environ.copy()
                     os.environ.pop("GITHUB_ACTIONS", None)
                     os.environ.pop("GITLAB_CI", None)
@@ -408,4 +489,3 @@ class TestSignCIDetection(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # Round 4 red-team hardening tests (R4-XX)
 # ---------------------------------------------------------------------------
-

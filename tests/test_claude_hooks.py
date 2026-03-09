@@ -7,6 +7,7 @@ and that the AIIR CLI commands embedded in hook commands are well-formed.
 Copyright 2025-2026 Invariant Systems, Inc.
 SPDX-License-Identifier: Apache-2.0
 """
+
 from __future__ import annotations
 
 import json
@@ -53,10 +54,7 @@ class TestClaudeHooksDoc(unittest.TestCase):
 
     def test_hook_configs_have_required_structure(self):
         """Hook config blocks must have hooks.PostToolUse with matcher and command."""
-        hook_configs = [
-            json.loads(b) for b in self.json_blocks
-            if '"PostToolUse"' in b
-        ]
+        hook_configs = [json.loads(b) for b in self.json_blocks if '"PostToolUse"' in b]
         self.assertGreater(len(hook_configs), 0, "No PostToolUse hook configs found")
 
         for i, cfg in enumerate(hook_configs):
@@ -76,7 +74,7 @@ class TestClaudeHooksDoc(unittest.TestCase):
                     matcher = entry["matcher"]
                     self.assertTrue(
                         "Write" in matcher or "Edit" in matcher,
-                        f"Matcher '{matcher}' doesn't match Write or Edit"
+                        f"Matcher '{matcher}' doesn't match Write or Edit",
                     )
 
                     for hook in entry["hooks"]:
@@ -86,51 +84,45 @@ class TestClaudeHooksDoc(unittest.TestCase):
 
     def test_hook_commands_contain_aiir(self):
         """Every hook command must invoke aiir."""
-        hook_configs = [
-            json.loads(b) for b in self.json_blocks
-            if '"PostToolUse"' in b
-        ]
-        for cfg in hook_configs:
-            for entry in cfg["hooks"]["PostToolUse"]:
-                for hook in entry["hooks"]:
-                    cmd = hook.get("command", "")
-                    self.assertIn("aiir", cmd, f"Hook command doesn't invoke aiir: {cmd[:100]}")
-
-    def test_hook_commands_use_project_dir_env(self):
-        """Hook commands should use $CLAUDE_PROJECT_DIR for portability."""
-        hook_configs = [
-            json.loads(b) for b in self.json_blocks
-            if '"PostToolUse"' in b
-        ]
+        hook_configs = [json.loads(b) for b in self.json_blocks if '"PostToolUse"' in b]
         for cfg in hook_configs:
             for entry in cfg["hooks"]["PostToolUse"]:
                 for hook in entry["hooks"]:
                     cmd = hook.get("command", "")
                     self.assertIn(
-                        "CLAUDE_PROJECT_DIR", cmd,
-                        f"Hook command missing $CLAUDE_PROJECT_DIR: {cmd[:100]}"
+                        "aiir", cmd, f"Hook command doesn't invoke aiir: {cmd[:100]}"
+                    )
+
+    def test_hook_commands_use_project_dir_env(self):
+        """Hook commands should use $CLAUDE_PROJECT_DIR for portability."""
+        hook_configs = [json.loads(b) for b in self.json_blocks if '"PostToolUse"' in b]
+        for cfg in hook_configs:
+            for entry in cfg["hooks"]["PostToolUse"]:
+                for hook in entry["hooks"]:
+                    cmd = hook.get("command", "")
+                    self.assertIn(
+                        "CLAUDE_PROJECT_DIR",
+                        cmd,
+                        f"Hook command missing $CLAUDE_PROJECT_DIR: {cmd[:100]}",
                     )
 
     def test_hook_commands_auto_commit(self):
         """Hook commands should include git commit with claude prefix."""
-        hook_configs = [
-            json.loads(b) for b in self.json_blocks
-            if '"PostToolUse"' in b
-        ]
+        hook_configs = [json.loads(b) for b in self.json_blocks if '"PostToolUse"' in b]
         for cfg in hook_configs:
             for entry in cfg["hooks"]["PostToolUse"]:
                 for hook in entry["hooks"]:
                     cmd = hook.get("command", "")
                     self.assertIn("git commit", cmd)
-                    self.assertIn("claude:", cmd,
-                        "Commit message should contain 'claude:' for AI detection")
+                    self.assertIn(
+                        "claude:",
+                        cmd,
+                        "Commit message should contain 'claude:' for AI detection",
+                    )
 
     def test_mcp_config_valid(self):
         """The MCP server configuration example must be valid."""
-        mcp_blocks = [
-            json.loads(b) for b in self.json_blocks
-            if '"mcpServers"' in b
-        ]
+        mcp_blocks = [json.loads(b) for b in self.json_blocks if '"mcpServers"' in b]
         self.assertGreater(len(mcp_blocks), 0, "No MCP config found in doc")
 
         for cfg in mcp_blocks:
@@ -142,25 +134,44 @@ class TestClaudeHooksDoc(unittest.TestCase):
 
     def test_no_stale_aiir_dev_references(self):
         """No references to the squatted aiir.dev domain."""
-        self.assertNotIn("aiir.dev", self.doc_text,
-            "Doc contains references to squatted aiir.dev domain")
+        self.assertNotIn(
+            "aiir.dev",
+            self.doc_text,
+            "Doc contains references to squatted aiir.dev domain",
+        )
 
     def test_aiir_flags_are_real(self):
         """All --flags used in hook commands must be real AIIR CLI flags."""
         # Known AIIR CLI flags (from cli.py)
         known_flags = {
-            "--pretty", "--sign", "--output", "--agent-tool",
-            "--agent-model", "--agent-context", "--in-toto",
-            "--json", "--ai-only", "--quiet", "--verify",
-            "--explain", "--stats", "--check", "--policy",
-            "--policy-init", "--range", "--jsonl", "--detail",
-            "--ledger", "--badge", "--export", "--namespace",
-            "--redact-files", "--version", "--no-sign",
+            "--pretty",
+            "--sign",
+            "--output",
+            "--agent-tool",
+            "--agent-model",
+            "--agent-context",
+            "--in-toto",
+            "--json",
+            "--ai-only",
+            "--quiet",
+            "--verify",
+            "--explain",
+            "--stats",
+            "--check",
+            "--policy",
+            "--policy-init",
+            "--range",
+            "--jsonl",
+            "--detail",
+            "--ledger",
+            "--badge",
+            "--export",
+            "--namespace",
+            "--redact-files",
+            "--version",
+            "--no-sign",
         }
-        hook_configs = [
-            json.loads(b) for b in self.json_blocks
-            if '"PostToolUse"' in b
-        ]
+        hook_configs = [json.loads(b) for b in self.json_blocks if '"PostToolUse"' in b]
         for cfg in hook_configs:
             for entry in cfg["hooks"]["PostToolUse"]:
                 for hook in entry["hooks"]:
@@ -172,8 +183,11 @@ class TestClaudeHooksDoc(unittest.TestCase):
                         # Skip git flags
                         if flag in ("--quiet", "--no-verify"):
                             continue
-                        self.assertIn(flag, known_flags,
-                            f"Unknown AIIR flag in hook command: {flag}")
+                        self.assertIn(
+                            flag,
+                            known_flags,
+                            f"Unknown AIIR flag in hook command: {flag}",
+                        )
 
 
 if __name__ == "__main__":

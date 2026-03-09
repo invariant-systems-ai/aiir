@@ -1,14 +1,10 @@
 """Tests for GitHub integration (outputs, summary, action.yml)."""
+
 from __future__ import annotations
 
-import json
 import os
-import shutil
-import subprocess
-import sys
 import tempfile
 import unittest
-import uuid
 from pathlib import Path
 from unittest.mock import patch
 
@@ -71,6 +67,7 @@ class TestGitHubOutputValueCap(unittest.TestCase):
             self.assertIn("key=short_value", content)
         finally:
             import shutil
+
             shutil.rmtree(tmpdir, ignore_errors=True)
 
     def test_value_over_limit_rejected(self):
@@ -92,6 +89,7 @@ class TestGitHubOutputValueCap(unittest.TestCase):
             # Should not raise
         finally:
             import shutil
+
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
@@ -109,4 +107,3 @@ class TestActionYmlSafePath(unittest.TestCase):
         action_path = Path(__file__).parent.parent / "action.yml"
         content = action_path.read_text(encoding="utf-8")
         self.assertIn("-P flag", content)
-

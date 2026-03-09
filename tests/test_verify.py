@@ -1,14 +1,12 @@
 """Tests for receipt verification."""
+
 from __future__ import annotations
 
 import json
 import os
 import shutil
-import subprocess
-import sys
 import tempfile
 import unittest
-import uuid
 from pathlib import Path
 from unittest.mock import patch
 
@@ -23,6 +21,7 @@ class TestSafeVerifyPathNoDeadCode(unittest.TestCase):
         """The _safe_verify_path function should not assign an unused raw_parts variable."""
         import inspect
         from aiir.mcp_server import _safe_verify_path
+
         source = inspect.getsource(_safe_verify_path)
         self.assertNotIn("raw_parts", source)
 
@@ -33,19 +32,23 @@ class TestPathRedactionInVerifySignature(unittest.TestCase):
     def test_error_path_redacts_filesystem_paths(self):
         """Paths >= 5 chars deep should be replaced with <path>."""
         import re
+
         # Simulate what the error handler does
-        error_msg = "sigstore failed: /home/user/.cache/sigstore/roots/tuf.json not found"
+        error_msg = (
+            "sigstore failed: /home/user/.cache/sigstore/roots/tuf.json not found"
+        )
         safe_error = error_msg.split("\n")[0][:200]
-        safe_error = re.sub(r'/[\w./-]{5,}', '<path>', safe_error)
+        safe_error = re.sub(r"/[\w./-]{5,}", "<path>", safe_error)
         self.assertNotIn("/home/", safe_error)
         self.assertIn("<path>", safe_error)
 
     def test_error_path_preserves_short_text(self):
         """Short error messages without paths should pass through."""
         import re
+
         error_msg = "connection refused"
         safe_error = error_msg.split("\n")[0][:200]
-        safe_error = re.sub(r'/[\w./-]{5,}', '<path>', safe_error)
+        safe_error = re.sub(r"/[\w./-]{5,}", "<path>", safe_error)
         self.assertEqual(safe_error, "connection refused")
 
 
@@ -85,6 +88,7 @@ class TestIterativeJsonDepthCheck(unittest.TestCase):
     def test_implementation_is_iterative(self):
         """The function should use a stack, not recursion."""
         import inspect
+
         source = inspect.getsource(cli._check_json_depth)
         # Iterative implementation uses 'stack' and 'while'
         self.assertIn("stack", source)
@@ -94,8 +98,10 @@ class TestIterativeJsonDepthCheck(unittest.TestCase):
         lines = source.split("\n")
         # Skip the def line and docstring, count _check_json_depth calls in body
         body_calls = sum(
-            1 for line in lines[1:]
-            if "_check_json_depth" in line and "def " not in line
+            1
+            for line in lines[1:]
+            if "_check_json_depth" in line
+            and "def " not in line
             and "#" not in line.split("_check_json_depth")[0]
         )
         self.assertEqual(body_calls, 0, "Function should not call itself recursively")
@@ -144,10 +150,13 @@ class TestContextAwareVerifyTips(unittest.TestCase):
     def test_verify_tip_for_file_not_found_in_main(self):
         """Full CLI --verify with missing file shows correct tip on stderr."""
         import io
+
         captured_err = io.StringIO()
-        with patch("sys.stderr", captured_err), \
-             patch("sys.stdout", io.StringIO()), \
-             patch("sys.argv", ["aiir", "--verify", "/nonexistent/file.json"]):
+        with (
+            patch("sys.stderr", captured_err),
+            patch("sys.stdout", io.StringIO()),
+            patch("sys.argv", ["aiir", "--verify", "/nonexistent/file.json"]),
+        ):
             code = cli.main()
 
         err = captured_err.getvalue()
@@ -161,10 +170,13 @@ class TestContextAwareVerifyTips(unittest.TestCase):
             f.write("not json")
             f.flush()
             import io
+
             captured_err = io.StringIO()
-            with patch("sys.stderr", captured_err), \
-                 patch("sys.stdout", io.StringIO()), \
-                 patch("sys.argv", ["aiir", "--verify", f.name]):
+            with (
+                patch("sys.stderr", captured_err),
+                patch("sys.stdout", io.StringIO()),
+                patch("sys.argv", ["aiir", "--verify", f.name]),
+            ):
                 code = cli.main()
 
         os.unlink(f.name)
@@ -189,10 +201,13 @@ class TestContextAwareVerifyTips(unittest.TestCase):
             json.dump(receipt, f)
             f.flush()
             import io
+
             captured_err = io.StringIO()
-            with patch("sys.stderr", captured_err), \
-                 patch("sys.stdout", io.StringIO()), \
-                 patch("sys.argv", ["aiir", "--verify", f.name]):
+            with (
+                patch("sys.stderr", captured_err),
+                patch("sys.stdout", io.StringIO()),
+                patch("sys.argv", ["aiir", "--verify", f.name]),
+            ):
                 code = cli.main()
 
         os.unlink(f.name)
@@ -210,10 +225,13 @@ class TestContextAwareVerifyTips(unittest.TestCase):
         try:
             os.symlink(real_path, link_path)
             import io
+
             captured_err = io.StringIO()
-            with patch("sys.stderr", captured_err), \
-                 patch("sys.stdout", io.StringIO()), \
-                 patch("sys.argv", ["aiir", "--verify", link_path]):
+            with (
+                patch("sys.stderr", captured_err),
+                patch("sys.stdout", io.StringIO()),
+                patch("sys.argv", ["aiir", "--verify", link_path]),
+            ):
                 code = cli.main()
 
             err = captured_err.getvalue()
@@ -258,10 +276,13 @@ class TestVerifyArrayPartialFailureTip(unittest.TestCase):
             json.dump([good, bad], f)
             f.flush()
             import io
+
             captured_err = io.StringIO()
-            with patch("sys.stderr", captured_err), \
-                 patch("sys.stdout", io.StringIO()), \
-                 patch("sys.argv", ["aiir", "--verify", f.name]):
+            with (
+                patch("sys.stderr", captured_err),
+                patch("sys.stdout", io.StringIO()),
+                patch("sys.argv", ["aiir", "--verify", f.name]),
+            ):
                 code = cli.main()
 
         os.unlink(f.name)
@@ -276,34 +297,40 @@ class TestVerifyArrayErrors(unittest.TestCase):
 
     def test_array_failure_shows_count(self):
         """When an array has invalid receipts, the error should show how many failed."""
-        import tempfile, shutil
+        import tempfile
+
         tmpdir = tempfile.mkdtemp()
         try:
             arr_file = Path(tmpdir, "arr.json")
             # Two receipts: one with bad type, one with bad hash
-            arr_file.write_text(json.dumps([
-                {
-                    "type": "aiir.commit_receipt",
-                    "schema": "aiir/commit_receipt.v1",
-                    "version": "1.0.0",
-                    "commit": {"sha": "abc"},
-                    "ai_attestation": {},
-                    "provenance": {},
-                    "receipt_id": "g1-wrong",
-                    "content_hash": "sha256:wrong",
-                },
-                {
-                    "type": "wrong_type",
-                    "schema": "aiir/commit_receipt.v1",
-                    "version": "1.0.0",
-                    "commit": {"sha": "def"},
-                    "ai_attestation": {},
-                    "provenance": {},
-                    "receipt_id": "g1-also-wrong",
-                    "content_hash": "sha256:also-wrong",
-                },
-            ]))
+            arr_file.write_text(
+                json.dumps(
+                    [
+                        {
+                            "type": "aiir.commit_receipt",
+                            "schema": "aiir/commit_receipt.v1",
+                            "version": "1.0.0",
+                            "commit": {"sha": "abc"},
+                            "ai_attestation": {},
+                            "provenance": {},
+                            "receipt_id": "g1-wrong",
+                            "content_hash": "sha256:wrong",
+                        },
+                        {
+                            "type": "wrong_type",
+                            "schema": "aiir/commit_receipt.v1",
+                            "version": "1.0.0",
+                            "commit": {"sha": "def"},
+                            "ai_attestation": {},
+                            "provenance": {},
+                            "receipt_id": "g1-also-wrong",
+                            "content_hash": "sha256:also-wrong",
+                        },
+                    ]
+                )
+            )
             from io import StringIO
+
             captured_err = StringIO()
             with patch("sys.stderr", captured_err):
                 rc = cli.main(["--verify", str(arr_file)])
@@ -318,12 +345,16 @@ class TestVerifyArrayErrors(unittest.TestCase):
 
     def test_single_receipt_failure_shows_error(self):
         """Single receipt failure should show the specific error."""
-        import tempfile, shutil
+        import tempfile
+
         tmpdir = tempfile.mkdtemp()
         try:
             bad_file = Path(tmpdir, "bad.json")
-            bad_file.write_text('{"type":"aiir.commit_receipt","schema":"aiir/commit_receipt.v1","version":"1.0.0","commit":{"sha":"abc"},"ai_attestation":{},"provenance":{},"receipt_id":"g1-x","content_hash":"sha256:x"}')
+            bad_file.write_text(
+                '{"type":"aiir.commit_receipt","schema":"aiir/commit_receipt.v1","version":"1.0.0","commit":{"sha":"abc"},"ai_attestation":{},"provenance":{},"receipt_id":"g1-x","content_hash":"sha256:x"}'
+            )
             from io import StringIO
+
             captured_err = StringIO()
             with patch("sys.stderr", captured_err):
                 rc = cli.main(["--verify", str(bad_file)])
@@ -333,4 +364,3 @@ class TestVerifyArrayErrors(unittest.TestCase):
             self.assertIn("\U0001f4a1", stderr_text)
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
-

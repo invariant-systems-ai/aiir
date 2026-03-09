@@ -23,7 +23,6 @@ import tempfile
 import unicodedata
 import unittest.mock
 
-import hypothesis
 from hypothesis import assume, given, settings, HealthCheck
 from hypothesis import strategies as st
 
@@ -45,8 +44,8 @@ dangerous_text = st.text(
     alphabet=st.sampled_from(
         list("\x00\x01\x0d\x0a\x1b\x07\x08\x7f")
         + list("|`[]!<>&;'\"\\/")
-        + list("\u200B\u200C\u200D\u200E\u200F\u202A\u202E\uFEFF\u00AD")
-        + list("\u2066\u2067\u2068\u2069\u202B\u202C\u202D")
+        + list("\u200b\u200c\u200d\u200e\u200f\u202a\u202e\ufeff\u00ad")
+        + list("\u2066\u2067\u2068\u2069\u202b\u202c\u202d")
         + list("://http.com")
         + list(string.printable)
     ),
@@ -55,19 +54,38 @@ dangerous_text = st.text(
 )
 
 # ANSI escape sequences mixed with text — built by joining fragments
-ansi_fragments = st.sampled_from([
-    "hello", "world", "fix:", "test", " ", "A", "B",
-    "\x1b[31m", "\x1b[0m", "\x1b[A", "\x1b[2K", "\x1b[1;32m",
-    "\x1b]0;EVIL\x07", "\x1b]2;TITLE\x1b\\",
-    "\x1b", "\x07", "\x00", "\x0d", "\x0a",
-])
+ansi_fragments = st.sampled_from(
+    [
+        "hello",
+        "world",
+        "fix:",
+        "test",
+        " ",
+        "A",
+        "B",
+        "\x1b[31m",
+        "\x1b[0m",
+        "\x1b[A",
+        "\x1b[2K",
+        "\x1b[1;32m",
+        "\x1b]0;EVIL\x07",
+        "\x1b]2;TITLE\x1b\\",
+        "\x1b",
+        "\x07",
+        "\x00",
+        "\x0d",
+        "\x0a",
+    ]
+)
 ansi_text = st.lists(ansi_fragments, min_size=0, max_size=30).map("".join)
 
 # Git ref-like strings (valid + adversarial)
 git_ref_text = st.one_of(
-    st.text(alphabet=st.sampled_from(
-        list(string.ascii_letters + string.digits + "/._~^-")
-    ), min_size=1, max_size=100),
+    st.text(
+        alphabet=st.sampled_from(list(string.ascii_letters + string.digits + "/._~^-")),
+        min_size=1,
+        max_size=100,
+    ),
     st.text(min_size=0, max_size=2000),  # overlong / random
 )
 
@@ -159,8 +177,17 @@ class TestFuzzSanitizeMd:
     def test_no_dangerous_bidi_chars(self, text: str):
         """Bidi override characters must be stripped."""
         result = cli._sanitize_md(text)
-        dangerous = {"\u202A", "\u202B", "\u202C", "\u202D", "\u202E",
-                     "\u2066", "\u2067", "\u2068", "\u2069"}
+        dangerous = {
+            "\u202a",
+            "\u202b",
+            "\u202c",
+            "\u202d",
+            "\u202e",
+            "\u2066",
+            "\u2067",
+            "\u2068",
+            "\u2069",
+        }
         for c in result:
             assert c not in dangerous, f"Dangerous bidi char U+{ord(c):04X} in output"
 
@@ -173,10 +200,13 @@ class TestFuzzSanitizeMd:
             cat = unicodedata.category(c)
             assert cat != "Cc", f"Control char U+{ord(c):04X} ({cat}) in output"
 
-    @given(text=st.text(
-        alphabet=st.sampled_from(list("abcdef https://evil.com ftp://x.y")),
-        min_size=10, max_size=200,
-    ))
+    @given(
+        text=st.text(
+            alphabet=st.sampled_from(list("abcdef https://evil.com ftp://x.y")),
+            min_size=10,
+            max_size=200,
+        )
+    )
     @settings(max_examples=500)
     def test_autolinks_broken(self, text: str):
         """Any :// in output must be preceded by ZWSP to break autolinks."""
@@ -186,16 +216,19 @@ class TestFuzzSanitizeMd:
             pos = result.find("://", idx)
             if pos == -1:
                 break
-            assert pos > 0 and result[pos - 1] == "\u200B", (
+            assert pos > 0 and result[pos - 1] == "\u200b", (
                 f"Unbroken autolink at position {pos} in: {result!r}"
             )
             idx = pos + 3
 
-    @given(text=st.text(
-        # Alphabet includes & and entity components but NOT literal < or >
-        alphabet=st.sampled_from(list("abc&; ltgampquoaos")),
-        min_size=1, max_size=200,
-    ))
+    @given(
+        text=st.text(
+            # Alphabet includes & and entity components but NOT literal < or >
+            alphabet=st.sampled_from(list("abc&; ltgampquoaos")),
+            min_size=1,
+            max_size=200,
+        )
+    )
     @settings(max_examples=1000)
     def test_no_raw_ampersand_entities(self, text: str):
         """Pre-encoded entities (e.g., &lt;) must be neutralised to &amp;lt;."""
@@ -228,7 +261,11 @@ class TestFuzzValidateRef:
         except ValueError:
             pass
 
-    @given(ref=st.text(min_size=1, max_size=100).map(lambda s: s.replace("\x00", "") + "\x00"))
+    @given(
+        ref=st.text(min_size=1, max_size=100).map(
+            lambda s: s.replace("\x00", "") + "\x00"
+        )
+    )
     @settings(max_examples=200)
     def test_rejects_nul_bytes(self, ref: str):
         """Refs with NUL bytes must be rejected."""
@@ -282,7 +319,9 @@ class TestFuzzSetGithubOutput:
 
     @given(
         key=st.text(min_size=1, max_size=50).filter(
-            lambda k: "\n" not in k and "\r" not in k and "=" not in k
+            lambda k: "\n" not in k
+            and "\r" not in k
+            and "=" not in k
             and "<<" not in k
             and all(ord(c) >= 0x20 for c in k)
         ),
@@ -315,10 +354,13 @@ class TestFuzzSetGithubOutput:
         finally:
             os.unlink(tmp)
 
-    @given(key=st.text(min_size=1, max_size=20).filter(
-        lambda k: any(c in k for c in "\n\r=") or any(ord(c) < 0x20 for c in k)
-        or "<<" in k
-    ))
+    @given(
+        key=st.text(min_size=1, max_size=20).filter(
+            lambda k: any(c in k for c in "\n\r=")
+            or any(ord(c) < 0x20 for c in k)
+            or "<<" in k
+        )
+    )
     @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
     def test_dangerous_keys_always_rejected(self, key: str):
         """Keys with newlines, =, control chars, or << must always be rejected."""
@@ -362,8 +404,10 @@ class TestFuzzStripTerminalEscapes:
             if ord(c) < 0x20 and c != "\t":
                 assert False, f"Control char U+{ord(c):04X} in output: {result!r}"
 
-    @given(prefix=st.text(alphabet=string.ascii_letters, min_size=1, max_size=20),
-           suffix=st.text(alphabet=string.ascii_letters, min_size=1, max_size=20))
+    @given(
+        prefix=st.text(alphabet=string.ascii_letters, min_size=1, max_size=20),
+        suffix=st.text(alphabet=string.ascii_letters, min_size=1, max_size=20),
+    )
     @settings(max_examples=500)
     def test_preserves_printable_text(self, prefix: str, suffix: str):
         """Pure ASCII text without escapes must pass through unchanged."""
@@ -415,7 +459,11 @@ class TestFuzzCanonicalJson:
         # Should not start/end with whitespace
         assert result == result.strip()
 
-    @given(obj=st.dictionaries(st.text(min_size=1, max_size=10), st.integers(), min_size=2, max_size=10))
+    @given(
+        obj=st.dictionaries(
+            st.text(min_size=1, max_size=10), st.integers(), min_size=2, max_size=10
+        )
+    )
     @settings(max_examples=500)
     def test_sorted_keys(self, obj: dict):
         """Dictionary keys must be sorted in output."""
@@ -436,8 +484,9 @@ class TestFuzzDetectAiSignals:
         committer_email=unicode_text,
     )
     @settings(max_examples=2000, suppress_health_check=[HealthCheck.too_slow])
-    def test_never_crashes(self, message, author_name, author_email,
-                           committer_name, committer_email):
+    def test_never_crashes(
+        self, message, author_name, author_email, committer_name, committer_email
+    ):
         """Must never raise on any Unicode input combination."""
         result = cli.detect_ai_signals(
             message, author_name, author_email, committer_name, committer_email
@@ -457,21 +506,37 @@ class TestFuzzDetectAiSignals:
     @settings(max_examples=500)
     def test_no_signals_for_innocent_text(self, message: str, author_name: str):
         """Random lowercase ASCII text should rarely trigger AI signals."""
-        assume("copilot" not in message and "chatgpt" not in message
-               and "claude" not in message and "cursor" not in message
-               and "generated" not in message and "ai-" not in message
-               and "llm-" not in message and "machine-" not in message
-               and "aider:" not in message and "codeium" not in message
-               and "windsurf" not in message and "cody" not in message
-               and "amazon" not in message and "codewhisperer" not in message
-               and "devin" not in message and "gemini" not in message
-               and "tabnine" not in message and "codegen" not in message
-               and "copilot" not in author_name and "dependabot" not in author_name
-               and "renovate" not in author_name and "snyk" not in author_name
-               and "deepsource" not in author_name and "coderabbit" not in author_name
-               and "github-actions" not in author_name
-               and "devin" not in author_name and "amazon" not in author_name
-               and "tabnine" not in author_name and "gemini" not in author_name)
+        assume(
+            "copilot" not in message
+            and "chatgpt" not in message
+            and "claude" not in message
+            and "cursor" not in message
+            and "generated" not in message
+            and "ai-" not in message
+            and "llm-" not in message
+            and "machine-" not in message
+            and "aider:" not in message
+            and "codeium" not in message
+            and "windsurf" not in message
+            and "cody" not in message
+            and "amazon" not in message
+            and "codewhisperer" not in message
+            and "devin" not in message
+            and "gemini" not in message
+            and "tabnine" not in message
+            and "codegen" not in message
+            and "copilot" not in author_name
+            and "dependabot" not in author_name
+            and "renovate" not in author_name
+            and "snyk" not in author_name
+            and "deepsource" not in author_name
+            and "coderabbit" not in author_name
+            and "github-actions" not in author_name
+            and "devin" not in author_name
+            and "amazon" not in author_name
+            and "tabnine" not in author_name
+            and "gemini" not in author_name
+        )
         result = cli.detect_ai_signals(message, author_name=author_name)
         ai_signals, bot_signals = result
         assert len(ai_signals) == 0, f"False positive AI signals: {ai_signals}"
@@ -505,7 +570,9 @@ class TestFuzzVerifyReceipt:
         assert "valid" in result
         assert isinstance(result["valid"], bool)
 
-    @given(obj=st.dictionaries(st.text(min_size=1, max_size=20), json_values, max_size=15))
+    @given(
+        obj=st.dictionaries(st.text(min_size=1, max_size=20), json_values, max_size=15)
+    )
     @settings(max_examples=1000, suppress_health_check=[HealthCheck.too_slow])
     def test_never_crashes_on_random_dicts(self, obj):
         """verify_receipt must handle completely random dicts without crashing."""
@@ -522,17 +589,26 @@ class TestFuzzVerifyReceipt:
         @settings(max_examples=100, deadline=None)
         def _inner(subject):
             commit = cli.CommitInfo(
-                sha="a" * 40, author_name="Test", author_email="t@t",
+                sha="a" * 40,
+                author_name="Test",
+                author_email="t@t",
                 author_date="2026-01-01T00:00:00Z",
-                committer_name="Test", committer_email="t@t",
+                committer_name="Test",
+                committer_email="t@t",
                 committer_date="2026-01-01T00:00:00Z",
-                subject=subject, body=subject,
-                diff_stat="1 file", diff_hash="sha256:" + "0" * 64,
+                subject=subject,
+                body=subject,
+                diff_stat="1 file",
+                diff_hash="sha256:" + "0" * 64,
                 files_changed=["test.py"],
             )
             # Mock _run_git and _strip_url_credentials for build_commit_receipt
-            with unittest.mock.patch.object(cli, "_run_git", return_value="https://example.com\n"):
-                with unittest.mock.patch.object(cli, "_strip_url_credentials", side_effect=lambda u: u.strip()):
+            with unittest.mock.patch.object(
+                cli, "_run_git", return_value="https://example.com\n"
+            ):
+                with unittest.mock.patch.object(
+                    cli, "_strip_url_credentials", side_effect=lambda u: u.strip()
+                ):
                     receipt = cli.build_commit_receipt(commit)
             result = cli.verify_receipt(receipt)
             assert result["valid"], f"Receipt failed verification: {result}"
@@ -555,6 +631,7 @@ class TestFuzzStripUrlCredentials:
     def test_no_credentials_in_output(self, url: str):
         """Output must not contain the @ credential separator in netloc."""
         from urllib.parse import urlparse
+
         result = cli._strip_url_credentials(url)
         try:
             parsed = urlparse(result)
@@ -563,10 +640,12 @@ class TestFuzzStripUrlCredentials:
         except Exception:
             pass  # Non-URL input is fine
 
-    @given(url=st.from_regex(
-        r"https?://user:pass@[a-z]+\.[a-z]{2,4}/[a-z]*",
-        fullmatch=True,
-    ))
+    @given(
+        url=st.from_regex(
+            r"https?://user:pass@[a-z]+\.[a-z]{2,4}/[a-z]*",
+            fullmatch=True,
+        )
+    )
     @settings(max_examples=500)
     def test_credentials_stripped(self, url: str):
         """Explicit user:pass@ must be removed."""
@@ -647,9 +726,7 @@ class TestFuzzVerifyReceiptFile:
     @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
     def test_never_crashes_on_random_json(self, data):
         """verify_receipt_file must handle any JSON structure without crashing."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".json", delete=False, mode="w"
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w") as f:
             json.dump(data, f)
             path = f.name
         try:
@@ -668,22 +745,34 @@ class TestFuzzVerifyReceiptFile:
 class TestFuzzRegressions:
     """Targeted fuzzing around previously-found vulnerabilities."""
 
-    @given(text=st.text(
-        alphabet=st.sampled_from(
-            ["\u202E", "\u200F", "\u200E", "\u2066", "\u2069", "\uFEFF"]
-            + list("normal text")
-        ),
-        min_size=5, max_size=100,
-    ))
+    @given(
+        text=st.text(
+            alphabet=st.sampled_from(
+                ["\u202e", "\u200f", "\u200e", "\u2066", "\u2069", "\ufeff"]
+                + list("normal text")
+            ),
+            min_size=5,
+            max_size=100,
+        )
+    )
     @settings(max_examples=500)
     def test_sanitize_md_bidi_regression(self, text):
         """R5-01 regression: All dangerous bidi chars must be stripped."""
         result = cli._sanitize_md(text)
         for c in result:
             assert c not in {
-                "\u202A", "\u202B", "\u202C", "\u202D", "\u202E",
-                "\u2066", "\u2067", "\u2068", "\u2069",
-                "\u200E", "\u200F", "\uFEFF",
+                "\u202a",
+                "\u202b",
+                "\u202c",
+                "\u202d",
+                "\u202e",
+                "\u2066",
+                "\u2067",
+                "\u2068",
+                "\u2069",
+                "\u200e",
+                "\u200f",
+                "\ufeff",
             }
 
     @given(
@@ -721,19 +810,28 @@ class TestFuzzRound7Homoglyphs:
 
     # Strategy: Cyrillic/fullwidth substitutions in AI signal keywords
     _HOMOGLYPH_MAP = {
-        'a': '\u0430',  # Cyrillic а
-        'c': '\u0441',  # Cyrillic с
-        'e': '\u0435',  # Cyrillic е
-        'o': '\u043e',  # Cyrillic о
-        'p': '\u0440',  # Cyrillic р
-        'i': '\u0456',  # Cyrillic і (Ukrainian)
+        "a": "\u0430",  # Cyrillic а
+        "c": "\u0441",  # Cyrillic с
+        "e": "\u0435",  # Cyrillic е
+        "o": "\u043e",  # Cyrillic о
+        "p": "\u0440",  # Cyrillic р
+        "i": "\u0456",  # Cyrillic і (Ukrainian)
     }
 
     @given(
-        keyword=st.sampled_from([
-            "copilot", "chatgpt", "claude", "cursor", "codeium", "windsurf",
-        ]),
-        positions=st.lists(st.integers(min_value=0, max_value=10), min_size=1, max_size=3),
+        keyword=st.sampled_from(
+            [
+                "copilot",
+                "chatgpt",
+                "claude",
+                "cursor",
+                "codeium",
+                "windsurf",
+            ]
+        ),
+        positions=st.lists(
+            st.integers(min_value=0, max_value=10), min_size=1, max_size=3
+        ),
     )
     @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
     def test_homoglyph_substitution_still_detected(self, keyword, positions):
@@ -752,6 +850,7 @@ class TestFuzzRound7Homoglyphs:
         # (Some Cyrillic chars NFKC-normalize to Latin equivalents)
         # Note: Not ALL homoglyphs are caught by NFKC — this tests the ones that are
         import unicodedata
+
         normalized = unicodedata.normalize("NFKC", mutated).lower()
         if keyword in normalized:
             assert len(ai_signals) > 0, (
@@ -761,15 +860,16 @@ class TestFuzzRound7Homoglyphs:
 
     @given(
         name=st.sampled_from(["copilot", "dependabot", "renovate", "github-actions"]),
-        sub_char=st.sampled_from(['\u0430', '\u0435', '\u043e', '\u0441', '\u0440']),
+        sub_char=st.sampled_from(["\u0430", "\u0435", "\u043e", "\u0441", "\u0440"]),
         sub_pos=st.integers(min_value=0, max_value=20),
     )
     @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
     def test_bot_name_homoglyph_detected(self, name, sub_char, sub_pos):
         """Bot patterns in author names with homoglyphs must be detected."""
         idx = sub_pos % len(name)
-        mutated = name[:idx] + sub_char + name[idx+1:]
+        mutated = name[:idx] + sub_char + name[idx + 1 :]
         import unicodedata
+
         normalized = unicodedata.normalize("NFKC", mutated).lower()
         ai_signals, bot_signals = cli.detect_ai_signals("test", author_name=mutated)
         if name in normalized:
@@ -784,11 +884,12 @@ class TestFuzzRound7CsiEscapes:
     @given(
         params=st.text(
             alphabet=st.sampled_from(list("0123456789;")),
-            min_size=0, max_size=10,
+            min_size=0,
+            max_size=10,
         ),
-        final_byte=st.sampled_from(list(
-            "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-        )),
+        final_byte=st.sampled_from(
+            list("@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~")
+        ),
         prefix=st.text(alphabet=string.ascii_letters, min_size=1, max_size=10),
         suffix=st.text(alphabet=string.ascii_letters, min_size=1, max_size=10),
     )
@@ -814,11 +915,13 @@ class TestFuzzRound7SummaryInjection:
     @settings(max_examples=1000, suppress_health_check=[HealthCheck.too_slow])
     def test_summary_never_contains_raw_html(self, sha, receipt_id, subject):
         """format_github_summary must never contain raw < or > from any field."""
-        receipts = [{
-            "commit": {"sha": sha, "subject": subject},
-            "ai_attestation": {"is_ai_authored": False, "signals_detected": []},
-            "receipt_id": receipt_id,
-        }]
+        receipts = [
+            {
+                "commit": {"sha": sha, "subject": subject},
+                "ai_attestation": {"is_ai_authored": False, "signals_detected": []},
+                "receipt_id": receipt_id,
+            }
+        ]
         result = cli.format_github_summary(receipts)
         # The header line contains fixed text with <, so only check data rows
         for line in result.split("\n"):
@@ -837,11 +940,13 @@ class TestFuzzRound7SummaryInjection:
     @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
     def test_summary_never_crashes(self, sha, receipt_id):
         """format_github_summary must never crash on arbitrary receipt fields."""
-        receipts = [{
-            "commit": {"sha": sha, "subject": "test"},
-            "ai_attestation": {"is_ai_authored": False, "signals_detected": []},
-            "receipt_id": receipt_id,
-        }]
+        receipts = [
+            {
+                "commit": {"sha": sha, "subject": "test"},
+                "ai_attestation": {"is_ai_authored": False, "signals_detected": []},
+                "receipt_id": receipt_id,
+            }
+        ]
         result = cli.format_github_summary(receipts)
         assert isinstance(result, str)
 
@@ -880,6 +985,7 @@ class TestFuzzRound12NormalizeHelper:
         assert isinstance(result, str)
         # Result should not contain any Cf characters
         import unicodedata
+
         for c in result:
             assert unicodedata.category(c) != "Cf", (
                 f"Cf char U+{ord(c):04X} survived normalization"
@@ -952,7 +1058,9 @@ class TestFuzzRound14VerifyRobust(unittest.TestCase):
     """R14-SEC-01 fuzz: verify_receipt never crashes regardless of nested field types."""
 
     @given(
-        commit_val=st.one_of(st.text(), st.integers(), st.none(), st.lists(st.integers())),
+        commit_val=st.one_of(
+            st.text(), st.integers(), st.none(), st.lists(st.integers())
+        ),
         ai_val=st.one_of(st.text(), st.integers(), st.none(), st.lists(st.text())),
     )
     @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
@@ -978,7 +1086,9 @@ class TestFuzzRound14PrettyRobust(unittest.TestCase):
     """R14-SEC-02 fuzz: format_receipt_pretty never crashes on non-dict fields."""
 
     @given(
-        commit_val=st.one_of(st.text(), st.integers(), st.none(), st.lists(st.integers())),
+        commit_val=st.one_of(
+            st.text(), st.integers(), st.none(), st.lists(st.integers())
+        ),
         ai_val=st.one_of(st.text(), st.integers(), st.none(), st.lists(st.text())),
     )
     @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
@@ -1001,8 +1111,11 @@ class TestFuzzRound15PrettyAuthorRobust(unittest.TestCase):
 
     @given(
         author_val=st.one_of(
-            st.text(), st.integers(), st.none(),
-            st.lists(st.integers()), st.binary(),
+            st.text(),
+            st.integers(),
+            st.none(),
+            st.lists(st.integers()),
+            st.binary(),
             st.dictionaries(st.text(), st.text()),
         ),
     )
@@ -1014,8 +1127,10 @@ class TestFuzzRound15PrettyAuthorRobust(unittest.TestCase):
             "content_hash": "sha256:abc",
             "timestamp": "2026-01-01T00:00:00Z",
             "commit": {
-                "sha": "abc123", "subject": "test",
-                "author": author_val, "files_changed": 1,
+                "sha": "abc123",
+                "subject": "test",
+                "author": author_val,
+                "files_changed": 1,
             },
             "ai_attestation": {"is_ai_authored": False, "signals_detected": []},
         }

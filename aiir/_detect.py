@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 import subprocess
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from aiir._core import (
     CommitInfo,
@@ -117,7 +117,7 @@ def detect_ai_signals(
     msg_clean = _normalize_for_detection(message)
     # Collapse whitespace runs (tab, double-space, etc.) to single
     # space so "Co-authored-by:\tCopilot" matches the canonical signal.
-    msg_lower = re.sub(r'\s+', ' ', msg_clean).lower()
+    msg_lower = re.sub(r"\s+", " ", msg_clean).lower()
 
     # Check message body for AI signals
     for signal in AI_SIGNALS:
@@ -177,9 +177,7 @@ def detect_ai_signals(
     return ai_signals, bot_signals
 
 
-def get_commit_info(
-    commit_ref: str = "HEAD", cwd: Optional[str] = None
-) -> CommitInfo:
+def get_commit_info(commit_ref: str = "HEAD", cwd: Optional[str] = None) -> CommitInfo:
     """Parse full commit metadata from git."""
     _validate_ref(commit_ref)  # Reject option-like refs
 
@@ -188,7 +186,9 @@ def get_commit_info(
     fmt = "%H%x00%an%x00%ae%x00%aI%x00%cn%x00%ce%x00%cI%x00%s"
     # --no-mailmap prevents .mailmap from rewriting bot/AI author
     # identities to human emails, which would bypass AI detection heuristics.
-    line = _run_git(["log", "-1", "--no-mailmap", f"--format={fmt}", commit_ref], cwd=cwd).strip()
+    line = _run_git(
+        ["log", "-1", "--no-mailmap", f"--format={fmt}", commit_ref], cwd=cwd
+    ).strip()
     parts = line.split("\x00", 7)
     if len(parts) < 8:  # pragma: no cover
         raise ValueError(f"Failed to parse commit {commit_ref}: got {line!r}")
@@ -197,18 +197,19 @@ def get_commit_info(
 
     # Validate SHA format — a corrupted repo or malicious git
     # wrapper could return non-hex data that propagates into receipts.
-    if not re.match(r'^[0-9a-f]{40,64}$', sha):
+    if not re.match(r"^[0-9a-f]{40,64}$", sha):
         raise ValueError(f"Invalid commit SHA format: {sha[:80]!r}")
 
     # Full commit message body
-    body = _run_git(["log", "-1", "--no-mailmap", "--format=%B", commit_ref], cwd=cwd).strip()
+    body = _run_git(
+        ["log", "-1", "--no-mailmap", "--format=%B", commit_ref], cwd=cwd
+    ).strip()
 
     # Handle root commits (no parent) by falling back to empty tree
     import os
+
     try:
-        parent = _run_git(
-            ["rev-parse", "--verify", f"{sha}~1"], cwd=cwd
-        ).strip()
+        parent = _run_git(["rev-parse", "--verify", f"{sha}~1"], cwd=cwd).strip()
     except RuntimeError:
         # Root commit — compute empty tree hash dynamically
         # (works with both SHA-1 and SHA-256 repos)
@@ -221,10 +222,13 @@ def get_commit_info(
                 stderr=subprocess.PIPE,
                 check=True,
                 timeout=GIT_TIMEOUT,  # Prevent hang on corrupt git
-                env=_GIT_SAFE_ENV,    # Consistent with _run_git
+                env=_GIT_SAFE_ENV,  # Consistent with _run_git
             )
             parent = result.stdout.decode().strip()
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:  # pragma: no cover
+        except (
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+        ) as e:  # pragma: no cover
             raise RuntimeError(f"Failed to compute empty tree hash: {e}") from e
 
     # Diff stat

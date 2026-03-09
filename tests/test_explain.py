@@ -102,7 +102,10 @@ class TestExplainVerification(unittest.TestCase):
         result = {
             "valid": True,
             "receipt_id": "g1-abc",
-            "schema_errors": ["commit.sha: required field missing", "version: pattern mismatch"],
+            "schema_errors": [
+                "commit.sha: required field missing",
+                "version: pattern mismatch",
+            ],
         }
         text = explain_verification(result)
         self.assertIn("VERIFICATION PASSED", text)
@@ -125,6 +128,7 @@ class TestExplainVerificationCLI(unittest.TestCase):
     def test_explain_flag_accepted(self):
         """--explain must be accepted by the argument parser."""
         import aiir.cli as cli
+
         # Just check the parser accepts it (doesn't error).
         parser = cli._FriendlyParser(prog="aiir")
         parser.add_argument("--explain", action="store_true")

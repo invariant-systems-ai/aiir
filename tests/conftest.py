@@ -1,4 +1,5 @@
 """Shared fixtures for AIIR CLI tests."""
+
 import os
 
 try:
@@ -11,7 +12,7 @@ try:
         max_examples=50,
         suppress_health_check=[HealthCheck.too_slow],
         deadline=None,
-        database=None,           # no .hypothesis dir in CI
+        database=None,  # no .hypothesis dir in CI
     )
 
     # Full local profile (default) — uses per-test @settings as-is.

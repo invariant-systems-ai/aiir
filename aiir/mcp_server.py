@@ -39,11 +39,10 @@ SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
 import json
-import os
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 # ---------------------------------------------------------------------------
 # Import AIIR CLI (proper package import — no sys.path manipulation)
@@ -133,7 +132,7 @@ def _sanitize_error(error: Exception) -> str:
     first_line = msg.split("\n")[0][:_MAX_ERROR_LEN]
 
     # Redact anything that looks like a filesystem path.
-    first_line = re.sub(r'/[\w./-]{5,}', '<path>', first_line)
+    first_line = re.sub(r"/[\w./-]{5,}", "<path>", first_line)
 
     return first_line
 
@@ -304,18 +303,24 @@ def _handle_aiir_receipt(args: Dict[str, Any]) -> Dict[str, Any]:
     try:
         if range_spec:
             receipts = generate_receipts_for_range(
-                range_spec, cwd=None, ai_only=ai_only,
+                range_spec,
+                cwd=None,
+                ai_only=ai_only,
                 redact_files=redact_files,
             )
         else:
             receipt = generate_receipt(
-                commit_ref, cwd=None, ai_only=ai_only,
+                commit_ref,
+                cwd=None,
+                ai_only=ai_only,
                 redact_files=redact_files,
             )
             receipts = [receipt] if receipt else []
 
         if not receipts:
-            return _text_result("No commits matched (ai_only filter may have excluded all).")
+            return _text_result(
+                "No commits matched (ai_only filter may have excluded all)."
+            )
 
         if pretty:
             text = "\n\n".join(format_receipt_pretty(r) for r in receipts)
@@ -501,8 +506,8 @@ def _make_error(msg_id: Any, code: int, message: str) -> Dict[str, Any]:
 
 # Rate limiting to prevent local DoS via request flooding.
 # A malicious client could spam tool calls that each spawn git subprocesses.
-_RATE_LIMIT_WINDOW = 1.0   # seconds
-_RATE_LIMIT_MAX = 50       # max requests per window
+_RATE_LIMIT_WINDOW = 1.0  # seconds
+_RATE_LIMIT_MAX = 50  # max requests per window
 
 
 def serve_stdio() -> None:
@@ -547,9 +552,13 @@ def serve_stdio() -> None:
 
         # Validate jsonrpc field per JSON-RPC 2.0 §4.
         if msg.get("jsonrpc") != "2.0":
-            _send(_make_error(
-                msg.get("id"), -32600, "Invalid Request: missing or wrong jsonrpc version"
-            ))
+            _send(
+                _make_error(
+                    msg.get("id"),
+                    -32600,
+                    "Invalid Request: missing or wrong jsonrpc version",
+                )
+            )
             continue
 
         method = msg.get("method", "")

@@ -1,16 +1,11 @@
 """Tests for MCP server integration."""
+
 from __future__ import annotations
 
-import json
 import os
-import shutil
-import subprocess
-import sys
 import tempfile
 import unittest
-import uuid
 from pathlib import Path
-from unittest.mock import patch
 
 # Import the module under test
 import aiir.cli as cli
@@ -22,6 +17,7 @@ class TestRedTeamMCP(unittest.TestCase):
     def test_r5_08_verify_receipt_signature_rejects_symlinks(self):
         """verify_receipt_signature must reject symlink receipt and bundle paths."""
         import tempfile
+
         with tempfile.TemporaryDirectory() as td:
             # Create a real file and a symlink to it
             real = os.path.join(td, "real.json")
@@ -50,6 +46,7 @@ class TestMcpSymlinkIntermediate(unittest.TestCase):
             link.symlink_to(real_dir)
             # Import the MCP server module
             import aiir.mcp_server as mcp
+
             # _safe_verify_path uses Path.cwd(), so chdir
             os.chdir(tmpdir)
             # Access through symlinked directory
@@ -59,6 +56,7 @@ class TestMcpSymlinkIntermediate(unittest.TestCase):
         finally:
             os.chdir(original_cwd)
             import shutil
+
             shutil.rmtree(tmpdir, ignore_errors=True)
 
     def test_real_path_accepted(self):
@@ -70,12 +68,14 @@ class TestMcpSymlinkIntermediate(unittest.TestCase):
             real_dir.mkdir()
             Path(real_dir, "file.json").write_text("{}")
             import aiir.mcp_server as mcp
+
             os.chdir(tmpdir)
             result = mcp._safe_verify_path(str(Path(real_dir, "file.json")))
             self.assertTrue(result.endswith("file.json"))
         finally:
             os.chdir(original_cwd)
             import shutil
+
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
@@ -85,6 +85,7 @@ class TestMcpToolDescriptions(unittest.TestCase):
     def test_aiir_receipt_description_has_constraints(self):
         """aiir_receipt tool description should mention security constraints."""
         from aiir.mcp_server import TOOLS
+
         receipt_tool = next(t for t in TOOLS if t["name"] == "aiir_receipt")
         desc = receipt_tool["description"]
         self.assertIn("current working directory", desc)
@@ -93,6 +94,7 @@ class TestMcpToolDescriptions(unittest.TestCase):
     def test_aiir_verify_description_has_constraints(self):
         """aiir_verify tool description should mention path restrictions."""
         from aiir.mcp_server import TOOLS
+
         verify_tool = next(t for t in TOOLS if t["name"] == "aiir_verify")
         desc = verify_tool["description"]
         self.assertIn("symlinks", desc.lower())
@@ -101,6 +103,7 @@ class TestMcpToolDescriptions(unittest.TestCase):
     def test_aiir_verify_file_schema_has_constraints(self):
         """aiir_verify file parameter should describe path restrictions."""
         from aiir.mcp_server import TOOLS
+
         verify_tool = next(t for t in TOOLS if t["name"] == "aiir_verify")
         file_desc = verify_tool["inputSchema"]["properties"]["file"]["description"]
         self.assertIn("..", file_desc)
@@ -118,6 +121,7 @@ class TestMcpParamsValidation(unittest.TestCase):
     def test_string_params_treated_as_empty(self):
         """String params should be coerced to empty dict, not crash handler."""
         from aiir.mcp_server import handle_tools_call
+
         # Simulating what happens after params coercion
         result = handle_tools_call({"name": "aiir_receipt", "arguments": {}})
         # Should not crash — returns a result (receipt or error, depending on git)
@@ -126,6 +130,7 @@ class TestMcpParamsValidation(unittest.TestCase):
     def test_list_params_coerced(self):
         """List params should be coerced to empty dict by serve_stdio."""
         from aiir.mcp_server import handle_tools_list
+
         # handle_tools_list ignores params, so any coerced value works
         result = handle_tools_list({})
         self.assertIn("tools", result)
@@ -134,6 +139,7 @@ class TestMcpParamsValidation(unittest.TestCase):
     def test_null_params_default_to_dict(self):
         """None params (JSON null) should default to empty dict."""
         from aiir.mcp_server import handle_tools_list
+
         result = handle_tools_list(None)  # Simulates params=None
         self.assertIn("tools", result)
 
@@ -144,6 +150,7 @@ class TestMcpArgumentsValidation(unittest.TestCase):
     def test_string_arguments_coerced(self):
         """String arguments should be coerced to empty dict, not crash."""
         from aiir.mcp_server import handle_tools_call
+
         # Pass string instead of dict for arguments
         result = handle_tools_call({"name": "aiir_receipt", "arguments": "bad"})
         # Should return a result (not crash with AttributeError)
@@ -152,18 +159,21 @@ class TestMcpArgumentsValidation(unittest.TestCase):
     def test_list_arguments_coerced(self):
         """List arguments should be coerced to empty dict."""
         from aiir.mcp_server import handle_tools_call
+
         result = handle_tools_call({"name": "aiir_receipt", "arguments": [1, 2]})
         self.assertIn("content", result)
 
     def test_null_arguments_coerced(self):
         """None (JSON null) arguments should be coerced to empty dict."""
         from aiir.mcp_server import handle_tools_call
+
         result = handle_tools_call({"name": "aiir_receipt", "arguments": None})
         self.assertIn("content", result)
 
     def test_number_arguments_coerced(self):
         """Numeric arguments should be coerced to empty dict."""
         from aiir.mcp_server import handle_tools_call
+
         result = handle_tools_call({"name": "aiir_verify", "arguments": 42})
         self.assertIn("content", result)
         # Should get a proper validation error, not an internal crash
@@ -176,6 +186,7 @@ class TestMcpRedactFiles(unittest.TestCase):
     def test_mcp_tool_schema_has_redact_files(self):
         """The aiir_receipt tool schema should include a redact_files parameter."""
         from aiir.mcp_server import TOOLS
+
         receipt_tool = next(t for t in TOOLS if t["name"] == "aiir_receipt")
         props = receipt_tool["inputSchema"]["properties"]
         self.assertIn("redact_files", props)
@@ -185,6 +196,7 @@ class TestMcpRedactFiles(unittest.TestCase):
     def test_mcp_handler_passes_redact_files(self, mock_gen):
         """The handler should forward redact_files to generate_receipt."""
         from aiir.mcp_server import _handle_aiir_receipt
+
         mock_gen.return_value = {
             "type": "aiir.commit_receipt",
             "receipt_id": "g1-test",
@@ -204,6 +216,7 @@ class TestMcpNewToolHandlers(unittest.TestCase):
     def test_stats_no_ledger(self):
         """aiir_stats returns helpful message when no ledger exists."""
         from aiir.mcp_server import _handle_aiir_stats
+
         with tempfile.TemporaryDirectory() as tmpdir:
             old_cwd = os.getcwd()
             try:
@@ -218,18 +231,21 @@ class TestMcpNewToolHandlers(unittest.TestCase):
     def test_explain_missing_file_param(self):
         """aiir_explain returns error when 'file' is missing."""
         from aiir.mcp_server import _handle_aiir_explain
+
         result = _handle_aiir_explain({})
         self.assertTrue(result.get("isError"))
 
     def test_verify_missing_file_param(self):
         """aiir_verify returns error when 'file' is missing."""
         from aiir.mcp_server import _handle_aiir_verify
+
         result = _handle_aiir_verify({})
         self.assertTrue(result.get("isError"))
 
     def test_policy_check_no_ledger(self):
         """aiir_policy_check returns message when no ledger exists."""
         from aiir.mcp_server import _handle_aiir_policy_check
+
         with tempfile.TemporaryDirectory() as tmpdir:
             old_cwd = os.getcwd()
             try:
@@ -243,6 +259,7 @@ class TestMcpNewToolHandlers(unittest.TestCase):
     def test_policy_check_invalid_threshold(self):
         """aiir_policy_check defaults to 50 when given bad max_ai_percent."""
         from aiir.mcp_server import _handle_aiir_policy_check
+
         with tempfile.TemporaryDirectory() as tmpdir:
             old_cwd = os.getcwd()
             try:
@@ -252,4 +269,3 @@ class TestMcpNewToolHandlers(unittest.TestCase):
                 os.chdir(old_cwd)
         text = result["content"][0]["text"]
         self.assertIn("No AIIR ledger", text)
-

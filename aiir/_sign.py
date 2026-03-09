@@ -71,18 +71,22 @@ def sign_receipt(receipt_json_bytes: bytes) -> str:
                 hints.append(
                     "  - Add 'permissions: { id-token: write }' to your workflow"
                 )
-                if os.environ.get("GITHUB_EVENT_NAME") == "pull_request":  # pragma: no cover
+                if (
+                    os.environ.get("GITHUB_EVENT_NAME") == "pull_request"
+                ):  # pragma: no cover
                     hints.append(
                         "  - Fork PRs cannot obtain OIDC tokens — use 'sign: false' for fork PRs"
                     )
             elif os.environ.get("GITLAB_CI"):  # pragma: no cover
-                hints.append(
-                    "  - Ensure CI_JOB_JWT or SIGSTORE_ID_TOKEN is available"
+                hints.append("  - Ensure CI_JOB_JWT or SIGSTORE_ID_TOKEN is available")
+            hint_text = (
+                "\n".join(hints)
+                if hints
+                else (
+                    "  - Ensure OIDC credentials are available in this CI environment\n"
+                    "  - Or set SIGSTORE_ID_TOKEN in your pipeline\n"
+                    "  - Or disable signing with --no-sign / sign: false"
                 )
-            hint_text = "\n".join(hints) if hints else (
-                "  - Ensure OIDC credentials are available in this CI environment\n"
-                "  - Or set SIGSTORE_ID_TOKEN in your pipeline\n"
-                "  - Or disable signing with --no-sign / sign: false"
             )
             raise RuntimeError(
                 "Sigstore signing failed: no ambient OIDC credential detected.\n"
@@ -257,7 +261,7 @@ def verify_receipt_signature(
         safe_error = error_msg.split("\n")[0][:200]  # First line, capped
         # Redact filesystem paths — previously missed here, unlike
         # _run_git and _sanitize_error which both apply this regex.
-        safe_error = re.sub(r'/[\w./-]{5,}', '<path>', safe_error)
+        safe_error = re.sub(r"/[\w./-]{5,}", "<path>", safe_error)
         return {
             "valid": False,
             "signature_valid": False,

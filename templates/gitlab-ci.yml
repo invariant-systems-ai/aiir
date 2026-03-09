@@ -8,7 +8,7 @@
 # QUICK START — add ONE line to your .gitlab-ci.yml:
 #
 #   include:
-#     - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.1.0/templates/gitlab-ci.yml'
+#     - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.2.0/templates/gitlab-ci.yml'
 #
 # That's it. Every push and MR now generates receipts.
 #
@@ -17,14 +17,14 @@
 #
 #   include:
 #     - project: 'your-group/aiir'
-#       ref: 'v1.1.0'
+#       ref: 'v1.2.0'
 #       file: '/templates/gitlab-ci.yml'
 #
 # ──────────────────────────────────────────────────────────────────────
 # CUSTOM CONFIGURATION — override variables in your pipeline:
 #
 #   variables:
-#     AIIR_VERSION: "1.1.0"        # Pin version (recommended)
+#     AIIR_VERSION: "1.2.0"        # Pin version (recommended)
 #     AIIR_AI_ONLY: ""            # Set to "--ai-only" to skip non-AI commits
 #     AIIR_EXTRA_ARGS: ""         # Any additional aiir CLI flags
 #     AIIR_ARTIFACT_EXPIRY: "90 days"  # How long to keep receipt artifacts
@@ -37,7 +37,7 @@
 .aiir-receipt:
   image: python:3.11-slim
   variables:
-    AIIR_VERSION: "1.0.14"
+    AIIR_VERSION: "1.2.0"
     AIIR_AI_ONLY: ""
     AIIR_EXTRA_ARGS: ""
     AIIR_ARTIFACT_EXPIRY: "90 days"

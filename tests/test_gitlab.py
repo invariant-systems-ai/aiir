@@ -15,6 +15,7 @@ import json
 import os
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 from unittest.mock import patch
 
@@ -28,6 +29,7 @@ from aiir._gitlab import (
     format_gitlab_summary,
     generate_dashboard_html,
     parse_webhook_event,
+    query_gitlab_graphql,
     set_gitlab_ci_output,
     validate_webhook_token,
 )
@@ -723,6 +725,123 @@ class TestPostMRComment(unittest.TestCase):
                 result = post_mr_comment("## AIIR Summary\n\nTest")
                 mock_api.assert_called_once()
                 self.assertEqual(result["id"], 1)
+
+
+# ---------------------------------------------------------------------------
+# Test: query_gitlab_graphql (mocked HTTP)
+# ---------------------------------------------------------------------------
+
+
+class TestQueryGitlabGraphQL(unittest.TestCase):
+    """Test GraphQL query execution (mocked HTTP)."""
+
+    def test_no_token_raises(self):
+        """RuntimeError when no auth token is available."""
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(RuntimeError) as ctx:
+                query_gitlab_graphql("{ currentUser { name } }")
+            self.assertIn("no gitlab auth token", str(ctx.exception).lower())
+
+    def test_successful_query(self):
+        """Successful GraphQL query returns data dict."""
+        response_data = json.dumps(
+            {"data": {"currentUser": {"name": "test-user"}}}
+        ).encode("utf-8")
+
+        mock_resp = unittest.mock.MagicMock()
+        mock_resp.read.return_value = response_data
+        mock_resp.__enter__ = lambda s: s
+        mock_resp.__exit__ = unittest.mock.MagicMock(return_value=False)
+
+        with patch.dict(os.environ, {"GITLAB_TOKEN": "glpat-test123"}, clear=True):
+            with patch("aiir._gitlab.urlopen", return_value=mock_resp) as mock_url:
+                result = query_gitlab_graphql("{ currentUser { name } }")
+                self.assertEqual(result, {"currentUser": {"name": "test-user"}})
+                mock_url.assert_called_once()
+                req = mock_url.call_args[0][0]
+                self.assertEqual(req.get_header("Authorization"), "Bearer glpat-test123")
+                self.assertIn(b"currentUser", req.data)
+
+    def test_custom_api_url(self):
+        """Custom api_url is used for the request."""
+        response_data = json.dumps({"data": {}}).encode("utf-8")
+
+        mock_resp = unittest.mock.MagicMock()
+        mock_resp.read.return_value = response_data
+        mock_resp.__enter__ = lambda s: s
+        mock_resp.__exit__ = unittest.mock.MagicMock(return_value=False)
+
+        with patch("aiir._gitlab.urlopen", return_value=mock_resp) as mock_url:
+            query_gitlab_graphql(
+                "{ projects { nodes { name } } }",
+                api_url="https://gitlab.example.com",
+                token="test-token",
+            )
+            req = mock_url.call_args[0][0]
+            self.assertTrue(
+                req.full_url.startswith("https://gitlab.example.com/api/graphql")
+            )
+
+    def test_graphql_errors_raise(self):
+        """GraphQL errors in response raise RuntimeError."""
+        response_data = json.dumps(
+            {"errors": [{"message": "Syntax error"}]}
+        ).encode("utf-8")
+
+        mock_resp = unittest.mock.MagicMock()
+        mock_resp.read.return_value = response_data
+        mock_resp.__enter__ = lambda s: s
+        mock_resp.__exit__ = unittest.mock.MagicMock(return_value=False)
+
+        with patch("aiir._gitlab.urlopen", return_value=mock_resp):
+            with self.assertRaises(RuntimeError) as ctx:
+                query_gitlab_graphql("{ bad }", token="test-token")
+            self.assertIn("graphql errors", str(ctx.exception).lower())
+
+    def test_http_error_raises(self):
+        """HTTPError is converted to RuntimeError."""
+        from urllib.error import HTTPError
+
+        mock_error = HTTPError(
+            "https://gitlab.com/api/graphql", 401, "Unauthorized", {}, None
+        )
+
+        with patch("aiir._gitlab.urlopen", side_effect=mock_error):
+            with self.assertRaises(RuntimeError) as ctx:
+                query_gitlab_graphql("{ test }", token="test-token")
+            self.assertIn("401", str(ctx.exception))
+
+    def test_url_error_raises(self):
+        """URLError (connection failure) is converted to RuntimeError."""
+        from urllib.error import URLError
+
+        with patch("aiir._gitlab.urlopen", side_effect=URLError("Connection refused")):
+            with self.assertRaises(RuntimeError) as ctx:
+                query_gitlab_graphql("{ test }", token="test-token")
+            self.assertIn("connection error", str(ctx.exception).lower())
+
+    def test_ci_server_url_fallback(self):
+        """CI_SERVER_URL env var is used when no api_url given."""
+        response_data = json.dumps({"data": {}}).encode("utf-8")
+
+        mock_resp = unittest.mock.MagicMock()
+        mock_resp.read.return_value = response_data
+        mock_resp.__enter__ = lambda s: s
+        mock_resp.__exit__ = unittest.mock.MagicMock(return_value=False)
+
+        with patch.dict(
+            os.environ,
+            {"CI_SERVER_URL": "https://self-hosted.example.com", "CI_JOB_TOKEN": "jt"},
+            clear=True,
+        ):
+            with patch("aiir._gitlab.urlopen", return_value=mock_resp) as mock_url:
+                query_gitlab_graphql("{ test }")
+                req = mock_url.call_args[0][0]
+                self.assertTrue(
+                    req.full_url.startswith(
+                        "https://self-hosted.example.com/api/graphql"
+                    )
+                )
 
 
 if __name__ == "__main__":

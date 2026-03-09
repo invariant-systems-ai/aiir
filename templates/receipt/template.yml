@@ -27,7 +27,7 @@ spec:
       default: test
     version:
       description: "AIIR version to install (pin for reproducibility, or 'source' to install from local checkout)"
-      default: "1.0.14"
+      default: "1.2.0"
     ai-only:
       description: "Only receipt AI-authored commits (skip human-only commits)"
       type: boolean
@@ -166,6 +166,24 @@ spec:
       echo "────────────────────────────────────────"
       echo "AIIR: ${RECEIPT_COUNT} commits receipted, ${AI_COUNT} AI-authored"
       echo "────────────────────────────────────────"
+    # Enforce extra MR approvals when AI% exceeds threshold
+    - |
+      if [ "$[[ inputs.approval-threshold ]]" -gt 0 ] 2>/dev/null; then
+        . aiir.env 2>/dev/null || true
+        if [ -n "${AIIR_AI_PERCENT:-}" ]; then
+          python3 -c "
+      from aiir import enforce_approval_rules
+      import json, sys
+      result = enforce_approval_rules(
+          ai_percent=float('${AIIR_AI_PERCENT}'),
+          threshold=float('$[[ inputs.approval-threshold ]]'),
+      )
+      print(json.dumps(result, indent=2))
+      if result.get('action') == 'failed':
+          sys.exit(1)
+      "
+        fi
+      fi
   artifacts:
     paths:
       - $[[ inputs.output-dir ]]/

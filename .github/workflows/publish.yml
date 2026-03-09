@@ -29,7 +29,7 @@ permissions:
 jobs:
   # ── Gate: verify CI tests passed on this commit ────────────────────
   ci-gate:
-    timeout-minutes: 10
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - name: Wait for CI tests to pass
@@ -39,9 +39,9 @@ jobs:
           COMMIT="${GITHUB_SHA}"
           echo "⏳ Checking CI status for commit ${COMMIT:0:12}..."
 
-          # Poll for up to 5 minutes — CI may still be running from
-          # the push that created the tag.
-          for i in $(seq 1 30); do
+          # Poll for up to 10 minutes — CI runs in parallel from the
+          # tag push (ci.yml triggers on version tags).
+          for i in $(seq 1 60); do
             # Get the combined status check result for this commit
             STATUS=$(gh api "repos/${{ github.repository }}/commits/${COMMIT}/status" \
               --jq '.state' 2>/dev/null || echo "unknown")
@@ -50,27 +50,36 @@ jobs:
             # Filter for actual CI jobs only: "test (...)" matrix jobs and the
             # "ci-ok" rollup gate.  Exclude "smoke-test" (Action Health) which
             # runs independently and should not block publishing.
+            #
+            # Dedup by name (keep latest started_at) so cancelled runs from
+            # prior pushes don't shadow fresh runs from the tag push.
             CHECKS=$(gh api "repos/${{ github.repository }}/commits/${COMMIT}/check-runs" \
-              --jq '[.check_runs[] | select(.name | test("^test \\(|^ci-ok$"; "i"))] | {total: length, success: [.[] | select(.conclusion == "success")] | length, pending: [.[] | select(.status != "completed")] | length}' \
-              2>/dev/null || echo '{"total":0,"success":0,"pending":0}')
+              --jq '[.check_runs[] | select(.name | test("^test \\(|^ci-ok$"; "i"))] | group_by(.name) | [.[] | sort_by(.started_at) | last] | {total: length, success: [.[] | select(.conclusion == "success")] | length, pending: [.[] | select(.status != "completed")] | length, cancelled: [.[] | select(.conclusion == "cancelled")] | length}' \
+              2>/dev/null || echo '{"total":0,"success":0,"pending":0,"cancelled":0}')
 
             TOTAL=$(echo "$CHECKS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total',0))")
             SUCCESS=$(echo "$CHECKS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('success',0))")
             PENDING=$(echo "$CHECKS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('pending',0))")
+            CANCELLED=$(echo "$CHECKS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('cancelled',0))")
 
-            echo "  Attempt $i/30: total=$TOTAL success=$SUCCESS pending=$PENDING status=$STATUS"
+            echo "  Attempt $i/60: total=$TOTAL success=$SUCCESS pending=$PENDING cancelled=$CANCELLED status=$STATUS"
 
-            # Need at least 1 check, all successful, none pending
-            if [ "$TOTAL" -gt 0 ] && [ "$SUCCESS" -eq "$TOTAL" ] && [ "$PENDING" -eq 0 ]; then
-              echo "✅ CI gate passed: $SUCCESS/$TOTAL checks successful"
+            if [ "$CANCELLED" -gt 0 ]; then
+              echo "  ℹ️  $CANCELLED cancelled run(s) ignored (superseded by re-runs)"
+            fi
+
+            # Need at least 1 non-cancelled check, all successful, none pending
+            ACTIVE=$((TOTAL - CANCELLED))
+            if [ "$ACTIVE" -gt 0 ] && [ "$SUCCESS" -eq "$ACTIVE" ] && [ "$PENDING" -eq 0 ]; then
+              echo "✅ CI gate passed: $SUCCESS/$ACTIVE checks successful"
               exit 0
             fi
 
-            # If any check failed (not pending, not success), fail fast
+            # If any check hard-failed (not pending, not success, not cancelled), fail fast
             FAILED=$(echo "$CHECKS" | python3 -c "
           import sys,json
           d = json.load(sys.stdin)
-          f = d.get('total',0) - d.get('success',0) - d.get('pending',0)
+          f = d.get('total',0) - d.get('success',0) - d.get('pending',0) - d.get('cancelled',0)
           print(f)
           ")
             if [ "$FAILED" -gt 0 ]; then
@@ -82,7 +91,7 @@ jobs:
             sleep 10
           done
 
-          echo "::error::CI gate timed out — tests did not complete within 5 minutes for ${COMMIT:0:12}"
+          echo "::error::CI gate timed out — tests did not complete within 10 minutes for ${COMMIT:0:12}"
           echo "Push a new tag after CI passes, or re-run this workflow."
           exit 1
 

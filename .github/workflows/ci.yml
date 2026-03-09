@@ -5,7 +5,7 @@ name: Tests
 on:
   push:
     branches: [main]
-    tags-ignore: ['**']   # Tag pushes handled by publish.yml, not CI
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']   # Also run on version tags so publish ci-gate finds check-runs
   pull_request:
     branches: [main]
 

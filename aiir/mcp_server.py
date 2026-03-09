@@ -62,6 +62,11 @@ from aiir.cli import (
     _load_index,
     _ledger_paths,
 )
+from aiir._gitlab import (
+    format_gitlab_summary,
+    format_gl_sast_report,
+    post_mr_comment,
+)
 
 # ---------------------------------------------------------------------------
 # Server metadata
@@ -319,6 +324,46 @@ TOOLS = [
             },
         },
     },
+    {
+        "name": "aiir_gitlab_summary",
+        "description": (
+            "Generate a GitLab-flavored Markdown summary of AIIR receipts. "
+            "Returns a formatted table with AI authorship breakdown, per-commit "
+            "details in a collapsible block, and optional SAST report data. "
+            "Designed for GitLab Duo Chat, MR comments, and CI pipelines. "
+            "Can optionally post the summary as a merge request comment when "
+            "running inside GitLab CI. Reads from the .aiir/ ledger in cwd."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "range": {
+                    "type": "string",
+                    "description": (
+                        "Commit range to summarize (e.g., 'origin/main..HEAD'). "
+                        "If omitted, all receipts in the ledger are summarized."
+                    ),
+                },
+                "include_sast": {
+                    "type": "boolean",
+                    "description": (
+                        "Include SAST report data (Security Dashboard format) "
+                        "alongside the Markdown summary."
+                    ),
+                    "default": False,
+                },
+                "post_to_mr": {
+                    "type": "boolean",
+                    "description": (
+                        "Post the summary as a comment on the current merge request. "
+                        "Only works when running inside GitLab CI with "
+                        "CI_MERGE_REQUEST_IID set. Ignored outside CI."
+                    ),
+                    "default": False,
+                },
+            },
+        },
+    },
 ]
 
 # ---------------------------------------------------------------------------
@@ -500,6 +545,80 @@ def _handle_aiir_verify_release(args: Dict[str, Any]) -> Dict[str, Any]:
     return _text_result(report)
 
 
+def _handle_aiir_gitlab_summary(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate a GitLab-flavored Markdown summary of AIIR receipts.
+
+    Designed for GitLab Duo Chat and MR comment integration.
+    Reads receipts from the ledger and produces a native GitLab Markdown
+    summary with optional SAST report data and MR comment posting.
+    """
+    range_spec = args.get("range")
+    include_sast = args.get("include_sast", False)
+    post_to_mr = args.get("post_to_mr", False)
+
+    try:
+        if range_spec:
+            # Generate receipts for the specified range
+            receipts = generate_receipts_for_range(range_spec, cwd=None)
+        else:
+            # Load from ledger
+            ledger_path = Path.cwd() / ".aiir" / "receipts.jsonl"
+            if not ledger_path.is_file():
+                return _text_result(
+                    "No AIIR ledger found in this repository.\n"
+                    "Run 'aiir --pretty' to generate your first receipt, "
+                    "then use this tool to create a GitLab summary."
+                )
+            receipts = []
+            with open(ledger_path, encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        try:
+                            receipts.append(json.loads(line))
+                        except json.JSONDecodeError:
+                            continue
+
+        if not receipts:
+            return _text_result(
+                "No receipts found. "
+                "Run 'aiir --range <range>' to generate receipts first."
+            )
+
+        # Format as GitLab-flavored Markdown
+        summary = format_gitlab_summary(receipts)
+
+        # Optionally append SAST report data
+        if include_sast:
+            sast = format_gl_sast_report(receipts)
+            summary += (
+                "\n\n<details>\n<summary>🛡️ SAST Report Data</summary>\n\n"
+                "```json\n"
+                + json.dumps(sast, indent=2)
+                + "\n```\n\n</details>"
+            )
+
+        # Optionally post to MR (best-effort, non-fatal)
+        mr_posted = False
+        if post_to_mr:
+            import os as _os
+
+            if _os.environ.get("CI_MERGE_REQUEST_IID"):
+                try:
+                    post_mr_comment(summary)
+                    mr_posted = True
+                except Exception:
+                    pass  # Best-effort — don't fail the tool call
+
+        if mr_posted:
+            summary += "\n\n✅ *Summary posted to merge request.*"
+
+        return _text_result(summary)
+
+    except Exception as e:
+        return _error_result(_sanitize_error(e))
+
+
 # ---------------------------------------------------------------------------
 # MCP response helpers
 # ---------------------------------------------------------------------------
@@ -524,6 +643,7 @@ TOOL_HANDLERS = {
     "aiir_explain": _handle_aiir_explain,
     "aiir_policy_check": _handle_aiir_policy_check,
     "aiir_verify_release": _handle_aiir_verify_release,
+    "aiir_gitlab_summary": _handle_aiir_gitlab_summary,
 }
 
 

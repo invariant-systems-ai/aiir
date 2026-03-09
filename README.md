@@ -655,7 +655,7 @@ Install signing support: `pip install aiir[sign]`
 <details>
 <summary><strong>MCP server details</strong></summary>
 
-The AIIR MCP server exposes six tools:
+The AIIR MCP server exposes seven tools:
 
 | Tool | Description |
 |------|-------------|
@@ -665,6 +665,7 @@ The AIIR MCP server exposes six tools:
 | `aiir_explain` | Human-readable explanation of verification results. |
 | `aiir_policy_check` | Check ledger against org AI-usage policy thresholds. |
 | `aiir_verify_release` | Release-scoped verification — evaluate receipts against policy, emit VSA. |
+| `aiir_gitlab_summary` | GitLab-flavored Markdown summary for Duo Chat, MR comments, and CI. |
 
 **Install globally:**
 

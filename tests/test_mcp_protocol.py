@@ -100,7 +100,7 @@ class TestServeStdioToolsList(unittest.TestCase):
         self.assertIn("aiir_explain", names)
         self.assertIn("aiir_policy_check", names)
         self.assertIn("aiir_verify_release", names)
-        self.assertEqual(len(tools), 6)
+        self.assertEqual(len(tools), 7)
 
 
 class TestServeStdioToolsCall(unittest.TestCase):

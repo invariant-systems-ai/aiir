@@ -759,7 +759,9 @@ class TestQueryGitlabGraphQL(unittest.TestCase):
                 self.assertEqual(result, {"currentUser": {"name": "test-user"}})
                 mock_url.assert_called_once()
                 req = mock_url.call_args[0][0]
-                self.assertEqual(req.get_header("Authorization"), "Bearer glpat-test123")
+                self.assertEqual(
+                    req.get_header("Authorization"), "Bearer glpat-test123"
+                )
                 self.assertIn(b"currentUser", req.data)
 
     def test_custom_api_url(self):
@@ -784,9 +786,9 @@ class TestQueryGitlabGraphQL(unittest.TestCase):
 
     def test_graphql_errors_raise(self):
         """GraphQL errors in response raise RuntimeError."""
-        response_data = json.dumps(
-            {"errors": [{"message": "Syntax error"}]}
-        ).encode("utf-8")
+        response_data = json.dumps({"errors": [{"message": "Syntax error"}]}).encode(
+            "utf-8"
+        )
 
         mock_resp = unittest.mock.MagicMock()
         mock_resp.read.return_value = response_data

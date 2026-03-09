@@ -56,34 +56,42 @@ test:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 # --- Publish release to CI/CD Catalog ---
+# Idempotent: if the release already exists (e.g. from a re-synced tag),
+# the job succeeds immediately.  This prevents cascading failures when
+# the GitHub→GitLab sync workflow force-pushes tags.
 create-release:
   stage: release
-  image: registry.gitlab.com/gitlab-org/cli:latest
+  image: python:3.11-slim
   script:
-    - echo "Publishing release $CI_COMMIT_TAG to CI/CD Catalog"
+    - |
+      echo "Checking release status for $CI_COMMIT_TAG"
+
+      # Check if release already exists (REST API with CI_JOB_TOKEN)
+      STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+        --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/releases/${CI_COMMIT_TAG}")
+
+      if [ "$STATUS" = "200" ]; then
+        echo "✅ Release $CI_COMMIT_TAG already exists — skipping"
+        exit 0
+      fi
+
+      # Strip 'v' prefix for pip install version
+      VERSION="${CI_COMMIT_TAG#v}"
+
+      # Create release via REST API
+      curl -s --fail \
+        --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+        --header "Content-Type: application/json" \
+        --data "{
+          \"tag_name\": \"${CI_COMMIT_TAG}\",
+          \"name\": \"AIIR ${CI_COMMIT_TAG}\",
+          \"description\": \"## AIIR ${CI_COMMIT_TAG}\\n\\nAI Integrity Receipts — tamper-evident cryptographic receipts for every AI-generated commit.\\n\\n### Install\\n\\n\\\`\\\`\\\`\\npip install aiir==${VERSION}\\n\\\`\\\`\\\`\\n\\n### Use as CI/CD Component\\n\\n\\\`\\\`\\\`yaml\\ninclude:\\n  - component: ${CI_SERVER_FQDN}/${CI_PROJECT_PATH}/receipt@${CI_COMMIT_TAG}\\n\\\`\\\`\\\`\\n\\n### Changelog\\n\\nSee [CHANGELOG.md](https://github.com/invariant-systems-ai/aiir/blob/main/CHANGELOG.md)\"
+        }" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/releases"
+
+      echo ""
+      echo "✅ Release $CI_COMMIT_TAG created"
   rules:
     - if: $CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+$/
   allow_failure: false
-  release:
-    tag_name: $CI_COMMIT_TAG
-    description: |
-      ## AIIR $CI_COMMIT_TAG
-
-      AI Integrity Receipts — tamper-evident cryptographic receipts for every AI-generated commit.
-
-      ### Install
-
-      ```
-      pip install aiir==$CI_COMMIT_TAG
-      ```
-
-      ### Use as CI/CD Component
-
-      ```yaml
-      include:
-        - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/receipt@$CI_COMMIT_TAG
-      ```
-
-      ### Changelog
-
-      See [CHANGELOG.md](https://github.com/invariant-systems-ai/aiir/blob/main/CHANGELOG.md)

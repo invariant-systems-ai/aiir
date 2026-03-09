@@ -593,9 +593,7 @@ def _handle_aiir_gitlab_summary(args: Dict[str, Any]) -> Dict[str, Any]:
             sast = format_gl_sast_report(receipts)
             summary += (
                 "\n\n<details>\n<summary>🛡️ SAST Report Data</summary>\n\n"
-                "```json\n"
-                + json.dumps(sast, indent=2)
-                + "\n```\n\n</details>"
+                "```json\n" + json.dumps(sast, indent=2) + "\n```\n\n</details>"
             )
 
         # Optionally post to MR (best-effort, non-fatal)

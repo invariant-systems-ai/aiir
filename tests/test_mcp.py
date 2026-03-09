@@ -293,8 +293,16 @@ def _make_test_receipt(
         "version": CLI_VERSION,
         "commit": {
             "sha": sha,
-            "author": {"name": "Test", "email": "t@e.com", "date": "2026-01-01T00:00:00Z"},
-            "committer": {"name": "Test", "email": "t@e.com", "date": "2026-01-01T00:00:00Z"},
+            "author": {
+                "name": "Test",
+                "email": "t@e.com",
+                "date": "2026-01-01T00:00:00Z",
+            },
+            "committer": {
+                "name": "Test",
+                "email": "t@e.com",
+                "date": "2026-01-01T00:00:00Z",
+            },
             "subject": subject,
             "message_hash": "sha256:aaa",
             "diff_hash": "sha256:bbb",
@@ -364,7 +372,12 @@ class TestMcpGitLabSummary(unittest.TestCase):
 
         receipts = [
             _make_test_receipt(sha="aaa111", subject="feat: AI feature", is_ai=True),
-            _make_test_receipt(sha="bbb222", subject="fix: human fix", is_ai=False, authorship_class="human"),
+            _make_test_receipt(
+                sha="bbb222",
+                subject="fix: human fix",
+                is_ai=False,
+                authorship_class="human",
+            ),
         ]
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -457,7 +470,9 @@ class TestMcpGitLabSummary(unittest.TestCase):
                     "GITLAB_TOKEN": "test-token",
                 }
                 with unittest.mock.patch.dict(os.environ, env, clear=True):
-                    with unittest.mock.patch("aiir.mcp_server.post_mr_comment") as mock_post:
+                    with unittest.mock.patch(
+                        "aiir.mcp_server.post_mr_comment"
+                    ) as mock_post:
                         mock_post.return_value = {"id": 1}
                         result = _handle_aiir_gitlab_summary({"post_to_mr": True})
                         mock_post.assert_called_once()

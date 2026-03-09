@@ -68,6 +68,10 @@ maintain full backward compatibility with existing receipts.
 | 5 MCP tools | v1.0.15 | receipt, verify, stats, explain, policy_check |
 | Full Unicode TR39 confusable detection | v1.0.15 | 669 entries across 69 scripts |
 | Adversarial red-team hardening | v1.0.15 | 80 hostile tests, 142 security controls |
+| Native GitLab CI integration | v1.1.0 | MR comments, SAST reports, Duo detection, approval rules |
+| GitLab Duo AI signal detection | v1.1.0 | 10 Duo patterns + 3 GitLab bot signals |
+| Sigstore signing in GitLab CI | v1.1.0 | OIDC id_tokens, SAST artifact reports |
+| NIST SSDF / SLSA hardening | v1.1.0 | SBOM (CycloneDX), provenance attestation, Semgrep SAST |
 
 ---
 

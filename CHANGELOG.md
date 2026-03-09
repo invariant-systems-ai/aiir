@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] — 2026-03-09
+
+### Added
+
+- **Native GitLab CI integration** (`aiir/_gitlab.py`): Full-featured module for GitLab CI/CD — MR comment posting, GL-SAST report generation, dotenv artifact outputs, approval rule enforcement, webhook parsing, GraphQL receipt queries, and dashboard HTML generation. 829 lines, 53 dedicated tests.
+- **GitLab Duo AI detection**: 10 new signal patterns for GitLab Duo (`gitlab duo`, `duo code suggestions`, `duo chat`, `duo enterprise`, `co-authored-by: gitlab duo`, and more), plus `gitlab-duo` and `duo[bot]` bot signals, and `gitlab-bot` automation signal.
+- **`--gitlab-ci` CLI flag**: Native GitLab CI output mode — sets dotenv variables, posts best-effort MR comments, and auto-detects `CI_MERGE_REQUEST_IID`.
+- **`--gl-sast-report` CLI flag**: Generates GitLab Security Dashboard–compatible SAST JSON report from receipt findings.
+- **Sigstore signing in GitLab CI**: Receipt template gains `sign`, `gl-sast-report`, and `approval-threshold` inputs with OIDC `id_tokens` blocks for keyless signing.
+- **NIST SSDF / SLSA hardening**: CycloneDX SBOM generation in publish pipeline, SLSA provenance attestation job, Semgrep taint-tracking SAST workflow.
+- **Security workflows**: `security.yml` (bandit + gitleaks + pip-audit + ruff), `verify-receipts.yml` (reusable Check Run verification).
+- **Pre-commit security hooks**: Added gitleaks, bandit, and ruff to `.pre-commit-config.yaml`.
+- **JS/TS receipt verifier SDK** (`sdks/js/aiir-verify.js`): Zero-dependency browser + Node.js receipt verification. TypeScript declarations included.
+- **25 conformance test vectors**: Expanded from 15 to 25 vectors in `schemas/test_vectors.json`. Conformance runner validates 25/25.
+- **VS Code extension skeleton**: `extensions/vscode/` with package.json, tsconfig, and activation stub.
+- **GitLab docs**: `gitlab-compliance-framework.md`, `gitlab-pages-dashboard.md`, `gitlab-webhooks.md`.
+- **GitLab templates**: `gitlab-pages-dashboard.yml`, `gitlab-publish-pypi.yml`.
+- **Trust tiers documentation**: Three-tier receipt trust model (Unsigned → Signed → Enveloped) in README and docs.
+- **`generator` parameter**: `build_commit_receipt`, `generate_receipt`, and `generate_receipts_for_range` accept a `generator` string to identify the calling tool (`aiir.cli`, `aiir.github`, `aiir.gitlab`).
+- **1084 tests passing** (up from 1022 in v1.0.15).
+
+### Changed
+
+- **Public API**: Added 6 GitLab functions to `aiir/__init__.py` public API and `__all__`.
+- **Receipt template**: Added Sigstore OIDC, SAST artifact reports, and dotenv outputs to `templates/receipt/template.yml`.
+- **GitLab CI template**: All `aiir` invocations now include `--gitlab-ci` flag for native integration.
+
 ## [1.0.15] — 2026-03-09
 
 ### Added

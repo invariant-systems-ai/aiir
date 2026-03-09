@@ -293,6 +293,7 @@ class TestCLIOutputModes(_CLIBase):
 class TestCLILedgerError(_CLIBase):
     """Cover cli.py lines 975-977: ledger append error."""
 
+    @unittest.skipIf(os.name == "nt", "os.chmod read-only is advisory on Windows")
     def test_ledger_write_to_readonly_dir(self):
         from aiir.cli import main as cli_main
 
@@ -1307,19 +1308,16 @@ class TestSignBoundaries(unittest.TestCase):
             f.write(b'{"test": true}')
             path = f.name
         try:
-            # We need stat to fail ONLY inside the try block (line 123),
-            # not during exists() or is_symlink().  Use a call counter.
-            real_stat = Path.stat
-            call_count = [0]
+            # Patch exists() and is_symlink() to return their real values,
+            # then patch stat() to always raise.  This avoids a fragile
+            # call-count that varies across Python versions (3.9 pathlib
+            # doesn't route exists()/is_symlink() through Path.stat()).
+            real_exists = Path(path).exists()
+            real_is_symlink = Path(path).is_symlink()
 
-            def stat_side_effect(self_path, *args, **kwargs):
-                call_count[0] += 1
-                # First calls are from exists() and is_symlink(); fail on 3rd+
-                if call_count[0] >= 3:
-                    raise OSError("disk error")
-                return real_stat(self_path, *args, **kwargs)
-
-            with patch.object(Path, "stat", stat_side_effect):
+            with patch.object(Path, "exists", return_value=real_exists), \
+                 patch.object(Path, "is_symlink", return_value=real_is_symlink), \
+                 patch.object(Path, "stat", side_effect=OSError("disk error")):
                 with self.assertRaises(ValueError) as ctx:
                     sign_receipt_file(path)
                 self.assertIn("Cannot stat", str(ctx.exception))
@@ -1351,19 +1349,20 @@ class TestSignBoundaries(unittest.TestCase):
         bundle_path = path + ".sigstore"
         Path(bundle_path).write_text('{"bundle": true}')
         try:
-            # Let exists() and is_symlink() work normally, fail on the stat()
-            # call inside the file-size guard (6th+ stat call due to
-            # exists/is_symlink for both receipt and bundle paths).
-            real_stat = Path.stat
-            call_count = [0]
+            # Patch exists() and is_symlink() with their real return values
+            # so they don't route through Path.stat() (whose routing varies
+            # between Python 3.9 and 3.12+).  Then patch stat() to always
+            # raise, exercising the OSError guard in the file-size check.
+            rpath = Path(path)
+            bpath = Path(bundle_path)
+            r_exists = rpath.exists()
+            r_sym = rpath.is_symlink()
+            b_exists = bpath.exists()
+            b_sym = bpath.is_symlink()
 
-            def stat_side_effect(self_path, *args, **kwargs):
-                call_count[0] += 1
-                if call_count[0] >= 5:
-                    raise OSError("disk error")
-                return real_stat(self_path, *args, **kwargs)
-
-            with patch.object(Path, "stat", stat_side_effect):
+            with patch.object(Path, "exists", side_effect=[r_exists, b_exists]), \
+                 patch.object(Path, "is_symlink", side_effect=[r_sym, b_sym]), \
+                 patch.object(Path, "stat", side_effect=OSError("disk error")):
                 result = verify_receipt_signature(path, bundle_path)
             self.assertFalse(result["valid"])
             self.assertIn("Cannot stat", result["error"])

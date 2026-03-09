@@ -155,12 +155,17 @@ class TestInTotoWrapper(unittest.TestCase):
         # Explicit cwd ensures `python -m aiir` can find the package
         # regardless of what previous tests did to os.getcwd().
         repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # Force UTF-8 encoding for subprocess stdout/stderr so the
+        # Unicode arrows (→) in the help epilog don't crash argparse
+        # on Windows where the default console encoding is cp1252.
+        env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
         result = subprocess.run(
             [sys.executable, "-m", "aiir", "--in-toto", "--help"],
             capture_output=True,
             text=True,
             timeout=10,
             cwd=repo_root,
+            env=env,
         )
         self.assertEqual(
             result.returncode, 0,

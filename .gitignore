@@ -12,3 +12,6 @@ htmlcov/
 
 # Workstation-local files (never committed)
 .local/
+mutants/
+.mutmut-cache/
+.benchmarks/

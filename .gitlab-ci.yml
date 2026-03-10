@@ -41,7 +41,7 @@ verify-component:
   image: python:3.11-slim@sha256:d6e4d224f70f9e0172a06a3a2eba2f768eb146811a349278b38fff3a36463b47
   script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
-    - pip install --quiet aiir
+    - pip install --no-cache-dir aiir
     - aiir --version
     - echo "✅ AIIR installed and runs"
     # Verify the component's receipt jobs exist in this pipeline
@@ -61,8 +61,8 @@ test:
     HYPOTHESIS_PROFILE: ci
   script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
-    - pip install --quiet pytest hypothesis
-    - pip install --quiet -e .
+    - pip install --no-cache-dir --require-hashes --no-deps -r .github/requirements/fuzz.txt
+    - pip install --no-cache-dir .
     - cd /tmp && git init test-repo && cd test-repo
     - git config user.name "Test" && git config user.email "test@test.com"
     - echo "hello" > file.txt && git add . && git commit -m "test commit"

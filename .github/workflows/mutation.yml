@@ -56,33 +56,41 @@ jobs:
 
       - name: Run mutation smoke test (_verify.py only)
         run: |
-          # Override mutmut config to test only _verify.py
+          # Expand do_not_mutate to exclude everything except _verify.py
+          # (paths_to_mutate must stay ["aiir/"] so the whole package is copied)
           python3 -c "
-          import subprocess, sys, tomllib, pathlib
+          import re, subprocess, pathlib
 
-          # Temporarily narrow paths_to_mutate for smoke test
           cfg = pathlib.Path('pyproject.toml')
           original = cfg.read_text()
-          data = tomllib.loads(original)
-          mutmut_cfg = data.get('tool', {}).get('mutmut', {})
 
-          # Rewrite paths_to_mutate to only _verify.py
-          patched = original.replace(
-              'paths_to_mutate = [\"aiir/\"]',
-              'paths_to_mutate = [\"aiir/_verify.py\"]'
+          # Build do_not_mutate list with all .py files except _verify.py
+          exclude = sorted(
+              f'aiir/{f.name}'
+              for f in pathlib.Path('aiir').glob('*.py')
+              if f.name != '_verify.py'
+          )
+          new_block = 'do_not_mutate = [\n' + ''.join(
+              f'    \"{e}\",\n' for e in exclude
+          ) + ']'
+
+          # Replace existing do_not_mutate block (multi-line TOML array)
+          patched = re.sub(
+              r'do_not_mutate\s*=\s*\[.*?\]',
+              new_block,
+              original,
+              flags=re.DOTALL,
+              count=1,
           )
           cfg.write_text(patched)
 
           try:
-              result = subprocess.run(
+              subprocess.run(
                   ['mutmut', 'run', '--max-children', '4'],
-                  check=False
+                  check=False,
               )
           finally:
-              # Restore original config
               cfg.write_text(original)
-
-          # mutmut exits non-zero when survivors exist — that's expected
           "
 
       - name: Check smoke mutation score

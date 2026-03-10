@@ -26,8 +26,9 @@ try:
     from markdown_it import MarkdownIt
 
     _MD = MarkdownIt("gfm-like")
+    _MD.render("test")  # verify linkify-it-py is also available
     _HAS_MARKDOWN_IT = True
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     _HAS_MARKDOWN_IT = False
 
 

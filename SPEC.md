@@ -462,7 +462,7 @@ threat models:
 | MCP `aiir_generate` | N/A | CWD boundary enforced | Prevent AI-directed writes outside project. |
 | GitHub Action | Runner workspace | Runner workspace | Sandboxed by Actions runtime. |
 
-See [THREAT_MODEL.md](THREAT_MODEL.md) for the full STRIDE analysis (142 controls).
+See [THREAT_MODEL.md](THREAT_MODEL.md) for the full STRIDE analysis (147 controls).
 
 ---
 

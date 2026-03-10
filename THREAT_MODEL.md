@@ -1,7 +1,7 @@
 # Threat Model — AIIR (AI Integrity Receipts)
 
 **Document version**: 3.2.0
-**CLI version**: 1.2.1
+**CLI version**: 1.2.2
 **Date**: 2025-07-15 (updated 2026-03-10)
 **Methodology**: STRIDE-per-element · DREAD risk scoring · Attack trees
 **Author**: Invariant Systems Security Team (supplemented by Hypothesis property-based fuzzing)

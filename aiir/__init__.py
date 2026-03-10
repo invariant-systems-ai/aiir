@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
 
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 
 # ---------------------------------------------------------------------------
 # Public API — importable via `from aiir import ...`
@@ -55,6 +55,7 @@ from aiir._gitlab import (  # noqa: F401
     parse_webhook_event,
     validate_webhook_token,
     build_receipts_graphql_query,
+    enforce_approval_rules,
 )
 
 __all__ = [
@@ -101,6 +102,7 @@ __all__ = [
     "parse_webhook_event",
     "validate_webhook_token",
     "build_receipts_graphql_query",
+    "enforce_approval_rules",
     # Low-level (for third-party implementors)
     "_canonical_json",
     "_sha256",

@@ -2100,5 +2100,34 @@ class TestReviewRevParseErrorPaths(unittest.TestCase):
             self.assertIn("Could not resolve ref", stderr_buf.getvalue())
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# GitLab component public import regression test
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestGitLabComponentImport(unittest.TestCase):
+    """Verify that the GitLab component template's import path works."""
+
+    def test_enforce_approval_rules_importable_from_public_api(self):
+        """from aiir import enforce_approval_rules — must not raise ImportError.
+
+        The GitLab CI/CD Catalog component template.yml contains:
+            from aiir import enforce_approval_rules
+        If this is not in __init__.py __all__, the component breaks.
+        """
+        from aiir import enforce_approval_rules  # noqa: F401
+
+        import aiir
+
+        self.assertIn("enforce_approval_rules", aiir.__all__)
+
+    def test_enforce_approval_rules_below_threshold(self):
+        """Smoke test: below-threshold returns 'none' action."""
+        from aiir import enforce_approval_rules
+
+        result = enforce_approval_rules(ai_percent=10.0, threshold=50.0)
+        self.assertEqual(result["action"], "none")
+
+
 if __name__ == "__main__":
     unittest.main()

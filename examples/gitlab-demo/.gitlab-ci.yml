@@ -29,7 +29,7 @@ aiir-receipt-mr:
     SIGSTORE_ID_TOKEN:
       aud: sigstore
   variables:
-    AIIR_VERSION: "1.2.1"
+    AIIR_VERSION: "1.2.2"
   before_script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
     - pip install --quiet "aiir==${AIIR_VERSION}" sigstore
@@ -72,7 +72,7 @@ aiir-receipt-push:
     SIGSTORE_ID_TOKEN:
       aud: sigstore
   variables:
-    AIIR_VERSION: "1.2.1"
+    AIIR_VERSION: "1.2.2"
   before_script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
     - pip install --quiet "aiir==${AIIR_VERSION}" sigstore
@@ -106,7 +106,7 @@ aiir-verify-release:
   stage: verify
   image: python:3.11-slim
   variables:
-    AIIR_VERSION: "1.2.1"
+    AIIR_VERSION: "1.2.2"
   before_script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
     - pip install --quiet "aiir==${AIIR_VERSION}"

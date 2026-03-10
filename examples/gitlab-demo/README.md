@@ -41,7 +41,7 @@ That's it. Every push and MR now:
 
 ```yaml
 include:
-  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.2.1/templates/gitlab-ci.yml'
+  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.2.2/templates/gitlab-ci.yml'
 ```
 
 ### Option C: Full control (copy-paste)

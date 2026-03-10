@@ -254,7 +254,7 @@ jobs:
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/invariant-systems-ai/aiir
-    rev: v1.2.1
+    rev: v1.2.2
     hooks:
       - id: aiir
 ```
@@ -283,11 +283,11 @@ All inputs are optional and typed:
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
 | `stage` | string | `test` | Pipeline stage |
-| `version` | string | `1.2.1` | AIIR version from PyPI |
+| `version` | string | `1.2.2` | AIIR version from PyPI |
 | `ai-only` | boolean | `false` | Only receipt AI-authored commits |
 | `output-dir` | string | `.aiir-receipts` | Artifact output directory |
 | `artifact-expiry` | string | `90 days` | Artifact retention |
-| `sign` | boolean | `false` | Sigstore keyless signing (GitLab OIDC) |
+| `sign` | boolean | `true` | Sigstore keyless signing (GitLab OIDC) |
 | `gl-sast-report` | boolean | `false` | Generate SAST report for Security Dashboard |
 | `approval-threshold` | number | `0` | AI% threshold for extra MR approvals (0 = off) |
 | `extra-args` | string | `""` | Additional CLI flags |
@@ -296,7 +296,7 @@ All inputs are optional and typed:
 
 ```yaml
 include:
-  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.2.1/templates/gitlab-ci.yml'
+  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.2.2/templates/gitlab-ci.yml'
 ```
 
 **Self-hosted GitLab?** Mirror the repo and use `project:` instead:
@@ -304,7 +304,7 @@ include:
 ```yaml
 include:
   - project: 'your-group/aiir'
-    ref: 'v1.2.1'
+    ref: 'v1.2.2'
     file: '/templates/gitlab-ci.yml'
 ```
 

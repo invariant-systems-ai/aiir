@@ -96,7 +96,7 @@ Consumers can verify that any AIIR release was built by the official CI pipeline
 python scripts/verify-pypi-provenance.py
 
 # Verify a specific version
-python scripts/verify-pypi-provenance.py 1.2.1
+python scripts/verify-pypi-provenance.py 1.2.2
 
 # Strict mode — fail if any artifact lacks attestations
 python scripts/verify-pypi-provenance.py --strict
@@ -106,7 +106,7 @@ Alternatively, query the PyPI Integrity API directly:
 
 ```bash
 # Fetch attestations for a specific file
-curl -s https://pypi.org/integrity/aiir/1.2.1/aiir-1.2.1-py3-none-any.whl/provenance | python3 -m json.tool
+curl -s https://pypi.org/integrity/aiir/1.2.2/aiir-1.2.2-py3-none-any.whl/provenance | python3 -m json.tool
 ```
 
 ## Secret rotation

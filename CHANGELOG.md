@@ -33,6 +33,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - **`--review` ref resolution**: CLI now resolves symbolic refs (e.g., `HEAD`) to full hex SHAs via `git rev-parse` before building review receipts. Previously, `--review HEAD` produced a receipt with `reviewed_commit.sha = "HEAD"`, which violated the JSON Schema.
 - **PR number validation**: `post_pr_comment()` now validates that the PR number is numeric, preventing URL path injection via crafted event payloads.
 - **Check Run code spans**: `create_check_run()` now uses double-backtick delimiters (consistent with `format_github_summary()`) to prevent code-span breakage from embedded backticks.
+- **GitLab component `enforce_approval_rules` import**: Function existed in `aiir._gitlab` but was not exported from `aiir.__init__`. The GitLab component's `approval-threshold` code path raised `ImportError`. Now exported in `__all__`.
+- **GitLab component signing default**: Changed from `false` to `true`, matching the GitHub Action's default. Both CI integrations now ship the same provenance strength by default.
+- **Stale GitLab component README**: Updated version default (`1.0.14` → `1.2.2`), test count (`760+` → `1,600+`), added missing inputs (`sign`, `gl-sast-report`, `approval-threshold`) to the input table.
+- **Version drift**: All version-bearing files (`__init__.py`, `THREAT_MODEL.md`, `SECURITY.md`, `mcp-manifest.json`, `README.md`, `templates/`) now reference `1.2.2` consistently.
+- **SPEC.md stale control count**: Updated cross-reference from "142 controls" to "147 controls" to match `THREAT_MODEL.md`.
+- **Hardening test false failures**: Differential GFM tests now probe `_MD.render()` during setup, correctly skipping when `linkify-it-py` is missing (was only guarding on `markdown-it-py` import).
 
 ## [1.2.1] — 2026-03-09
 

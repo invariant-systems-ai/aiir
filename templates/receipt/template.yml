@@ -27,7 +27,7 @@ spec:
       default: test
     version:
       description: "AIIR version to install (pin for reproducibility, or 'source' to install from local checkout)"
-      default: "1.2.1"
+      default: "1.2.2"
     ai-only:
       description: "Only receipt AI-authored commits (skip human-only commits)"
       type: boolean
@@ -50,7 +50,7 @@ spec:
     sign:
       description: "Enable Sigstore keyless signing (uses GitLab OIDC id_tokens)"
       type: boolean
-      default: false
+      default: true
     gl-sast-report:
       description: "Generate gl-sast-report.json for Security Dashboard (AI findings as informational)"
       type: boolean

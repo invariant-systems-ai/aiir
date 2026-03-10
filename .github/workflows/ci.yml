@@ -111,7 +111,7 @@ jobs:
         run: |
           coverage run --source=aiir -m pytest tests/ --ignore=tests/test_fuzz.py -q --tb=short
           coverage report --show-missing
-          coverage report --fail-under=92
+          coverage report --fail-under=99
 
   # Version drift check — ensures every file that embeds the version
   # string matches __version__ in aiir/__init__.py.  Runs in ~2 s.

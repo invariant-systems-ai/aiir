@@ -364,3 +364,153 @@ class TestVerifyArrayErrors(unittest.TestCase):
             self.assertIn("\U0001f4a1", stderr_text)
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
+# Mutation-killing tests: verify_receipt_file edge cases
+# ---------------------------------------------------------------------------
+# These tests target surviving mutants found by mutation testing:
+# - False→True on error-path "valid" fields (security-critical)
+# - Key name mutations ("valid"→"VALID", "error"→"ERROR")
+# - Boundary condition changes (> vs >=)
+
+
+class TestVerifyReceiptFileEdgeCases(unittest.TestCase):
+    """Tests that kill surviving mutants in verify_receipt_file."""
+
+    def _assert_standard_error_result(self, result: dict, expected_error_substr: str = ""):
+        """Assert result is a well-formed error dict with exact keys."""
+        self.assertIsInstance(result, dict)
+        # Key must be exactly "valid", not "VALID" or "XXvalidXX"
+        self.assertIn("valid", result, "Result must contain 'valid' key")
+        self.assertIs(result["valid"], False, "Error result must have valid=False")
+        # Key must be exactly "error", not "ERROR" or "XXerrorXX"
+        self.assertIn("error", result, "Result must contain 'error' key")
+        self.assertIsInstance(result["error"], str)
+        if expected_error_substr:
+            self.assertIn(expected_error_substr, result["error"])
+
+    def test_symlink_rejected_with_valid_false(self):
+        """Symlink receipt file must return valid=False, not valid=True."""
+        tmpdir = tempfile.mkdtemp()
+        try:
+            real = Path(tmpdir, "real.json")
+            real.write_text('{}')
+            link = Path(tmpdir, "link.json")
+            link.symlink_to(real)
+            result = cli.verify_receipt_file(str(link))
+            self._assert_standard_error_result(result, "symlink")
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_oversized_file_rejected_with_valid_false(self):
+        """File exceeding MAX_RECEIPT_FILE_SIZE must return valid=False."""
+        from aiir._core import MAX_RECEIPT_FILE_SIZE
+
+        tmpdir = tempfile.mkdtemp()
+        try:
+            big = Path(tmpdir, "big.json")
+            # Write a valid JSON file that exceeds the size limit
+            big.write_text(" " * (MAX_RECEIPT_FILE_SIZE + 1))
+            result = cli.verify_receipt_file(str(big))
+            self._assert_standard_error_result(result, "too large")
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_oversized_array_rejected_with_valid_false(self):
+        """Array exceeding MAX_RECEIPTS_PER_RANGE must return valid=False."""
+        from aiir._core import MAX_RECEIPTS_PER_RANGE
+
+        tmpdir = tempfile.mkdtemp()
+        try:
+            arr = Path(tmpdir, "arr.json")
+            # Create a JSON array that exceeds the limit
+            arr.write_text(json.dumps([{}] * (MAX_RECEIPTS_PER_RANGE + 1)))
+            result = cli.verify_receipt_file(str(arr))
+            self._assert_standard_error_result(result, "too large")
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_non_object_non_array_json_rejected_with_valid_false(self):
+        """JSON string/number/bool must return valid=False."""
+        tmpdir = tempfile.mkdtemp()
+        try:
+            for value in ['"just a string"', '42', 'true', 'null']:
+                path = Path(tmpdir, "scalar.json")
+                path.write_text(value)
+                result = cli.verify_receipt_file(str(path))
+                self._assert_standard_error_result(result, "Expected JSON object or array")
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_valid_array_result_has_standard_keys(self):
+        """Array result must have 'valid', 'receipts', and 'count' keys."""
+        # Minimal valid-shaped receipt (will fail verification but exercises array path)
+        receipt = {
+            "type": "aiir.commit_receipt",
+            "schema": "aiir/commit_receipt.v1",
+            "version": "1.0.0",
+            "commit": {"sha": "a" * 40, "subject": "test"},
+            "ai_attestation": {},
+            "provenance": {},
+            "receipt_id": "g1-wrong",
+            "content_hash": "sha256:wrong",
+        }
+        tmpdir = tempfile.mkdtemp()
+        try:
+            arr = Path(tmpdir, "arr.json")
+            arr.write_text(json.dumps([receipt]))
+            result = cli.verify_receipt_file(str(arr))
+            # Exact key names must be present
+            self.assertIn("valid", result)
+            self.assertIn("receipts", result)
+            self.assertIn("count", result)
+            self.assertEqual(result["count"], 1)
+            self.assertIsInstance(result["receipts"], list)
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_stat_error_returns_valid_false(self):
+        """OSError during stat must return valid=False.
+
+        NOTE: This targets a `pragma: no cover` path (race between exists()
+        and stat()), so we use a targeted mock that only fails on size check.
+        """
+        tmpdir = tempfile.mkdtemp()
+        try:
+            real = Path(tmpdir, "file.json")
+            real.write_text("{}")
+            orig_stat = real.stat
+
+            call_count = [0]
+
+            def stat_bomb(*a, **kw):
+                call_count[0] += 1
+                # Let exists() and is_symlink() succeed (calls 1 & 2),
+                # but fail on the actual stat-for-size call (call 3).
+                if call_count[0] >= 3:
+                    raise OSError("disk error")
+                return orig_stat(*a, **kw)
+
+            with patch.object(type(real), "stat", side_effect=stat_bomb):
+                result = cli.verify_receipt_file(str(real))
+            self._assert_standard_error_result(result, "Cannot stat")
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_file_size_boundary_at_max(self):
+        """File at exactly MAX_RECEIPT_FILE_SIZE must still be accepted."""
+        from aiir._core import MAX_RECEIPT_FILE_SIZE
+
+        tmpdir = tempfile.mkdtemp()
+        try:
+            exact = Path(tmpdir, "exact.json")
+            # Make a valid JSON file of exactly MAX_RECEIPT_FILE_SIZE bytes
+            content = '{"type":"aiir.commit_receipt"}'
+            padding = " " * (MAX_RECEIPT_FILE_SIZE - len(content))
+            exact.write_text(content + padding)
+            result = cli.verify_receipt_file(str(exact))
+            # Should NOT return "too large" error — the boundary is >
+            self.assertNotIn("too large", result.get("error", ""))
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)

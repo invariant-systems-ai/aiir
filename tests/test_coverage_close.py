@@ -29,9 +29,8 @@ import sys
 import tempfile
 import time
 import unittest
-from collections import deque
 from pathlib import Path
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, patch
 
 # ---------------------------------------------------------------------------
 # _core.py — shell metachar in git ref (L849), URL port (L1146)

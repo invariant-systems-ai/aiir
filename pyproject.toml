@@ -47,7 +47,7 @@ dependencies = []
 
 [project.optional-dependencies]
 sign = ["sigstore>=4.0.0,<5.0.0"]
-dev = ["hypothesis>=6.0", "pytest>=7.0"]
+dev = ["hypothesis>=6.0", "pytest>=7.0", "mutmut>=3.0"]
 
 [project.urls]
 Homepage = "https://invariantsystems.io"
@@ -87,3 +87,48 @@ packages = ["aiir"]
 # Tests: allow ambiguous var names (l), unused assignments (captures),
 # and class redefinitions (parameterized test patterns).
 "tests/**" = ["E741", "F841", "F811"]
+
+# ── Mutmut (mutation testing) ─────────────────────────────────────────
+[tool.mutmut]
+# Target the security-critical modules — these are the ones where
+# a surviving mutant represents a real missed check.
+# We point at the entire package so copy_src_dir brings __init__.py, _core.py, etc.
+paths_to_mutate = ["aiir/"]
+# Only mutate the five core modules; skip CLI, MCP, integrations, etc.
+do_not_mutate = [
+    "aiir/__init__.py",
+    "aiir/__main__.py",
+    "aiir/cli.py",
+    "aiir/mcp_server.py",
+    "aiir/_core.py",
+    "aiir/_explain.py",
+    "aiir/_github.py",
+    "aiir/_gitlab.py",
+    "aiir/_ledger.py",
+    "aiir/_sign.py",
+    "aiir/_stats.py",
+    "aiir/_verify_release.py",
+]
+# Focus test runner on relevant tests for speed.
+# NOTE: tests_dir is appended to test selection; omit when using explicit files.
+debug = false
+pytest_add_cli_args = [
+    "-x", "-q", "--tb=no", "--no-header",
+    # Deselect tests that use inspect.getsource (incompatible with trampoline)
+    # or check non-code artifacts (py.typed marker).
+    "--deselect=tests/test_receipt.py::TestDelimiterInjection::test_pipe_in_author_name_does_not_shift_fields",
+    "--deselect=tests/test_receipt.py::TestMaxCount::test_max_count_in_git_command",
+    "--deselect=tests/test_receipt.py::TestPublicBasic::test_help_text_contains_url",
+    "--deselect=tests/test_receipt.py::TestPublicBasic::test_r7_pub_02_py_typed_marker_exists",
+    "--deselect=tests/test_verify.py::TestSafeVerifyPathNoDeadCode::test_no_raw_parts_variable",
+    "--deselect=tests/test_verify.py::TestIterativeJsonDepthCheck::test_implementation_is_iterative",
+]
+pytest_add_cli_args_test_selection = [
+    "tests/test_verify.py",
+    "tests/test_schema.py",
+    "tests/test_policy.py",
+    "tests/test_detect.py",
+    "tests/test_receipt.py",
+    "tests/test_properties.py",
+]
+also_copy = ["aiir/py.typed"]

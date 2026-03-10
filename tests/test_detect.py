@@ -228,6 +228,190 @@ class TestAISignalCoverage(unittest.TestCase):
             self.assertIn(tool, cli.AI_SIGNALS, f"Missing AI signal: {tool}")
 
 
+class TestDetectMutationKillers(unittest.TestCase):
+    """Mutation-killing tests for detect_ai_signals().
+
+    Each test targets a specific class of surviving mutant that line-
+    coverage-based tests miss (weak assertions, missing boundary checks).
+    """
+
+    # ------------------------------------------------------------------
+    # Default parameter mutations (mutants 1-4)
+    # Mutant changes default "" to "XXXX", which would inject phantom
+    # bot signals when the caller omits an author/committer field.
+    # ------------------------------------------------------------------
+
+    def test_no_false_positive_when_author_name_omitted(self):
+        """Omitting author_name must not produce any signal."""
+        ai, bot = cli.detect_ai_signals("chore: update deps")
+        self.assertEqual(ai, [])
+        self.assertEqual(bot, [])
+
+    def test_no_false_positive_when_all_fields_omitted(self):
+        """Calling with only message and no author fields => no signals."""
+        ai, bot = cli.detect_ai_signals("docs: fix typo in README")
+        self.assertEqual(ai, [])
+        self.assertEqual(bot, [])
+
+    def test_empty_author_email_no_signal(self):
+        """Explicit empty author_email must not match any pattern."""
+        ai, bot = cli.detect_ai_signals("chore: bump", author_email="")
+        self.assertEqual(ai, [])
+        self.assertEqual(bot, [])
+
+    def test_empty_committer_fields_no_signal(self):
+        """Explicit empty committer_name/email => no signals."""
+        ai, bot = cli.detect_ai_signals(
+            "chore: bump", committer_name="", committer_email=""
+        )
+        self.assertEqual(ai, [])
+        self.assertEqual(bot, [])
+
+    # ------------------------------------------------------------------
+    # Message split mutation (mutant 21)
+    # Mutant changes message.split("\n") to message.split(None), which
+    # splits on any whitespace and breaks trailer parsing (trailers
+    # are line-oriented).
+    # ------------------------------------------------------------------
+
+    def test_trailer_on_separate_line(self):
+        """Trailers must be detected line-by-line, not word-by-word."""
+        msg = "feat: add endpoint\n\nGenerated-by: copilot-v2"
+        ai, _ = cli.detect_ai_signals(msg)
+        trailer_signals = [s for s in ai if s.startswith("trailer:")]
+        self.assertTrue(
+            len(trailer_signals) > 0,
+            "Trailer on its own line must be detected",
+        )
+
+    def test_trailer_key_not_in_middle_of_line(self):
+        """A word that starts with a trailer key but is mid-line must not
+        generate a trailer signal (split(None) would wrongly match it)."""
+        msg = "feat: impl\n\nThis does not start with generated-by: copilot"
+        ai, _ = cli.detect_ai_signals(msg)
+        trailer_signals = [s for s in ai if s.startswith("trailer:")]
+        # The line doesn't START with "generated-by:", so no trailer signal.
+        # (Message-body match is fine, we're testing trailer specifically.)
+        self.assertEqual(
+            trailer_signals,
+            [],
+            "Mid-line trailer key must not generate trailer: signal",
+        )
+
+    # ------------------------------------------------------------------
+    # AI author pattern exact-string mutations (mutants 29-48)
+    # Mutants corrupt bot names (e.g. "copilot" → "COPILOT" or
+    # "XXcopilotXX").  Tests verify each pattern matches in author fields.
+    # ------------------------------------------------------------------
+
+    def test_ai_author_copilot(self):
+        ai, _ = cli.detect_ai_signals("chore: x", author_name="copilot[bot]")
+        matched = [s for s in ai if "copilot" in s]
+        self.assertTrue(matched, "copilot in author_name must be detected")
+
+    def test_ai_author_coderabbit(self):
+        ai, _ = cli.detect_ai_signals("chore: x", author_name="coderabbit[bot]")
+        matched = [s for s in ai if "coderabbit" in s]
+        self.assertTrue(matched, "coderabbit in author_name must be detected")
+
+    def test_ai_author_devin_bot(self):
+        ai, _ = cli.detect_ai_signals("chore: x", committer_name="devin-bot")
+        matched = [s for s in ai if "devin-bot" in s]
+        self.assertTrue(matched, "devin-bot in committer_name must be detected")
+
+    def test_ai_author_gemini_bot_hyphen(self):
+        ai, _ = cli.detect_ai_signals("chore: x", author_name="gemini-bot")
+        matched = [s for s in ai if "gemini-bot" in s]
+        self.assertTrue(matched, "gemini-bot in author_name must be detected")
+
+    def test_ai_author_gitlab_duo(self):
+        ai, _ = cli.detect_ai_signals("chore: x", author_email="gitlab-duo@example.com")
+        matched = [s for s in ai if "gitlab-duo" in s]
+        self.assertTrue(matched, "gitlab-duo in author_email must be detected")
+
+    def test_ai_author_duo_bot(self):
+        ai, _ = cli.detect_ai_signals("chore: x", committer_name="duo[bot]")
+        matched = [s for s in ai if "duo[bot]" in s]
+        self.assertTrue(matched, "duo[bot] in committer_name must be detected")
+
+    # ------------------------------------------------------------------
+    # Bot pattern exact-string mutations (mutants 56-61)
+    # ------------------------------------------------------------------
+
+    def test_bot_snyk(self):
+        _, bot = cli.detect_ai_signals("chore: x", author_name="snyk-bot")
+        matched = [s for s in bot if "snyk-bot" in s]
+        self.assertTrue(matched, "snyk-bot in author_name must be detected")
+
+    def test_bot_deepsource(self):
+        _, bot = cli.detect_ai_signals("chore: x", committer_name="deepsource[bot]")
+        matched = [s for s in bot if "deepsource" in s]
+        self.assertTrue(matched, "deepsource in committer_name must be detected")
+
+    def test_bot_gitlab_bot(self):
+        _, bot = cli.detect_ai_signals("chore: x", author_name="gitlab-bot")
+        matched = [s for s in bot if "gitlab-bot" in s]
+        self.assertTrue(matched, "gitlab-bot in author_name must be detected")
+
+    # ------------------------------------------------------------------
+    # Signal label mutations (mutants 62-69)
+    # Mutants change field labels like "author_name" to "AUTHOR_NAME".
+    # Tests verify the exact label prefix in the signal string.
+    # ------------------------------------------------------------------
+
+    def test_signal_label_author_name(self):
+        ai, _ = cli.detect_ai_signals("chore: x", author_name="copilot[bot]")
+        self.assertTrue(
+            any(s.startswith("author_name_bot:") for s in ai),
+            f"Expected 'author_name_bot:' prefix, got {ai}",
+        )
+
+    def test_signal_label_author_email(self):
+        ai, _ = cli.detect_ai_signals("chore: x", author_email="copilot@users.noreply")
+        self.assertTrue(
+            any(s.startswith("author_email_bot:") for s in ai),
+            f"Expected 'author_email_bot:' prefix, got {ai}",
+        )
+
+    def test_signal_label_committer_name(self):
+        ai, _ = cli.detect_ai_signals("chore: x", committer_name="copilot[bot]")
+        self.assertTrue(
+            any(s.startswith("committer_name_bot:") for s in ai),
+            f"Expected 'committer_name_bot:' prefix, got {ai}",
+        )
+
+    def test_signal_label_committer_email(self):
+        _, bot = cli.detect_ai_signals(
+            "chore: x", committer_email="dependabot@github.com"
+        )
+        self.assertTrue(
+            any(s.startswith("committer_email_bot:") for s in bot),
+            f"Expected 'committer_email_bot:' prefix, got {bot}",
+        )
+
+    # ------------------------------------------------------------------
+    # Empty-string fallback mutation (mutant 74)
+    # Mutant changes `name_field or ""` to `name_field or "XXXX"`.
+    # When None is passed, the fallback must be empty, not "XXXX".
+    # ------------------------------------------------------------------
+
+    def test_none_author_name_no_false_positive(self):
+        """Passing None as author_name must not produce any signal."""
+        ai, bot = cli.detect_ai_signals(
+            "chore: bump", author_name=None, author_email=None
+        )
+        self.assertEqual(ai, [])
+        self.assertEqual(bot, [])
+
+    def test_none_committer_no_false_positive(self):
+        """Passing None as committer fields must not produce any signal."""
+        ai, bot = cli.detect_ai_signals(
+            "chore: bump", committer_name=None, committer_email=None
+        )
+        self.assertEqual(ai, [])
+        self.assertEqual(bot, [])
+
+
 # ---------------------------------------------------------------------------
 # Ledger tests
 # ---------------------------------------------------------------------------

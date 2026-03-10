@@ -811,8 +811,8 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
             # Capture real guard results, then replace the guards and
             # make stat() always raise.  This avoids fragile call-count
             # thresholds that vary across Python 3.9-3.13.
-            real_is_file = f.is_file()       # True
-            real_is_symlink = f.is_symlink() # False
+            real_is_file = f.is_file()  # True
+            real_is_symlink = f.is_symlink()  # False
 
             with (
                 patch.object(Path, "is_file", return_value=real_is_file),

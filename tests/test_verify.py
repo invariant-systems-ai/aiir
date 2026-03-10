@@ -489,7 +489,7 @@ class TestVerifyReceiptFileEdgeCases(unittest.TestCase):
             # Capture real guard return values, then mock the guards and
             # stat separately.  This avoids fragile call-count thresholds
             # that vary across Python 3.9-3.13 (lstat routing changes).
-            real_exists = real.exists()       # True
+            real_exists = real.exists()  # True
             real_is_symlink = real.is_symlink()  # False
 
             with (

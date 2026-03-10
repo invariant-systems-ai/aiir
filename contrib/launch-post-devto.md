@@ -43,6 +43,7 @@ Optional **Sigstore signing** adds non-repudiation — keyless, OIDC-based, no k
 The EU AI Act's transparency obligations for general-purpose AI started in August 2025. High-risk system requirements follow in August 2026. If your product uses AI-generated code, you need provenance evidence.
 
 AIIR receipts provide:
+
 - Per-commit AI attribution with specific signal evidence
 - Tamper-evident audit trail (content-addressed)
 - Release-level coverage reports ("42% of commits in this release were AI-authored")
@@ -111,6 +112,7 @@ aiir --check --policy strict
 ```
 
 Three presets:
+
 - **strict**: Max 50% AI commits, signing required, hard-fail
 - **balanced**: Signing recommended, soft-fail
 - **permissive**: Warn-only
@@ -128,6 +130,7 @@ Three presets:
 ## What's next
 
 We're working on:
+
 - GitHub Marketplace listing (this week)
 - VS Code extension with receipt visualization
 - npm package for the JS SDK

@@ -68,6 +68,7 @@ The following are in scope:
 ### Threat model
 
 This tool processes untrusted input from:
+
 1. **Git commit metadata** — author names, emails, subjects, message bodies
 2. **GitHub Actions inputs** — `commit-range`, `ai-only`, `output-dir`
 3. **Diff content** — full diffs are hashed but not stored in receipts
@@ -122,6 +123,7 @@ repository-level secrets remain:
 | `WEBSITE_DISPATCH_TOKEN` | GitHub fine-grained PAT | `contents:read` on `invariantsystems.io` | 90 days |
 
 **Rotation procedure:**
+
 1. Generate a new token with the scopes listed above.
 2. Update the secret in **Settings → Secrets and variables → Actions**.
 3. Trigger a test workflow run to verify the new token works.

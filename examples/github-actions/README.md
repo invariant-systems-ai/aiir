@@ -105,6 +105,7 @@ Add policy checks to your CI to enforce AI authorship limits:
 ```
 
 Policy presets:
+
 - **`strict`**: Max 50% AI commits, signing required, hard-fail
 - **`balanced`**: Signing recommended, soft-fail
 - **`permissive`**: Warn-only, no enforcement

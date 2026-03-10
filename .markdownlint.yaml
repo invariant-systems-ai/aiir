@@ -27,3 +27,7 @@ MD003:
 
 # Allow inline HTML for shields.io badges
 no-inline-html: false
+
+# Table column style — disabled because compact pipe-delimited tables
+# are standard in this project and required for readability.
+MD060: false

@@ -11,19 +11,20 @@ SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
 
-import json
 import os
-import tempfile
 import unittest
 import unittest.mock
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from typing import TYPE_CHECKING
+from unittest.mock import patch
+
+if TYPE_CHECKING:
+    from aiir._detect import CommitInfo
 
 
 class TestMcpTransportAttestation(unittest.TestCase):
     """MCP server must stamp generator='aiir.mcp' and confidence='transport'."""
 
-    def _make_fake_commit(self) -> "aiir._detect.CommitInfo":
+    def _make_fake_commit(self) -> CommitInfo:
         """Create a minimal CommitInfo for testing."""
         from aiir._detect import CommitInfo
 

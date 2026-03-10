@@ -1265,7 +1265,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.github_action:
             _ci_actor = os.environ.get("GITHUB_ACTOR", "")
             _ci_context = "github-actions"
-        elif args.gitlab_ci:
+        elif args.gitlab_ci:  # pragma: no branch — outer guard guarantees one is True
             _ci_actor = os.environ.get(
                 "GITLAB_USER_LOGIN", os.environ.get("GITLAB_USER_NAME", "")
             )

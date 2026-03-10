@@ -471,7 +471,7 @@ Property-based tests (Hypothesis) covering each security-critical function:
 | CSI escape range | 1 | All CSI final bytes (0x40–0x7E) stripped |
 | Emphasis escaping | 1 | No unescaped `*`, `_`, `~` after `_sanitize_md` |
 | Normalize helper | 1 | No crashes; no Cf/Mn/Me chars in output |
-| Backslash escape | 2 | All `|` preceded by odd backslash count; all `*`/`_`/`~` preceded by odd backslash count |
+| Backslash escape | 2 | All `\|` preceded by odd backslash count; all `*`/`_`/`~` preceded by odd backslash count |
 | `verify_receipt` nested types | 1 | Never crashes regardless of `commit`/`ai_attestation` field types |
 | `format_receipt_pretty` nested types | 1 | Never crashes regardless of `commit`/`ai_attestation` field types |
 | `format_receipt_pretty` author types | 1 | Never crashes regardless of `author` sub-field type (R15-SEC-01) |

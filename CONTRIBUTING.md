@@ -52,6 +52,7 @@ PRs with unsigned commits will not be merged.
 ### Commit messages
 
 Use clear, descriptive commit messages. Examples:
+
 - `fix: handle empty commit range gracefully`
 - `feat: add --format csv output option`
 - `test: add fuzz coverage for unicode filenames`

@@ -112,7 +112,7 @@ test vectors.
 For trademark use not covered above, contact:
 
 <!-- markdownlint-disable-next-line MD036 -->
-**trademark@invariantsystems.io**
+**<trademark@invariantsystems.io>**
 
 We're generally friendly about legitimate use. Just ask first.
 

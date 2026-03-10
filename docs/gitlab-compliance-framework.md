@@ -74,6 +74,7 @@ aiir-compliance-receipt:
 ### 3. Configure the framework to use this pipeline
 
 In the compliance framework settings, set:
+
 - **Compliance pipeline configuration**: `your-group/compliance-pipelines:.aiir-compliance.yml@main`
 
 ### 4. Tag projects with the framework

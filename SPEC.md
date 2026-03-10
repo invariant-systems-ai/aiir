@@ -37,6 +37,7 @@ The reference implementation is the `aiir` Python package:
 ### 1.3 Machine-Readable Schema
 
 A JSON Schema (draft 2020-12) is provided at:
+
 - [`schemas/commit_receipt.v1.schema.json`](schemas/commit_receipt.v1.schema.json)
 
 ---
@@ -177,6 +178,7 @@ identify them with a distinct `detection_method` value.
 ### 5.1 Credential Stripping
 
 The `repository` field MUST have all credentials removed:
+
 - Userinfo component of the URL (e.g., `https://token@github.com/...` → `https://github.com/...`)
 - Query parameters (may contain tokens)
 - URL fragments
@@ -367,18 +369,19 @@ To verify a receipt, an implementation MUST:
 7. **Hash computation**: Compute:
    - `expected_hash = "sha256:" + hex(SHA-256(core_json.encode("utf-8")))`
 <!-- markdownlint-disable-next-line MD011 -->
-   - `expected_id = "g1-" + hex(SHA-256(core_json.encode("utf-8")))[:32]`
+- `expected_id = "g1-" + hex(SHA-256(core_json.encode("utf-8")))[:32]`
 
-8. **Constant-time comparison**: Compare `expected_hash` against
+1. **Constant-time comparison**: Compare `expected_hash` against
    `receipt["content_hash"]` and `expected_id` against
    `receipt["receipt_id"]` using constant-time comparison
    (e.g., `hmac.compare_digest`).
 
-9. **Result**: The receipt is valid if and only if BOTH comparisons succeed.
+2. **Result**: The receipt is valid if and only if BOTH comparisons succeed.
 
 ### 9.1 Error Reporting
 
 On failure, implementations SHOULD report which check failed:
+
 - `"content hash mismatch"` — core fields were modified after generation
 - `"receipt_id mismatch"` — receipt ID was modified
 - `"unknown receipt type"` — not an AIIR receipt
@@ -473,9 +476,11 @@ See [THREAT_MODEL.md](THREAT_MODEL.md) for the full STRIDE analysis (153 control
 ## 13. Test Vectors
 
 Machine-readable test vectors are provided at:
+
 - [`schemas/test_vectors.json`](schemas/test_vectors.json)
 
 Each test vector includes:
+
 - A complete receipt JSON
 - Expected verification result (`valid: true/false`)
 - Expected error messages (if invalid)
@@ -585,6 +590,7 @@ The specification uses **Semantic Versioning** (SemVer):
 ### 15.5 Interoperability
 
 Third-party implementations claiming AIIR compatibility SHOULD:
+
 - Reference the spec version they conform to
 - Pass all published test vectors for that version
 - Follow the badge usage guidelines in [TRADEMARK.md](TRADEMARK.md)

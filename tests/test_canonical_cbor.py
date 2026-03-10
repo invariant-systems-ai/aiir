@@ -62,8 +62,8 @@ class TestCanonicalCbor(unittest.TestCase):
     def test_try_f16_and_f16_to_f64_cover_branches(self) -> None:
         self.assertIsNone(_try_f16(math.inf))
         self.assertIsNone(_try_f16(1e-20))
-        self.assertIsNone(_try_f16(2 ** -30))
-        self.assertIsNotNone(_try_f16(2 ** -20))
+        self.assertIsNone(_try_f16(2**-30))
+        self.assertIsNotNone(_try_f16(2**-20))
         self.assertEqual(_f16_to_f64(0), 0.0)
         self.assertGreater(_f16_to_f64(1), 0.0)
         self.assertEqual(_f16_to_f64(0x3C00), 1.0)

@@ -106,7 +106,7 @@ def _f16_to_f64(bits: int) -> float:
     exp = (bits >> 10) & 0x1F
     frac = bits & 0x03FF
     if exp == 0:
-        return sign * (frac / 1024.0) * (2.0 ** -14)
+        return sign * (frac / 1024.0) * (2.0**-14)
     return sign * (1.0 + frac / 1024.0) * (2.0 ** (exp - 15))
 
 

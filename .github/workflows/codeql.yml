@@ -1,0 +1,50 @@
+# CodeQL semantic code analysis — catches vulnerabilities that pattern-based
+# SAST tools (Bandit, Semgrep) miss: data-flow, taint-tracking, type confusion.
+#
+# Complements security.yml (Bandit + Semgrep) with GitHub's own analysis engine.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly Wednesday 04:00 UTC — catch new CodeQL rules
+    - cron: '0 4 * * 3'
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@fca7ace96b7d713c7035871441bd52efbe39e27e  # v3.28.19
+        with:
+          languages: ${{ matrix.language }}
+          # Use extended queries for security-and-quality coverage
+          queries: security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@fca7ace96b7d713c7035871441bd52efbe39e27e  # v3.28.19
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@fca7ace96b7d713c7035871441bd52efbe39e27e  # v3.28.19
+        with:
+          category: "/language:${{ matrix.language }}"

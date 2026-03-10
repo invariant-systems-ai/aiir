@@ -6,7 +6,7 @@ build_receipts_graphql_query, query_gitlab_graphql, generate_dashboard_html,
 post_mr_comment, GitLab Duo signal detection, and generator ID differentiation.
 
 Copyright 2025-2026 Invariant Systems, Inc.
-SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 """
 
 from __future__ import annotations

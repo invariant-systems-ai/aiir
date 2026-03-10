@@ -5,7 +5,7 @@ are valid JSON, structurally correct for Claude Code's settings schema,
 and that the AIIR CLI commands embedded in hook commands are well-formed.
 
 Copyright 2025-2026 Invariant Systems, Inc.
-SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 """
 
 from __future__ import annotations

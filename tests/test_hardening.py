@@ -3,6 +3,9 @@
 Gap 1: _sanitize_md differential tests against a real Markdown parser.
 Gap 2: Source-code assertion that hmac.compare_digest is used for
        constant-time comparison (prevents accidental regression to ==).
+
+Copyright 2025-2026 Invariant Systems, Inc.
+# SPDX-License-Identifier: Apache-2.0
 """
 
 from __future__ import annotations

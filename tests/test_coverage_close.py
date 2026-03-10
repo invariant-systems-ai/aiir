@@ -17,7 +17,7 @@ Target modules and approximate missed-line counts:
                               rate limiter, GraphQL error
 
 Copyright 2025-2026 Invariant Systems, Inc.
-SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 """
 
 from __future__ import annotations

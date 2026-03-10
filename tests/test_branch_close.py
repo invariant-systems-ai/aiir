@@ -47,7 +47,7 @@ Branch coverage gaps addressed (module → line → untested direction):
                     576→574    gitlab_summary no receipts
 
 Copyright 2025-2026 Invariant Systems, Inc.
-SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 """
 
 from __future__ import annotations

@@ -2,6 +2,9 @@
 """
 sync-version.py — Self-healing version synchronisation for AIIR.
 
+Copyright 2025-2026 Invariant Systems, Inc.
+SPDX-License-Identifier: Apache-2.0
+
 Reads the single source of truth (__version__ in aiir/__init__.py) and
 patches every file that embeds the version string.  Designed to be called
 from:

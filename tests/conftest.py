@@ -1,4 +1,6 @@
 """Shared fixtures for AIIR CLI tests."""
+# Copyright 2025-2026 Invariant Systems, Inc.
+# SPDX-License-Identifier: Apache-2.0
 
 import os
 

@@ -21,7 +21,7 @@ Run:
     python3 -m pytest tests/test_properties.py -v --hypothesis-show-statistics
 
 Copyright 2025-2026 Invariant Systems, Inc.
-SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 """
 
 from __future__ import annotations

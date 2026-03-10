@@ -375,6 +375,15 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.tag }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
+      - name: Scan image for vulnerabilities (Trivy)
+        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947e0f18c8ea63fd80e  # v0.28.0
+        with:
+          image-ref: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.tag }}"
+          format: "table"
+          exit-code: "1"
+          severity: "CRITICAL,HIGH"
+          ignore-unfixed: true
+
   # ── Step 7: Propagate version to website ───────────────────────────
   update-website:
     needs: [verify, docker, publish-npm]

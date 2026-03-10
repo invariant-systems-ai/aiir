@@ -1,0 +1,25 @@
+# markdownlint configuration for AIIR project.
+# https://github.com/DavidAnson/markdownlint
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Allow long lines — markdown prose is not code.
+MD013: false
+
+# Allow raw HTML (needed for badges, collapsible sections, etc.)
+MD033: false
+
+# Allow duplicate headings in different contexts (e.g., "Install" in
+# both README and CHANGELOG)
+MD024:
+  siblings_only: true
+
+# Allow trailing punctuation in headings (e.g., "What is AIIR?")
+MD026: false
+
+# Allow non-atx heading style (CHANGELOG uses both)
+MD003:
+  style: consistent
+
+# Allow inline HTML for shields.io badges
+no-inline-html: false

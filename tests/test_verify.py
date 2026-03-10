@@ -1,4 +1,6 @@
 """Tests for receipt verification."""
+# Copyright 2025-2026 Invariant Systems, Inc.
+# SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
 

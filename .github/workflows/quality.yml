@@ -1,0 +1,172 @@
+# Quality checks — type checking, markdown lint, link checking, spelling,
+# Dockerfile lint, YAML validation, and SPDX header enforcement.
+#
+# These checks complement ci.yml (tests) and security.yml (SAST/deps).
+# They validate documentation integrity, type safety, and packaging hygiene.
+name: Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Static type checking (mypy) ────────────────────────────────────
+  # Validates the py.typed + Typing::Typed classifier claims.
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+      - name: Install mypy
+        run: pip install 'mypy>=1.10,<2' pytest hypothesis
+      - name: Run mypy
+        run: mypy aiir/
+
+  # ── Markdown lint ──────────────────────────────────────────────────
+  # Validates formatting consistency across all .md files.
+  markdown-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Run markdownlint
+        uses: DavidAnson/markdownlint-cli2-action@05f32210e84442804257b2f7a6dc4220dbc1c8e5  # v19.0.0
+        with:
+          globs: "**/*.md"
+
+  # ── Link checking ──────────────────────────────────────────────────
+  # Catches dead URLs in documentation.
+  link-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Check links with lychee
+        uses: lycheeverse/lychee-action@f613c4a64e50d792e0b31ec34bbcbba12263c6a6  # v2.3.0
+        with:
+          args: >-
+            --no-progress
+            --exclude-mail
+            --exclude 'https://pypi.org/project/aiir'
+            --exclude 'localhost'
+            --exclude '127.0.0.1'
+            --timeout 30
+            --max-retries 3
+            '**/*.md'
+          fail: true
+
+  # ── Spelling check ─────────────────────────────────────────────────
+  # Catches typos in docs and source code comments.
+  spelling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Install typos
+        uses: crate-ci/typos@b1ae8d918b6e85bd611117f3d9a1b6e5a5efc0b9  # v1.29.5
+        with:
+          config: .typos.toml
+
+  # ── Dockerfile lint (Hadolint) ─────────────────────────────────────
+  hadolint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Run Hadolint
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf  # v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+  # ── YAML validation ────────────────────────────────────────────────
+  # Validates CI templates and examples are syntactically correct YAML.
+  yaml-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+      - name: Install yamllint
+        run: pip install yamllint
+      - name: Lint YAML templates and examples
+        run: |
+          yamllint -d "{extends: relaxed, rules: {line-length: disable}}" \
+            templates/ examples/
+
+  # ── SPDX header enforcement ────────────────────────────────────────
+  # Ensures every .py file has an SPDX-License-Identifier.
+  spdx-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Verify SPDX headers
+        run: |
+          MISSING=0
+          for f in $(find aiir/ tests/ scripts/ -name '*.py' -not -path '*__pycache__*' -not -name '__init__.py'); do
+            if ! grep -q 'SPDX-License-Identifier' "$f"; then
+              echo "::error file=$f::Missing SPDX-License-Identifier header"
+              MISSING=$((MISSING + 1))
+            fi
+          done
+          if [ "$MISSING" -gt 0 ]; then
+            echo "::error::$MISSING files missing SPDX headers"
+            exit 1
+          fi
+          echo "✅ All .py files have SPDX headers"
+
+  # ── Summary gate ───────────────────────────────────────────────────
+  quality-ok:
+    if: always()
+    needs: [typecheck, markdown-lint, link-check, spelling, hadolint, yaml-lint, spdx-check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Verify all quality jobs passed
+        run: |
+          echo "typecheck:     ${{ needs.typecheck.result }}"
+          echo "markdown-lint: ${{ needs.markdown-lint.result }}"
+          echo "link-check:    ${{ needs.link-check.result }}"
+          echo "spelling:      ${{ needs.spelling.result }}"
+          echo "hadolint:      ${{ needs.hadolint.result }}"
+          echo "yaml-lint:     ${{ needs.yaml-lint.result }}"
+          echo "spdx-check:    ${{ needs.spdx-check.result }}"
+          if [[ "${{ needs.typecheck.result }}" != "success" || \
+                "${{ needs.markdown-lint.result }}" != "success" || \
+                "${{ needs.link-check.result }}" != "success" || \
+                "${{ needs.spelling.result }}" != "success" || \
+                "${{ needs.hadolint.result }}" != "success" || \
+                "${{ needs.yaml-lint.result }}" != "success" || \
+                "${{ needs.spdx-check.result }}" != "success" ]]; then
+            echo "::error::Quality gate failed"
+            exit 1
+          fi
+          echo "✅ All quality checks passed"

@@ -2,6 +2,9 @@
 """AIIR Conformance Test Runner — validates any implementation against
 the official test vectors.
 
+Copyright 2025-2026 Invariant Systems, Inc.
+SPDX-License-Identifier: Apache-2.0
+
 Usage:
     python conformance.py                    # use bundled test vectors
     python conformance.py vectors.json       # use custom vector file

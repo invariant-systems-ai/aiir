@@ -5,7 +5,7 @@ Tests the schema validation module against valid receipts, invalid receipts,
 and the published conformance test vectors.
 
 Copyright 2025-2026 Invariant Systems, Inc.
-SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 """
 
 from __future__ import annotations

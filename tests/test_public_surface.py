@@ -23,7 +23,7 @@ Designed to run in CI without network access — all checks are local/filesystem
 The SITE_DIR env var points to the website checkout; defaults to sibling repo.
 
 Copyright 2025-2026 Invariant Systems, Inc.
-SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 """
 
 from __future__ import annotations

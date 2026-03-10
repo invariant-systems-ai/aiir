@@ -12,7 +12,7 @@ Covers the entire serve_stdio() loop that was at 0% coverage:
 - Entry point (main)
 
 Copyright 2025-2026 Invariant Systems, Inc.
-SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 """
 
 from __future__ import annotations

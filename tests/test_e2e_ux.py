@@ -31,7 +31,7 @@ and exercises every CLI path documented in README.md:
 If any of these documented contracts break, this test fails immediately.
 
 Copyright 2025-2026 Invariant Systems, Inc.
-SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 """
 
 from __future__ import annotations

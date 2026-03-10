@@ -2,7 +2,7 @@
 Tests for aiir._explain — human-readable verification explanations.
 
 Copyright 2025-2026 Invariant Systems, Inc.
-SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 """
 
 from __future__ import annotations

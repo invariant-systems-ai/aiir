@@ -16,9 +16,9 @@ from unittest.mock import patch
 # Import the module under test
 import aiir.cli as cli
 
-# On Python 3.12+, is_symlink() routes through Path.stat(follow_symlinks=False),
+# On Python 3.11+, is_symlink() routes through Path.stat(follow_symlinks=False),
 # adding one extra stat() call before the explicit stat-for-size call.
-_STAT_GUARD_CALLS = 3 if sys.version_info >= (3, 12) else 2
+_STAT_GUARD_CALLS = 3 if sys.version_info >= (3, 11) else 2
 
 
 class TestSafeVerifyPathNoDeadCode(unittest.TestCase):

@@ -1,9 +1,9 @@
 # AIIR Commit Receipt Specification
 
-**Specification version**: 1.0.1
+**Specification version**: 1.1.0
 **Schema identifier**: `aiir/commit_receipt.v1`
 **Status**: Stable
-**Date**: 2026-03-09
+**Date**: 2026-03-10
 **Author**: Invariant Systems, Inc.
 **License**: Apache-2.0
 
@@ -229,6 +229,48 @@ Canonical output:
 ```
 {"a":{"c":3,"d":2},"b":1}
 ```
+
+### 6.5 Normative Canonicalization Contract
+
+The canonical JSON encoding for `aiir/commit_receipt.v1` is **fully defined**
+by the following parameters:
+
+| Parameter | Value | Effect |
+|-----------|-------|--------|
+| Key ordering | lexicographic by Unicode code point | Matches [RFC 8785 (JCS)](https://www.rfc-editor.org/rfc/rfc8785) §3.2.3 |
+| Separators | `(",", ":")` | No structural whitespace |
+| ASCII safety | all non-ASCII escaped as `\uXXXX` | Eliminates Unicode normalization divergence across runtimes |
+| NaN / Infinity | rejected | Per RFC 8259 §6 |
+| Integer format | decimal, no leading zeros, no exponent | Matches JCS §3.2.2.1 |
+| Depth limit | 64 levels | Stack-overflow prevention |
+
+**Conformance note for SDK authors:**
+
+The current receipt schema uses ONLY the following JSON value types:
+strings, integers, booleans, null, arrays of strings, and nested objects.
+**No floating-point values appear in CORE_KEYS.** For these types, the
+algorithm above produces output that is **byte-identical** to RFC 8785
+(JCS). This equivalence is verified by the regression test suite
+(`tests/test_canonicalization.py`).
+
+The **one** area where this algorithm diverges from JCS is IEEE-754
+floating-point serialization (Python `json.dumps` uses `repr()`-style
+formatting; JCS mandates ECMAScript `Number::toString` rules). This
+divergence is irrelevant today because the schema contains no floats.
+
+> **Migration trigger**: If a future schema version introduces a
+> floating-point field in CORE_KEYS (e.g., a confidence score), this
+> algorithm MUST be replaced with a full RFC 8785 implementation to
+> preserve cross-language determinism. The `ensure_ascii=True` flag
+> SHOULD be retained during the transition to avoid breaking existing
+> verifiers, with a documented migration window for the switch to
+> literal UTF-8 output.
+
+Implementations that handle ONLY the types listed above (strings,
+integers, booleans, null, arrays, objects) MAY use this simplified
+algorithm. Implementations that aim for full JCS compliance SHOULD use
+a validated RFC 8785 library and MUST produce byte-identical output for
+the current receipt schema.
 
 ---
 
@@ -551,3 +593,4 @@ Third-party implementations claiming AIIR compatibility SHOULD:
 |---------|------|---------|
 | 1.0.0 | 2026-03-09 | Initial specification extracted from reference implementation |
 | 1.0.1 | 2026-03-09 | §14: IANA media type registration template, predicate type URI, schema URI resolution |
+| 1.1.0 | 2026-03-10 | §6.5: Normative canonicalization contract — explicit type inventory, RFC 8785 equivalence statement, migration trigger for floats |

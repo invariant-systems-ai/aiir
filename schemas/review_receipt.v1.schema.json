@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://invariantsystems.io/schemas/aiir/review_receipt.v1.schema.json",
+  "title": "AIIR Review Receipt v1",
+  "description": "Content-addressed review receipt attesting that a human reviewed a specific commit. Schema: aiir/review_receipt.v1",
+  "type": "object",
+  "required": [
+    "type",
+    "schema",
+    "version",
+    "reviewed_commit",
+    "reviewer",
+    "review_outcome",
+    "provenance",
+    "receipt_id",
+    "content_hash",
+    "timestamp",
+    "extensions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "const": "aiir.review_receipt",
+      "description": "Receipt type identifier. MUST be 'aiir.review_receipt'."
+    },
+    "schema": {
+      "const": "aiir/review_receipt.v1",
+      "description": "Schema version identifier."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([.+\\-][0-9a-zA-Z.+\\-]*)?$",
+      "description": "SemVer version of the tool that generated this receipt."
+    },
+    "reviewed_commit": {
+      "type": "object",
+      "required": ["sha"],
+      "additionalProperties": false,
+      "properties": {
+        "sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$|^[0-9a-f]{64}$",
+          "description": "Full hex SHA of the reviewed commit."
+        },
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^g1-[0-9a-f]{32}$",
+          "description": "Optional receipt_id of the corresponding commit receipt."
+        }
+      }
+    },
+    "reviewer": {
+      "type": "object",
+      "required": ["name", "email"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Name of the reviewer."
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Email of the reviewer."
+        }
+      }
+    },
+    "review_outcome": {
+      "type": "string",
+      "enum": ["approved", "rejected", "commented"],
+      "description": "The outcome of the review."
+    },
+    "comment": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Optional review comment."
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["tool", "generator"],
+      "properties": {
+        "repository": {
+          "type": ["string", "null"],
+          "description": "Repository URL (stripped of credentials)."
+        },
+        "tool": {
+          "type": "string",
+          "description": "URI-based tool identifier."
+        },
+        "generator": {
+          "type": "string",
+          "description": "Generator identifier (e.g. 'aiir.cli', 'aiir.github')."
+        }
+      },
+      "additionalProperties": false
+    },
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^g1-[0-9a-f]{32}$",
+      "description": "Content-addressed receipt identifier."
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "Full SHA-256 hash of the canonical JSON of CORE_KEYS."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 UTC timestamp of receipt generation."
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Extension point for downstream integrations.",
+      "additionalProperties": true,
+      "properties": {
+        "instance_id": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

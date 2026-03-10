@@ -33,6 +33,13 @@ from aiir._detect import (
 
 
 # ---------------------------------------------------------------------------
+# Review receipt schema version
+# ---------------------------------------------------------------------------
+
+REVIEW_RECEIPT_SCHEMA_VERSION = "aiir/review_receipt.v1"
+
+
+# ---------------------------------------------------------------------------
 # Agent attestation helpers
 # ---------------------------------------------------------------------------
 
@@ -175,6 +182,104 @@ def build_commit_receipt(
                 if agent_attestation
                 else {}
             ),
+        },
+    }
+
+    return receipt
+
+
+def build_review_receipt(
+    reviewed_commit: str,
+    reviewer_name: str,
+    reviewer_email: str,
+    review_outcome: str = "approved",
+    commit_receipt_id: Optional[str] = None,
+    comment: Optional[str] = None,
+    cwd: Optional[str] = None,
+    instance_id: Optional[str] = None,
+    namespace: Optional[str] = None,
+    generator: str = "aiir.cli",
+) -> Dict[str, Any]:
+    """Build a review receipt attesting that a human reviewed a commit.
+
+    The receipt is content-addressed, following the same pattern as
+    :func:`build_commit_receipt`.
+
+    Args:
+        reviewed_commit: The commit SHA that was reviewed.
+        reviewer_name: Name of the reviewer.
+        reviewer_email: Email of the reviewer.
+        review_outcome: One of ``approved``, ``rejected``, ``commented``.
+        commit_receipt_id: Optional receipt_id of the corresponding commit receipt.
+        comment: Optional review comment.
+        cwd: Repository root (for provenance).
+        instance_id: Optional instance identifier.
+        namespace: Optional namespace.
+        generator: Generator identifier.
+
+    Returns:
+        A content-addressed review receipt dict.
+    """
+    _VALID_OUTCOMES = ("approved", "rejected", "commented")
+    if review_outcome not in _VALID_OUTCOMES:
+        raise ValueError(
+            f"Invalid review_outcome: {review_outcome!r}. "
+            f"Must be one of: {', '.join(_VALID_OUTCOMES)}"
+        )
+
+    _validate_ref(reviewed_commit)
+    now = _now_rfc3339()
+
+    # Determine repo identity
+    repo_url: Optional[str] = None
+    try:
+        repo_url = (
+            _run_git(["remote", "get-url", "origin"], cwd=cwd).strip() or None
+        )
+        if repo_url:
+            repo_url = _strip_url_credentials(repo_url)
+    except RuntimeError:
+        pass
+
+    # Sanitize inputs
+    reviewer_name = _strip_terminal_escapes(str(reviewer_name))[:200]
+    reviewer_email = _strip_terminal_escapes(str(reviewer_email))[:200]
+    comment_safe = _strip_terminal_escapes(str(comment))[:2000] if comment else None
+
+    receipt_core: Dict[str, Any] = {
+        "type": "aiir.review_receipt",
+        "schema": REVIEW_RECEIPT_SCHEMA_VERSION,
+        "version": CLI_VERSION,
+        "reviewed_commit": {
+            "sha": _strip_terminal_escapes(str(reviewed_commit))[:64],
+            **({"receipt_id": _strip_terminal_escapes(str(commit_receipt_id))[:40]}
+               if commit_receipt_id else {}),
+        },
+        "reviewer": {
+            "name": reviewer_name,
+            "email": reviewer_email,
+        },
+        "review_outcome": review_outcome,
+        **({"comment": comment_safe} if comment_safe else {}),
+        "provenance": {
+            "repository": repo_url,
+            "tool": f"https://github.com/invariant-systems-ai/aiir@{CLI_VERSION}",
+            "generator": generator,
+        },
+    }
+
+    core_json = _canonical_json(receipt_core)
+    content_hash = "sha256:" + _sha256(core_json)
+    receipt_id = f"g1-{_sha256(core_json)[:32]}"
+
+    receipt: Dict[str, Any] = {
+        **receipt_core,
+        "receipt_id": receipt_id,
+        "content_hash": content_hash,
+        "timestamp": now,
+        "extensions": {
+            **(({"instance_id": instance_id}) if instance_id else {}),
+            **(({"namespace": namespace}) if namespace else {}),
         },
     }
 

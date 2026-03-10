@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - **PyPI Integrity API verification**: Post-publish CI step queries `GET /integrity/aiir/<version>/<file>/provenance` for every release artifact and reports attestation coverage.
 - **Consumer verification script** (`scripts/verify-pypi-provenance.py`): Zero-dependency (stdlib-only) tool for downstream consumers to verify PEP 740 attestations on any AIIR release. Supports `--strict` mode for CI gating.
 - **5 new supply-chain security controls** (R22-SC-01 through R22-SC-05) in THREAT_MODEL.md. **147 total controls.**
+- **JCS compatibility regression test** (`tests/test_canonicalization.py`): Proves `_canonical_json` produces byte-identical output to RFC 8785 for all receipt-schema types (strings, ints, bools, null, arrays, objects). 500-example Hypothesis fuzz suite. Float canary tests document the exact IEEE-754 divergence that would trigger JCS adoption.
+- **Normative canonicalization contract** (SPEC.md §6.5): Explicit type inventory, RFC 8785 equivalence statement, and documented migration trigger for SDK authors. Spec version → 1.1.0.
 
 ### Changed
 

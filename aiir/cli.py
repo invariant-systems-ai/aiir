@@ -87,6 +87,8 @@ from aiir._receipt import (  # noqa: F401
     format_receipt_detail,
     write_receipt,
     wrap_in_toto_statement,
+    build_review_receipt,
+    REVIEW_RECEIPT_SCHEMA_VERSION,
     INTOTO_PREDICATE_TYPE,
 )
 
@@ -121,6 +123,9 @@ from aiir._github import (  # noqa: F401
     set_github_output,
     set_github_summary,
     format_github_summary,
+    create_check_run,
+    post_pr_comment,
+    format_commit_trailer,
 )
 
 from aiir._gitlab import (  # noqa: F401
@@ -531,6 +536,51 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "Creates the file and exits."
         ),
     )
+    parser.add_argument(
+        "--init",
+        action="store_true",
+        help=(
+            "Initialize a .aiir/ directory for the current project. "
+            "Creates receipts.jsonl, index.json, config.json, and .gitignore. "
+            "Optionally pass --policy to set a policy preset."
+        ),
+    )
+    parser.add_argument(
+        "--review",
+        nargs="?",
+        const="HEAD",
+        default=None,
+        metavar="COMMIT",
+        help=(
+            "Generate a review receipt for a commit (default: HEAD). "
+            "Attests that a human reviewed the commit. "
+            "Use --review-outcome to set approved/rejected/commented."
+        ),
+    )
+    parser.add_argument(
+        "--review-outcome",
+        default="approved",
+        metavar="OUTCOME",
+        help=(
+            "Review outcome: approved, rejected, or commented (default: approved). "
+            "Used with --review."
+        ),
+    )
+    parser.add_argument(
+        "--review-comment",
+        default=None,
+        metavar="TEXT",
+        help="Optional review comment (used with --review).",
+    )
+    parser.add_argument(
+        "--trailer",
+        action="store_true",
+        help=(
+            "Print AIIR commit trailer lines to stdout after receipt generation. "
+            "Suitable for appending to git commit messages via "
+            "'git interpret-trailers'."
+        ),
+    )
 
     args = parser.parse_args(argv)
 
@@ -564,6 +614,182 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         except ValueError as e:
             print(f"{_e('error')} {e}", file=sys.stderr)
             return 1
+
+    # --- Init mode (scaffolds .aiir/ directory) ---
+    if args.init:
+        from pathlib import Path as _InitPath
+
+        ledger_dir = args.ledger if args.ledger else _LEDGER_DIR
+        aiir_path = _InitPath(ledger_dir)
+
+        # Guard: don't escape project root
+        try:
+            resolved = aiir_path.resolve()
+            if not str(resolved).startswith(str(_InitPath.cwd().resolve())):
+                print(
+                    f"{_e('error')} Ledger dir must be within the project root.",
+                    file=sys.stderr,
+                )
+                return 1
+        except OSError:
+            pass  # resolve may fail on some platforms; continue
+
+        aiir_path.mkdir(parents=True, exist_ok=True)
+
+        created = []
+        # .gitignore inside .aiir/
+        gitignore = aiir_path / ".gitignore"
+        if not gitignore.exists():
+            gitignore.write_text(
+                "# AIIR receipts — commit this directory for an audit trail.\n"
+                "# Uncomment lines below to exclude specific files:\n"
+                "# *.sigstore\n"
+                "# config.json\n",
+                encoding="utf-8",
+            )
+            created.append(".gitignore")
+
+        # Empty receipts.jsonl
+        receipts_file = aiir_path / "receipts.jsonl"
+        if not receipts_file.exists():
+            receipts_file.write_text("", encoding="utf-8")
+            created.append("receipts.jsonl")
+
+        # index.json
+        index_file = aiir_path / "index.json"
+        if not index_file.exists():
+            index_file.write_text(
+                json.dumps({"receipt_count": 0, "receipts": {}}, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            created.append("index.json")
+
+        # config.json with instance_id
+        config_file = aiir_path / "config.json"
+        if not config_file.exists():
+            import uuid as _uuid
+
+            config_data: Dict[str, Any] = {
+                "instance_id": str(_uuid.uuid4()),
+            }
+            if getattr(args, "namespace", None):
+                config_data["namespace"] = args.namespace
+            config_file.write_text(
+                json.dumps(config_data, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            created.append("config.json")
+
+        # Optionally init policy too
+        if args.policy:
+            try:
+                _p, _pp = init_policy(
+                    preset=args.policy if args.policy in POLICY_PRESETS else "balanced",
+                    ledger_dir=ledger_dir,
+                )
+                created.append("policy.json")
+            except ValueError:
+                pass
+
+        if created:
+            print(
+                f"{_e('ok')} Initialized {ledger_dir}/ with: {', '.join(created)}",
+                file=sys.stderr,
+            )
+        else:
+            print(
+                f"{_e('ok')} {ledger_dir}/ already initialized (no changes).",
+                file=sys.stderr,
+            )
+        print(
+            f"   {_e('hint')} Add {ledger_dir}/ to your repo: git add {ledger_dir}/",
+            file=sys.stderr,
+        )
+        return 0
+
+    # --- Review receipt mode ---
+    if args.review is not None:
+        try:
+            cwd_review = get_repo_root()
+        except (RuntimeError, FileNotFoundError, OSError) as e:
+            print(f"{_e('error')} {e}", file=sys.stderr)
+            return 1
+
+        # Get reviewer identity from git config
+        try:
+            reviewer_name = _run_git(
+                ["config", "user.name"], cwd=cwd_review
+            ).strip()
+            reviewer_email = _run_git(
+                ["config", "user.email"], cwd=cwd_review
+            ).strip()
+        except RuntimeError:
+            reviewer_name = os.environ.get("GIT_AUTHOR_NAME", "unknown")
+            reviewer_email = os.environ.get("GIT_AUTHOR_EMAIL", "unknown")
+
+        if not reviewer_name or not reviewer_email:
+            print(
+                f"{_e('error')} Cannot determine reviewer identity. "
+                "Set git config user.name and user.email.",
+                file=sys.stderr,
+            )
+            return 1
+
+        try:
+            review_receipt = build_review_receipt(
+                reviewed_commit=args.review,
+                reviewer_name=reviewer_name,
+                reviewer_email=reviewer_email,
+                review_outcome=args.review_outcome,
+                comment=args.review_comment,
+                cwd=cwd_review,
+                generator="aiir.cli",
+            )
+        except (ValueError, RuntimeError) as e:
+            print(f"{_e('error')} {e}", file=sys.stderr)
+            return 1
+
+        # Output the review receipt
+        if args.json_stdout:
+            print(json.dumps(review_receipt, indent=2, ensure_ascii=False), flush=True)
+        elif args.jsonl:
+            print(
+                json.dumps(review_receipt, separators=(",", ":"), ensure_ascii=False),
+                flush=True,
+            )
+        else:
+            # Append to ledger
+            ledger_dir = args.ledger if args.ledger is not None else _LEDGER_DIR
+            try:
+                appended, skipped, ledger_path = append_to_ledger(
+                    [review_receipt], ledger_dir=ledger_dir,
+                )
+            except ValueError as e:
+                print(f"{_e('error')} {e}", file=sys.stderr)
+                return 1
+
+        if not args.quiet:
+            rid = review_receipt.get("receipt_id", "")[:24]
+            sha_short = args.review[:12]
+            print(
+                f"\n{_e('ok')} Review receipt: {rid}…",
+                file=sys.stderr,
+            )
+            print(
+                f"   Reviewed: {sha_short}  Outcome: {args.review_outcome}",
+                file=sys.stderr,
+            )
+            if args.review_comment:
+                print(
+                    f"   Comment: {_strip_terminal_escapes(args.review_comment)[:80]}",
+                    file=sys.stderr,
+                )
+
+        if args.json_stdout or args.jsonl:
+            pass  # already printed
+        else:
+            print(json.dumps(review_receipt, indent=2, ensure_ascii=False))
+        return 0
 
     # --- Verify mode (no git repo needed) ---
     if args.verify:
@@ -1273,6 +1499,37 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         summary = format_github_summary(receipts)
         set_github_summary(summary)
 
+        # P0: Create a GitHub Check Run (requires checks: write permission)
+        if os.environ.get("GITHUB_TOKEN"):
+            try:
+                create_check_run(receipts)
+                if not args.quiet:
+                    print(
+                        f"   {_e('ok')} Created aiir/verify check run",
+                        file=sys.stderr,
+                    )
+            except RuntimeError as e:
+                # Non-fatal — check run is best-effort
+                if not args.quiet:
+                    print(
+                        f"   {_e('hint')} Could not create check run: "
+                        f"{_strip_terminal_escapes(str(e))[:200]}",
+                        file=sys.stderr,
+                    )
+
+        # P3: Post PR comment (requires pull-requests: write permission)
+        if os.environ.get("GITHUB_TOKEN"):
+            try:
+                post_pr_comment(receipts)
+                if not args.quiet:
+                    print(
+                        f"   {_e('ok')} Posted receipt summary to PR",
+                        file=sys.stderr,
+                    )
+            except RuntimeError:
+                # Non-fatal — PR comment is best-effort (may not be a PR context)
+                pass
+
     # GitLab CI integration
     if args.gitlab_ci:
         set_gitlab_ci_output("AIIR_RECEIPT_COUNT", str(len(receipts)))
@@ -1315,6 +1572,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 f"   {_e('ok')} SAST report: {vuln_count} AI-authored finding{'s' if vuln_count != 1 else ''} → {args.gl_sast_report}",
                 file=sys.stderr,
             )
+
+    # P4: Commit trailer output (--trailer)
+    if getattr(args, "trailer", False) and receipts:
+        ledger_dir = args.ledger if args.ledger is not None else _LEDGER_DIR
+        trailer_text = format_commit_trailer(receipts, ledger_dir=ledger_dir)
+        print(trailer_text, end="")
 
     return 0
 

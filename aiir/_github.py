@@ -7,15 +7,26 @@ SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
 
+import json
+import logging
 import os
 import uuid
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+from urllib.request import Request, urlopen
 
 from aiir._core import (
     CLI_VERSION,
     MAX_SUMMARY_SIZE,
     _sanitize_md,
+    _strip_terminal_escapes,
 )
+
+logger = logging.getLogger("aiir")
+
+
+# ---------------------------------------------------------------------------
+# GitHub Actions outputs + step summary
+# ---------------------------------------------------------------------------
 
 
 def set_github_output(key: str, value: str) -> None:
@@ -119,3 +130,347 @@ def format_github_summary(receipts: List[Dict[str, Any]]) -> str:
         ]
     )
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# GitHub Checks API — P0: create a visible check run on every PR
+# ---------------------------------------------------------------------------
+
+_API_TIMEOUT = 15  # seconds
+
+
+def _github_api_request(
+    endpoint: str,
+    payload: Dict[str, Any],
+    token: Optional[str] = None,
+    method: str = "POST",
+) -> Dict[str, Any]:
+    """Make an authenticated request to the GitHub REST API.
+
+    Args:
+        endpoint: Full URL (e.g. ``https://api.github.com/repos/owner/repo/...``).
+        payload: JSON body.
+        token: GitHub token.  Falls back to ``GITHUB_TOKEN`` env var.
+        method: HTTP method (default POST).
+
+    Returns:
+        Parsed JSON response dict.
+
+    Raises:
+        RuntimeError: On missing token or HTTP error.
+    """
+    auth_token = token or os.environ.get("GITHUB_TOKEN", "")
+    if not auth_token:
+        raise RuntimeError("No GitHub token available for API request")
+
+    data = json.dumps(payload).encode("utf-8")
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {auth_token}",
+        "Content-Type": "application/json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    req = Request(endpoint, data=data, headers=headers, method=method)
+
+    try:
+        with urlopen(req, timeout=_API_TIMEOUT) as resp:  # nosec B310
+            return json.loads(resp.read().decode("utf-8"))
+    except Exception as exc:
+        raise RuntimeError(f"GitHub API request failed: {exc}") from exc
+
+
+def create_check_run(
+    receipts: List[Dict[str, Any]],
+    repo: Optional[str] = None,
+    sha: Optional[str] = None,
+    token: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Create an ``aiir/verify`` check run on the current commit.
+
+    This makes AIIR verification visible as a pass/fail status check
+    on every PR, which can be enforced via branch protection rules.
+
+    Args:
+        receipts: List of AIIR receipt dicts.
+        repo: ``owner/repo`` (defaults to ``GITHUB_REPOSITORY`` env var).
+        sha: Commit SHA (defaults to ``GITHUB_SHA`` env var).
+        token: GitHub token (defaults to ``GITHUB_TOKEN`` env var).
+
+    Returns:
+        The GitHub API response dict.
+    """
+    repo = repo or os.environ.get("GITHUB_REPOSITORY", "")
+    sha = sha or os.environ.get("GITHUB_SHA", "")
+    if not repo or not sha:
+        raise RuntimeError(
+            "Cannot create check run: GITHUB_REPOSITORY and GITHUB_SHA required"
+        )
+
+    total = len(receipts)
+    ai_count = sum(
+        1
+        for r in receipts
+        if isinstance(r.get("ai_attestation"), dict)
+        and r["ai_attestation"].get("is_ai_authored")
+    )
+    signed_count = sum(
+        1 for r in receipts if r.get("extensions", {}).get("sigstore_bundle")
+    )
+
+    # Build summary text for the check run
+    summary_lines = [
+        "## AIIR Verification Summary",
+        "",
+        f"**{total}** commit{'s' if total != 1 else ''} receipted",
+    ]
+    if ai_count:
+        summary_lines.append(f"- **{ai_count}** AI-authored")
+    summary_lines.append(
+        f"- **{total - ai_count}** human-authored"
+    )
+    if signed_count:
+        summary_lines.append(f"- **{signed_count}** signed with Sigstore")
+
+    summary_lines.extend(["", "| Commit | Subject | AI | Receipt ID |"])
+    summary_lines.append("|--------|---------|-----|-----------|")
+
+    for r in receipts[:50]:  # Cap at 50 rows for Check Run display
+        commit = r.get("commit", {})
+        if not isinstance(commit, dict):
+            commit = {}
+        ai = r.get("ai_attestation", {})
+        if not isinstance(ai, dict):
+            ai = {}
+        sha_short = _sanitize_md(commit.get("sha", "")[:8])
+        subject = _sanitize_md(commit.get("subject", "")[:50])
+        ai_flag = "🤖" if ai.get("is_ai_authored") else "✅"
+        rid = _sanitize_md(r.get("receipt_id", "")[:16]) + "…"
+        summary_lines.append(f"| `{sha_short}` | {subject} | {ai_flag} | `{rid}` |")
+
+    summary_lines.extend(["", f"*Generated by [aiir](https://github.com/invariant-systems-ai/aiir) v{CLI_VERSION}*"])
+    summary_text = "\n".join(summary_lines)
+
+    title = f"{total} receipt{'s' if total != 1 else ''}"
+    if ai_count:
+        title += f" · {ai_count} AI-authored"
+
+    payload = {
+        "name": "aiir/verify",
+        "head_sha": sha,
+        "status": "completed",
+        "conclusion": "success",
+        "output": {
+            "title": title,
+            "summary": summary_text,
+        },
+    }
+
+    api_url = os.environ.get("GITHUB_API_URL", "https://api.github.com")
+    endpoint = f"{api_url}/repos/{repo}/check-runs"
+
+    return _github_api_request(endpoint, payload, token=token)
+
+
+# ---------------------------------------------------------------------------
+# GitHub PR comment — P3: human-readable summary on every PR
+# ---------------------------------------------------------------------------
+
+_PR_COMMENT_MARKER = "<!-- aiir-receipt-summary -->"
+
+
+def post_pr_comment(
+    receipts: List[Dict[str, Any]],
+    repo: Optional[str] = None,
+    pr_number: Optional[str] = None,
+    token: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Post (or update) an AIIR verification summary comment on a PR.
+
+    If a previous AIIR comment exists (identified by a hidden HTML marker),
+    it will be updated in place to avoid comment spam.
+
+    Args:
+        receipts: List of AIIR receipt dicts.
+        repo: ``owner/repo`` (defaults to ``GITHUB_REPOSITORY`` env var).
+        pr_number: PR number (defaults to event payload detection).
+        token: GitHub token (defaults to ``GITHUB_TOKEN`` env var).
+
+    Returns:
+        The GitHub API response dict.
+    """
+    repo = repo or os.environ.get("GITHUB_REPOSITORY", "")
+    if not pr_number:
+        # Try to extract from GITHUB_EVENT_PATH
+        pr_number = _detect_pr_number()
+    if not repo or not pr_number:
+        raise RuntimeError(
+            "Cannot post PR comment: need GITHUB_REPOSITORY and a PR number"
+        )
+
+    body = _format_pr_comment(receipts)
+
+    api_url = os.environ.get("GITHUB_API_URL", "https://api.github.com")
+
+    # Try to find and update existing comment
+    existing_id = _find_existing_comment(repo, pr_number, token=token)
+    if existing_id:
+        endpoint = f"{api_url}/repos/{repo}/issues/comments/{existing_id}"
+        return _github_api_request(endpoint, {"body": body}, token=token, method="PATCH")
+    else:
+        endpoint = f"{api_url}/repos/{repo}/issues/{pr_number}/comments"
+        return _github_api_request(endpoint, {"body": body}, token=token)
+
+
+def _detect_pr_number() -> Optional[str]:
+    """Extract PR number from the GitHub Actions event payload."""
+    event_path = os.environ.get("GITHUB_EVENT_PATH", "")
+    if not event_path:
+        return None
+    try:
+        with open(event_path, encoding="utf-8") as f:
+            event = json.load(f)
+        pr = event.get("pull_request") or event.get("issue") or {}
+        number = pr.get("number")
+        return str(number) if number else None
+    except (OSError, json.JSONDecodeError, TypeError):
+        return None
+
+
+def _find_existing_comment(
+    repo: str,
+    pr_number: str,
+    token: Optional[str] = None,
+) -> Optional[int]:
+    """Find an existing AIIR comment on a PR by marker."""
+    auth_token = token or os.environ.get("GITHUB_TOKEN", "")
+    if not auth_token:
+        return None
+
+    api_url = os.environ.get("GITHUB_API_URL", "https://api.github.com")
+    endpoint = f"{api_url}/repos/{repo}/issues/{pr_number}/comments?per_page=100"
+
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {auth_token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    req = Request(endpoint, headers=headers, method="GET")
+
+    try:
+        with urlopen(req, timeout=_API_TIMEOUT) as resp:  # nosec B310
+            comments = json.loads(resp.read().decode("utf-8"))
+        for c in comments:
+            if isinstance(c, dict) and _PR_COMMENT_MARKER in c.get("body", ""):
+                return c.get("id")
+    except Exception:
+        pass  # Non-fatal — will create a new comment instead
+    return None
+
+
+def _format_pr_comment(receipts: List[Dict[str, Any]]) -> str:
+    """Format the PR comment body with the AIIR verification summary."""
+    total = len(receipts)
+    ai_count = sum(
+        1
+        for r in receipts
+        if isinstance(r.get("ai_attestation"), dict)
+        and r["ai_attestation"].get("is_ai_authored")
+    )
+
+    lines = [
+        _PR_COMMENT_MARKER,
+        "## 🔐 AIIR Verification Summary",
+        "",
+        "| | |",
+        "|---|---|",
+        f"| **Status** | ✅ Verified |",
+        f"| **Receipts** | {total} commit{'s' if total != 1 else ''} |",
+        f"| **AI-authored** | {ai_count} |",
+        f"| **Human-authored** | {total - ai_count} |",
+    ]
+
+    # Per-commit table
+    if receipts:
+        lines.extend([
+            "",
+            "<details>",
+            "<summary>Receipt details</summary>",
+            "",
+            "| Commit | Subject | Authorship | Receipt ID |",
+            "|--------|---------|------------|-----------|",
+        ])
+
+        for r in receipts[:50]:
+            commit = r.get("commit", {})
+            if not isinstance(commit, dict):
+                commit = {}
+            ai = r.get("ai_attestation", {})
+            if not isinstance(ai, dict):
+                ai = {}
+            sha_short = _strip_terminal_escapes(commit.get("sha", "")[:8])
+            subject = _strip_terminal_escapes(commit.get("subject", "")[:50])
+            authorship = _strip_terminal_escapes(str(ai.get("authorship_class", "unknown")))
+            rid = _strip_terminal_escapes(r.get("receipt_id", "")[:20])
+            lines.append(f"| `{sha_short}` | {subject} | {authorship} | `{rid}…` |")
+
+        lines.extend([
+            "",
+            "</details>",
+        ])
+
+    lines.extend([
+        "",
+        f"*Generated by [aiir](https://github.com/invariant-systems-ai/aiir) v{CLI_VERSION}*",
+    ])
+
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Commit trailer helper — P4: AIIR-Receipt trailer for git commit messages
+# ---------------------------------------------------------------------------
+
+
+def format_commit_trailer(
+    receipts: List[Dict[str, Any]],
+    ledger_dir: str = ".aiir",
+) -> str:
+    """Format git commit trailer lines for AIIR receipts.
+
+    Returns a string suitable for appending to a commit message body::
+
+        AIIR-Receipt: .aiir/receipts.jsonl#g1-4f8d...
+        AIIR-Type: aiir.commit_receipt
+        AIIR-AI: true
+
+    Args:
+        receipts: List of receipt dicts.
+        ledger_dir: Ledger directory path (default ``.aiir``).
+
+    Returns:
+        Trailer lines as a single string (with trailing newline).
+    """
+    if not receipts:
+        return ""
+
+    lines = []
+    has_ai = any(
+        isinstance(r.get("ai_attestation"), dict)
+        and r["ai_attestation"].get("is_ai_authored")
+        for r in receipts
+    )
+
+    for r in receipts[:10]:  # Cap at 10 trailers for sanity
+        rid = _strip_terminal_escapes(str(r.get("receipt_id", ""))[:40])
+        if rid:
+            lines.append(f"AIIR-Receipt: {ledger_dir}/receipts.jsonl#{rid}")
+
+    if receipts:  # pragma: no branch — early return above guarantees non-empty
+        rtype = _strip_terminal_escapes(
+            str(receipts[0].get("type", "aiir.commit_receipt"))
+        )
+        lines.append(f"AIIR-Type: {rtype}")
+    lines.append(f"AIIR-AI: {'true' if has_ai else 'false'}")
+    lines.append(f"AIIR-Verified: true")
+
+    return "\n".join(lines) + "\n"

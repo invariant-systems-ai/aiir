@@ -31,6 +31,8 @@ from aiir._receipt import (
     generate_receipts_for_range,
     format_receipt_pretty,
     wrap_in_toto_statement,
+    build_review_receipt,
+    REVIEW_RECEIPT_SCHEMA_VERSION,
 )  # noqa: F401
 from aiir._schema import validate_receipt_schema as validate_receipt  # noqa: F401
 from aiir._stats import check_policy, format_badge, format_stats  # noqa: F401
@@ -39,6 +41,12 @@ from aiir._verify_release import (  # noqa: F401
     verify_release,
     format_release_report,
     VSA_PREDICATE_TYPE,
+)
+from aiir._github import (  # noqa: F401
+    format_github_summary,
+    create_check_run,
+    post_pr_comment,
+    format_commit_trailer,
 )
 from aiir._gitlab import (  # noqa: F401
     format_gitlab_summary,
@@ -56,6 +64,8 @@ __all__ = [
     "generate_receipts_for_range",
     "format_receipt_pretty",
     "wrap_in_toto_statement",
+    "build_review_receipt",
+    "REVIEW_RECEIPT_SCHEMA_VERSION",
     # Detection
     "detect_ai_signals",
     # Verification
@@ -79,6 +89,11 @@ __all__ = [
     "evaluate_receipt_policy",
     "evaluate_ledger_policy",
     "POLICY_PRESETS",
+    # GitHub integration
+    "format_github_summary",
+    "create_check_run",
+    "post_pr_comment",
+    "format_commit_trailer",
     # GitLab integration
     "format_gitlab_summary",
     "format_gl_sast_report",

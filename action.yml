@@ -149,6 +149,13 @@ runs:
         # and achieve arbitrary code execution on the CI runner.
         PYTHONPATH="$ACTION_PATH" python -P -m aiir "${ARGS[@]}"
 
+    # P0+P3: The check run (aiir/verify) and PR comment are posted
+    # automatically by the CLI when --github-action is set and
+    # GITHUB_TOKEN is available. Grant your workflow:
+    #   permissions:
+    #     checks: write
+    #     pull-requests: write
+
     - name: Upload receipt artifacts
       if: inputs.output-dir != '' || inputs.sign == 'true'
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0

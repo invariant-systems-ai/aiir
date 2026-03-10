@@ -481,23 +481,24 @@ class TestValidateWebhookToken(unittest.TestCase):
 
     def test_no_secret_configured_rejects_by_default(self):
         """When no secret is configured, validation fails (fail-closed)."""
-        env = {k: v for k, v in os.environ.items()
-               if k not in ("AIIR_WEBHOOK_SECRET", "AIIR_WEBHOOK_ALLOW_UNSIGNED")}
+        env = {
+            k: v
+            for k, v in os.environ.items()
+            if k not in ("AIIR_WEBHOOK_SECRET", "AIIR_WEBHOOK_ALLOW_UNSIGNED")
+        }
         with patch.dict(os.environ, env, clear=True):
             self.assertFalse(validate_webhook_token("anything", expected_token=""))
 
     def test_no_secret_allows_when_opt_in(self):
         """When AIIR_WEBHOOK_ALLOW_UNSIGNED=1, unsigned webhooks are accepted."""
-        env = {k: v for k, v in os.environ.items()
-               if k != "AIIR_WEBHOOK_SECRET"}
+        env = {k: v for k, v in os.environ.items() if k != "AIIR_WEBHOOK_SECRET"}
         env["AIIR_WEBHOOK_ALLOW_UNSIGNED"] = "1"
         with patch.dict(os.environ, env, clear=True):
             self.assertTrue(validate_webhook_token("anything", expected_token=""))
 
     def test_no_secret_rejects_when_opt_in_wrong_value(self):
         """AIIR_WEBHOOK_ALLOW_UNSIGNED must be exactly '1'."""
-        env = {k: v for k, v in os.environ.items()
-               if k != "AIIR_WEBHOOK_SECRET"}
+        env = {k: v for k, v in os.environ.items() if k != "AIIR_WEBHOOK_SECRET"}
         env["AIIR_WEBHOOK_ALLOW_UNSIGNED"] = "true"
         with patch.dict(os.environ, env, clear=True):
             self.assertFalse(validate_webhook_token("anything", expected_token=""))
@@ -791,9 +792,9 @@ class TestQueryGitlabGraphQL(unittest.TestCase):
 
     def test_variables_included_in_payload(self):
         """When variables are provided, they appear in the JSON payload."""
-        response_data = json.dumps(
-            {"data": {"project": {"name": "test"}}}
-        ).encode("utf-8")
+        response_data = json.dumps({"data": {"project": {"name": "test"}}}).encode(
+            "utf-8"
+        )
 
         mock_resp = unittest.mock.MagicMock()
         mock_resp.read.return_value = response_data

@@ -56,11 +56,10 @@ import io
 import json
 import os
 import shutil
-import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -250,7 +249,9 @@ class TestLedgerBranchIndexExists(unittest.TestCase):
         tmpdir = tempfile.mkdtemp()
         try:
             idx_path = Path(tmpdir, "index.json")
-            idx_path.write_text(json.dumps({"version": 99, "receipt_count": 100}), encoding="utf-8")
+            idx_path.write_text(
+                json.dumps({"version": 99, "receipt_count": 100}), encoding="utf-8"
+            )
             loaded = _load_index(idx_path)
             self.assertEqual(loaded["version"], 1)
             self.assertEqual(loaded["receipt_count"], 0)
@@ -319,9 +320,7 @@ class TestLedgerBranchExport(unittest.TestCase):
             r2 = {"receipt_id": "g1-b", "commit": {"sha": "b" * 40}}
             ledger_path = Path(ledger_dir, "receipts.jsonl")
             # Blank lines between receipts should be skipped
-            ledger_path.write_text(
-                json.dumps(r1) + "\n\n\n" + json.dumps(r2) + "\n"
-            )
+            ledger_path.write_text(json.dumps(r1) + "\n\n\n" + json.dumps(r2) + "\n")
             result = export_ledger(ledger_dir)
             self.assertEqual(len(result["receipts"]), 2)
         finally:
@@ -458,7 +457,9 @@ class TestSchemaBranchesPartial(unittest.TestCase):
         r = self._make_valid_receipt()
         # Already has files, no files_redacted — should be fine
         errors = validate_receipt_schema(r)
-        file_errors = [e for e in errors if "files_redacted" in e or "files" in e.lower()]
+        file_errors = [
+            e for e in errors if "files_redacted" in e or "files" in e.lower()
+        ]
         self.assertEqual(len(file_errors), 0, f"Unexpected file errors: {file_errors}")
 
     def test_signals_not_list_skips_string_check(self):
@@ -603,7 +604,10 @@ class TestVerifyReleaseBranchLedgerEdges(unittest.TestCase):
 
     def test_ledger_truncated_at_max(self):
         """Ledger stops at _MAX_LEDGER_RECEIPTS (branch 124→117)."""
-        from aiir._verify_release import _load_receipts_from_ledger, _MAX_LEDGER_RECEIPTS
+        from aiir._verify_release import (
+            _load_receipts_from_ledger,
+            _MAX_LEDGER_RECEIPTS,
+        )
 
         tmpdir = tempfile.mkdtemp()
         try:
@@ -620,8 +624,9 @@ class TestVerifyReleaseBranchLedgerEdges(unittest.TestCase):
 class TestVerifyReleaseBranchEvaluateReceipts(unittest.TestCase):
     """Close _verify_release.py _evaluate_receipts branches."""
 
-    def _make_receipt(self, sha="a" * 40, method="heuristic_v1", signed=False,
-                      extensions=None):
+    def _make_receipt(
+        self, sha="a" * 40, method="heuristic_v1", signed=False, extensions=None
+    ):
         """Build a minimal receipt for evaluation."""
         r = {
             "type": "aiir.commit_receipt",
@@ -671,7 +676,9 @@ class TestVerifyReleaseBranchEvaluateReceipts(unittest.TestCase):
         }
         result = _evaluate_receipts([receipt], policy)
         violations = result["policy_violations"]
-        method_viols = [v for v in violations if v.get("rule") == "allowed_detection_methods"]
+        method_viols = [
+            v for v in violations if v.get("rule") == "allowed_detection_methods"
+        ]
         self.assertGreater(len(method_viols), 0)
 
     def test_allowed_methods_ai_not_dict(self):
@@ -685,8 +692,11 @@ class TestVerifyReleaseBranchEvaluateReceipts(unittest.TestCase):
             "allowed_detection_methods": ["heuristic_v1"],
         }
         result = _evaluate_receipts([receipt], policy)
-        method_viols = [v for v in result["policy_violations"]
-                        if v.get("rule") == "allowed_detection_methods"]
+        method_viols = [
+            v
+            for v in result["policy_violations"]
+            if v.get("rule") == "allowed_detection_methods"
+        ]
         self.assertEqual(len(method_viols), 0)
 
     def test_allowed_method_no_violation(self):
@@ -699,8 +709,11 @@ class TestVerifyReleaseBranchEvaluateReceipts(unittest.TestCase):
             "allowed_detection_methods": ["heuristic_v1"],
         }
         result = _evaluate_receipts([receipt], policy)
-        method_viols = [v for v in result["policy_violations"]
-                        if v.get("rule") == "allowed_detection_methods"]
+        method_viols = [
+            v
+            for v in result["policy_violations"]
+            if v.get("rule") == "allowed_detection_methods"
+        ]
         self.assertEqual(len(method_viols), 0)
 
     def test_disallow_unsigned_extensions(self):
@@ -716,7 +729,9 @@ class TestVerifyReleaseBranchEvaluateReceipts(unittest.TestCase):
         }
         result = _evaluate_receipts([receipt], policy)
         violations = result["policy_violations"]
-        ext_viols = [v for v in violations if v.get("rule") == "disallow_unsigned_extensions"]
+        ext_viols = [
+            v for v in violations if v.get("rule") == "disallow_unsigned_extensions"
+        ]
         self.assertGreater(len(ext_viols), 0)
 
     def test_disallow_unsigned_ext_empty_extensions(self):
@@ -729,8 +744,11 @@ class TestVerifyReleaseBranchEvaluateReceipts(unittest.TestCase):
             "disallow_unsigned_extensions": True,
         }
         result = _evaluate_receipts([receipt], policy)
-        ext_viols = [v for v in result["policy_violations"]
-                     if v.get("rule") == "disallow_unsigned_extensions"]
+        ext_viols = [
+            v
+            for v in result["policy_violations"]
+            if v.get("rule") == "disallow_unsigned_extensions"
+        ]
         self.assertEqual(len(ext_viols), 0)
 
     def test_unsigned_with_only_standard_ext_keys_no_violation(self):
@@ -738,15 +756,22 @@ class TestVerifyReleaseBranchEvaluateReceipts(unittest.TestCase):
         from aiir._verify_release import _evaluate_receipts
 
         receipt = self._make_receipt(
-            extensions={"sigstore_bundle": "", "generator": "aiir.cli", "instance_id": "x"}
+            extensions={
+                "sigstore_bundle": "",
+                "generator": "aiir.cli",
+                "instance_id": "x",
+            }
         )
         policy = {
             "enforcement": "warn",
             "disallow_unsigned_extensions": True,
         }
         result = _evaluate_receipts([receipt], policy)
-        ext_viols = [v for v in result["policy_violations"]
-                     if v.get("rule") == "disallow_unsigned_extensions"]
+        ext_viols = [
+            v
+            for v in result["policy_violations"]
+            if v.get("rule") == "disallow_unsigned_extensions"
+        ]
         self.assertEqual(len(ext_viols), 0)
 
 
@@ -777,7 +802,10 @@ class TestVerifyReleaseBranchCommitRange(unittest.TestCase):
 
             # Mock git operations
             with (
-                patch("aiir._verify_release.list_commits_in_range", return_value=["a" * 40]),
+                patch(
+                    "aiir._verify_release.list_commits_in_range",
+                    return_value=["a" * 40],
+                ),
                 patch("aiir._verify_release._validate_ref"),
             ):
                 result = verify_release(
@@ -939,7 +967,10 @@ class TestCliBranchGitlabGenerator(unittest.TestCase):
         }
         with (
             patch("aiir.cli.generate_receipt", return_value=receipt) as mock_gen,
-            patch("aiir.cli.append_to_ledger", return_value=(1, 0, "/tmp/.aiir/receipts.jsonl")),
+            patch(
+                "aiir.cli.append_to_ledger",
+                return_value=(1, 0, "/tmp/.aiir/receipts.jsonl"),
+            ),
             patch("aiir.cli.write_receipt", return_value="stdout:json"),
             patch("aiir.cli.set_gitlab_ci_output"),
             patch("sys.stderr", io.StringIO()),
@@ -947,7 +978,11 @@ class TestCliBranchGitlabGenerator(unittest.TestCase):
             patch.dict(os.environ, {"CI_COMMIT_SHA": "a" * 40}, clear=False),
         ):
             cli_mod.main(["--gitlab-ci"])
-        call_kw = mock_gen.call_args.kwargs if mock_gen.call_args.kwargs else mock_gen.call_args[1]
+        call_kw = (
+            mock_gen.call_args.kwargs
+            if mock_gen.call_args.kwargs
+            else mock_gen.call_args[1]
+        )
         self.assertEqual(call_kw.get("generator"), "aiir.gitlab")
 
 
@@ -985,12 +1020,17 @@ class TestCliBranchSignFailure(unittest.TestCase):
                 "ai_attestation": {"is_ai_authored": False},
                 "content_hash": "sha256:" + "a" * 64,
             }
-            receipt_path = str(Path(tmpdir, "receipt_aaaaaaaaaaaa_bbbbbbbbbbbbbbbb.json"))
+            receipt_path = str(
+                Path(tmpdir, "receipt_aaaaaaaaaaaa_bbbbbbbbbbbbbbbb.json")
+            )
 
             with (
                 patch("aiir.cli.generate_receipt", return_value=receipt),
                 patch("aiir.cli.write_receipt", return_value=receipt_path),
-                patch("aiir.cli.sign_receipt_file", side_effect=RuntimeError("mock sign error")),
+                patch(
+                    "aiir.cli.sign_receipt_file",
+                    side_effect=RuntimeError("mock sign error"),
+                ),
                 patch("aiir.cli._sigstore_available", return_value=True),
                 patch("aiir.cli.os.remove") as mock_remove,
                 patch("sys.stderr", io.StringIO()),
@@ -1027,10 +1067,14 @@ class TestCliBranchGitlabCIMR(unittest.TestCase):
             patch("aiir.cli.post_mr_comment"),
             patch("sys.stderr", captured_err),
             patch("sys.stdout", io.StringIO()),
-            patch.dict(os.environ, {
-                "CI_COMMIT_SHA": "a" * 40,
-                "CI_MERGE_REQUEST_IID": "42",
-            }, clear=False),
+            patch.dict(
+                os.environ,
+                {
+                    "CI_COMMIT_SHA": "a" * 40,
+                    "CI_MERGE_REQUEST_IID": "42",
+                },
+                clear=False,
+            ),
         ):
             code = cli_mod.main(["--gitlab-ci"])
         self.assertEqual(code, 0)
@@ -1048,13 +1092,19 @@ class TestCliBranchGitlabCIMR(unittest.TestCase):
             patch("aiir.cli.write_receipt", return_value="stdout:json"),
             patch("aiir.cli.set_gitlab_ci_output"),
             patch("aiir.cli.format_gitlab_summary", return_value="| summary |"),
-            patch("aiir.cli.post_mr_comment", side_effect=RuntimeError("MR comment fail")),
+            patch(
+                "aiir.cli.post_mr_comment", side_effect=RuntimeError("MR comment fail")
+            ),
             patch("sys.stderr", captured_err),
             patch("sys.stdout", io.StringIO()),
-            patch.dict(os.environ, {
-                "CI_COMMIT_SHA": "a" * 40,
-                "CI_MERGE_REQUEST_IID": "99",
-            }, clear=False),
+            patch.dict(
+                os.environ,
+                {
+                    "CI_COMMIT_SHA": "a" * 40,
+                    "CI_MERGE_REQUEST_IID": "99",
+                },
+                clear=False,
+            ),
         ):
             code = cli_mod.main(["--gitlab-ci"])
         self.assertEqual(code, 0)
@@ -1083,10 +1133,13 @@ class TestCliBranchGlSastReport(unittest.TestCase):
                 patch("aiir.cli.append_to_ledger", return_value=(1, 0, "/tmp/r.jsonl")),
                 patch("aiir.cli.write_receipt", return_value="stdout:json"),
                 patch("aiir.cli.set_gitlab_ci_output"),
-                patch("aiir.cli.format_gl_sast_report", return_value={
-                    "version": "15.0.0",
-                    "vulnerabilities": [],
-                }),
+                patch(
+                    "aiir.cli.format_gl_sast_report",
+                    return_value={
+                        "version": "15.0.0",
+                        "vulnerabilities": [],
+                    },
+                ),
                 patch("sys.stderr", captured_err),
                 patch("sys.stdout", io.StringIO()),
                 patch.dict(os.environ, {"CI_COMMIT_SHA": "a" * 40}, clear=False),
@@ -1117,10 +1170,12 @@ class TestMcpBranchVerifyReleasePreset(unittest.TestCase):
             patch("aiir.mcp_server.format_release_report", return_value="report text"),
         ):
             mock_vr.return_value = {"verificationResult": "PASSED", "reason": "ok"}
-            result = _handle_aiir_verify_release({
-                "commit_range": "HEAD~1..HEAD",
-                "policy": "strict",
-            })
+            result = _handle_aiir_verify_release(
+                {
+                    "commit_range": "HEAD~1..HEAD",
+                    "policy": "strict",
+                }
+            )
         # Should have called verify_release with policy_preset="strict"
         mock_vr.assert_called_once()
         call_kwargs = mock_vr.call_args.kwargs
@@ -1151,13 +1206,17 @@ class TestMcpBranchVerifyReleasePreset(unittest.TestCase):
             with (
                 patch("aiir.mcp_server.verify_release") as mock_vr,
                 patch("aiir.mcp_server.format_release_report", return_value="report"),
-                patch("aiir.mcp_server._safe_verify_path", return_value=str(policy_path)),
+                patch(
+                    "aiir.mcp_server._safe_verify_path", return_value=str(policy_path)
+                ),
             ):
                 mock_vr.return_value = {"verificationResult": "PASSED", "reason": "ok"}
-                result = _handle_aiir_verify_release({
-                    "commit_range": "HEAD~1..HEAD",
-                    "policy": str(policy_path),
-                })
+                result = _handle_aiir_verify_release(
+                    {
+                        "commit_range": "HEAD~1..HEAD",
+                        "policy": str(policy_path),
+                    }
+                )
             call_kwargs = mock_vr.call_args.kwargs
             self.assertEqual(call_kwargs.get("policy_path"), str(policy_path))
         finally:
@@ -1194,14 +1253,19 @@ class TestMcpBranchGitlabSummaryNoReceipts(unittest.TestCase):
         try:
             ledger = Path(tmpdir, ".aiir", "receipts.jsonl")
             ledger.parent.mkdir(parents=True)
-            r = {"type": "aiir.commit_receipt", "commit": {"sha": "a" * 40},
-                 "ai_attestation": {"is_ai_authored": False}}
+            r = {
+                "type": "aiir.commit_receipt",
+                "commit": {"sha": "a" * 40},
+                "ai_attestation": {"is_ai_authored": False},
+            }
             # Write receipt with blank lines interspersed
             ledger.write_text(json.dumps(r) + "\n\n\n")
 
             with (
                 patch("pathlib.Path.cwd", return_value=Path(tmpdir)),
-                patch("aiir.mcp_server.format_gitlab_summary", return_value="| summary |"),
+                patch(
+                    "aiir.mcp_server.format_gitlab_summary", return_value="| summary |"
+                ),
             ):
                 result = _handle_aiir_gitlab_summary({})
             self.assertIsNotNone(result)
@@ -1289,11 +1353,15 @@ class TestVerifyReleaseBranchDirLoader(unittest.TestCase):
 
         tmpdir = tempfile.mkdtemp()
         try:
-            Path(tmpdir, "arr.json").write_text(json.dumps([
-                42,
-                "string",
-                {"commit": {"sha": "a" * 40}},
-            ]))
+            Path(tmpdir, "arr.json").write_text(
+                json.dumps(
+                    [
+                        42,
+                        "string",
+                        {"commit": {"sha": "a" * 40}},
+                    ]
+                )
+            )
             receipts = _load_receipts_from_dir(tmpdir)
             self.assertEqual(len(receipts), 1)
         finally:
@@ -1364,8 +1432,13 @@ class TestCliBranchQuietMode(unittest.TestCase):
         try:
             with (
                 patch("aiir.cli.generate_receipt", return_value=self._make_receipt()),
-                patch("aiir.cli.write_receipt", return_value=str(Path(tmpdir, "r.json"))),
-                patch("aiir.cli.sign_receipt_file", return_value=str(Path(tmpdir, "r.sigstore"))),
+                patch(
+                    "aiir.cli.write_receipt", return_value=str(Path(tmpdir, "r.json"))
+                ),
+                patch(
+                    "aiir.cli.sign_receipt_file",
+                    return_value=str(Path(tmpdir, "r.sigstore")),
+                ),
                 patch("aiir.cli._sigstore_available", return_value=True),
                 patch("sys.stderr", io.StringIO()),
                 patch("sys.stdout", io.StringIO()),
@@ -1388,10 +1461,14 @@ class TestCliBranchQuietMode(unittest.TestCase):
             patch("aiir.cli.post_mr_comment"),
             patch("sys.stderr", io.StringIO()),
             patch("sys.stdout", io.StringIO()),
-            patch.dict(os.environ, {
-                "CI_COMMIT_SHA": "a" * 40,
-                "CI_MERGE_REQUEST_IID": "42",
-            }, clear=False),
+            patch.dict(
+                os.environ,
+                {
+                    "CI_COMMIT_SHA": "a" * 40,
+                    "CI_MERGE_REQUEST_IID": "42",
+                },
+                clear=False,
+            ),
         ):
             code = cli_mod.main(["--gitlab-ci", "--quiet"])
         self.assertEqual(code, 0)
@@ -1409,10 +1486,14 @@ class TestCliBranchQuietMode(unittest.TestCase):
             patch("aiir.cli.post_mr_comment", side_effect=RuntimeError("fail")),
             patch("sys.stderr", io.StringIO()),
             patch("sys.stdout", io.StringIO()),
-            patch.dict(os.environ, {
-                "CI_COMMIT_SHA": "a" * 40,
-                "CI_MERGE_REQUEST_IID": "42",
-            }, clear=False),
+            patch.dict(
+                os.environ,
+                {
+                    "CI_COMMIT_SHA": "a" * 40,
+                    "CI_MERGE_REQUEST_IID": "42",
+                },
+                clear=False,
+            ),
         ):
             code = cli_mod.main(["--gitlab-ci", "--quiet"])
         self.assertEqual(code, 0)
@@ -1429,17 +1510,25 @@ class TestCliBranchQuietMode(unittest.TestCase):
                 patch("aiir.cli.append_to_ledger", return_value=(1, 0, "/tmp/r.jsonl")),
                 patch("aiir.cli.write_receipt", return_value="stdout:json"),
                 patch("aiir.cli.set_gitlab_ci_output"),
-                patch("aiir.cli.format_gl_sast_report", return_value={
-                    "version": "15.0.0",
-                    "vulnerabilities": [],
-                }),
+                patch(
+                    "aiir.cli.format_gl_sast_report",
+                    return_value={
+                        "version": "15.0.0",
+                        "vulnerabilities": [],
+                    },
+                ),
                 patch("sys.stderr", io.StringIO()),
                 patch("sys.stdout", io.StringIO()),
                 patch.dict(os.environ, {"CI_COMMIT_SHA": "a" * 40}, clear=False),
             ):
-                code = cli_mod.main([
-                    "--gitlab-ci", "--gl-sast-report", sast_path, "--quiet",
-                ])
+                code = cli_mod.main(
+                    [
+                        "--gitlab-ci",
+                        "--gl-sast-report",
+                        sast_path,
+                        "--quiet",
+                    ]
+                )
             self.assertEqual(code, 0)
             self.assertTrue(Path(sast_path).exists())
         finally:
@@ -1465,6 +1554,7 @@ class TestVerifyReceiptFileMutationKillers(unittest.TestCase):
 
     def _verify(self, filepath: str) -> dict:
         from aiir._verify import verify_receipt_file
+
         return verify_receipt_file(filepath)
 
     def _assert_error_result(self, result: dict, error_substr: str = ""):
@@ -1494,7 +1584,7 @@ class TestVerifyReceiptFileMutationKillers(unittest.TestCase):
         tmpdir = tempfile.mkdtemp()
         try:
             real = Path(tmpdir, "real.json")
-            real.write_text('{}')
+            real.write_text("{}")
             link = Path(tmpdir, "link.json")
             link.symlink_to(real)
             result = self._verify(str(link))

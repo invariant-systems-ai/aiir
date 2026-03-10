@@ -40,7 +40,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 PYPI_PROJECT = "aiir"
 PYPI_JSON_URL = "https://pypi.org/pypi/{project}/{version}/json"
-PYPI_INTEGRITY_URL = "https://pypi.org/integrity/{project}/{version}/{filename}/provenance"
+PYPI_INTEGRITY_URL = (
+    "https://pypi.org/integrity/{project}/{version}/{filename}/provenance"
+)
 PYPI_LATEST_URL = "https://pypi.org/pypi/{project}/json"
 
 # Timeout for HTTP requests (seconds).
@@ -188,16 +190,16 @@ def verify_release(
                 for pred in result["predicates"]:
                     print(f"      - {pred}")
             else:
-                print(f"      (predicate types not enumerated in response)")
+                print("      (predicate types not enumerated in response)")
         elif result["http_code"] == 404:
-            print(f"    Attestations: none (Integrity API returned 404)")
+            print("    Attestations: none (Integrity API returned 404)")
         elif result["http_code"] == 0:
-            print(f"    Attestations: could not reach Integrity API")
+            print("    Attestations: could not reach Integrity API")
         else:
             print(f"    Attestations: none (HTTP {result['http_code']})")
 
         if verbose and result["raw"]:
-            print(f"    Raw response:")
+            print("    Raw response:")
             print(f"      {json.dumps(result['raw'], indent=2)[:500]}")
 
         print()

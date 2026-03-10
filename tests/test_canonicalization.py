@@ -121,19 +121,25 @@ class TestCanonicalJsonMatchesJCS:
             "Hello, World!",
         ]:
             obj = {"value": s}
-            assert _canonical_json(obj) == jcs_canonicalize(obj), f"Mismatch for string: {s!r}"
+            assert _canonical_json(obj) == jcs_canonicalize(obj), (
+                f"Mismatch for string: {s!r}"
+            )
 
     def test_integer_values(self):
         """Integers (signal_count, files_changed, bot_signal_count) match JCS."""
         for n in [0, 1, 3, 42, 100, -1, 2**31, -(2**31)]:
             obj = {"count": n}
-            assert _canonical_json(obj) == jcs_canonicalize(obj), f"Mismatch for int: {n}"
+            assert _canonical_json(obj) == jcs_canonicalize(obj), (
+                f"Mismatch for int: {n}"
+            )
 
     def test_boolean_values(self):
         """Booleans (is_ai_authored, is_bot_authored, files_capped) match JCS."""
         for b in [True, False]:
             obj = {"flag": b}
-            assert _canonical_json(obj) == jcs_canonicalize(obj), f"Mismatch for bool: {b}"
+            assert _canonical_json(obj) == jcs_canonicalize(obj), (
+                f"Mismatch for bool: {b}"
+            )
 
     def test_null_value(self):
         """Null (repository when no remote) matches JCS."""
@@ -336,7 +342,9 @@ class TestSpecCanonicalProperties:
         obj = {"key": "value", "list": [1, 2, 3]}
         out = _canonical_json(obj)
         # Re-serialize with compact separators; must match
-        assert out == json.dumps(json.loads(out), sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+        assert out == json.dumps(
+            json.loads(out), sort_keys=True, separators=(",", ":"), ensure_ascii=True
+        )
 
     def test_sorted_keys_recursive(self):
         """Keys are sorted at every nesting level."""

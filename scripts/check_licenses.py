@@ -4,6 +4,9 @@
 Used by the Security CI workflow (license-check job).
 Reads the JSON output of pip-licenses and verifies every package's
 license string contains at least one approved term.
+
+Copyright 2025-2026 Invariant Systems, Inc.
+# SPDX-License-Identifier: Apache-2.0
 """
 
 from __future__ import annotations

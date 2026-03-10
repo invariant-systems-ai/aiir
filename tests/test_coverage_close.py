@@ -276,6 +276,7 @@ class TestSignCoverage(unittest.TestCase):
             try:
                 with patch.dict("sys.modules", modules):
                     from aiir._sign import verify_receipt_signature
+
                     result = verify_receipt_signature(
                         str(receipt_path),
                         expected_identity="test@example.com",
@@ -311,8 +312,10 @@ class TestGitlabApiRequest(unittest.TestCase):
             "CI_API_V4_URL": "https://gitlab.example.com/api/v4",
             "CI_JOB_TOKEN": "job-token-123",
         }
-        with patch.dict(os.environ, env, clear=False), \
-             patch("aiir._gitlab.urlopen", return_value=mock_resp):
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch("aiir._gitlab.urlopen", return_value=mock_resp),
+        ):
             result = _gitlab_api_request("GET", "/projects/1")
         self.assertEqual(result, {"id": 1})
 
@@ -330,10 +333,14 @@ class TestGitlabApiRequest(unittest.TestCase):
             "GITLAB_TOKEN": "glpat-xxx",
         }
         # Make sure CI_JOB_TOKEN is not set
-        with patch.dict(os.environ, env, clear=False), \
-             patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False), \
-             patch("aiir._gitlab.urlopen", return_value=mock_resp):
-            result = _gitlab_api_request("POST", "/projects/1/notes", body={"body": "hi"})
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False),
+            patch("aiir._gitlab.urlopen", return_value=mock_resp),
+        ):
+            result = _gitlab_api_request(
+                "POST", "/projects/1/notes", body={"body": "hi"}
+            )
         self.assertEqual(result, {"ok": True})
 
     def test_api_request_http_error(self):
@@ -343,15 +350,20 @@ class TestGitlabApiRequest(unittest.TestCase):
 
         http_err = HTTPError(
             "https://gitlab.example.com/api/v4/bad",
-            403, "Forbidden", {}, io.BytesIO(b"access denied")
+            403,
+            "Forbidden",
+            {},
+            io.BytesIO(b"access denied"),
         )
         env = {
             "CI_API_V4_URL": "https://gitlab.example.com/api/v4",
             "GITLAB_TOKEN": "glpat-xxx",
         }
-        with patch.dict(os.environ, env, clear=False), \
-             patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False), \
-             patch("aiir._gitlab.urlopen", side_effect=http_err):
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False),
+            patch("aiir._gitlab.urlopen", side_effect=http_err),
+        ):
             with self.assertRaises(RuntimeError) as ctx:
                 _gitlab_api_request("GET", "/bad")
         self.assertIn("403", str(ctx.exception))
@@ -363,8 +375,7 @@ class TestGitlabApiRequest(unittest.TestCase):
 
         # Create an HTTPError where read() raises
         http_err = HTTPError(
-            "https://gitlab.example.com/api/v4/bad",
-            500, "Server Error", {}, None
+            "https://gitlab.example.com/api/v4/bad", 500, "Server Error", {}, None
         )
         # Make read() raise an exception
         http_err.read = MagicMock(side_effect=Exception("read failed"))
@@ -372,9 +383,11 @@ class TestGitlabApiRequest(unittest.TestCase):
             "CI_API_V4_URL": "https://gitlab.example.com/api/v4",
             "GITLAB_TOKEN": "glpat-xxx",
         }
-        with patch.dict(os.environ, env, clear=False), \
-             patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False), \
-             patch("aiir._gitlab.urlopen", side_effect=http_err):
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False),
+            patch("aiir._gitlab.urlopen", side_effect=http_err),
+        ):
             with self.assertRaises(RuntimeError) as ctx:
                 _gitlab_api_request("GET", "/bad")
         self.assertIn("500", str(ctx.exception))
@@ -388,9 +401,11 @@ class TestGitlabApiRequest(unittest.TestCase):
             "CI_API_V4_URL": "https://gitlab.example.com/api/v4",
             "GITLAB_TOKEN": "glpat-xxx",
         }
-        with patch.dict(os.environ, env, clear=False), \
-             patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False), \
-             patch("aiir._gitlab.urlopen", side_effect=URLError("timeout")):
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False),
+            patch("aiir._gitlab.urlopen", side_effect=URLError("timeout")),
+        ):
             with self.assertRaises(RuntimeError) as ctx:
                 _gitlab_api_request("GET", "/slow")
         self.assertIn("connection error", str(ctx.exception).lower())
@@ -399,7 +414,9 @@ class TestGitlabApiRequest(unittest.TestCase):
         """Missing CI_API_V4_URL raises RuntimeError."""
         from aiir._gitlab import _gitlab_api_request
 
-        with patch.dict(os.environ, {"CI_API_V4_URL": "", "GITLAB_TOKEN": "x"}, clear=False):
+        with patch.dict(
+            os.environ, {"CI_API_V4_URL": "", "GITLAB_TOKEN": "x"}, clear=False
+        ):
             with self.assertRaises(RuntimeError):
                 _gitlab_api_request("GET", "/test")
 
@@ -408,8 +425,12 @@ class TestGitlabApiRequest(unittest.TestCase):
         from aiir._gitlab import _gitlab_api_request
 
         env = {"CI_API_V4_URL": "https://gitlab.example.com/api/v4"}
-        with patch.dict(os.environ, env, clear=False), \
-             patch.dict(os.environ, {"GITLAB_TOKEN": "", "CI_JOB_TOKEN": ""}, clear=False):
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.dict(
+                os.environ, {"GITLAB_TOKEN": "", "CI_JOB_TOKEN": ""}, clear=False
+            ),
+        ):
             with self.assertRaises(RuntimeError):
                 _gitlab_api_request("GET", "/test")
 
@@ -426,8 +447,12 @@ class TestGitlabPostMrComment(unittest.TestCase):
             "CI_PROJECT_ID": "123",
             "CI_MERGE_REQUEST_IID": "7",
         }
-        with patch.dict(os.environ, env, clear=False), \
-             patch("aiir._gitlab._gitlab_api_request", return_value={"id": 99}) as mock_api:
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch(
+                "aiir._gitlab._gitlab_api_request", return_value={"id": 99}
+            ) as mock_api,
+        ):
             result = post_mr_comment(big_comment)
         # Verify the API was called and the comment was truncated
         call_args = mock_api.call_args
@@ -459,10 +484,12 @@ class TestGitlabFormatGuards(unittest.TestCase):
         """L281,283: non-dict commit/ai in detailed section."""
         from aiir._gitlab import format_gitlab_summary
 
-        receipts = [self._make_receipt(
-            commit={"sha": "abc123", "subject": "test"},
-            ai="not-a-dict",
-        )]
+        receipts = [
+            self._make_receipt(
+                commit={"sha": "abc123", "subject": "test"},
+                ai="not-a-dict",
+            )
+        ]
         text = format_gitlab_summary(receipts)
         self.assertIn("abc123", text)
 
@@ -590,12 +617,17 @@ class TestGitlabGraphQLError(unittest.TestCase):
 
         http_err = HTTPError(
             "https://gitlab.com/api/graphql",
-            500, "Server Error", {}, io.BytesIO(b"internal error")
+            500,
+            "Server Error",
+            {},
+            io.BytesIO(b"internal error"),
         )
         env = {"CI_SERVER_URL": "https://gitlab.com", "GITLAB_TOKEN": "tok"}
-        with patch.dict(os.environ, env, clear=False), \
-             patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False), \
-             patch("aiir._gitlab.urlopen", side_effect=http_err):
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False),
+            patch("aiir._gitlab.urlopen", side_effect=http_err),
+        ):
             with self.assertRaises(RuntimeError) as ctx:
                 query_gitlab_graphql("{ currentUser { name } }")
         self.assertIn("500", str(ctx.exception))
@@ -606,14 +638,15 @@ class TestGitlabGraphQLError(unittest.TestCase):
         from aiir._gitlab import query_gitlab_graphql
 
         http_err = HTTPError(
-            "https://gitlab.com/api/graphql",
-            502, "Bad Gateway", {}, None
+            "https://gitlab.com/api/graphql", 502, "Bad Gateway", {}, None
         )
         http_err.read = MagicMock(side_effect=OSError("closed"))
         env = {"CI_SERVER_URL": "https://gitlab.com", "GITLAB_TOKEN": "tok"}
-        with patch.dict(os.environ, env, clear=False), \
-             patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False), \
-             patch("aiir._gitlab.urlopen", side_effect=http_err):
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False),
+            patch("aiir._gitlab.urlopen", side_effect=http_err),
+        ):
             with self.assertRaises(RuntimeError) as ctx:
                 query_gitlab_graphql("{ currentUser { name } }")
         self.assertIn("502", str(ctx.exception))
@@ -624,9 +657,11 @@ class TestGitlabGraphQLError(unittest.TestCase):
         from aiir._gitlab import query_gitlab_graphql
 
         env = {"CI_SERVER_URL": "https://gitlab.com", "GITLAB_TOKEN": "tok"}
-        with patch.dict(os.environ, env, clear=False), \
-             patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False), \
-             patch("aiir._gitlab.urlopen", side_effect=URLError("timeout")):
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False),
+            patch("aiir._gitlab.urlopen", side_effect=URLError("timeout")),
+        ):
             with self.assertRaises(RuntimeError):
                 query_gitlab_graphql("{ currentUser { name } }")
 
@@ -642,9 +677,11 @@ class TestGitlabGraphQLError(unittest.TestCase):
         mock_resp.__exit__ = MagicMock(return_value=False)
 
         env = {"CI_SERVER_URL": "https://gitlab.com", "GITLAB_TOKEN": "tok"}
-        with patch.dict(os.environ, env, clear=False), \
-             patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False), \
-             patch("aiir._gitlab.urlopen", return_value=mock_resp):
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch.dict(os.environ, {"CI_JOB_TOKEN": ""}, clear=False),
+            patch("aiir._gitlab.urlopen", return_value=mock_resp),
+        ):
             with self.assertRaises(RuntimeError) as ctx:
                 query_gitlab_graphql("{ bad }")
         self.assertIn("GraphQL errors", str(ctx.exception))
@@ -728,12 +765,18 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
 
     def test_ledger_max_receipts_truncation(self):
         """L95-100: ledger with > _MAX_LEDGER_RECEIPTS stops early."""
-        from aiir._verify_release import _load_receipts_from_ledger, _MAX_LEDGER_RECEIPTS
+        from aiir._verify_release import (
+            _load_receipts_from_ledger,
+            _MAX_LEDGER_RECEIPTS,
+        )
 
         with tempfile.TemporaryDirectory() as td:
             ledger = Path(td) / "big.jsonl"
             # Write _MAX_LEDGER_RECEIPTS + 100 lines
-            lines = [json.dumps({"receipt_id": f"r-{i}"}) for i in range(_MAX_LEDGER_RECEIPTS + 100)]
+            lines = [
+                json.dumps({"receipt_id": f"r-{i}"})
+                for i in range(_MAX_LEDGER_RECEIPTS + 100)
+            ]
             ledger.write_text("\n".join(lines), encoding="utf-8")
             receipts = _load_receipts_from_ledger(str(ledger))
             self.assertEqual(len(receipts), _MAX_LEDGER_RECEIPTS)
@@ -760,6 +803,7 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
             f.write_text('{"x":1}\n', encoding="utf-8")
             real_stat = Path.stat
             call_count = [0]
+
             def stat_side_effect(self_path, *a, **kw):
                 call_count[0] += 1
                 # Let is_file() and is_symlink() through (they call stat),
@@ -767,6 +811,7 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
                 if call_count[0] <= 2:
                     return real_stat(self_path, *a, **kw)
                 raise OSError("perm denied")
+
             with patch.object(Path, "stat", stat_side_effect):
                 with self.assertRaises(ValueError) as ctx:
                     _load_receipts_from_ledger(str(f))
@@ -884,6 +929,7 @@ class TestVerifyReleasePolicyFile(unittest.TestCase):
             # Only raise for the policy file, and only on the explicit stat() call
             # (not the internal is_file/is_symlink calls).
             policy_stat_calls = [0]
+
             def stat_side_effect(self_path, *a, **kw):
                 if str(self_path) == str(policy):
                     policy_stat_calls[0] += 1
@@ -892,6 +938,7 @@ class TestVerifyReleasePolicyFile(unittest.TestCase):
                     if policy_stat_calls[0] >= 3:
                         raise OSError("disk error")
                 return real_stat(self_path, *a, **kw)
+
             with patch.object(Path, "stat", stat_side_effect):
                 with self.assertRaises(ValueError) as ctx:
                     verify_release(
@@ -949,8 +996,16 @@ class TestVerifyReleaseInTotoVSA(unittest.TestCase):
                 "content_hash": "sha256:abc",
                 "commit": {
                     "sha": "deadbeef12345678",
-                    "author": {"name": "A", "email": "a@b.com", "date": "2026-01-01T00:00:00Z"},
-                    "committer": {"name": "A", "email": "a@b.com", "date": "2026-01-01T00:00:00Z"},
+                    "author": {
+                        "name": "A",
+                        "email": "a@b.com",
+                        "date": "2026-01-01T00:00:00Z",
+                    },
+                    "committer": {
+                        "name": "A",
+                        "email": "a@b.com",
+                        "date": "2026-01-01T00:00:00Z",
+                    },
                     "subject": "test commit",
                     "diff_hash": "sha256:abc",
                     "files_changed": 1,
@@ -999,13 +1054,39 @@ class TestVerifyReleaseInTotoVSA(unittest.TestCase):
                 "type": "aiir.commit.v1",
                 "timestamp": "2026-01-01T00:00:00Z",
                 "content_hash": "sha256:abc",
-                "commit": {"sha": "aaa", "author": {"name": "A", "email": "a@b.com", "date": "2026-01-01T00:00:00Z"}, "committer": {"name": "A", "email": "a@b.com", "date": "2026-01-01T00:00:00Z"}, "subject": "test", "diff_hash": "sha256:abc", "files_changed": 1},
-                "ai_attestation": {"is_ai_authored": False, "signal_count": 0, "signals_detected": [], "authorship_class": "human"},
-                "provenance": {"repository": "https://example.com/r", "tool": "https://github.com/invariant-systems-ai/aiir@v1.2.1", "generator": "aiir.cli"},
+                "commit": {
+                    "sha": "aaa",
+                    "author": {
+                        "name": "A",
+                        "email": "a@b.com",
+                        "date": "2026-01-01T00:00:00Z",
+                    },
+                    "committer": {
+                        "name": "A",
+                        "email": "a@b.com",
+                        "date": "2026-01-01T00:00:00Z",
+                    },
+                    "subject": "test",
+                    "diff_hash": "sha256:abc",
+                    "files_changed": 1,
+                },
+                "ai_attestation": {
+                    "is_ai_authored": False,
+                    "signal_count": 0,
+                    "signals_detected": [],
+                    "authorship_class": "human",
+                },
+                "provenance": {
+                    "repository": "https://example.com/r",
+                    "tool": "https://github.com/invariant-systems-ai/aiir@v1.2.1",
+                    "generator": "aiir.cli",
+                },
             }
             ledger.write_text(json.dumps(receipt) + "\n", encoding="utf-8")
 
-            with patch("aiir._verify_release._run_git", side_effect=RuntimeError("no git")):
+            with patch(
+                "aiir._verify_release._run_git", side_effect=RuntimeError("no git")
+            ):
                 result = verify_release(
                     receipts_path=str(ledger),
                     emit_intoto=True,
@@ -1026,9 +1107,33 @@ class TestVerifyReleaseInTotoVSA(unittest.TestCase):
                 "type": "aiir.commit.v1",
                 "timestamp": "2026-01-01T00:00:00Z",
                 "content_hash": "sha256:abc",
-                "commit": {"sha": "aaa", "author": {"name": "A", "email": "a@b.com", "date": "2026-01-01T00:00:00Z"}, "committer": {"name": "A", "email": "a@b.com", "date": "2026-01-01T00:00:00Z"}, "subject": "test", "diff_hash": "sha256:abc", "files_changed": 1},
-                "ai_attestation": {"is_ai_authored": False, "signal_count": 0, "signals_detected": [], "authorship_class": "human"},
-                "provenance": {"repository": "https://example.com/r", "tool": "https://github.com/invariant-systems-ai/aiir@v1.2.1", "generator": "aiir.cli"},
+                "commit": {
+                    "sha": "aaa",
+                    "author": {
+                        "name": "A",
+                        "email": "a@b.com",
+                        "date": "2026-01-01T00:00:00Z",
+                    },
+                    "committer": {
+                        "name": "A",
+                        "email": "a@b.com",
+                        "date": "2026-01-01T00:00:00Z",
+                    },
+                    "subject": "test",
+                    "diff_hash": "sha256:abc",
+                    "files_changed": 1,
+                },
+                "ai_attestation": {
+                    "is_ai_authored": False,
+                    "signal_count": 0,
+                    "signals_detected": [],
+                    "authorship_class": "human",
+                },
+                "provenance": {
+                    "repository": "https://example.com/r",
+                    "tool": "https://github.com/invariant-systems-ai/aiir@v1.2.1",
+                    "generator": "aiir.cli",
+                },
             }
             ledger.write_text(json.dumps(receipt) + "\n", encoding="utf-8")
 
@@ -1041,8 +1146,12 @@ class TestVerifyReleaseInTotoVSA(unittest.TestCase):
                     return "aaa\n"
                 return ""
 
-            with patch("aiir._verify_release._run_git", side_effect=mock_run_git), \
-                 patch("aiir._verify_release.list_commits_in_range", return_value=["aaa"]):
+            with (
+                patch("aiir._verify_release._run_git", side_effect=mock_run_git),
+                patch(
+                    "aiir._verify_release.list_commits_in_range", return_value=["aaa"]
+                ),
+            ):
                 result = verify_release(
                     receipts_path=str(ledger),
                     emit_intoto=True,
@@ -1061,9 +1170,33 @@ class TestVerifyReleaseInTotoVSA(unittest.TestCase):
                 "type": "aiir.commit.v1",
                 "timestamp": "2026-01-01T00:00:00Z",
                 "content_hash": "sha256:abc",
-                "commit": {"sha": "aaa", "author": {"name": "A", "email": "a@b.com", "date": "2026-01-01T00:00:00Z"}, "committer": {"name": "A", "email": "a@b.com", "date": "2026-01-01T00:00:00Z"}, "subject": "test", "diff_hash": "sha256:abc", "files_changed": 1},
-                "ai_attestation": {"is_ai_authored": False, "signal_count": 0, "signals_detected": [], "authorship_class": "human"},
-                "provenance": {"repository": "https://example.com/r", "tool": "https://github.com/invariant-systems-ai/aiir@v1.2.1", "generator": "aiir.cli"},
+                "commit": {
+                    "sha": "aaa",
+                    "author": {
+                        "name": "A",
+                        "email": "a@b.com",
+                        "date": "2026-01-01T00:00:00Z",
+                    },
+                    "committer": {
+                        "name": "A",
+                        "email": "a@b.com",
+                        "date": "2026-01-01T00:00:00Z",
+                    },
+                    "subject": "test",
+                    "diff_hash": "sha256:abc",
+                    "files_changed": 1,
+                },
+                "ai_attestation": {
+                    "is_ai_authored": False,
+                    "signal_count": 0,
+                    "signals_detected": [],
+                    "authorship_class": "human",
+                },
+                "provenance": {
+                    "repository": "https://example.com/r",
+                    "tool": "https://github.com/invariant-systems-ai/aiir@v1.2.1",
+                    "generator": "aiir.cli",
+                },
             }
             ledger.write_text(json.dumps(receipt) + "\n", encoding="utf-8")
 
@@ -1074,8 +1207,12 @@ class TestVerifyReleaseInTotoVSA(unittest.TestCase):
                     raise RuntimeError("bad ref")
                 return ""
 
-            with patch("aiir._verify_release._run_git", side_effect=mock_run_git), \
-                 patch("aiir._verify_release.list_commits_in_range", return_value=["aaa"]):
+            with (
+                patch("aiir._verify_release._run_git", side_effect=mock_run_git),
+                patch(
+                    "aiir._verify_release.list_commits_in_range", return_value=["aaa"]
+                ),
+            ):
                 result = verify_release(
                     receipts_path=str(ledger),
                     emit_intoto=True,
@@ -1118,10 +1255,22 @@ class TestFormatReleaseReport(unittest.TestCase):
         result = {
             "verificationResult": "PASSED",
             "reason": "All checks passed",
-            "coverage": {"commits_total": 1, "receipts_found": 1, "coverage_percent": 100},
+            "coverage": {
+                "commits_total": 1,
+                "receipts_found": 1,
+                "coverage_percent": 100,
+            },
             "predicate": {
-                "evaluation": {"totalReceipts": 1, "validReceipts": 1, "invalidReceipts": 0, "policyViolations": 0},
-                "verifier": {"id": "https://invariantsystems.io/verifiers/aiir", "version": {"aiir": "1.2.1"}},
+                "evaluation": {
+                    "totalReceipts": 1,
+                    "validReceipts": 1,
+                    "invalidReceipts": 0,
+                    "policyViolations": 0,
+                },
+                "verifier": {
+                    "id": "https://invariantsystems.io/verifiers/aiir",
+                    "version": {"aiir": "1.2.1"},
+                },
             },
             "policy_violations": [],
         }
@@ -1134,14 +1283,30 @@ class TestFormatReleaseReport(unittest.TestCase):
         from aiir._verify_release import format_release_report
 
         violations = [
-            {"commit_sha": f"sha{i:04d}", "rule": "max_ai_percent", "message": f"violation {i}"}
+            {
+                "commit_sha": f"sha{i:04d}",
+                "rule": "max_ai_percent",
+                "message": f"violation {i}",
+            }
             for i in range(25)
         ]
         result = {
             "verificationResult": "FAILED",
             "reason": "Policy violations detected",
-            "coverage": {"commits_total": 25, "receipts_found": 25, "coverage_percent": 100},
-            "predicate": {"evaluation": {"totalReceipts": 25, "validReceipts": 0, "invalidReceipts": 25, "policyViolations": 25}, "verifier": {}},
+            "coverage": {
+                "commits_total": 25,
+                "receipts_found": 25,
+                "coverage_percent": 100,
+            },
+            "predicate": {
+                "evaluation": {
+                    "totalReceipts": 25,
+                    "validReceipts": 0,
+                    "invalidReceipts": 25,
+                    "policyViolations": 25,
+                },
+                "verifier": {},
+            },
             "policy_violations": violations,
         }
         report = format_release_report(result)
@@ -1160,6 +1325,7 @@ class TestCliVerifyHints(unittest.TestCase):
     def _run_cli(self, args_list):
         """Helper to run CLI main with given args."""
         import aiir.cli as cli
+
         with patch("sys.argv", ["aiir"] + args_list):
             return cli.main()
 
@@ -1179,11 +1345,16 @@ class TestCliVerifyHints(unittest.TestCase):
             rf = Path(td) / "receipt.json"
             rf.write_text(json.dumps(receipt), encoding="utf-8")
 
-            with patch.object(cli, "verify_receipt_file", return_value=receipt), \
-                 patch.object(cli, "verify_receipt_signature", return_value=sig_result), \
-                 patch.object(cli, "_sigstore_available", return_value=True), \
-                 patch("sys.argv", ["aiir", "--verify", str(rf), "--verify-sig", "--explain"]), \
-                 patch("sys.stderr", new_callable=io.StringIO) as err:
+            with (
+                patch.object(cli, "verify_receipt_file", return_value=receipt),
+                patch.object(cli, "verify_receipt_signature", return_value=sig_result),
+                patch.object(cli, "_sigstore_available", return_value=True),
+                patch(
+                    "sys.argv",
+                    ["aiir", "--verify", str(rf), "--verify-sig", "--explain"],
+                ),
+                patch("sys.stderr", new_callable=io.StringIO) as err,
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 1)
             self.assertIn("Signature FAILED", err.getvalue())
@@ -1197,9 +1368,11 @@ class TestCliVerifyHints(unittest.TestCase):
             rf = Path(td) / "receipt.json"
             rf.write_text("{}", encoding="utf-8")
 
-            with patch.object(cli, "verify_receipt_file", return_value=result), \
-                 patch("sys.argv", ["aiir", "--verify", str(rf)]), \
-                 patch("sys.stderr", new_callable=io.StringIO) as err:
+            with (
+                patch.object(cli, "verify_receipt_file", return_value=result),
+                patch("sys.argv", ["aiir", "--verify", str(rf)]),
+                patch("sys.stderr", new_callable=io.StringIO) as err,
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 1)
             self.assertIn("symlink", err.getvalue())
@@ -1213,9 +1386,11 @@ class TestCliVerifyHints(unittest.TestCase):
             rf = Path(td) / "receipt.json"
             rf.write_text("{}", encoding="utf-8")
 
-            with patch.object(cli, "verify_receipt_file", return_value=result), \
-                 patch("sys.argv", ["aiir", "--verify", str(rf)]), \
-                 patch("sys.stderr", new_callable=io.StringIO) as err:
+            with (
+                patch.object(cli, "verify_receipt_file", return_value=result),
+                patch("sys.argv", ["aiir", "--verify", str(rf)]),
+                patch("sys.stderr", new_callable=io.StringIO) as err,
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 1)
             self.assertIn("size limit", err.getvalue())
@@ -1229,9 +1404,11 @@ class TestCliVerifyHints(unittest.TestCase):
             rf = Path(td) / "receipt.json"
             rf.write_text("{}", encoding="utf-8")
 
-            with patch.object(cli, "verify_receipt_file", return_value=result), \
-                 patch("sys.argv", ["aiir", "--verify", str(rf)]), \
-                 patch("sys.stderr", new_callable=io.StringIO) as err:
+            with (
+                patch.object(cli, "verify_receipt_file", return_value=result),
+                patch("sys.argv", ["aiir", "--verify", str(rf)]),
+                patch("sys.stderr", new_callable=io.StringIO) as err,
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 1)
             self.assertIn("receipt was changed", err.getvalue())
@@ -1245,10 +1422,14 @@ class TestCliVerifyHints(unittest.TestCase):
             rf = Path(td) / "receipt.json"
             rf.write_text("{}", encoding="utf-8")
 
-            with patch.object(cli, "verify_receipt_file", return_value=result), \
-                 patch.object(cli, "explain_verification", return_value="EXPLAIN: failure"), \
-                 patch("sys.argv", ["aiir", "--verify", str(rf), "--explain"]), \
-                 patch("sys.stderr", new_callable=io.StringIO) as err:
+            with (
+                patch.object(cli, "verify_receipt_file", return_value=result),
+                patch.object(
+                    cli, "explain_verification", return_value="EXPLAIN: failure"
+                ),
+                patch("sys.argv", ["aiir", "--verify", str(rf), "--explain"]),
+                patch("sys.stderr", new_callable=io.StringIO) as err,
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 1)
             self.assertIn("EXPLAIN: failure", err.getvalue())
@@ -1264,7 +1445,11 @@ class TestCliVerifyRelease(unittest.TestCase):
         mock_result = {
             "verificationResult": "PASSED",
             "reason": "ok",
-            "coverage": {"commits_total": 1, "receipts_found": 1, "coverage_percent": 100},
+            "coverage": {
+                "commits_total": 1,
+                "receipts_found": 1,
+                "coverage_percent": 100,
+            },
             "predicate": {"evaluation": {}, "verifier": {}},
             "policy_violations": [],
         }
@@ -1274,17 +1459,33 @@ class TestCliVerifyRelease(unittest.TestCase):
             ledger = Path(td) / "receipts.jsonl"
             ledger.write_text('{"receipt_id": "r1"}\n', encoding="utf-8")
 
-            with patch.object(cli, "verify_release", return_value=mock_result) as mock_vr, \
-                 patch.object(cli, "format_release_report", return_value="OK"), \
-                 patch("sys.argv", ["aiir", "--verify-release",
-                                     "--receipts", str(ledger),
-                                     "--policy", str(policy_f)]), \
-                 patch("sys.stderr", new_callable=io.StringIO):
+            with (
+                patch.object(
+                    cli, "verify_release", return_value=mock_result
+                ) as mock_vr,
+                patch.object(cli, "format_release_report", return_value="OK"),
+                patch(
+                    "sys.argv",
+                    [
+                        "aiir",
+                        "--verify-release",
+                        "--receipts",
+                        str(ledger),
+                        "--policy",
+                        str(policy_f),
+                    ],
+                ),
+                patch("sys.stderr", new_callable=io.StringIO),
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 0)
             # Verify policy_path was passed (not preset)
             call_kwargs = mock_vr.call_args
-            self.assertEqual(call_kwargs[1].get("policy_path") or call_kwargs.kwargs.get("policy_path"), str(policy_f))
+            self.assertEqual(
+                call_kwargs[1].get("policy_path")
+                or call_kwargs.kwargs.get("policy_path"),
+                str(policy_f),
+            )
 
     def test_verify_release_max_ai_percent(self):
         """L698: --max-ai-percent sets policy override."""
@@ -1293,7 +1494,11 @@ class TestCliVerifyRelease(unittest.TestCase):
         mock_result = {
             "verificationResult": "PASSED",
             "reason": "ok",
-            "coverage": {"commits_total": 1, "receipts_found": 1, "coverage_percent": 100},
+            "coverage": {
+                "commits_total": 1,
+                "receipts_found": 1,
+                "coverage_percent": 100,
+            },
             "predicate": {"evaluation": {}, "verifier": {}},
             "policy_violations": [],
         }
@@ -1301,16 +1506,30 @@ class TestCliVerifyRelease(unittest.TestCase):
             ledger = Path(td) / "receipts.jsonl"
             ledger.write_text('{"receipt_id": "r1"}\n', encoding="utf-8")
 
-            with patch.object(cli, "verify_release", return_value=mock_result) as mock_vr, \
-                 patch.object(cli, "format_release_report", return_value="OK"), \
-                 patch("sys.argv", ["aiir", "--verify-release",
-                                     "--receipts", str(ledger),
-                                     "--max-ai-percent", "25"]), \
-                 patch("sys.stderr", new_callable=io.StringIO):
+            with (
+                patch.object(
+                    cli, "verify_release", return_value=mock_result
+                ) as mock_vr,
+                patch.object(cli, "format_release_report", return_value="OK"),
+                patch(
+                    "sys.argv",
+                    [
+                        "aiir",
+                        "--verify-release",
+                        "--receipts",
+                        str(ledger),
+                        "--max-ai-percent",
+                        "25",
+                    ],
+                ),
+                patch("sys.stderr", new_callable=io.StringIO),
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 0)
             call_kwargs = mock_vr.call_args
-            overrides = call_kwargs[1].get("policy_overrides") or call_kwargs.kwargs.get("policy_overrides")
+            overrides = call_kwargs[1].get(
+                "policy_overrides"
+            ) or call_kwargs.kwargs.get("policy_overrides")
             self.assertEqual(overrides["max_ai_percent"], 25)
 
     def test_verify_release_error_handling(self):
@@ -1321,10 +1540,15 @@ class TestCliVerifyRelease(unittest.TestCase):
             ledger = Path(td) / "receipts.jsonl"
             ledger.write_text('{"receipt_id": "r1"}\n', encoding="utf-8")
 
-            with patch.object(cli, "verify_release", side_effect=ValueError("bad policy")), \
-                 patch("sys.argv", ["aiir", "--verify-release",
-                                     "--receipts", str(ledger)]), \
-                 patch("sys.stderr", new_callable=io.StringIO) as err:
+            with (
+                patch.object(
+                    cli, "verify_release", side_effect=ValueError("bad policy")
+                ),
+                patch(
+                    "sys.argv", ["aiir", "--verify-release", "--receipts", str(ledger)]
+                ),
+                patch("sys.stderr", new_callable=io.StringIO) as err,
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 1)
             self.assertIn("bad policy", err.getvalue())
@@ -1346,10 +1570,17 @@ class TestCliVSAWrite(unittest.TestCase):
         vr_result = {
             "verificationResult": "PASSED",
             "reason": "OK",
-            "coverage": {"commits_total": 1, "receipts_found": 1, "coverage_percent": 100},
+            "coverage": {
+                "commits_total": 1,
+                "receipts_found": 1,
+                "coverage_percent": 100,
+            },
             "predicate": {"evaluation": {}, "verifier": {}},
             "policy_violations": [],
-            "intoto_statement": {"_type": "https://in-toto.io/Statement/v1", "subject": []},
+            "intoto_statement": {
+                "_type": "https://in-toto.io/Statement/v1",
+                "subject": [],
+            },
         }
 
         with tempfile.TemporaryDirectory() as td:
@@ -1358,10 +1589,14 @@ class TestCliVSAWrite(unittest.TestCase):
             ledger.parent.mkdir(parents=True)
             ledger.write_text('{"receipt_id": "test"}\n', encoding="utf-8")
 
-            with patch.object(cli, "verify_release", return_value=vr_result), \
-                 patch.object(cli, "format_release_report", return_value="PASS"), \
-                 patch("sys.argv", ["aiir", "--verify-release", "--emit-vsa", "vsa.json"]), \
-                 patch("sys.stderr", new_callable=io.StringIO):
+            with (
+                patch.object(cli, "verify_release", return_value=vr_result),
+                patch.object(cli, "format_release_report", return_value="PASS"),
+                patch(
+                    "sys.argv", ["aiir", "--verify-release", "--emit-vsa", "vsa.json"]
+                ),
+                patch("sys.stderr", new_callable=io.StringIO),
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 0)
             vsa_file = Path(td) / "vsa.json"
@@ -1385,10 +1620,15 @@ class TestCliVSAWrite(unittest.TestCase):
             ledger.parent.mkdir(parents=True)
             ledger.write_text('{"receipt_id": "test"}\n', encoding="utf-8")
 
-            with patch.object(cli, "verify_release", return_value=vr_result), \
-                 patch.object(cli, "format_release_report", return_value="PASS"), \
-                 patch("sys.argv", ["aiir", "--verify-release", "--emit-vsa", "/tmp/evil.json"]), \
-                 patch("sys.stderr", new_callable=io.StringIO) as err:
+            with (
+                patch.object(cli, "verify_release", return_value=vr_result),
+                patch.object(cli, "format_release_report", return_value="PASS"),
+                patch(
+                    "sys.argv",
+                    ["aiir", "--verify-release", "--emit-vsa", "/tmp/evil.json"],
+                ),
+                patch("sys.stderr", new_callable=io.StringIO) as err,
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 1)
             self.assertIn("relative", err.getvalue())
@@ -1416,14 +1656,18 @@ class TestCliGitlabCIOutput(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             os.chdir(td)
             # Init a git repo
-            os.system("git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init")  # noqa: S605
+            os.system(
+                "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
+            )  # noqa: S605
 
             env = {"GITLAB_CI": "true", "CI_DOTENV_FILE": os.path.join(td, "ci.env")}
-            with patch.dict(os.environ, env, clear=False), \
-                 patch.object(cli, "generate_receipt", return_value=mock_receipt), \
-                 patch("sys.argv", ["aiir", "--gitlab-ci", "--json"]), \
-                 patch("sys.stderr", new_callable=io.StringIO), \
-                 patch("sys.stdout", new_callable=io.StringIO):
+            with (
+                patch.dict(os.environ, env, clear=False),
+                patch.object(cli, "generate_receipt", return_value=mock_receipt),
+                patch("sys.argv", ["aiir", "--gitlab-ci", "--json"]),
+                patch("sys.stderr", new_callable=io.StringIO),
+                patch("sys.stdout", new_callable=io.StringIO),
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 0)
 
@@ -1431,17 +1675,24 @@ class TestCliGitlabCIOutput(unittest.TestCase):
         """L1072-1076: empty results in --gitlab-ci mode sets outputs to 0."""
         import aiir.cli as cli
 
-        env = {"GITLAB_CI": "true", "CI_DOTENV_FILE": os.path.join(tempfile.gettempdir(), "ci.env")}
+        env = {
+            "GITLAB_CI": "true",
+            "CI_DOTENV_FILE": os.path.join(tempfile.gettempdir(), "ci.env"),
+        }
 
         with tempfile.TemporaryDirectory() as td:
             os.chdir(td)
-            os.system("git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init")  # noqa: S605
+            os.system(
+                "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
+            )  # noqa: S605
 
-            with patch.dict(os.environ, env, clear=False), \
-                 patch.object(cli, "generate_receipts_for_range", return_value=[]), \
-                 patch("sys.argv", ["aiir", "--gitlab-ci", "--range", "HEAD~1..HEAD"]), \
-                 patch("sys.stderr", new_callable=io.StringIO), \
-                 patch.object(cli, "set_gitlab_ci_output") as mock_output:
+            with (
+                patch.dict(os.environ, env, clear=False),
+                patch.object(cli, "generate_receipts_for_range", return_value=[]),
+                patch("sys.argv", ["aiir", "--gitlab-ci", "--range", "HEAD~1..HEAD"]),
+                patch("sys.stderr", new_callable=io.StringIO),
+                patch.object(cli, "set_gitlab_ci_output") as mock_output,
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 0)
             # Check that AIIR_RECEIPT_COUNT=0 was set
@@ -1456,26 +1707,35 @@ class TestCliGitlabCIOutput(unittest.TestCase):
             "receipt_id": "g1-test",
             "content_hash": "sha256:abc",
             "commit": {"sha": "aaa"},
-            "ai_attestation": {"is_ai_authored": True, "authorship_class": "ai_assisted"},
+            "ai_attestation": {
+                "is_ai_authored": True,
+                "authorship_class": "ai_assisted",
+            },
             "provenance": {"repository": None},
         }
 
         with tempfile.TemporaryDirectory() as td:
             os.chdir(td)
-            os.system("git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init")  # noqa: S605
+            os.system(
+                "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
+            )  # noqa: S605
 
             env = {
                 "GITLAB_CI": "true",
                 "CI_DOTENV_FILE": os.path.join(td, "ci.env"),
                 "CI_MERGE_REQUEST_IID": "42",
             }
-            with patch.dict(os.environ, env, clear=False), \
-                 patch.object(cli, "generate_receipt", return_value=mock_receipt), \
-                 patch.object(cli, "post_mr_comment", return_value={"id": 1}) as mock_post, \
-                 patch.object(cli, "format_gitlab_summary", return_value="Summary"), \
-                 patch("sys.argv", ["aiir", "--gitlab-ci", "--json"]), \
-                 patch("sys.stderr", new_callable=io.StringIO), \
-                 patch("sys.stdout", new_callable=io.StringIO):
+            with (
+                patch.dict(os.environ, env, clear=False),
+                patch.object(cli, "generate_receipt", return_value=mock_receipt),
+                patch.object(
+                    cli, "post_mr_comment", return_value={"id": 1}
+                ) as mock_post,
+                patch.object(cli, "format_gitlab_summary", return_value="Summary"),
+                patch("sys.argv", ["aiir", "--gitlab-ci", "--json"]),
+                patch("sys.stderr", new_callable=io.StringIO),
+                patch("sys.stdout", new_callable=io.StringIO),
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 0)
             mock_post.assert_called_once()
@@ -1494,20 +1754,26 @@ class TestCliGitlabCIOutput(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as td:
             os.chdir(td)
-            os.system("git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init")  # noqa: S605
+            os.system(
+                "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
+            )  # noqa: S605
 
             env = {
                 "GITLAB_CI": "true",
                 "CI_DOTENV_FILE": os.path.join(td, "ci.env"),
                 "CI_MERGE_REQUEST_IID": "42",
             }
-            with patch.dict(os.environ, env, clear=False), \
-                 patch.object(cli, "generate_receipt", return_value=mock_receipt), \
-                 patch.object(cli, "post_mr_comment", side_effect=RuntimeError("API error")), \
-                 patch.object(cli, "format_gitlab_summary", return_value="Summary"), \
-                 patch("sys.argv", ["aiir", "--gitlab-ci", "--json"]), \
-                 patch("sys.stderr", new_callable=io.StringIO) as err, \
-                 patch("sys.stdout", new_callable=io.StringIO):
+            with (
+                patch.dict(os.environ, env, clear=False),
+                patch.object(cli, "generate_receipt", return_value=mock_receipt),
+                patch.object(
+                    cli, "post_mr_comment", side_effect=RuntimeError("API error")
+                ),
+                patch.object(cli, "format_gitlab_summary", return_value="Summary"),
+                patch("sys.argv", ["aiir", "--gitlab-ci", "--json"]),
+                patch("sys.stderr", new_callable=io.StringIO) as err,
+                patch("sys.stdout", new_callable=io.StringIO),
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 0)  # non-fatal
             self.assertIn("Could not post MR comment", err.getvalue())
@@ -1520,19 +1786,26 @@ class TestCliGitlabCIOutput(unittest.TestCase):
             "receipt_id": "g1-test",
             "content_hash": "sha256:abc",
             "commit": {"sha": "aaa"},
-            "ai_attestation": {"is_ai_authored": True, "authorship_class": "ai_assisted"},
+            "ai_attestation": {
+                "is_ai_authored": True,
+                "authorship_class": "ai_assisted",
+            },
             "provenance": {"repository": "https://example.com/repo"},
         }
 
         with tempfile.TemporaryDirectory() as td:
             os.chdir(td)
-            os.system("git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init")  # noqa: S605
+            os.system(
+                "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
+            )  # noqa: S605
 
             sast_path = os.path.join(td, "gl-sast-report.json")
-            with patch.object(cli, "generate_receipt", return_value=mock_receipt), \
-                 patch("sys.argv", ["aiir", "--gl-sast-report", sast_path, "--json"]), \
-                 patch("sys.stderr", new_callable=io.StringIO), \
-                 patch("sys.stdout", new_callable=io.StringIO):
+            with (
+                patch.object(cli, "generate_receipt", return_value=mock_receipt),
+                patch("sys.argv", ["aiir", "--gl-sast-report", sast_path, "--json"]),
+                patch("sys.stderr", new_callable=io.StringIO),
+                patch("sys.stdout", new_callable=io.StringIO),
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 0)
             self.assertTrue(Path(sast_path).exists())
@@ -1555,15 +1828,21 @@ class TestCliGitHubActionOutput(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as td:
             os.chdir(td)
-            os.system("git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init")  # noqa: S605
+            os.system(
+                "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
+            )  # noqa: S605
 
             github_output = os.path.join(td, "github_output.txt")
             env = {"GITHUB_ACTIONS": "true", "GITHUB_OUTPUT": github_output}
-            with patch.dict(os.environ, env, clear=False), \
-                 patch.object(cli, "generate_receipts_for_range", return_value=[]), \
-                 patch("sys.argv", ["aiir", "--github-action", "--range", "HEAD~1..HEAD"]), \
-                 patch("sys.stderr", new_callable=io.StringIO), \
-                 patch.object(cli, "set_github_output") as mock_output:
+            with (
+                patch.dict(os.environ, env, clear=False),
+                patch.object(cli, "generate_receipts_for_range", return_value=[]),
+                patch(
+                    "sys.argv", ["aiir", "--github-action", "--range", "HEAD~1..HEAD"]
+                ),
+                patch("sys.stderr", new_callable=io.StringIO),
+                patch.object(cli, "set_github_output") as mock_output,
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 0)
             calls = {c[0][0]: c[0][1] for c in mock_output.call_args_list}
@@ -1593,17 +1872,27 @@ class TestCliSignFailure(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as td:
             os.chdir(td)
-            os.system("git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init")  # noqa: S605
+            os.system(
+                "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
+            )  # noqa: S605
 
             out_dir = os.path.join(td, "receipts")
             os.makedirs(out_dir)
 
-            with patch.object(cli, "generate_receipt", return_value=mock_receipt), \
-                 patch.object(cli, "_sigstore_available", return_value=True), \
-                 patch.object(cli, "write_receipt", return_value=os.path.join(out_dir, "receipt_aaa.json")), \
-                 patch.object(cli, "sign_receipt_file", side_effect=Exception("OIDC error")), \
-                 patch("sys.argv", ["aiir", "--sign", "--output", out_dir]), \
-                 patch("sys.stderr", new_callable=io.StringIO) as err:
+            with (
+                patch.object(cli, "generate_receipt", return_value=mock_receipt),
+                patch.object(cli, "_sigstore_available", return_value=True),
+                patch.object(
+                    cli,
+                    "write_receipt",
+                    return_value=os.path.join(out_dir, "receipt_aaa.json"),
+                ),
+                patch.object(
+                    cli, "sign_receipt_file", side_effect=Exception("OIDC error")
+                ),
+                patch("sys.argv", ["aiir", "--sign", "--output", out_dir]),
+                patch("sys.stderr", new_callable=io.StringIO) as err,
+            ):
                 # Create a fake receipt file to be removed
                 fake_receipt = Path(out_dir) / "receipt_aaa.json"
                 fake_receipt.write_text("{}", encoding="utf-8")
@@ -1627,18 +1916,28 @@ class TestCliSignFailure(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as td:
             os.chdir(td)
-            os.system("git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init")  # noqa: S605
+            os.system(
+                "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
+            )  # noqa: S605
 
             out_dir = os.path.join(td, "receipts")
             os.makedirs(out_dir)
 
-            with patch.object(cli, "generate_receipt", return_value=mock_receipt), \
-                 patch.object(cli, "_sigstore_available", return_value=True), \
-                 patch.object(cli, "write_receipt", return_value=os.path.join(out_dir, "receipt_aaa.json")), \
-                 patch.object(cli, "sign_receipt_file", side_effect=Exception("OIDC error")), \
-                 patch("os.remove", side_effect=OSError("perm denied")), \
-                 patch("sys.argv", ["aiir", "--sign", "--output", out_dir]), \
-                 patch("sys.stderr", new_callable=io.StringIO) as err:
+            with (
+                patch.object(cli, "generate_receipt", return_value=mock_receipt),
+                patch.object(cli, "_sigstore_available", return_value=True),
+                patch.object(
+                    cli,
+                    "write_receipt",
+                    return_value=os.path.join(out_dir, "receipt_aaa.json"),
+                ),
+                patch.object(
+                    cli, "sign_receipt_file", side_effect=Exception("OIDC error")
+                ),
+                patch("os.remove", side_effect=OSError("perm denied")),
+                patch("sys.argv", ["aiir", "--sign", "--output", out_dir]),
+                patch("sys.stderr", new_callable=io.StringIO) as err,
+            ):
                 rc = cli.main()
             self.assertEqual(rc, 1)
             self.assertIn("Signing failed", err.getvalue())
@@ -1725,7 +2024,11 @@ class TestMcpVerifyReleaseHandler(unittest.TestCase):
         vr_result = {
             "verificationResult": "PASSED",
             "reason": "OK",
-            "coverage": {"commits_total": 1, "receipts_found": 1, "coverage_percent": 100},
+            "coverage": {
+                "commits_total": 1,
+                "receipts_found": 1,
+                "coverage_percent": 100,
+            },
             "predicate": {"evaluation": {}, "verifier": {}},
             "policy_violations": [],
         }
@@ -1736,12 +2039,16 @@ class TestMcpVerifyReleaseHandler(unittest.TestCase):
             ledger.parent.mkdir(parents=True)
             ledger.write_text('{"receipt_id": "test"}\n', encoding="utf-8")
 
-            with patch.object(mcp, "verify_release", return_value=vr_result), \
-                 patch.object(mcp, "format_release_report", return_value="REPORT"):
-                result = mcp._handle_aiir_verify_release({
-                    "policy": "strict",
-                    "commit_range": "HEAD~1..HEAD",
-                })
+            with (
+                patch.object(mcp, "verify_release", return_value=vr_result),
+                patch.object(mcp, "format_release_report", return_value="REPORT"),
+            ):
+                result = mcp._handle_aiir_verify_release(
+                    {
+                        "policy": "strict",
+                        "commit_range": "HEAD~1..HEAD",
+                    }
+                )
             text = result["content"][0]["text"]
             self.assertIn("REPORT", text)
 
@@ -1764,11 +2071,15 @@ class TestMcpVerifyReleaseHandler(unittest.TestCase):
                 "predicate": {"evaluation": {}, "verifier": {}},
                 "policy_violations": [],
             }
-            with patch.object(mcp, "verify_release", return_value=vr_result), \
-                 patch.object(mcp, "format_release_report", return_value="OK"):
-                result = mcp._handle_aiir_verify_release({
-                    "policy": str(policy_file),
-                })
+            with (
+                patch.object(mcp, "verify_release", return_value=vr_result),
+                patch.object(mcp, "format_release_report", return_value="OK"),
+            ):
+                result = mcp._handle_aiir_verify_release(
+                    {
+                        "policy": str(policy_file),
+                    }
+                )
             self.assertFalse(result.get("isError", False))
 
     def test_verify_release_error_handling(self):
@@ -1781,7 +2092,9 @@ class TestMcpVerifyReleaseHandler(unittest.TestCase):
             ledger.parent.mkdir(parents=True)
             ledger.write_text('{"receipt_id": "test"}\n', encoding="utf-8")
 
-            with patch.object(mcp, "verify_release", side_effect=FileNotFoundError("missing")):
+            with patch.object(
+                mcp, "verify_release", side_effect=FileNotFoundError("missing")
+            ):
                 result = mcp._handle_aiir_verify_release({"policy": "strict"})
             self.assertTrue(result.get("isError", False))
 
@@ -1792,7 +2105,9 @@ class TestMcpVerifyReleaseHandler(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             os.chdir(td)
             # Policy path that doesn't exist, not a preset name
-            result = mcp._handle_aiir_verify_release({"policy": "nonexistent_policy_file.json"})
+            result = mcp._handle_aiir_verify_release(
+                {"policy": "nonexistent_policy_file.json"}
+            )
             self.assertTrue(result.get("isError", False))
 
     def test_verify_release_unexpected_exception(self):
@@ -1805,7 +2120,9 @@ class TestMcpVerifyReleaseHandler(unittest.TestCase):
             ledger.parent.mkdir(parents=True)
             ledger.write_text('{"receipt_id": "test"}\n', encoding="utf-8")
 
-            with patch.object(mcp, "verify_release", side_effect=TypeError("unexpected")):
+            with patch.object(
+                mcp, "verify_release", side_effect=TypeError("unexpected")
+            ):
                 result = mcp._handle_aiir_verify_release({"policy": "strict"})
             self.assertTrue(result.get("isError", False))
 
@@ -1881,8 +2198,12 @@ class TestMcpGitlabSummaryHandler(unittest.TestCase):
             ledger.parent.mkdir(parents=True)
             ledger.write_text(json.dumps(receipt) + "\n", encoding="utf-8")
 
-            with patch.object(mcp, "format_gitlab_summary", return_value="Summary"), \
-                 patch.object(mcp, "format_gl_sast_report", return_value={"vulnerabilities": []}):
+            with (
+                patch.object(mcp, "format_gitlab_summary", return_value="Summary"),
+                patch.object(
+                    mcp, "format_gl_sast_report", return_value={"vulnerabilities": []}
+                ),
+            ):
                 result = mcp._handle_aiir_gitlab_summary({"include_sast": True})
             text = result["content"][0]["text"]
             self.assertIn("SAST", text)
@@ -1904,9 +2225,11 @@ class TestMcpGitlabSummaryHandler(unittest.TestCase):
             ledger.write_text(json.dumps(receipt) + "\n", encoding="utf-8")
 
             env = {"CI_MERGE_REQUEST_IID": "42"}
-            with patch.dict(os.environ, env, clear=False), \
-                 patch.object(mcp, "format_gitlab_summary", return_value="Summary"), \
-                 patch.object(mcp, "post_mr_comment", return_value={"id": 1}):
+            with (
+                patch.dict(os.environ, env, clear=False),
+                patch.object(mcp, "format_gitlab_summary", return_value="Summary"),
+                patch.object(mcp, "post_mr_comment", return_value={"id": 1}),
+            ):
                 result = mcp._handle_aiir_gitlab_summary({"post_to_mr": True})
             text = result["content"][0]["text"]
             self.assertIn("posted to merge request", text.lower())
@@ -1920,7 +2243,14 @@ class TestMcpGitlabSummaryHandler(unittest.TestCase):
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
             ledger.parent.mkdir(parents=True)
             # One valid, one malformed
-            valid = json.dumps({"receipt_id": "r1", "commit": {"sha": "a"}, "ai_attestation": {}, "content_hash": "sha256:x"})
+            valid = json.dumps(
+                {
+                    "receipt_id": "r1",
+                    "commit": {"sha": "a"},
+                    "ai_attestation": {},
+                    "content_hash": "sha256:x",
+                }
+            )
             ledger.write_text(f"{valid}\nnot-valid-json\n", encoding="utf-8")
 
             with patch.object(mcp, "format_gitlab_summary", return_value="Summary"):
@@ -1945,9 +2275,13 @@ class TestMcpGitlabSummaryHandler(unittest.TestCase):
             ledger.write_text(json.dumps(receipt) + "\n", encoding="utf-8")
 
             env = {"CI_MERGE_REQUEST_IID": "99"}
-            with patch.dict(os.environ, env, clear=False), \
-                 patch.object(mcp, "format_gitlab_summary", return_value="Summary"), \
-                 patch.object(mcp, "post_mr_comment", side_effect=Exception("API error")):
+            with (
+                patch.dict(os.environ, env, clear=False),
+                patch.object(mcp, "format_gitlab_summary", return_value="Summary"),
+                patch.object(
+                    mcp, "post_mr_comment", side_effect=Exception("API error")
+                ),
+            ):
                 result = mcp._handle_aiir_gitlab_summary({"post_to_mr": True})
             # Should still succeed (error is best-effort)
             self.assertFalse(result.get("isError", False))
@@ -1975,8 +2309,10 @@ class TestMcpRateLimiter(unittest.TestCase):
         input_data = "\n".join(messages) + "\n"
         captured_output = io.StringIO()
 
-        with patch("sys.stdin", io.StringIO(input_data)), \
-             patch("sys.stdout", captured_output):
+        with (
+            patch("sys.stdin", io.StringIO(input_data)),
+            patch("sys.stdout", captured_output),
+        ):
             # Monkey-patch time.monotonic to return same time (all within window)
             fixed_time = time.monotonic()
             with patch("time.monotonic", return_value=fixed_time):
@@ -1995,7 +2331,9 @@ class TestMcpRateLimiter(unittest.TestCase):
                     break
             except json.JSONDecodeError:
                 continue
-        self.assertTrue(found_rate_limit, "Expected rate limit exceeded error in output")
+        self.assertTrue(
+            found_rate_limit, "Expected rate limit exceeded error in output"
+        )
 
     def test_rate_limiter_popleft_cleanup(self):
         """L779: old timestamps are cleaned via popleft when time advances past window."""
@@ -2022,9 +2360,11 @@ class TestMcpRateLimiter(unittest.TestCase):
         input_data = "\n".join(messages) + "\n"
         captured_output = io.StringIO()
 
-        with patch("sys.stdin", io.StringIO(input_data)), \
-             patch("sys.stdout", captured_output), \
-             patch("time.monotonic", side_effect=advancing_time):
+        with (
+            patch("sys.stdin", io.StringIO(input_data)),
+            patch("sys.stdout", captured_output),
+            patch("time.monotonic", side_effect=advancing_time),
+        ):
             mcp.serve_stdio()
 
         output_lines = [
@@ -2034,7 +2374,9 @@ class TestMcpRateLimiter(unittest.TestCase):
         for line in output_lines:
             try:
                 resp = json.loads(line)
-                self.assertNotIn("Rate limit exceeded", resp.get("error", {}).get("message", ""))
+                self.assertNotIn(
+                    "Rate limit exceeded", resp.get("error", {}).get("message", "")
+                )
             except json.JSONDecodeError:
                 continue
 
@@ -2050,8 +2392,7 @@ class TestMcpRateLimiter(unittest.TestCase):
         mock_stdin = ReconfigurableStringIO("")  # Empty input → immediate EOF
         mock_stdout = ReconfigurableStringIO()
 
-        with patch("sys.stdin", mock_stdin), \
-             patch("sys.stdout", mock_stdout):
+        with patch("sys.stdin", mock_stdin), patch("sys.stdout", mock_stdout):
             mcp.serve_stdio()
         # If we reach here without error, reconfigure was called on both streams
 
@@ -2080,7 +2421,11 @@ class TestMcpGraphQLError(unittest.TestCase):
             ledger.write_text('{"receipt_id": "test"}\n', encoding="utf-8")
 
             # gitlab_summary with range triggers generate_receipts_for_range
-            with patch.object(mcp, "generate_receipts_for_range", side_effect=RuntimeError("GraphQL error")):
+            with patch.object(
+                mcp,
+                "generate_receipts_for_range",
+                side_effect=RuntimeError("GraphQL error"),
+            ):
                 result = mcp._handle_aiir_gitlab_summary({"range": "HEAD~1..HEAD"})
             self.assertTrue(result.get("isError", False))
 

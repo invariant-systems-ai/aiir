@@ -101,7 +101,8 @@ def sign_receipt(receipt_json_bytes: bytes) -> str:
     ctx = SigningContext.from_trust_config(config)
     with ctx.signer(identity_token) as signer:
         bundle = signer.sign_artifact(receipt_json_bytes)
-    return bundle.to_json()
+    result: str = bundle.to_json()
+    return result
 
 
 def sign_receipt_file(receipt_path: str) -> str:

@@ -131,7 +131,7 @@ def build_commit_receipt(
             **(
                 {"files": commit.files_changed[:100]}
                 if not redact_files
-                else {"files_redacted": True}
+                else {"files_redacted": True}  # type: ignore[dict-item]
             ),
             # Indicate when file list was truncated so verifiers know
             # the full list is not present.
@@ -233,9 +233,7 @@ def build_review_receipt(
     # Determine repo identity
     repo_url: Optional[str] = None
     try:
-        repo_url = (
-            _run_git(["remote", "get-url", "origin"], cwd=cwd).strip() or None
-        )
+        repo_url = _run_git(["remote", "get-url", "origin"], cwd=cwd).strip() or None
         if repo_url:
             repo_url = _strip_url_credentials(repo_url)
     except RuntimeError:
@@ -252,8 +250,11 @@ def build_review_receipt(
         "version": CLI_VERSION,
         "reviewed_commit": {
             "sha": _strip_terminal_escapes(str(reviewed_commit))[:64],
-            **({"receipt_id": _strip_terminal_escapes(str(commit_receipt_id))[:40]}
-               if commit_receipt_id else {}),
+            **(
+                {"receipt_id": _strip_terminal_escapes(str(commit_receipt_id))[:40]}
+                if commit_receipt_id
+                else {}
+            ),
         },
         "reviewer": {
             "name": reviewer_name,
@@ -460,7 +461,7 @@ def format_receipt_pretty(receipt: Dict[str, Any], signed: str = "none") -> str:
         signals = []
     # Box-drawing chars → _b() for encoding safety.
     # Lazy-import cli._b so that tests toggling cli._USE_BOXDRAW are respected.
-    from aiir.cli import _b as _box  # noqa: C0415 — lazy to avoid circular import
+    from aiir.cli import _b as _box  # noqa: PLC0415 — lazy to avoid circular import
 
     tl, vl, bl, hl = _box("tl"), _box("vl"), _box("bl"), _box("hl")
     lines = [
@@ -542,7 +543,7 @@ def format_receipt_detail(receipt: Dict[str, Any], signed: str = "none") -> str:
         files_count = 0
 
     # Box-drawing chars
-    from aiir.cli import _b as _box  # noqa: C0415
+    from aiir.cli import _b as _box  # noqa: PLC0415
 
     tl, vl, bl_char, hl = _box("tl"), _box("vl"), _box("bl"), _box("hl")
     sec = f"{vl}{'─' * 44}"  # section separator

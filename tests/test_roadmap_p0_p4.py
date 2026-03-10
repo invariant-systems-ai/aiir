@@ -17,11 +17,10 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, patch
 
 import aiir.cli as cli
 from aiir._github import (
-    _API_TIMEOUT,
     _PR_COMMENT_MARKER,
     _detect_pr_number,
     _find_existing_comment,
@@ -41,6 +40,7 @@ from aiir._receipt import (
 # Test fixtures
 # ---------------------------------------------------------------------------
 
+
 def _make_receipt(**overrides):
     """Build a minimal valid receipt dict for testing."""
     base = {
@@ -49,8 +49,16 @@ def _make_receipt(**overrides):
         "version": "1.2.1",
         "commit": {
             "sha": "a" * 40,
-            "author": {"name": "Alice", "email": "alice@example.com", "date": "2026-01-01T00:00:00Z"},
-            "committer": {"name": "Alice", "email": "alice@example.com", "date": "2026-01-01T00:00:00Z"},
+            "author": {
+                "name": "Alice",
+                "email": "alice@example.com",
+                "date": "2026-01-01T00:00:00Z",
+            },
+            "committer": {
+                "name": "Alice",
+                "email": "alice@example.com",
+                "date": "2026-01-01T00:00:00Z",
+            },
             "subject": "feat: add feature",
             "message_hash": "sha256:" + "0" * 64,
             "diff_hash": "sha256:" + "1" * 64,
@@ -216,7 +224,9 @@ class TestCreateCheckRun(unittest.TestCase):
         mock_resp.__enter__ = lambda s: s
         mock_resp.__exit__ = MagicMock(return_value=False)
 
-        with patch.dict(os.environ, {"GITHUB_API_URL": "https://api.github.com"}, clear=True):
+        with patch.dict(
+            os.environ, {"GITHUB_API_URL": "https://api.github.com"}, clear=True
+        ):
             with patch("aiir._github.urlopen", return_value=mock_resp) as mock_urlopen:
                 create_check_run(
                     [_make_receipt()],
@@ -305,30 +315,39 @@ class TestBuildReviewReceipt(unittest.TestCase):
         """Run func inside a temporary git repo."""
         with tempfile.TemporaryDirectory() as tmpdir:
             import subprocess
+
             subprocess.run(["git", "init", tmpdir], capture_output=True, check=True)
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.email", "test@example.com"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.name", "Test User"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             # Create a commit
             Path(tmpdir, "file.txt").write_text("hello\n")
-            subprocess.run(["git", "-C", tmpdir, "add", "."], capture_output=True, check=True)
+            subprocess.run(
+                ["git", "-C", tmpdir, "add", "."], capture_output=True, check=True
+            )
             subprocess.run(
                 ["git", "-C", tmpdir, "commit", "-m", "initial"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             head_sha = subprocess.run(
                 ["git", "-C", tmpdir, "rev-parse", "HEAD"],
-                capture_output=True, text=True, check=True,
+                capture_output=True,
+                text=True,
+                check=True,
             ).stdout.strip()
             return func(tmpdir, head_sha)
 
     def test_basic_review_receipt(self):
         """Build a review receipt with default outcome."""
+
         def _test(tmpdir, head_sha):
             receipt = build_review_receipt(
                 reviewed_commit=head_sha,
@@ -352,6 +371,7 @@ class TestBuildReviewReceipt(unittest.TestCase):
 
     def test_review_outcomes(self):
         """All three review outcomes work."""
+
         def _test(tmpdir, head_sha):
             for outcome in ("approved", "rejected", "commented"):
                 r = build_review_receipt(
@@ -368,6 +388,7 @@ class TestBuildReviewReceipt(unittest.TestCase):
 
     def test_invalid_outcome_raises(self):
         """Invalid review outcome raises ValueError."""
+
         def _test(tmpdir, head_sha):
             with self.assertRaises(ValueError) as ctx:
                 build_review_receipt(
@@ -384,6 +405,7 @@ class TestBuildReviewReceipt(unittest.TestCase):
 
     def test_with_comment(self):
         """Review receipt with comment."""
+
         def _test(tmpdir, head_sha):
             r = build_review_receipt(
                 reviewed_commit=head_sha,
@@ -399,6 +421,7 @@ class TestBuildReviewReceipt(unittest.TestCase):
 
     def test_without_comment(self):
         """Review receipt without comment has no comment key."""
+
         def _test(tmpdir, head_sha):
             r = build_review_receipt(
                 reviewed_commit=head_sha,
@@ -413,6 +436,7 @@ class TestBuildReviewReceipt(unittest.TestCase):
 
     def test_with_commit_receipt_id(self):
         """Review receipt can reference a commit receipt."""
+
         def _test(tmpdir, head_sha):
             r = build_review_receipt(
                 reviewed_commit=head_sha,
@@ -431,6 +455,7 @@ class TestBuildReviewReceipt(unittest.TestCase):
 
     def test_content_addressing(self):
         """Receipt ID is deterministic for same inputs."""
+
         def _test(tmpdir, head_sha):
             r1 = build_review_receipt(
                 reviewed_commit=head_sha,
@@ -455,6 +480,7 @@ class TestBuildReviewReceipt(unittest.TestCase):
 
     def test_different_outcome_different_hash(self):
         """Different outcomes produce different hashes."""
+
         def _test(tmpdir, head_sha):
             r1 = build_review_receipt(
                 reviewed_commit=head_sha,
@@ -477,6 +503,7 @@ class TestBuildReviewReceipt(unittest.TestCase):
 
     def test_extensions_with_namespace(self):
         """Extensions carry namespace when provided."""
+
         def _test(tmpdir, head_sha):
             r = build_review_receipt(
                 reviewed_commit=head_sha,
@@ -494,6 +521,7 @@ class TestBuildReviewReceipt(unittest.TestCase):
 
     def test_sanitizes_terminal_escapes(self):
         """Terminal escape sequences are stripped from all inputs."""
+
         def _test(tmpdir, head_sha):
             r = build_review_receipt(
                 reviewed_commit=head_sha,
@@ -515,12 +543,16 @@ class TestReviewReceiptSchema(unittest.TestCase):
 
     def test_schema_exists(self):
         """Schema file exists."""
-        schema_path = Path(__file__).parent.parent / "schemas" / "review_receipt.v1.schema.json"
+        schema_path = (
+            Path(__file__).parent.parent / "schemas" / "review_receipt.v1.schema.json"
+        )
         self.assertTrue(schema_path.exists(), f"Schema not found: {schema_path}")
 
     def test_schema_valid_json(self):
         """Schema file is valid JSON."""
-        schema_path = Path(__file__).parent.parent / "schemas" / "review_receipt.v1.schema.json"
+        schema_path = (
+            Path(__file__).parent.parent / "schemas" / "review_receipt.v1.schema.json"
+        )
         data = json.loads(schema_path.read_text(encoding="utf-8"))
         self.assertEqual(data["title"], "AIIR Review Receipt v1")
         self.assertIn("reviewed_commit", data["properties"])
@@ -587,7 +619,9 @@ class TestAiirInit(unittest.TestCase):
             old_cwd = os.getcwd()
             try:
                 os.chdir(tmpdir)
-                result = cli.main(["--init", "--ledger", str(aiir_dir), "--policy", "balanced"])
+                result = cli.main(
+                    ["--init", "--ledger", str(aiir_dir), "--policy", "balanced"]
+                )
             finally:
                 os.chdir(old_cwd)
 
@@ -815,7 +849,9 @@ class TestPostPRComment(unittest.TestCase):
 
         # First call: list comments (GET). Second call: create comment (POST).
         with patch.dict(os.environ, env, clear=True):
-            with patch("aiir._github.urlopen", side_effect=[mock_resp_list, mock_resp_post]) as mock_urlopen:
+            with patch(
+                "aiir._github.urlopen", side_effect=[mock_resp_list, mock_resp_post]
+            ) as mock_urlopen:
                 result = post_pr_comment([_make_receipt()], pr_number="42")
 
         self.assertEqual(result, {"id": 500})
@@ -825,9 +861,11 @@ class TestPostPRComment(unittest.TestCase):
 
     def test_updates_existing_comment(self):
         """Updates an existing comment when marker found."""
-        comments_json = json.dumps([
-            {"id": 200, "body": f"{_PR_COMMENT_MARKER}\nOld summary"},
-        ]).encode("utf-8")
+        comments_json = json.dumps(
+            [
+                {"id": 200, "body": f"{_PR_COMMENT_MARKER}\nOld summary"},
+            ]
+        ).encode("utf-8")
 
         mock_resp_list = MagicMock()
         mock_resp_list.read.return_value = comments_json
@@ -846,7 +884,9 @@ class TestPostPRComment(unittest.TestCase):
         }
 
         with patch.dict(os.environ, env, clear=True):
-            with patch("aiir._github.urlopen", side_effect=[mock_resp_list, mock_resp_patch]) as mock_urlopen:
+            with patch(
+                "aiir._github.urlopen", side_effect=[mock_resp_list, mock_resp_patch]
+            ) as mock_urlopen:
                 result = post_pr_comment([_make_receipt()], pr_number="42")
 
         self.assertEqual(result, {"id": 200})
@@ -897,7 +937,9 @@ class TestFormatCommitTrailer(unittest.TestCase):
         """Caps at 10 AIIR-Receipt lines."""
         receipts = [_make_receipt() for _ in range(15)]
         trailer = format_commit_trailer(receipts)
-        receipt_lines = [l for l in trailer.split("\n") if l.startswith("AIIR-Receipt:")]
+        receipt_lines = [
+            l for l in trailer.split("\n") if l.startswith("AIIR-Receipt:")
+        ]
         self.assertEqual(len(receipt_lines), 10)
 
     def test_ends_with_newline(self):
@@ -910,7 +952,9 @@ class TestFormatCommitTrailer(unittest.TestCase):
         trailer = format_commit_trailer([_make_receipt(), _make_ai_receipt()])
         self.assertIn("AIIR-AI: true", trailer)
         # Two receipt lines
-        receipt_lines = [l for l in trailer.split("\n") if l.startswith("AIIR-Receipt:")]
+        receipt_lines = [
+            l for l in trailer.split("\n") if l.startswith("AIIR-Receipt:")
+        ]
         self.assertEqual(len(receipt_lines), 2)
 
     def test_sanitizes_receipt_id(self):
@@ -1017,6 +1061,7 @@ class TestPublicAPI(unittest.TestCase):
     def test_github_exports(self):
         """GitHub functions are in __all__."""
         import aiir
+
         self.assertIn("create_check_run", aiir.__all__)
         self.assertIn("post_pr_comment", aiir.__all__)
         self.assertIn("format_commit_trailer", aiir.__all__)
@@ -1024,6 +1069,7 @@ class TestPublicAPI(unittest.TestCase):
     def test_review_receipt_exports(self):
         """Review receipt function is in __all__."""
         import aiir
+
         self.assertIn("build_review_receipt", aiir.__all__)
         self.assertIn("REVIEW_RECEIPT_SCHEMA_VERSION", aiir.__all__)
 
@@ -1036,6 +1082,7 @@ class TestPublicAPI(unittest.TestCase):
             build_review_receipt,
             REVIEW_RECEIPT_SCHEMA_VERSION,
         )
+
         self.assertIsNotNone(create_check_run)
         self.assertIsNotNone(post_pr_comment)
         self.assertIsNotNone(format_commit_trailer)
@@ -1153,7 +1200,9 @@ class TestFormatCommitTrailerEdgeCases(unittest.TestCase):
         r["receipt_id"] = ""
         trailer = format_commit_trailer([r])
         # Should NOT have an AIIR-Receipt line (empty rid → skip)
-        receipt_lines = [l for l in trailer.split("\n") if l.startswith("AIIR-Receipt:")]
+        receipt_lines = [
+            l for l in trailer.split("\n") if l.startswith("AIIR-Receipt:")
+        ]
         self.assertEqual(len(receipt_lines), 0)
         # But should still have Type, AI, Verified
         self.assertIn("AIIR-Type:", trailer)
@@ -1165,7 +1214,9 @@ class TestFormatCommitTrailerEdgeCases(unittest.TestCase):
         r = _make_receipt()
         del r["receipt_id"]
         trailer = format_commit_trailer([r])
-        receipt_lines = [l for l in trailer.split("\n") if l.startswith("AIIR-Receipt:")]
+        receipt_lines = [
+            l for l in trailer.split("\n") if l.startswith("AIIR-Receipt:")
+        ]
         self.assertEqual(len(receipt_lines), 0)
 
     def test_ai_attestation_not_dict_in_has_ai(self):
@@ -1200,28 +1251,43 @@ class TestReviewReceiptRepoUrlStripping(unittest.TestCase):
             subprocess.run(["git", "init", tmpdir], capture_output=True, check=True)
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.email", "t@t.com"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.name", "T"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             # Add a remote with credentials in URL
             subprocess.run(
-                ["git", "-C", tmpdir, "remote", "add", "origin",
-                 "https://user:password@github.com/test/repo.git"],
-                capture_output=True, check=True,
+                [
+                    "git",
+                    "-C",
+                    tmpdir,
+                    "remote",
+                    "add",
+                    "origin",
+                    "https://user:password@github.com/test/repo.git",
+                ],
+                capture_output=True,
+                check=True,
             )
             # Create a commit
             Path(tmpdir, "f.txt").write_text("x\n")
-            subprocess.run(["git", "-C", tmpdir, "add", "."], capture_output=True, check=True)
+            subprocess.run(
+                ["git", "-C", tmpdir, "add", "."], capture_output=True, check=True
+            )
             subprocess.run(
                 ["git", "-C", tmpdir, "commit", "-m", "init"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             head = subprocess.run(
                 ["git", "-C", tmpdir, "rev-parse", "HEAD"],
-                capture_output=True, text=True, check=True,
+                capture_output=True,
+                text=True,
+                check=True,
             ).stdout.strip()
 
             receipt = build_review_receipt(
@@ -1244,26 +1310,41 @@ class TestReviewReceiptRepoUrlStripping(unittest.TestCase):
             subprocess.run(["git", "init", tmpdir], capture_output=True, check=True)
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.email", "t@t.com"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.name", "T"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             subprocess.run(
-                ["git", "-C", tmpdir, "remote", "add", "origin",
-                 "https://github.com/test/repo.git"],
-                capture_output=True, check=True,
+                [
+                    "git",
+                    "-C",
+                    tmpdir,
+                    "remote",
+                    "add",
+                    "origin",
+                    "https://github.com/test/repo.git",
+                ],
+                capture_output=True,
+                check=True,
             )
             Path(tmpdir, "f.txt").write_text("x\n")
-            subprocess.run(["git", "-C", tmpdir, "add", "."], capture_output=True, check=True)
+            subprocess.run(
+                ["git", "-C", tmpdir, "add", "."], capture_output=True, check=True
+            )
             subprocess.run(
                 ["git", "-C", tmpdir, "commit", "-m", "init"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             head = subprocess.run(
                 ["git", "-C", tmpdir, "rev-parse", "HEAD"],
-                capture_output=True, text=True, check=True,
+                capture_output=True,
+                text=True,
+                check=True,
             ).stdout.strip()
 
             receipt = build_review_receipt(
@@ -1300,6 +1381,7 @@ class TestInitPathTraversalGuard(unittest.TestCase):
                 os.chdir(old_cwd)
                 # Clean up in case it was somehow created
                 import shutil
+
                 if os.path.exists(evil_ledger):
                     shutil.rmtree(evil_ledger)
             self.assertEqual(result, 1)
@@ -1332,10 +1414,15 @@ class TestInitNamespace(unittest.TestCase):
             old_cwd = os.getcwd()
             try:
                 os.chdir(tmpdir)
-                result = cli.main([
-                    "--init", "--ledger", str(aiir_dir),
-                    "--namespace", "acme-corp",
-                ])
+                result = cli.main(
+                    [
+                        "--init",
+                        "--ledger",
+                        str(aiir_dir),
+                        "--namespace",
+                        "acme-corp",
+                    ]
+                )
             finally:
                 os.chdir(old_cwd)
             self.assertEqual(result, 0)
@@ -1372,10 +1459,15 @@ class TestInitPolicyEdgeCases(unittest.TestCase):
             old_cwd = os.getcwd()
             try:
                 os.chdir(tmpdir)
-                result = cli.main([
-                    "--init", "--ledger", str(aiir_dir),
-                    "--policy", "strict",
-                ])
+                result = cli.main(
+                    [
+                        "--init",
+                        "--ledger",
+                        str(aiir_dir),
+                        "--policy",
+                        "strict",
+                    ]
+                )
             finally:
                 os.chdir(old_cwd)
             self.assertEqual(result, 0)
@@ -1388,10 +1480,15 @@ class TestInitPolicyEdgeCases(unittest.TestCase):
             old_cwd = os.getcwd()
             try:
                 os.chdir(tmpdir)
-                result = cli.main([
-                    "--init", "--ledger", str(aiir_dir),
-                    "--policy", "unknown-preset",
-                ])
+                result = cli.main(
+                    [
+                        "--init",
+                        "--ledger",
+                        str(aiir_dir),
+                        "--policy",
+                        "unknown-preset",
+                    ]
+                )
             finally:
                 os.chdir(old_cwd)
             self.assertEqual(result, 0)
@@ -1416,23 +1513,36 @@ class TestReviewCLI(unittest.TestCase):
             subprocess.run(["git", "init", tmpdir], capture_output=True, check=True)
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.email", "rev@test.com"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.name", "Reviewer"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             # Add remote so repo_url is populated
             subprocess.run(
-                ["git", "-C", tmpdir, "remote", "add", "origin",
-                 "https://github.com/test/repo.git"],
-                capture_output=True, check=True,
+                [
+                    "git",
+                    "-C",
+                    tmpdir,
+                    "remote",
+                    "add",
+                    "origin",
+                    "https://github.com/test/repo.git",
+                ],
+                capture_output=True,
+                check=True,
             )
             Path(tmpdir, "f.txt").write_text("x\n")
-            subprocess.run(["git", "-C", tmpdir, "add", "."], capture_output=True, check=True)
+            subprocess.run(
+                ["git", "-C", tmpdir, "add", "."], capture_output=True, check=True
+            )
             subprocess.run(
                 ["git", "-C", tmpdir, "commit", "-m", "init"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
 
             argv = ["--review", "--ledger", str(Path(tmpdir) / ".aiir")]
@@ -1446,10 +1556,16 @@ class TestReviewCLI(unittest.TestCase):
                 os.chdir(tmpdir)
                 if env_overrides:
                     with patch.dict(os.environ, env_overrides):
-                        with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                        with (
+                            contextlib.redirect_stdout(stdout_buf),
+                            contextlib.redirect_stderr(stderr_buf),
+                        ):
                             rc = cli.main(argv)
                 else:
-                    with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                    with (
+                        contextlib.redirect_stdout(stdout_buf),
+                        contextlib.redirect_stderr(stderr_buf),
+                    ):
                         rc = cli.main(argv)
             finally:
                 os.chdir(old_cwd)
@@ -1478,8 +1594,10 @@ class TestReviewCLI(unittest.TestCase):
         """--review --review-outcome commented --review-comment 'needs work'."""
         rc, stdout, stderr = self._run_review_in_git_repo(
             extra_args=[
-                "--review-outcome", "commented",
-                "--review-comment", "needs work",
+                "--review-outcome",
+                "commented",
+                "--review-comment",
+                "needs work",
             ]
         )
         self.assertEqual(rc, 0)
@@ -1490,18 +1608,14 @@ class TestReviewCLI(unittest.TestCase):
 
     def test_review_json_output(self):
         """--review --json outputs indented JSON to stdout."""
-        rc, stdout, stderr = self._run_review_in_git_repo(
-            extra_args=["--json"]
-        )
+        rc, stdout, stderr = self._run_review_in_git_repo(extra_args=["--json"])
         self.assertEqual(rc, 0)
         receipt = json.loads(stdout)
         self.assertEqual(receipt["type"], "aiir.review_receipt")
 
     def test_review_jsonl_output(self):
         """--review --jsonl outputs compact JSON to stdout."""
-        rc, stdout, stderr = self._run_review_in_git_repo(
-            extra_args=["--jsonl"]
-        )
+        rc, stdout, stderr = self._run_review_in_git_repo(extra_args=["--jsonl"])
         self.assertEqual(rc, 0)
         # JSONL should be a single line
         lines = [l for l in stdout.strip().split("\n") if l.strip()]
@@ -1511,31 +1625,36 @@ class TestReviewCLI(unittest.TestCase):
 
     def test_review_quiet(self):
         """--review --quiet suppresses stderr output."""
-        rc, stdout, stderr = self._run_review_in_git_repo(
-            extra_args=["--quiet"]
-        )
+        rc, stdout, stderr = self._run_review_in_git_repo(extra_args=["--quiet"])
         self.assertEqual(rc, 0)
         self.assertNotIn("Review receipt", stderr)
 
     def test_review_writes_to_stdout_default(self):
         """--review (no --json/--jsonl) still prints receipt JSON to stdout."""
-        import subprocess, io, contextlib
+        import subprocess
+        import io
+        import contextlib
 
         with tempfile.TemporaryDirectory() as tmpdir:
             subprocess.run(["git", "init", tmpdir], capture_output=True, check=True)
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.email", "r@t.com"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.name", "R"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             Path(tmpdir, "f.txt").write_text("x\n")
-            subprocess.run(["git", "-C", tmpdir, "add", "."], capture_output=True, check=True)
+            subprocess.run(
+                ["git", "-C", tmpdir, "add", "."], capture_output=True, check=True
+            )
             subprocess.run(
                 ["git", "-C", tmpdir, "commit", "-m", "init"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             ledger = Path(tmpdir) / ".aiir"
             stdout_buf = io.StringIO()
@@ -1546,7 +1665,10 @@ class TestReviewCLI(unittest.TestCase):
                 # Init the ledger first
                 cli.main(["--init", "--ledger", str(ledger)])
                 # Now review (default mode: append to ledger + print to stdout)
-                with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                with (
+                    contextlib.redirect_stdout(stdout_buf),
+                    contextlib.redirect_stderr(stderr_buf),
+                ):
                     rc = cli.main(["--review", "--ledger", str(ledger)])
             finally:
                 os.chdir(old_cwd)
@@ -1559,23 +1681,29 @@ class TestReviewCLI(unittest.TestCase):
     def test_review_no_git_identity_uses_env(self):
         """When git config user.name/email fail, falls back to env vars."""
         import subprocess
-        import io, contextlib
+        import io
+        import contextlib
 
         with tempfile.TemporaryDirectory() as tmpdir:
             subprocess.run(["git", "init", tmpdir], capture_output=True, check=True)
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.email", "tmp@t.com"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.name", "Tmp"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             Path(tmpdir, "f.txt").write_text("x\n")
-            subprocess.run(["git", "-C", tmpdir, "add", "."], capture_output=True, check=True)
+            subprocess.run(
+                ["git", "-C", tmpdir, "add", "."], capture_output=True, check=True
+            )
             subprocess.run(
                 ["git", "-C", tmpdir, "commit", "-m", "init"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
 
             # Mock _run_git to raise for user.name/email queries
@@ -1597,7 +1725,10 @@ class TestReviewCLI(unittest.TestCase):
                 }
                 with patch.dict(os.environ, env_override):
                     with patch("aiir.cli._run_git", side_effect=_mock_run_git):
-                        with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                        with (
+                            contextlib.redirect_stdout(stdout_buf),
+                            contextlib.redirect_stderr(stderr_buf),
+                        ):
                             rc = cli.main(["--review", "--json"])
             finally:
                 os.chdir(old_cwd)
@@ -1621,24 +1752,31 @@ class TestTrailerCLIOutput(unittest.TestCase):
         """--trailer prints trailer lines to stdout after receipt generation."""
         mock_gen.return_value = _make_receipt()
 
-        import subprocess, io, contextlib
+        import subprocess
+        import io
+        import contextlib
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create a git repo
             subprocess.run(["git", "init", tmpdir], capture_output=True, check=True)
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.email", "t@t.com"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.name", "T"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             Path(tmpdir, "f.txt").write_text("x\n")
-            subprocess.run(["git", "-C", tmpdir, "add", "."], capture_output=True, check=True)
+            subprocess.run(
+                ["git", "-C", tmpdir, "add", "."], capture_output=True, check=True
+            )
             subprocess.run(
                 ["git", "-C", tmpdir, "commit", "-m", "init"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
 
             ledger_dir = str(Path(tmpdir) / ".aiir")
@@ -1649,11 +1787,18 @@ class TestTrailerCLIOutput(unittest.TestCase):
             try:
                 os.chdir(tmpdir)
                 with patch("aiir.cli.get_repo_root", return_value=tmpdir):
-                    with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
-                        rc = cli.main([
-                            "--trailer", "--ledger", ledger_dir,
-                            "--quiet",
-                        ])
+                    with (
+                        contextlib.redirect_stdout(stdout_buf),
+                        contextlib.redirect_stderr(stderr_buf),
+                    ):
+                        rc = cli.main(
+                            [
+                                "--trailer",
+                                "--ledger",
+                                ledger_dir,
+                                "--quiet",
+                            ]
+                        )
             finally:
                 os.chdir(old_cwd)
 
@@ -1682,7 +1827,8 @@ class TestGitHubActionSuccessLogs(unittest.TestCase):
         mock_check.return_value = {"id": 1}
         mock_pr.side_effect = RuntimeError("no PR")  # PR comment fails (no PR context)
 
-        import io, contextlib
+        import io
+        import contextlib
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_file = Path(tmpdir) / "output"
@@ -1699,7 +1845,10 @@ class TestGitHubActionSuccessLogs(unittest.TestCase):
             stdout_buf = io.StringIO()
             with patch.dict(os.environ, env):
                 with patch("aiir.cli.get_repo_root", return_value=tmpdir):
-                    with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                    with (
+                        contextlib.redirect_stdout(stdout_buf),
+                        contextlib.redirect_stderr(stderr_buf),
+                    ):
                         rc = cli.main(["--github-action"])
 
         self.assertEqual(rc, 0)
@@ -1714,7 +1863,8 @@ class TestGitHubActionSuccessLogs(unittest.TestCase):
         mock_check.return_value = {"id": 1}
         mock_pr.return_value = {"id": 500}
 
-        import io, contextlib
+        import io
+        import contextlib
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_file = Path(tmpdir) / "output"
@@ -1731,7 +1881,10 @@ class TestGitHubActionSuccessLogs(unittest.TestCase):
             stdout_buf = io.StringIO()
             with patch.dict(os.environ, env):
                 with patch("aiir.cli.get_repo_root", return_value=tmpdir):
-                    with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                    with (
+                        contextlib.redirect_stdout(stdout_buf),
+                        contextlib.redirect_stderr(stderr_buf),
+                    ):
                         rc = cli.main(["--github-action"])
 
         self.assertEqual(rc, 0)
@@ -1746,7 +1899,8 @@ class TestGitHubActionSuccessLogs(unittest.TestCase):
         mock_gen.return_value = _make_receipt()
         mock_check.side_effect = RuntimeError("403 Forbidden")
 
-        import io, contextlib
+        import io
+        import contextlib
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_file = Path(tmpdir) / "output"
@@ -1763,7 +1917,10 @@ class TestGitHubActionSuccessLogs(unittest.TestCase):
             stdout_buf = io.StringIO()
             with patch.dict(os.environ, env):
                 with patch("aiir.cli.get_repo_root", return_value=tmpdir):
-                    with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                    with (
+                        contextlib.redirect_stdout(stdout_buf),
+                        contextlib.redirect_stderr(stderr_buf),
+                    ):
                         rc = cli.main(["--github-action"])
 
         self.assertEqual(rc, 0)
@@ -1784,7 +1941,9 @@ class TestInitOSError(unittest.TestCase):
             old_cwd = os.getcwd()
             try:
                 os.chdir(tmpdir)
-                with patch("pathlib.Path.resolve", side_effect=OSError("mock resolve failure")):
+                with patch(
+                    "pathlib.Path.resolve", side_effect=OSError("mock resolve failure")
+                ):
                     result = cli.main(["--init", "--ledger", ".aiir"])
             finally:
                 os.chdir(old_cwd)
@@ -1802,11 +1961,18 @@ class TestInitPolicyValueError(unittest.TestCase):
             old_cwd = os.getcwd()
             try:
                 os.chdir(tmpdir)
-                with patch("aiir.cli.init_policy", side_effect=ValueError("bad policy")):
-                    result = cli.main([
-                        "--init", "--ledger", str(aiir_dir),
-                        "--policy", "balanced",
-                    ])
+                with patch(
+                    "aiir.cli.init_policy", side_effect=ValueError("bad policy")
+                ):
+                    result = cli.main(
+                        [
+                            "--init",
+                            "--ledger",
+                            str(aiir_dir),
+                            "--policy",
+                            "balanced",
+                        ]
+                    )
             finally:
                 os.chdir(old_cwd)
             self.assertEqual(result, 0)
@@ -1821,7 +1987,8 @@ class TestReviewErrorPaths(unittest.TestCase):
 
     def test_review_no_git_repo(self):
         """--review when get_repo_root fails → error + return 1."""
-        import io, contextlib
+        import io
+        import contextlib
 
         with tempfile.TemporaryDirectory() as tmpdir:
             old_cwd = os.getcwd()
@@ -1829,8 +1996,13 @@ class TestReviewErrorPaths(unittest.TestCase):
             stdout_buf = io.StringIO()
             try:
                 os.chdir(tmpdir)
-                with patch("aiir.cli.get_repo_root", side_effect=RuntimeError("not a git repo")):
-                    with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                with patch(
+                    "aiir.cli.get_repo_root", side_effect=RuntimeError("not a git repo")
+                ):
+                    with (
+                        contextlib.redirect_stdout(stdout_buf),
+                        contextlib.redirect_stderr(stderr_buf),
+                    ):
                         rc = cli.main(["--review"])
             finally:
                 os.chdir(old_cwd)
@@ -1839,7 +2011,8 @@ class TestReviewErrorPaths(unittest.TestCase):
 
     def test_review_empty_identity(self):
         """--review with empty reviewer identity → error + return 1."""
-        import io, contextlib
+        import io
+        import contextlib
 
         original_run_git = cli._run_git
 
@@ -1860,7 +2033,10 @@ class TestReviewErrorPaths(unittest.TestCase):
                 os.chdir(tmpdir)
                 with patch("aiir.cli.get_repo_root", return_value=tmpdir):
                     with patch("aiir.cli._run_git", side_effect=_mock_run_git):
-                        with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                        with (
+                            contextlib.redirect_stdout(stdout_buf),
+                            contextlib.redirect_stderr(stderr_buf),
+                        ):
                             rc = cli.main(["--review"])
             finally:
                 os.chdir(old_cwd)
@@ -1869,7 +2045,8 @@ class TestReviewErrorPaths(unittest.TestCase):
 
     def test_review_build_receipt_fails(self):
         """--review when build_review_receipt raises ValueError → error."""
-        import io, contextlib
+        import io
+        import contextlib
 
         with tempfile.TemporaryDirectory() as tmpdir:
             old_cwd = os.getcwd()
@@ -1879,9 +2056,17 @@ class TestReviewErrorPaths(unittest.TestCase):
                 os.chdir(tmpdir)
                 with patch("aiir.cli.get_repo_root", return_value=tmpdir):
                     with patch("aiir.cli._run_git", return_value="TestUser"):
-                        with patch("aiir.cli.build_review_receipt", side_effect=ValueError("bad input")):
-                            with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
-                                rc = cli.main(["--review", "--review-outcome", "approved"])
+                        with patch(
+                            "aiir.cli.build_review_receipt",
+                            side_effect=ValueError("bad input"),
+                        ):
+                            with (
+                                contextlib.redirect_stdout(stdout_buf),
+                                contextlib.redirect_stderr(stderr_buf),
+                            ):
+                                rc = cli.main(
+                                    ["--review", "--review-outcome", "approved"]
+                                )
             finally:
                 os.chdir(old_cwd)
             self.assertEqual(rc, 1)
@@ -1889,23 +2074,30 @@ class TestReviewErrorPaths(unittest.TestCase):
 
     def test_review_ledger_append_fails(self):
         """--review when append_to_ledger raises ValueError → error."""
-        import io, contextlib, subprocess
+        import io
+        import contextlib
+        import subprocess
 
         with tempfile.TemporaryDirectory() as tmpdir:
             subprocess.run(["git", "init", tmpdir], capture_output=True, check=True)
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.email", "t@t.com"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.name", "T"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             Path(tmpdir, "f.txt").write_text("x\n")
-            subprocess.run(["git", "-C", tmpdir, "add", "."], capture_output=True, check=True)
+            subprocess.run(
+                ["git", "-C", tmpdir, "add", "."], capture_output=True, check=True
+            )
             subprocess.run(
                 ["git", "-C", tmpdir, "commit", "-m", "init"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
 
             old_cwd = os.getcwd()
@@ -1913,8 +2105,14 @@ class TestReviewErrorPaths(unittest.TestCase):
             stdout_buf = io.StringIO()
             try:
                 os.chdir(tmpdir)
-                with patch("aiir.cli.append_to_ledger", side_effect=ValueError("path traversal")):
-                    with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                with patch(
+                    "aiir.cli.append_to_ledger",
+                    side_effect=ValueError("path traversal"),
+                ):
+                    with (
+                        contextlib.redirect_stdout(stdout_buf),
+                        contextlib.redirect_stderr(stderr_buf),
+                    ):
                         rc = cli.main(["--review", "--ledger", ".aiir"])
             finally:
                 os.chdir(old_cwd)
@@ -1938,21 +2136,28 @@ class TestReviewReceiptEmptyRemoteUrl(unittest.TestCase):
             subprocess.run(["git", "init", tmpdir], capture_output=True, check=True)
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.email", "t@t.com"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             subprocess.run(
                 ["git", "-C", tmpdir, "config", "user.name", "T"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             Path(tmpdir, "f.txt").write_text("x\n")
-            subprocess.run(["git", "-C", tmpdir, "add", "."], capture_output=True, check=True)
+            subprocess.run(
+                ["git", "-C", tmpdir, "add", "."], capture_output=True, check=True
+            )
             subprocess.run(
                 ["git", "-C", tmpdir, "commit", "-m", "init"],
-                capture_output=True, check=True,
+                capture_output=True,
+                check=True,
             )
             head = subprocess.run(
                 ["git", "-C", tmpdir, "rev-parse", "HEAD"],
-                capture_output=True, text=True, check=True,
+                capture_output=True,
+                text=True,
+                check=True,
             ).stdout.strip()
 
             # Add origin that returns empty URL somehow — mock _run_git
@@ -1985,7 +2190,8 @@ class TestCheckRunFailureQuiet(unittest.TestCase):
         mock_gen.return_value = _make_receipt()
         mock_check.side_effect = RuntimeError("403 Forbidden")
 
-        import io, contextlib
+        import io
+        import contextlib
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_file = Path(tmpdir) / "output"
@@ -2002,7 +2208,10 @@ class TestCheckRunFailureQuiet(unittest.TestCase):
             stdout_buf = io.StringIO()
             with patch.dict(os.environ, env):
                 with patch("aiir.cli.get_repo_root", return_value=tmpdir):
-                    with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                    with (
+                        contextlib.redirect_stdout(stdout_buf),
+                        contextlib.redirect_stderr(stderr_buf),
+                    ):
                         rc = cli.main(["--github-action", "--quiet"])
 
         self.assertEqual(rc, 0)
@@ -2043,7 +2252,9 @@ class TestPrNumberValidation(unittest.TestCase):
             "GITHUB_API_URL": "https://api.github.com",
         }
         with patch.dict(os.environ, env, clear=True):
-            with patch("aiir._github.urlopen", side_effect=[mock_resp_list, mock_resp_post]):
+            with patch(
+                "aiir._github.urlopen", side_effect=[mock_resp_list, mock_resp_post]
+            ):
                 result = post_pr_comment([_make_receipt()], pr_number="99")
         self.assertEqual(result, {"id": 1})
 
@@ -2053,7 +2264,8 @@ class TestReviewRevParseErrorPaths(unittest.TestCase):
 
     def test_review_rev_parse_fails(self):
         """--review when git rev-parse fails → error + return 1."""
-        import io, contextlib
+        import io
+        import contextlib
 
         def _mock_run_git(args, **kwargs):
             if args[0] == "rev-parse":
@@ -2068,7 +2280,10 @@ class TestReviewRevParseErrorPaths(unittest.TestCase):
                 os.chdir(tmpdir)
                 with patch("aiir.cli.get_repo_root", return_value=tmpdir):
                     with patch("aiir.cli._run_git", side_effect=_mock_run_git):
-                        with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                        with (
+                            contextlib.redirect_stdout(stdout_buf),
+                            contextlib.redirect_stderr(stderr_buf),
+                        ):
                             rc = cli.main(["--review", "BADREF"])
             finally:
                 os.chdir(old_cwd)
@@ -2077,7 +2292,8 @@ class TestReviewRevParseErrorPaths(unittest.TestCase):
 
     def test_review_rev_parse_empty(self):
         """--review when git rev-parse returns empty → error + return 1."""
-        import io, contextlib
+        import io
+        import contextlib
 
         def _mock_run_git(args, **kwargs):
             if args[0] == "rev-parse":
@@ -2092,7 +2308,10 @@ class TestReviewRevParseErrorPaths(unittest.TestCase):
                 os.chdir(tmpdir)
                 with patch("aiir.cli.get_repo_root", return_value=tmpdir):
                     with patch("aiir.cli._run_git", side_effect=_mock_run_git):
-                        with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                        with (
+                            contextlib.redirect_stdout(stdout_buf),
+                            contextlib.redirect_stderr(stderr_buf),
+                        ):
                             rc = cli.main(["--review", "HEAD"])
             finally:
                 os.chdir(old_cwd)

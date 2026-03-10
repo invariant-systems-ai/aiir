@@ -14,7 +14,6 @@ These tests validate that logic in isolation.
 
 from __future__ import annotations
 
-import os
 import re
 import shutil
 import subprocess
@@ -32,12 +31,11 @@ class TestActionYmlExists(unittest.TestCase):
         self.assertTrue(ACTION_YML.exists())
 
     def test_action_yml_is_valid_yaml(self):
-        import json
         # Use Python's built-in YAML-like parsing or just check structure
         content = ACTION_YML.read_text()
         self.assertIn("name:", content)
         self.assertIn("runs:", content)
-        self.assertIn("using: \"composite\"", content)
+        self.assertIn('using: "composite"', content)
 
     def test_action_yml_has_required_inputs(self):
         content = ACTION_YML.read_text()
@@ -59,7 +57,7 @@ class TestInputValidation(unittest.TestCase):
 
     # This regex matches the input validation pattern from action.yml:
     #   if echo "$RANGE" | grep -qE '[;&|$`\\]|[[:cntrl:]]'; then
-    FORBIDDEN_PATTERN = re.compile(r'[;&|$`\\]|[\x00-\x1f\x7f]')
+    FORBIDDEN_PATTERN = re.compile(r"[;&|$`\\]|[\x00-\x1f\x7f]")
 
     def test_clean_range_passes(self):
         """Normal commit ranges pass validation."""
@@ -127,32 +125,45 @@ class TestCommitRangeLogic(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.tmpdir, True)
         # Create a minimal git repo
         subprocess.run(
-            ["git", "init"], cwd=self.tmpdir,
-            capture_output=True, check=True,
+            ["git", "init"],
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
         subprocess.run(
             ["git", "config", "user.email", "test@test.com"],
-            cwd=self.tmpdir, capture_output=True, check=True,
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
         subprocess.run(
             ["git", "config", "user.name", "Test"],
-            cwd=self.tmpdir, capture_output=True, check=True,
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
         # First commit
         (Path(self.tmpdir) / "file.txt").write_text("hello")
         subprocess.run(
-            ["git", "add", "."], cwd=self.tmpdir,
-            capture_output=True, check=True,
+            ["git", "add", "."],
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
         subprocess.run(
-            ["git", "commit", "-m", "init"], cwd=self.tmpdir,
-            capture_output=True, check=True,
+            ["git", "commit", "-m", "init"],
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
 
     def _get_head_sha(self) -> str:
         result = subprocess.run(
-            ["git", "rev-parse", "HEAD"], cwd=self.tmpdir,
-            capture_output=True, text=True, check=True,
+            ["git", "rev-parse", "HEAD"],
+            cwd=self.tmpdir,
+            capture_output=True,
+            text=True,
+            check=True,
         )
         return result.stdout.strip()
 
@@ -181,12 +192,16 @@ class TestCommitRangeLogic(unittest.TestCase):
         # Create second commit
         (Path(self.tmpdir) / "file2.txt").write_text("world")
         subprocess.run(
-            ["git", "add", "."], cwd=self.tmpdir,
-            capture_output=True, check=True,
+            ["git", "add", "."],
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
         subprocess.run(
-            ["git", "commit", "-m", "second"], cwd=self.tmpdir,
-            capture_output=True, check=True,
+            ["git", "commit", "-m", "second"],
+            cwd=self.tmpdir,
+            capture_output=True,
+            check=True,
         )
         sha2 = self._get_head_sha()
 
@@ -240,11 +255,14 @@ class TestActionShaPin(unittest.TestCase):
     def test_all_uses_sha_pinned(self):
         """Every 'uses:' in action.yml references a SHA, not a tag."""
         content = ACTION_YML.read_text()
-        sha_pattern = re.compile(r'uses:\s+\S+@[0-9a-f]{40}')
-        tag_pattern = re.compile(r'uses:\s+\S+@v\d')
+        sha_pattern = re.compile(r"uses:\s+\S+@[0-9a-f]{40}")
+        tag_pattern = re.compile(r"uses:\s+\S+@v\d")
 
-        uses_lines = [line.strip() for line in content.split("\n")
-                      if "uses:" in line and "@" in line]
+        uses_lines = [
+            line.strip()
+            for line in content.split("\n")
+            if "uses:" in line and "@" in line
+        ]
 
         for line in uses_lines:
             self.assertTrue(

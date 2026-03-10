@@ -142,7 +142,8 @@ def _gitlab_api_request(
 
     try:
         with urlopen(req, timeout=_API_TIMEOUT) as resp:  # nosec B310  # nosemgrep
-            return json.loads(resp.read().decode("utf-8"))
+            result: dict[str, Any] = json.loads(resp.read().decode("utf-8"))
+            return result
     except HTTPError as e:
         error_body = ""
         try:
@@ -737,7 +738,8 @@ def query_gitlab_graphql(
                 raise RuntimeError(
                     f"GraphQL errors: {json.dumps(result['errors'][:3])}"
                 )
-            return result.get("data", {})
+            gql_data: dict[str, Any] = result.get("data", {})
+            return gql_data
     except HTTPError as e:
         error_body = ""
         try:
@@ -816,7 +818,9 @@ def generate_dashboard_html(
             cls, "❓"
         )
         safe_cls = html.escape(_strip_terminal_escapes(cls))
-        class_rows += f"<tr><td>{icon} {safe_cls}</td><td>{count}</td><td>{pct:.1f}%</td></tr>\n"
+        class_rows += (
+            f"<tr><td>{icon} {safe_cls}</td><td>{count}</td><td>{pct:.1f}%</td></tr>\n"
+        )
 
     # Build recent receipts rows (last 50)
     receipt_rows = ""
@@ -829,7 +833,9 @@ def generate_dashboard_html(
             ai = {}
         sha = html.escape(_strip_terminal_escapes(str(commit.get("sha", "")))[:8])
         subj = html.escape(_strip_terminal_escapes(str(commit.get("subject", "")))[:60])
-        cls = html.escape(_strip_terminal_escapes(str(ai.get("authorship_class", "unknown"))))
+        cls = html.escape(
+            _strip_terminal_escapes(str(ai.get("authorship_class", "unknown")))
+        )
         ts = html.escape(_strip_terminal_escapes(str(r.get("timestamp", "")))[:19])
         receipt_rows += f"<tr><td><code>{sha}</code></td><td>{subj}</td><td>{cls}</td><td>{ts}</td></tr>\n"
 

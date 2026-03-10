@@ -37,6 +37,7 @@ RUN if [ -n "$AIIR_VERSION" ]; then \
     rm -rf /src
 
 # Git is required for commit scanning
+# hadolint ignore=DL3008
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git && \
     rm -rf /var/lib/apt/lists/*

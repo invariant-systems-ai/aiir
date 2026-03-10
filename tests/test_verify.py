@@ -380,7 +380,9 @@ class TestVerifyArrayErrors(unittest.TestCase):
 class TestVerifyReceiptFileEdgeCases(unittest.TestCase):
     """Tests that kill surviving mutants in verify_receipt_file."""
 
-    def _assert_standard_error_result(self, result: dict, expected_error_substr: str = ""):
+    def _assert_standard_error_result(
+        self, result: dict, expected_error_substr: str = ""
+    ):
         """Assert result is a well-formed error dict with exact keys."""
         self.assertIsInstance(result, dict)
         # Key must be exactly "valid", not "VALID" or "XXvalidXX"
@@ -397,7 +399,7 @@ class TestVerifyReceiptFileEdgeCases(unittest.TestCase):
         tmpdir = tempfile.mkdtemp()
         try:
             real = Path(tmpdir, "real.json")
-            real.write_text('{}')
+            real.write_text("{}")
             link = Path(tmpdir, "link.json")
             link.symlink_to(real)
             result = cli.verify_receipt_file(str(link))
@@ -437,11 +439,13 @@ class TestVerifyReceiptFileEdgeCases(unittest.TestCase):
         """JSON string/number/bool must return valid=False."""
         tmpdir = tempfile.mkdtemp()
         try:
-            for value in ['"just a string"', '42', 'true', 'null']:
+            for value in ['"just a string"', "42", "true", "null"]:
                 path = Path(tmpdir, "scalar.json")
                 path.write_text(value)
                 result = cli.verify_receipt_file(str(path))
-                self._assert_standard_error_result(result, "Expected JSON object or array")
+                self._assert_standard_error_result(
+                    result, "Expected JSON object or array"
+                )
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
 

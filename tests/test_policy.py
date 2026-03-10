@@ -311,7 +311,9 @@ class TestPolicyMutationKillers(unittest.TestCase):
             policy_path = Path(td) / "policy.json"
             # Write a policy with a non-ASCII char to verify encoding works
             policy = {"description": "Richtlinie — strict"}
-            policy_path.write_text(json.dumps(policy, ensure_ascii=False), encoding="utf-8")
+            policy_path.write_text(
+                json.dumps(policy, ensure_ascii=False), encoding="utf-8"
+            )
             loaded = load_policy(ledger_dir=td)
             self.assertIn("Richtlinie", loaded["description"])
 
@@ -369,6 +371,7 @@ class TestPolicyMutationKillers(unittest.TestCase):
     def test_save_default_ledger_dir_is_dotaiir(self):
         """Default ledger_dir must be '.aiir' (not '.AIIR')."""
         import inspect
+
         sig = inspect.signature(save_policy)
         self.assertEqual(sig.parameters["ledger_dir"].default, ".aiir")
 
@@ -379,12 +382,14 @@ class TestPolicyMutationKillers(unittest.TestCase):
     def test_init_default_preset_is_balanced(self):
         """Default preset must be 'balanced' (not 'BALANCED')."""
         import inspect
+
         sig = inspect.signature(init_policy)
         self.assertEqual(sig.parameters["preset"].default, "balanced")
 
     def test_init_default_ledger_dir_is_dotaiir(self):
         """Default ledger_dir must be '.aiir'."""
         import inspect
+
         sig = inspect.signature(init_policy)
         self.assertEqual(sig.parameters["ledger_dir"].default, ".aiir")
 
@@ -576,6 +581,7 @@ class TestPolicyMutationKillers(unittest.TestCase):
     def test_report_enforcement_default_is_warn(self):
         """Default enforcement param must be 'warn'."""
         import inspect
+
         sig = inspect.signature(format_policy_report)
         self.assertEqual(sig.parameters["enforcement"].default, "warn")
 

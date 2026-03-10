@@ -30,10 +30,15 @@ import copy
 import json
 import string
 
-from hypothesis import assume, given, settings, HealthCheck
-from hypothesis import strategies as st
+import pytest
 
-from aiir._core import (
+hypothesis = pytest.importorskip("hypothesis", reason="hypothesis not installed")
+from hypothesis import assume, given, settings, HealthCheck  # noqa: E402
+from hypothesis import strategies as st  # noqa: E402
+
+HAS_HYPOTHESIS = True
+
+from aiir._core import (  # noqa: E402
     CommitInfo,
     _canonical_json,
     _normalize_for_detection,
@@ -41,21 +46,21 @@ from aiir._core import (
     _strip_terminal_escapes,
     _strip_url_credentials,
 )
-from aiir._detect import detect_ai_signals
-from aiir._policy import (
+from aiir._detect import detect_ai_signals  # noqa: E402
+from aiir._policy import (  # noqa: E402
     POLICY_PRESETS,
     evaluate_ledger_policy,
     evaluate_receipt_policy,
 )
-from aiir._receipt import (
+from aiir._receipt import (  # noqa: E402
     _sanitize_agent_attestation,
     build_commit_receipt,
     format_receipt_detail,
     format_receipt_pretty,
     wrap_in_toto_statement,
 )
-from aiir._schema import validate_receipt_schema
-from aiir._verify import verify_receipt
+from aiir._schema import validate_receipt_schema  # noqa: E402
+from aiir._verify import verify_receipt  # noqa: E402
 
 # ── Strategies ────────────────────────────────────────────────────────
 
@@ -75,7 +80,9 @@ sha_hex_64 = st.text(
 # Safe text for commit fields (printable ASCII, no NUL)
 safe_text = st.text(
     alphabet=st.sampled_from(
-        list(string.printable.replace("\x00", "").replace("\x0b", "").replace("\x0c", ""))
+        list(
+            string.printable.replace("\x00", "").replace("\x0b", "").replace("\x0c", "")
+        )
     ),
     min_size=1,
     max_size=200,
@@ -166,9 +173,7 @@ json_objects = st.recursive(
     json_primitives,
     lambda children: st.one_of(
         st.lists(children, max_size=8),
-        st.dictionaries(
-            st.text(min_size=1, max_size=20), children, max_size=8
-        ),
+        st.dictionaries(st.text(min_size=1, max_size=20), children, max_size=8),
     ),
     max_leaves=30,
 )
@@ -176,10 +181,14 @@ json_objects = st.recursive(
 
 # ── Helpers ───────────────────────────────────────────────────────────
 
+
 def _build_receipt(commit: CommitInfo, attestation=None) -> dict:
     """Build a receipt from a CommitInfo, mocking git remote."""
     import unittest.mock
-    with unittest.mock.patch("aiir._receipt._run_git", return_value="https://github.com/test/repo"):
+
+    with unittest.mock.patch(
+        "aiir._receipt._run_git", return_value="https://github.com/test/repo"
+    ):
         return build_commit_receipt(
             commit,
             repo_root="/tmp/test",
@@ -190,6 +199,7 @@ def _build_receipt(commit: CommitInfo, attestation=None) -> dict:
 # ═══════════════════════════════════════════════════════════════════════
 # PROPERTY 1: Content-addressing is deterministic
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestContentAddressingDeterministic:
     """Same CommitInfo → same receipt_id, always."""
@@ -218,6 +228,7 @@ class TestContentAddressingDeterministic:
 # PROPERTY 2: Self-generated receipts always self-verify
 # ═══════════════════════════════════════════════════════════════════════
 
+
 class TestSelfVerification:
     """Every receipt we build must pass our own verifier."""
 
@@ -237,12 +248,15 @@ class TestSelfVerification:
         serialized = json.dumps(receipt, sort_keys=True)
         deserialized = json.loads(serialized)
         result = verify_receipt(deserialized)
-        assert result["valid"], f"JSON round-trip broke verification: {result.get('errors')}"
+        assert result["valid"], (
+            f"JSON round-trip broke verification: {result.get('errors')}"
+        )
 
 
 # ═══════════════════════════════════════════════════════════════════════
 # PROPERTY 3: Tampering with any core field breaks verification
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestTamperDetection:
     """Modifying ANY core field must cause verify_receipt to return valid=False."""
@@ -264,7 +278,9 @@ class TestTamperDetection:
         """Flipping is_ai_authored must break verification."""
         receipt = _build_receipt(commit)
         tampered = copy.deepcopy(receipt)
-        tampered["ai_attestation"]["is_ai_authored"] = not receipt["ai_attestation"]["is_ai_authored"]
+        tampered["ai_attestation"]["is_ai_authored"] = not receipt["ai_attestation"][
+            "is_ai_authored"
+        ]
         result = verify_receipt(tampered)
         assert not result["valid"], "Tampered AI flag was not detected"
 
@@ -306,6 +322,7 @@ class TestTamperDetection:
 # PROPERTY 4: Schema validation passes on all self-generated receipts
 # ═══════════════════════════════════════════════════════════════════════
 
+
 class TestSchemaOnSelfGenerated:
     """Our own receipts must always pass our own schema validator."""
 
@@ -322,12 +339,15 @@ class TestSchemaOnSelfGenerated:
 # PROPERTY 5: Policy strictness is monotone
 # ═══════════════════════════════════════════════════════════════════════
 
+
 class TestPolicyMonotonicity:
     """strict ⊇ balanced ⊇ permissive — anything strict rejects, so do the others."""
 
     @given(commit=commit_info_st, is_signed=st.booleans())
     @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
-    def test_permissive_accepts_superset_of_balanced(self, commit: CommitInfo, is_signed: bool):
+    def test_permissive_accepts_superset_of_balanced(
+        self, commit: CommitInfo, is_signed: bool
+    ):
         """If balanced accepts a receipt, permissive must also accept."""
         receipt = _build_receipt(commit)
         balanced = {**POLICY_PRESETS["balanced"], "preset": "balanced"}
@@ -343,7 +363,9 @@ class TestPolicyMonotonicity:
 
     @given(commit=commit_info_st, is_signed=st.booleans())
     @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
-    def test_balanced_accepts_superset_of_strict(self, commit: CommitInfo, is_signed: bool):
+    def test_balanced_accepts_superset_of_strict(
+        self, commit: CommitInfo, is_signed: bool
+    ):
         """If strict accepts, balanced must also accept."""
         receipt = _build_receipt(commit)
         strict = {**POLICY_PRESETS["strict"], "preset": "strict"}
@@ -361,6 +383,7 @@ class TestPolicyMonotonicity:
 # ═══════════════════════════════════════════════════════════════════════
 # PROPERTY 6: In-toto wrapping is structure-preserving
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestInTotoWrapping:
     """The in-toto envelope must preserve the receipt verbatim."""
@@ -390,6 +413,7 @@ class TestInTotoWrapping:
 # ═══════════════════════════════════════════════════════════════════════
 # PROPERTY 7: Canonical JSON is idempotent and deterministic
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestCanonicalJson:
     """_canonical_json must produce a stable, unique representation."""
@@ -427,12 +451,18 @@ class TestCanonicalJson:
             return
         # The only spaces are inside string values, never structural
         parsed_back = json.loads(cj)
-        cj_min = json.dumps(parsed_back, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+        cj_min = json.dumps(
+            parsed_back, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+        )
         assert cj == cj_min
 
     @given(
         d=st.dictionaries(
-            st.text(min_size=1, max_size=10, alphabet=st.sampled_from(list(string.ascii_letters))),
+            st.text(
+                min_size=1,
+                max_size=10,
+                alphabet=st.sampled_from(list(string.ascii_letters)),
+            ),
             st.integers(min_value=0, max_value=100),
             min_size=2,
             max_size=10,
@@ -442,6 +472,7 @@ class TestCanonicalJson:
     def test_key_order_irrelevant(self, d: dict):
         """Key insertion order must not affect canonical output."""
         import random
+
         keys = list(d.keys())
         random.shuffle(keys)
         d_shuffled = {k: d[k] for k in keys}
@@ -451,6 +482,7 @@ class TestCanonicalJson:
 # ═══════════════════════════════════════════════════════════════════════
 # PROPERTY 8: Agent attestation sanitization is idempotent
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestAgentAttestationSanitization:
     """Sanitizing twice must produce the same result as sanitizing once."""
@@ -468,20 +500,24 @@ class TestAgentAttestationSanitization:
     def test_only_allowed_keys(self, att):
         """Output must contain only whitelisted keys."""
         from aiir._receipt import _AGENT_ATTESTATION_KEYS
+
         result = _sanitize_agent_attestation(att)
         assert isinstance(result, dict)
         for k in result:
             assert k in _AGENT_ATTESTATION_KEYS, f"Unexpected key: {k}"
 
-    @given(att=st.dictionaries(
-        st.text(min_size=1, max_size=30),
-        st.text(min_size=0, max_size=300),
-        max_size=20,
-    ))
+    @given(
+        att=st.dictionaries(
+            st.text(min_size=1, max_size=30),
+            st.text(min_size=0, max_size=300),
+            max_size=20,
+        )
+    )
     @settings(max_examples=200)
     def test_unknown_keys_stripped(self, att: dict):
         """Keys not in the allowlist must not appear in output."""
         from aiir._receipt import _AGENT_ATTESTATION_KEYS
+
         result = _sanitize_agent_attestation(att)
         for k in result:
             assert k in _AGENT_ATTESTATION_KEYS
@@ -499,6 +535,7 @@ class TestAgentAttestationSanitization:
 # PROPERTY 9: AI signal detection is pure (deterministic)
 # ═══════════════════════════════════════════════════════════════════════
 
+
 class TestDetectionPurity:
     """detect_ai_signals is a pure function — same inputs, same outputs."""
 
@@ -510,34 +547,47 @@ class TestDetectionPurity:
         committer_email=safe_text,
     )
     @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
-    def test_deterministic(self, message, author_name, author_email, committer_name, committer_email):
+    def test_deterministic(
+        self, message, author_name, author_email, committer_name, committer_email
+    ):
         """Calling detect twice with same args gives same result."""
-        r1 = detect_ai_signals(message, author_name, author_email, committer_name, committer_email)
-        r2 = detect_ai_signals(message, author_name, author_email, committer_name, committer_email)
+        r1 = detect_ai_signals(
+            message, author_name, author_email, committer_name, committer_email
+        )
+        r2 = detect_ai_signals(
+            message, author_name, author_email, committer_name, committer_email
+        )
         assert r1 == r2
 
     @given(
-        message=st.sampled_from([
-            "fix: update README",
-            "Co-authored-by: Copilot <copilot@github.com>",
-            "Generated by ChatGPT",
-            "chore: bump deps",
-            "feat: add new feature\n\nGenerated-by: claude",
-        ]),
+        message=st.sampled_from(
+            [
+                "fix: update README",
+                "Co-authored-by: Copilot <copilot@github.com>",
+                "Generated by ChatGPT",
+                "chore: bump deps",
+                "feat: add new feature\n\nGenerated-by: claude",
+            ]
+        ),
     )
     @settings(max_examples=50)
     def test_known_signals_detected(self, message: str):
         """Known AI messages must produce non-empty ai_signals."""
         ai_signals, _ = detect_ai_signals(message)
-        if any(kw in message.lower() for kw in ["copilot", "chatgpt", "claude", "generated-by"]):
+        if any(
+            kw in message.lower()
+            for kw in ["copilot", "chatgpt", "claude", "generated-by"]
+        ):
             assert len(ai_signals) > 0, f"Expected AI signals in: {message!r}"
 
     @given(
-        committer_email=st.sampled_from([
-            "41898282+github-actions[bot]@users.noreply.github.com",
-            "dependabot[bot]@users.noreply.github.com",
-            "renovate[bot]@users.noreply.github.com",
-        ]),
+        committer_email=st.sampled_from(
+            [
+                "41898282+github-actions[bot]@users.noreply.github.com",
+                "dependabot[bot]@users.noreply.github.com",
+                "renovate[bot]@users.noreply.github.com",
+            ]
+        ),
     )
     @settings(max_examples=30)
     def test_bot_signals_detected(self, committer_email: str):
@@ -552,6 +602,7 @@ class TestDetectionPurity:
 # ═══════════════════════════════════════════════════════════════════════
 # PROPERTY 10: _normalize_for_detection is idempotent
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestNormalizationIdempotent:
     """Normalization must converge: repeated application must stabilize."""
@@ -582,6 +633,7 @@ class TestNormalizationIdempotent:
 # PROPERTY 11: _sha256 is deterministic and has correct format
 # ═══════════════════════════════════════════════════════════════════════
 
+
 class TestSha256Properties:
     """SHA-256 helper properties."""
 
@@ -610,6 +662,7 @@ class TestSha256Properties:
 # ═══════════════════════════════════════════════════════════════════════
 # PROPERTY 12: Receipt formatting never crashes
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestFormattingRobustness:
     """Pretty and detail formatters must never crash on valid receipts."""
@@ -645,6 +698,7 @@ class TestFormattingRobustness:
 # PROPERTY 13: URL credential stripping is safe
 # ═══════════════════════════════════════════════════════════════════════
 
+
 class TestUrlCredentialStripping:
     """_strip_url_credentials must remove credentials without crashing."""
 
@@ -666,15 +720,18 @@ class TestUrlCredentialStripping:
     @given(
         user=st.text(
             alphabet=st.sampled_from(list(string.ascii_lowercase)),
-            min_size=3, max_size=10,
+            min_size=3,
+            max_size=10,
         ),
         password=st.text(
             alphabet=st.sampled_from(list(string.ascii_lowercase + string.digits)),
-            min_size=8, max_size=20,
+            min_size=8,
+            max_size=20,
         ),
         host=st.text(
             alphabet=st.sampled_from(list(string.ascii_lowercase)),
-            min_size=4, max_size=10,
+            min_size=4,
+            max_size=10,
         ),
     )
     @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
@@ -692,6 +749,7 @@ class TestUrlCredentialStripping:
 # PROPERTY 14: _strip_terminal_escapes is idempotent
 # ═══════════════════════════════════════════════════════════════════════
 
+
 class TestStripEscapesIdempotent:
     """Stripping escapes twice = stripping once."""
 
@@ -708,6 +766,7 @@ class TestStripEscapesIdempotent:
 # PROPERTY 15: Ledger-level policy evaluation (aggregate)
 # ═══════════════════════════════════════════════════════════════════════
 
+
 class TestLedgerPolicyProperties:
     """Ledger-level policy evaluation has consistent behavior."""
 
@@ -716,7 +775,9 @@ class TestLedgerPolicyProperties:
         receipt_count=st.integers(min_value=1, max_value=10000),
     )
     @settings(max_examples=200)
-    def test_permissive_never_rejects_on_ai_percent(self, ai_pct: float, receipt_count: int):
+    def test_permissive_never_rejects_on_ai_percent(
+        self, ai_pct: float, receipt_count: int
+    ):
         """Permissive allows 100% AI, so it should never fail on ai_percent."""
         index = {
             "receipt_count": receipt_count,

@@ -172,7 +172,7 @@ from aiir._sign import (  # noqa: F401
 # ---------------------------------------------------------------------------
 
 
-def _e(name: str) -> str:  # noqa: F811 — intentional override
+def _e(name: str) -> str:  # type: ignore[no-redef]  # noqa: F811
     """Return emoji glyph if the terminal supports it, else ASCII fallback."""
     pair = _EMOJI.get(name)
     if pair is None:
@@ -180,7 +180,7 @@ def _e(name: str) -> str:  # noqa: F811 — intentional override
     return pair[0] if _USE_EMOJI else pair[1]
 
 
-def _b(name: str) -> str:  # noqa: F811 — intentional override
+def _b(name: str) -> str:  # type: ignore[no-redef]  # noqa: F811
     """Return box-drawing glyph if the terminal supports it, else ASCII."""
     pair = _BOX.get(name)
     if pair is None:
@@ -726,9 +726,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # like "HEAD" or a short SHA like "abc1234".
         reviewed_ref = args.review
         try:
-            reviewed_sha = _run_git(
-                ["rev-parse", reviewed_ref], cwd=cwd_review
-            ).strip()
+            reviewed_sha = _run_git(["rev-parse", reviewed_ref], cwd=cwd_review).strip()
             if not reviewed_sha:
                 raise RuntimeError(f"Could not resolve ref: {reviewed_ref}")
         except RuntimeError as e:
@@ -737,12 +735,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         # Get reviewer identity from git config
         try:
-            reviewer_name = _run_git(
-                ["config", "user.name"], cwd=cwd_review
-            ).strip()
-            reviewer_email = _run_git(
-                ["config", "user.email"], cwd=cwd_review
-            ).strip()
+            reviewer_name = _run_git(["config", "user.name"], cwd=cwd_review).strip()
+            reviewer_email = _run_git(["config", "user.email"], cwd=cwd_review).strip()
         except RuntimeError:
             reviewer_name = os.environ.get("GIT_AUTHOR_NAME", "unknown")
             reviewer_email = os.environ.get("GIT_AUTHOR_EMAIL", "unknown")
@@ -782,7 +776,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ledger_dir = args.ledger if args.ledger is not None else _LEDGER_DIR
             try:
                 appended, skipped, ledger_path = append_to_ledger(
-                    [review_receipt], ledger_dir=ledger_dir,
+                    [review_receipt],
+                    ledger_dir=ledger_dir,
                 )
             except ValueError as e:
                 print(f"{_e('error')} {e}", file=sys.stderr)
@@ -1460,12 +1455,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         if use_ledger:
             print(
-                f"   {_e('hint')} Saved to {ledger_path}"  # type: ignore[possibly-undefined]
+                f"   {_e('hint')} Saved to {ledger_path}"
                 + (
-                    f" ({skipped_count} duplicate{'s' if skipped_count != 1 else ''} skipped)"  # type: ignore[possibly-undefined]
+                    f" ({skipped_count} duplicate{'s' if skipped_count != 1 else ''} skipped)"
                     if skipped_count
                     else ""
-                ),  # type: ignore[possibly-undefined]
+                ),
                 file=sys.stderr,
             )
 

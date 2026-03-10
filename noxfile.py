@@ -22,16 +22,31 @@ nox.options.reuse_existing_virtualenvs = True
 def test(session: nox.Session) -> None:
     """Run the test suite (excluding fuzz tests)."""
     session.install("pytest")
-    session.run("python", "-m", "pytest", "tests/", "-v", "--tb=short",
-                "--ignore=tests/test_fuzz.py", *session.posargs)
+    session.run(
+        "python",
+        "-m",
+        "pytest",
+        "tests/",
+        "-v",
+        "--tb=short",
+        "--ignore=tests/test_fuzz.py",
+        *session.posargs,
+    )
 
 
 @nox.session(python="3.12")
 def fuzz(session: nox.Session) -> None:
     """Run Hypothesis property-based fuzz tests."""
     session.install("pytest", "hypothesis")
-    session.run("python", "-m", "pytest", "tests/test_fuzz.py",
-                "tests/test_properties.py", "-v", "--tb=short")
+    session.run(
+        "python",
+        "-m",
+        "pytest",
+        "tests/test_fuzz.py",
+        "tests/test_properties.py",
+        "-v",
+        "--tb=short",
+    )
 
 
 @nox.session(python="3.12")
@@ -53,8 +68,17 @@ def typecheck(session: nox.Session) -> None:
 def coverage(session: nox.Session) -> None:
     """Run tests with coverage and enforce 100% line coverage."""
     session.install("pytest", "coverage")
-    session.run("coverage", "run", "--source=aiir", "-m", "pytest", "tests/",
-                "--ignore=tests/test_fuzz.py", "-q", "--tb=short")
+    session.run(
+        "coverage",
+        "run",
+        "--source=aiir",
+        "-m",
+        "pytest",
+        "tests/",
+        "--ignore=tests/test_fuzz.py",
+        "-q",
+        "--tb=short",
+    )
     session.run("coverage", "report", "--show-missing")
     session.run("coverage", "report", "--fail-under=100")
 
@@ -63,8 +87,15 @@ def coverage(session: nox.Session) -> None:
 def benchmark(session: nox.Session) -> None:
     """Run performance benchmarks."""
     session.install("pytest", "pytest-benchmark")
-    session.run("python", "-m", "pytest", "tests/test_benchmark.py", "-v",
-                "--benchmark-only", *session.posargs)
+    session.run(
+        "python",
+        "-m",
+        "pytest",
+        "tests/test_benchmark.py",
+        "-v",
+        "--benchmark-only",
+        *session.posargs,
+    )
 
 
 @nox.session(python="3.12")

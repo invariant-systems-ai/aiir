@@ -87,7 +87,7 @@ class TestSanitizeMdDifferentialHTML(unittest.TestCase):
 
     def test_math_tag_neutralised(self):
         """<math> (MathML) must not render.  Covers: E-04"""
-        raw = '<math><mtext>x</mtext></math>'
+        raw = "<math><mtext>x</mtext></math>"
         html = _render(_sanitize_md(raw))
         self.assertNotIn("<math", html.lower())
 
@@ -103,7 +103,7 @@ class TestSanitizeMdDifferentialHTML(unittest.TestCase):
         html = _render(_sanitize_md(raw))
         # The <a> tag must NOT render as a real anchor element.
         # The text may appear literally (entity-encoded) but not as <a href=...>.
-        self.assertNotRegex(html, r'<a\s+href=', msg="data: URI link survived")
+        self.assertNotRegex(html, r"<a\s+href=", msg="data: URI link survived")
 
     # -- Angle-bracket edge cases --
 
@@ -178,12 +178,12 @@ class TestSanitizeMdDifferentialLinks(unittest.TestCase):
         """https://evil.com must not become a clickable <a>.  Covers: E-04, I-05"""
         html = _render(_sanitize_md("visit https://evil.com now"))
         # The URL should NOT be wrapped in <a href=...>
-        self.assertNotRegex(html, r'<a\s+href=', msg="Autolink survived sanitization")
+        self.assertNotRegex(html, r"<a\s+href=", msg="Autolink survived sanitization")
 
     def test_markdown_link_syntax_broken(self):
         """[text](url) must not produce a link.  Covers: E-04"""
         html = _render(_sanitize_md("[click here](https://evil.com)"))
-        self.assertNotRegex(html, r'<a\s+href=')
+        self.assertNotRegex(html, r"<a\s+href=")
 
     def test_image_syntax_broken(self):
         """![alt](url) must not produce an <img>.  Covers: E-04"""
@@ -194,7 +194,7 @@ class TestSanitizeMdDifferentialLinks(unittest.TestCase):
         """[text][ref] reference links must not render.  Covers: E-04"""
         text = _sanitize_md("[click][evil]\n\n[evil]: https://evil.com")
         html = _render(text)
-        self.assertNotRegex(html, r'<a\s+href=')
+        self.assertNotRegex(html, r"<a\s+href=")
 
 
 @unittest.skipUnless(_HAS_MARKDOWN_IT, "markdown-it-py not installed")
@@ -203,8 +203,17 @@ class TestSanitizeMdDifferentialUnicode(unittest.TestCase):
 
     def test_bidi_override_stripped(self):
         """RTL/LTR overrides must be removed.  Covers: S-01, I-05"""
-        for cp in ["\u202a", "\u202b", "\u202c", "\u202d", "\u202e",
-                    "\u2066", "\u2067", "\u2068", "\u2069"]:
+        for cp in [
+            "\u202a",
+            "\u202b",
+            "\u202c",
+            "\u202d",
+            "\u202e",
+            "\u2066",
+            "\u2067",
+            "\u2068",
+            "\u2069",
+        ]:
             result = _sanitize_md(f"safe{cp}text")
             self.assertNotIn(cp, result, f"Bidi codepoint U+{ord(cp):04X} survived")
 
@@ -227,8 +236,37 @@ class TestSanitizeMdDifferentialUnicode(unittest.TestCase):
     def test_c0_control_chars_stripped(self):
         """C0 control characters (except \\n, \\r, \\t?) must be stripped.  Covers: E-05"""
         # Test BEL, ESC, NUL, etc.
-        for i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18, 19,
-                  20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]:
+        for i in [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            11,
+            12,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+        ]:
             c = chr(i)
             result = _sanitize_md(f"a{c}b")
             self.assertNotIn(c, result, f"Control char U+{i:04X} survived")
@@ -244,14 +282,16 @@ class TestSanitizeMdDifferentialComposed(unittest.TestCase):
         html = _render(_sanitize_md(payload))
         # Real HTML elements must not be created — check for actual tags, not
         # literal text in entity-encoded output.
-        self.assertNotRegex(html, r'<svg[\s/>]', msg="<svg> survived as real tag")
-        self.assertNotRegex(html, r'<script[\s/>]', msg="<script> survived as real tag")
+        self.assertNotRegex(html, r"<svg[\s/>]", msg="<svg> survived as real tag")
+        self.assertNotRegex(html, r"<script[\s/>]", msg="<script> survived as real tag")
         # Event handlers must not appear in actual HTML attributes
-        self.assertNotRegex(html, r'\bon\w+=', msg="Event handler survived in HTML attribute")
+        self.assertNotRegex(
+            html, r"\bon\w+=", msg="Event handler survived in HTML attribute"
+        )
 
     def test_table_breakout_with_html(self):
         """Pipe + HTML injection must not break table AND inject HTML.  Covers: E-04"""
-        payload = 'safe | <img src=x onerror=alert(1)>'
+        payload = "safe | <img src=x onerror=alert(1)>"
         html = _render_in_table(_sanitize_md(payload))
         self.assertNotIn("<img", html.lower())
         td_count = html.lower().count("<td>")
@@ -295,13 +335,17 @@ class TestConstantTimeComparisonGuard(unittest.TestCase):
     def _get_verify_source(self) -> str:
         """Return the source code of the verify_receipt function."""
         from aiir._verify import verify_receipt
+
         return inspect.getsource(verify_receipt)
 
     def test_hmac_compare_digest_present(self):
         """verify_receipt MUST call hmac.compare_digest.  Covers: T-01"""
         source = self._get_verify_source()
-        self.assertIn("hmac.compare_digest", source,
-                       "verify_receipt must use hmac.compare_digest for constant-time comparison")
+        self.assertIn(
+            "hmac.compare_digest",
+            source,
+            "verify_receipt must use hmac.compare_digest for constant-time comparison",
+        )
 
     def test_hmac_compare_digest_used_for_hash(self):
         """Stored hash comparison MUST use hmac.compare_digest.  Covers: T-01"""
@@ -311,8 +355,9 @@ class TestConstantTimeComparisonGuard(unittest.TestCase):
         self.assertIn("expected_hash", source)
         # Ensure hmac.compare_digest is used (at least 2 calls: hash + id)
         count = source.count("hmac.compare_digest")
-        self.assertGreaterEqual(count, 2,
-                                f"Expected ≥2 hmac.compare_digest calls, found {count}")
+        self.assertGreaterEqual(
+            count, 2, f"Expected ≥2 hmac.compare_digest calls, found {count}"
+        )
 
     def test_no_equality_operator_on_hashes(self):
         """Hash/id comparisons MUST NOT use == or !=.  Covers: T-01, T-02"""
@@ -321,8 +366,14 @@ class TestConstantTimeComparisonGuard(unittest.TestCase):
 
         # Collect all Compare nodes that use == or != with hash/id variables
         dangerous_comparisons = []
-        sensitive_names = {"stored_hash", "expected_hash", "stored_id", "expected_id",
-                          "hash_ok", "id_ok"}
+        sensitive_names = {
+            "stored_hash",
+            "expected_hash",
+            "stored_id",
+            "expected_id",
+            "hash_ok",
+            "id_ok",
+        }
 
         for node in ast.walk(tree):
             if not isinstance(node, ast.Compare):
@@ -342,25 +393,36 @@ class TestConstantTimeComparisonGuard(unittest.TestCase):
                         f"Line ~{node.lineno}: {ast.dump(node)} uses ==/!= on {involved_names}"
                     )
 
-        self.assertEqual(dangerous_comparisons, [],
-                         "Dangerous equality on security-sensitive values:\n"
-                         + "\n".join(dangerous_comparisons))
+        self.assertEqual(
+            dangerous_comparisons,
+            [],
+            "Dangerous equality on security-sensitive values:\n"
+            + "\n".join(dangerous_comparisons),
+        )
 
     def test_hmac_import_present(self):
         """The hmac module MUST be imported in _verify.py.  Covers: T-01"""
         import aiir._verify as verify_mod
+
         source = inspect.getsource(verify_mod)
-        self.assertIn("import hmac", source,
-                       "_verify.py must import hmac for constant-time comparison")
+        self.assertIn(
+            "import hmac",
+            source,
+            "_verify.py must import hmac for constant-time comparison",
+        )
 
     def test_compare_digest_not_wrapped_in_equality(self):
         """hmac.compare_digest result must not be compared with == True.  Covers: T-01"""
         source = self._get_verify_source()
         # Patterns like `if hmac.compare_digest(...) == True:` are redundant
         # but not dangerous — however `== False` would invert the logic.
-        self.assertNotIn("compare_digest(", source.replace(" ", "").split("==False")[0]
-                         if "==False" in source.replace(" ", "") else "SKIP_CHECK",
-                         "hmac.compare_digest result must not be compared with == False")
+        self.assertNotIn(
+            "compare_digest(",
+            source.replace(" ", "").split("==False")[0]
+            if "==False" in source.replace(" ", "")
+            else "SKIP_CHECK",
+            "hmac.compare_digest result must not be compared with == False",
+        )
         # Simpler check: no `== False` or `!= True` near compare_digest
         for line in source.splitlines():
             if "compare_digest" in line:

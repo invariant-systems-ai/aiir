@@ -12,10 +12,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
-import subprocess
-import sys
 import tempfile
-import textwrap
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -36,6 +33,7 @@ def _load_module(name: str, path: Path):
 # ═══════════════════════════════════════════════════════════════════════
 # check_licenses.py
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestCheckLicenses(unittest.TestCase):
     """Tests for scripts/check_licenses.py logic."""
@@ -59,7 +57,11 @@ class TestCheckLicenses(unittest.TestCase):
         """All packages approved → exit 0."""
         pkgs = [
             {"Name": "pytest", "Version": "8.0.0", "License": "MIT License"},
-            {"Name": "hypothesis", "Version": "6.0", "License": "Mozilla Public License 2.0"},
+            {
+                "Name": "hypothesis",
+                "Version": "6.0",
+                "License": "Mozilla Public License 2.0",
+            },
         ]
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(pkgs, f)
@@ -111,6 +113,7 @@ class TestCheckLicenses(unittest.TestCase):
 # ═══════════════════════════════════════════════════════════════════════
 # conformance.py
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestConformance(unittest.TestCase):
     """Tests for scripts/conformance.py logic."""
@@ -209,18 +212,22 @@ class TestConformance(unittest.TestCase):
         self.assertFalse(valid)
 
     def test_verify_bad_schema(self):
-        valid, errors = self.mod.verify({
-            "type": "aiir.commit_receipt",
-            "schema": "bad",
-        })
+        valid, errors = self.mod.verify(
+            {
+                "type": "aiir.commit_receipt",
+                "schema": "bad",
+            }
+        )
         self.assertFalse(valid)
 
     def test_verify_bad_version(self):
-        valid, errors = self.mod.verify({
-            "type": "aiir.commit_receipt",
-            "schema": "aiir/commit_receipt.v1",
-            "version": "not-a-version",
-        })
+        valid, errors = self.mod.verify(
+            {
+                "type": "aiir.commit_receipt",
+                "schema": "aiir/commit_receipt.v1",
+                "version": "not-a-version",
+            }
+        )
         self.assertFalse(valid)
 
     def test_run_vectors_with_bundled_vectors(self):
@@ -250,6 +257,7 @@ class TestConformance(unittest.TestCase):
 # sync-version.py
 # ═══════════════════════════════════════════════════════════════════════
 
+
 class TestSyncVersion(unittest.TestCase):
     """Tests for scripts/sync-version.py logic."""
 
@@ -278,7 +286,7 @@ class TestSyncVersion(unittest.TestCase):
         try:
             # Create a file with a stale version
             test_file = Path(tmpdir) / "test.md"
-            test_file.write_text('rev: v0.0.0\n')
+            test_file.write_text("rev: v0.0.0\n")
 
             rules = [
                 self.mod.Rule(
@@ -292,6 +300,7 @@ class TestSyncVersion(unittest.TestCase):
             self.assertIn("0.0.0", drifts[0])
         finally:
             import shutil
+
             shutil.rmtree(tmpdir, ignore_errors=True)
 
     def test_apply_rules_fixes_drift(self):
@@ -299,7 +308,7 @@ class TestSyncVersion(unittest.TestCase):
         tmpdir = tempfile.mkdtemp()
         try:
             test_file = Path(tmpdir) / "test.md"
-            test_file.write_text('rev: v0.0.0\n')
+            test_file.write_text("rev: v0.0.0\n")
 
             rules = [
                 self.mod.Rule(
@@ -315,6 +324,7 @@ class TestSyncVersion(unittest.TestCase):
             self.assertNotIn("v0.0.0", content)
         finally:
             import shutil
+
             shutil.rmtree(tmpdir, ignore_errors=True)
 
     def test_apply_rules_missing_file_skipped(self):
@@ -344,6 +354,7 @@ class TestSyncVersion(unittest.TestCase):
             self.assertIn("pattern not found", drifts[0])
         finally:
             import shutil
+
             shutil.rmtree(tmpdir, ignore_errors=True)
 
     def test_aiir_rules_not_empty(self):

@@ -1107,7 +1107,7 @@ def _hash_diff_streaming(parent: str, sha: str, cwd: Optional[str] = None) -> st
                 raise RuntimeError(
                     f"git diff {parent} {sha} timed out after {GIT_TIMEOUT}s"
                 )
-            chunk = proc.stdout.read(65536)
+            chunk = proc.stdout.read(65536)  # type: ignore[union-attr]
             if not chunk:
                 break
             h.update(chunk)
@@ -1119,7 +1119,7 @@ def _hash_diff_streaming(parent: str, sha: str, cwd: Optional[str] = None) -> st
         proc.wait()
         raise
     finally:
-        proc.stdout.close()
+        proc.stdout.close()  # type: ignore[union-attr]
     # Final wait with timeout — kill if git hangs during cleanup.
     _killed_for_cleanup = False
     try:

@@ -17,13 +17,7 @@ Regressions are caught by comparing against stored baselines.
 
 from __future__ import annotations
 
-import json
-import os
-import shutil
-import subprocess
-import tempfile
 import unittest
-from pathlib import Path
 from typing import Any, Dict
 
 import pytest
@@ -31,6 +25,7 @@ import pytest
 # Import guards — tests are skipped if pytest-benchmark is not installed.
 try:
     import pytest_benchmark  # noqa: F401
+
     HAS_BENCHMARK = True
 except ImportError:
     HAS_BENCHMARK = False
@@ -43,7 +38,6 @@ from aiir._core import (
     _strip_url_credentials,
 )
 from aiir._detect import detect_ai_signals
-from aiir._receipt import build_commit_receipt
 from aiir._schema import validate_receipt_schema
 from aiir._verify import verify_receipt
 
@@ -51,6 +45,7 @@ pytestmark = pytest.mark.benchmark
 
 
 # ── Fixtures ──────────────────────────────────────────────────────────
+
 
 def _make_receipt(**overrides: Any) -> Dict[str, Any]:
     """Build a minimal valid receipt for benchmarking."""
@@ -80,21 +75,23 @@ def _make_receipt(**overrides: Any) -> Dict[str, Any]:
     }
     base.update(overrides)
     # Build with proper hashing
-    content = _canonical_json({
-        k: v for k, v in base.items()
-        if k not in ("receipt_id", "content_hash")
-    })
+    content = _canonical_json(
+        {k: v for k, v in base.items() if k not in ("receipt_id", "content_hash")}
+    )
     base["content_hash"] = "sha256:" + _sha256(content)
     base["receipt_id"] = "g1-" + _sha256(content)[:32]
     return base
 
 
 SAMPLE_RECEIPT = _make_receipt()
-LARGE_MARKDOWN = "# Heading\n\n" + "This is a paragraph with **bold** and *italic* text.\n" * 500
+LARGE_MARKDOWN = (
+    "# Heading\n\n" + "This is a paragraph with **bold** and *italic* text.\n" * 500
+)
 NESTED_OBJ = {"a": {"b": {"c": {"d": {"e": "deep"}}}}}
 
 
 # ── Benchmarks ────────────────────────────────────────────────────────
+
 
 @pytest.mark.skipif(not HAS_BENCHMARK, reason="pytest-benchmark not installed")
 class TestCanonicalJsonBenchmark:
@@ -155,13 +152,20 @@ class TestDetectAiSignalsBenchmark:
     """Benchmark AI signal detection."""
 
     def test_clean_commit(self, benchmark: Any) -> None:
-        benchmark(detect_ai_signals, "feat: add widget support",
-                  "Alice <alice@example.com>", "")
+        benchmark(
+            detect_ai_signals,
+            "feat: add widget support",
+            "Alice <alice@example.com>",
+            "",
+        )
 
     def test_ai_commit(self, benchmark: Any) -> None:
-        benchmark(detect_ai_signals,
-                  "feat: add widget support\n\nCo-authored-by: Copilot",
-                  "Alice <alice@example.com>", "")
+        benchmark(
+            detect_ai_signals,
+            "feat: add widget support\n\nCo-authored-by: Copilot",
+            "Alice <alice@example.com>",
+            "",
+        )
 
 
 @pytest.mark.skipif(not HAS_BENCHMARK, reason="pytest-benchmark not installed")
@@ -199,6 +203,7 @@ class TestStripUrlCredentialsBenchmark:
 
 # ── Non-benchmark regression sanity checks ────────────────────────────
 # These always run (no pytest-benchmark required) to verify correctness.
+
 
 class TestBenchmarkSanity(unittest.TestCase):
     """Sanity checks that benchmark subjects produce correct results."""

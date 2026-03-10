@@ -22,6 +22,22 @@ slsa = "slsa"
 ghcr = "ghcr"
 sbom = "sbom"
 vsa = "vsa"
+# Unicode character names (GREEK CAPITAL LETTER YOT, etc.)
+YOT = "YOT"
+Yot = "Yot"
+SEH = "SEH"
+Seh = "Seh"
+# Lisu Letter BA, Bamum Letter UE, Cherokee Letter Ot, Georgian Mtavruli Vas
+BA = "BA"
+Ba = "Ba"
+UE = "UE"
+Ue = "Ue"
+Ot = "Ot"
+Vas = "Vas"
+# Intentional misspelling in test_cli_integration.py (tests --verfy → --verify suggestion)
+verfy = "verfy"
+# XSS payload fragment in test_hardening.py
+Cript = "Cript"
 
 [files]
 extend-exclude = [

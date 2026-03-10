@@ -1,0 +1,21 @@
+# Gitleaks configuration — allowlist for intentional test fixtures.
+# These are NOT real secrets; they're hardcoded fake credentials used
+# by test_redteam.py and test_cli.py to verify URL-sanitization logic.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[allowlist]
+  description = "Test fixture tokens (not real secrets)"
+
+  # Fingerprints identified by gitleaks --verbose
+  commits = [
+    "1fe0d192f17b875c6bfc82c7d512ad7112ddcb56",
+    "bd896194c31c61405531dabd78a795028ac65dff",
+  ]
+
+  # Path-based allowlist — test files containing intentional fake credentials
+  paths = [
+    '''tests/test_redteam\.py''',
+    '''tests/test_cli\.py''',
+    '''test_cli\.py''',
+  ]

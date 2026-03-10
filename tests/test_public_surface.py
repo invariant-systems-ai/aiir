@@ -773,6 +773,7 @@ class TestSchemaIntegrity(unittest.TestCase):
 def _decode_guard_patterns() -> list[str]:
     """Decode reference-guard patterns from their stored representation."""
     import base64 as _b64
+
     # Encoded patterns for internal reference guards — do not inline plaintext.
     _enc = [
         b"aHViXC5pbnZhcmlhbnRzeXN0ZW1zXC5pbw==",

@@ -58,14 +58,31 @@ jobs:
         run: |
           # Override mutmut config to test only _verify.py
           python3 -c "
-          import sys, json
-          import mutmut.__main__
-          sys.argv = ['mutmut', 'run', '--max-children', '4',
-                       '--paths-to-mutate', 'aiir/_verify.py']
+          import subprocess, sys, tomllib, pathlib
+
+          # Temporarily narrow paths_to_mutate for smoke test
+          cfg = pathlib.Path('pyproject.toml')
+          original = cfg.read_text()
+          data = tomllib.loads(original)
+          mutmut_cfg = data.get('tool', {}).get('mutmut', {})
+
+          # Rewrite paths_to_mutate to only _verify.py
+          patched = original.replace(
+              'paths_to_mutate = [\"aiir/\"]',
+              'paths_to_mutate = [\"aiir/_verify.py\"]'
+          )
+          cfg.write_text(patched)
+
           try:
-              mutmut.__main__.cli()
-          except SystemExit:
-              pass  # mutmut exits non-zero when survivors exist
+              result = subprocess.run(
+                  ['mutmut', 'run', '--max-children', '4'],
+                  check=False
+              )
+          finally:
+              # Restore original config
+              cfg.write_text(original)
+
+          # mutmut exits non-zero when survivors exist — that's expected
           "
 
       - name: Check smoke mutation score
@@ -116,15 +133,7 @@ jobs:
 
       - name: Run full mutation test
         run: |
-          python3 -c "
-          import sys
-          import mutmut.__main__
-          sys.argv = ['mutmut', 'run', '--max-children', '4']
-          try:
-              mutmut.__main__.cli()
-          except SystemExit:
-              pass
-          "
+          mutmut run --max-children 4 || true
 
       - name: Check mutation score against threshold
         env:

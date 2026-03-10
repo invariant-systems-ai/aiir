@@ -23,3 +23,45 @@ MD003:
 
 # Allow inline HTML for shields.io badges
 no-inline-html: false
+
+# ── Relaxations for docs/contrib content ─────────────────────────────
+# These rules fire frequently on intentional patterns in our docs.
+
+# Fenced code blocks without language (sometimes intentional for plain text)
+MD040: false
+
+# Blanks around lists (frequently violated in contrib posts and docs)
+MD032: false
+
+# Bare URLs (common in contrib launch posts, Show HN drafts, etc.)
+MD034: false
+
+# Blanks around fences (contrib posts use compact formatting)
+MD031: false
+
+# Emphasis as heading (docs use bold for UI navigation paths)
+MD036: false
+
+# First line must be a heading (PR template starts with ## Description)
+MD041: false
+
+# Blank lines inside blockquotes
+MD028: false
+
+# Emphasis style consistency (contrib uses both * and _)
+MD049: false
+
+# Heading spacing
+MD022: false
+
+# No multiple blank lines (can happen in formatted docs)
+MD012: false
+
+# Single top-level heading (contrib posts have frontmatter + heading)
+MD025: false
+
+# Ordered list prefix
+MD029: false
+
+# Link fragments
+MD056: false

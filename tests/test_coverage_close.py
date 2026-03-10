@@ -32,6 +32,17 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+# Windows compat: TemporaryDirectory cleanup can fail with PermissionError
+# when subprocess file handles are still open.  Python 3.10+ accepts
+# ``ignore_cleanup_errors``; on 3.9 we pass nothing (best-effort).
+_TD_KWARGS: dict = (
+    {"ignore_cleanup_errors": True} if sys.version_info >= (3, 10) else {}
+)
+
+# On Python 3.12+, is_symlink() routes through Path.stat(follow_symlinks=False),
+# adding one extra stat() call before the explicit stat-for-size call.
+_STAT_GUARD_CALLS = 3 if sys.version_info >= (3, 12) else 2
+
 # ---------------------------------------------------------------------------
 # _core.py — shell metachar in git ref (L849), URL port (L1146)
 # ---------------------------------------------------------------------------
@@ -85,7 +96,7 @@ class TestPolicyCoverage(unittest.TestCase):
         """L102: policy.json containing non-dict JSON triggers ValueError."""
         from aiir._policy import load_policy
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             policy_path = Path(td) / "policy.json"
             policy_path.write_text('["array", "not", "dict"]', encoding="utf-8")
             with self.assertRaises(ValueError) as ctx:
@@ -239,7 +250,7 @@ class TestSignCoverage(unittest.TestCase):
 
     def test_verify_with_expected_identity(self):
         """L241: when expected_identity is set, Identity policy is used."""
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             receipt_path = Path(td) / "receipt.json"
             bundle_path = Path(td) / "receipt.json.sigstore"
             receipt_path.write_text('{"test": true}', encoding="utf-8")
@@ -734,7 +745,7 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
         """L82-83: symlink ledger is rejected."""
         from aiir._verify_release import _load_receipts_from_ledger
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             real = Path(td) / "real.jsonl"
             real.write_text('{"receipt_id": "test"}\n', encoding="utf-8")
             link = Path(td) / "link.jsonl"
@@ -748,7 +759,7 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
         from aiir._verify_release import _load_receipts_from_ledger
         from aiir._core import MAX_RECEIPT_FILE_SIZE
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             big = Path(td) / "big.jsonl"
             # Write enough to exceed limit
             big.write_text("x" * (MAX_RECEIPT_FILE_SIZE + 1), encoding="utf-8")
@@ -770,7 +781,7 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
             _MAX_LEDGER_RECEIPTS,
         )
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             ledger = Path(td) / "big.jsonl"
             # Write _MAX_LEDGER_RECEIPTS + 100 lines
             lines = [
@@ -785,7 +796,7 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
         """Malformed JSON lines are skipped."""
         from aiir._verify_release import _load_receipts_from_ledger
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             ledger = Path(td) / "mixed.jsonl"
             ledger.write_text(
                 '{"good": 1}\nnot-json\n{"good": 2}\n',
@@ -798,7 +809,7 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
         """L82-83: stat() raises OSError → ValueError."""
         from aiir._verify_release import _load_receipts_from_ledger
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             f = Path(td) / "ledger.jsonl"
             f.write_text('{"x":1}\n', encoding="utf-8")
             real_stat = Path.stat
@@ -806,11 +817,11 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
 
             def stat_side_effect(self_path, *a, **kw):
                 call_count[0] += 1
-                # Let is_file() and is_symlink() through (they call stat),
-                # then fail on the explicit stat() call in the function
-                if call_count[0] <= 2:
-                    return real_stat(self_path, *a, **kw)
-                raise OSError("perm denied")
+                # Let is_file() and is_symlink() guard calls succeed,
+                # then fail on the explicit stat-for-size call.
+                if call_count[0] >= _STAT_GUARD_CALLS:
+                    raise OSError("perm denied")
+                return real_stat(self_path, *a, **kw)
 
             with patch.object(Path, "stat", stat_side_effect):
                 with self.assertRaises(ValueError) as ctx:
@@ -821,7 +832,7 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
         """L95: blank lines between entries are skipped via continue."""
         from aiir._verify_release import _load_receipts_from_ledger
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             ledger = Path(td) / "blanks.jsonl"
             # Use \\n\\n to create blank lines — splitlines will include them
             ledger.write_text(
@@ -835,7 +846,7 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
         """Non-dict JSON values (e.g. integers, lists) in ledger are skipped."""
         from aiir._verify_release import _load_receipts_from_ledger
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             ledger = Path(td) / "nondicts.jsonl"
             ledger.write_text(
                 '42\n"hello"\n[1,2,3]\n{"valid": true}\n',
@@ -860,7 +871,7 @@ class TestVerifyReleaseLoadReceiptsFromDir(unittest.TestCase):
         """L119: symlink .json files are skipped."""
         from aiir._verify_release import _load_receipts_from_dir
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             real = Path(td) / "real.json"
             real.write_text('{"receipt_id": "r1"}', encoding="utf-8")
             link = Path(td) / "link.json"
@@ -873,7 +884,7 @@ class TestVerifyReleaseLoadReceiptsFromDir(unittest.TestCase):
         """L124-126: JSON file containing a list of receipts."""
         from aiir._verify_release import _load_receipts_from_dir
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             f = Path(td) / "batch.json"
             f.write_text(
                 json.dumps([{"receipt_id": "r1"}, {"receipt_id": "r2"}]),
@@ -886,7 +897,7 @@ class TestVerifyReleaseLoadReceiptsFromDir(unittest.TestCase):
         """L128-129: unreadable/malformed file is skipped."""
         from aiir._verify_release import _load_receipts_from_dir
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             bad = Path(td) / "bad.json"
             bad.write_text("not valid json {{{", encoding="utf-8")
             good = Path(td) / "good.json"
@@ -902,7 +913,7 @@ class TestVerifyReleasePolicyFile(unittest.TestCase):
         """L442-443: symlink policy file is rejected."""
         from aiir._verify_release import verify_release
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             real = Path(td) / "policy.json"
             real.write_text('{"preset": "balanced"}', encoding="utf-8")
             link = Path(td) / "link.json"
@@ -920,22 +931,20 @@ class TestVerifyReleasePolicyFile(unittest.TestCase):
         """L446-447: stat() on policy file raises OSError → ValueError."""
         from aiir._verify_release import verify_release
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             policy = Path(td) / "policy.json"
             policy.write_text('{"preset": "balanced"}', encoding="utf-8")
             ledger = Path(td) / "receipts.jsonl"
             ledger.write_text('{"receipt_id": "test"}\n', encoding="utf-8")
             real_stat = Path.stat
-            # Only raise for the policy file, and only on the explicit stat() call
-            # (not the internal is_file/is_symlink calls).
-            policy_stat_calls = [0]
+            # Allow is_file() and is_symlink() to succeed for the policy
+            # file, then fail on the explicit stat() in verify_release.
+            policy_calls = [0]
 
             def stat_side_effect(self_path, *a, **kw):
                 if str(self_path) == str(policy):
-                    policy_stat_calls[0] += 1
-                    # is_file() calls stat once, is_symlink/lstat calls stat once
-                    # The 3rd call is the explicit stat() in the verify_release code
-                    if policy_stat_calls[0] >= 3:
+                    policy_calls[0] += 1
+                    if policy_calls[0] >= _STAT_GUARD_CALLS:
                         raise OSError("disk error")
                 return real_stat(self_path, *a, **kw)
 
@@ -951,7 +960,7 @@ class TestVerifyReleasePolicyFile(unittest.TestCase):
         """L454: policy file exceeding limit is rejected."""
         from aiir._verify_release import verify_release, _MAX_POLICY_FILE_SIZE
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             policy = Path(td) / "huge.json"
             policy.write_text("x" * (_MAX_POLICY_FILE_SIZE + 1), encoding="utf-8")
             ledger = Path(td) / "receipts.jsonl"
@@ -967,7 +976,7 @@ class TestVerifyReleasePolicyFile(unittest.TestCase):
         """Policy file that is not a JSON object is rejected."""
         from aiir._verify_release import verify_release
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             policy = Path(td) / "bad.json"
             policy.write_text('"just a string"', encoding="utf-8")
             ledger = Path(td) / "receipts.jsonl"
@@ -987,7 +996,7 @@ class TestVerifyReleaseInTotoVSA(unittest.TestCase):
         """L586-603: emit_intoto without subject_name falls back to git remote."""
         from aiir._verify_release import verify_release
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             ledger = Path(td) / "receipts.jsonl"
             receipt = {
                 "receipt_id": "g1-test",
@@ -1047,7 +1056,7 @@ class TestVerifyReleaseInTotoVSA(unittest.TestCase):
         """When git remote fails, subject_name falls back to 'unknown'."""
         from aiir._verify_release import verify_release
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             ledger = Path(td) / "receipts.jsonl"
             receipt = {
                 "receipt_id": "g1-test",
@@ -1100,7 +1109,7 @@ class TestVerifyReleaseInTotoVSA(unittest.TestCase):
         """L593-597: emit_intoto with commit_range containing '..' extracts head_ref."""
         from aiir._verify_release import verify_release
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             ledger = Path(td) / "receipts.jsonl"
             receipt = {
                 "receipt_id": "g1-test",
@@ -1163,7 +1172,7 @@ class TestVerifyReleaseInTotoVSA(unittest.TestCase):
         """L596-597: rev-parse fails in commit_range '..' branch → head_sha='unknown'."""
         from aiir._verify_release import verify_release
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             ledger = Path(td) / "receipts.jsonl"
             receipt = {
                 "receipt_id": "g1-test",
@@ -1341,7 +1350,7 @@ class TestCliVerifyHints(unittest.TestCase):
         }
         sig_result = {"valid": False, "error": "bad signature"}
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             rf = Path(td) / "receipt.json"
             rf.write_text(json.dumps(receipt), encoding="utf-8")
 
@@ -1364,7 +1373,7 @@ class TestCliVerifyHints(unittest.TestCase):
         import aiir.cli as cli
 
         result = {"valid": False, "error": "symlink detected"}
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             rf = Path(td) / "receipt.json"
             rf.write_text("{}", encoding="utf-8")
 
@@ -1382,7 +1391,7 @@ class TestCliVerifyHints(unittest.TestCase):
         import aiir.cli as cli
 
         result = {"valid": False, "error": "file too large"}
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             rf = Path(td) / "receipt.json"
             rf.write_text("{}", encoding="utf-8")
 
@@ -1400,7 +1409,7 @@ class TestCliVerifyHints(unittest.TestCase):
         import aiir.cli as cli
 
         result = {"valid": False, "error": "unknown problem"}
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             rf = Path(td) / "receipt.json"
             rf.write_text("{}", encoding="utf-8")
 
@@ -1418,7 +1427,7 @@ class TestCliVerifyHints(unittest.TestCase):
         import aiir.cli as cli
 
         result = {"valid": False, "error": "content hash mismatch"}
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             rf = Path(td) / "receipt.json"
             rf.write_text("{}", encoding="utf-8")
 
@@ -1453,7 +1462,7 @@ class TestCliVerifyRelease(unittest.TestCase):
             "predicate": {"evaluation": {}, "verifier": {}},
             "policy_violations": [],
         }
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             policy_f = Path(td) / "custom_policy.json"
             policy_f.write_text('{"max_ai_percent": 50}', encoding="utf-8")
             ledger = Path(td) / "receipts.jsonl"
@@ -1502,7 +1511,7 @@ class TestCliVerifyRelease(unittest.TestCase):
             "predicate": {"evaluation": {}, "verifier": {}},
             "policy_violations": [],
         }
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             ledger = Path(td) / "receipts.jsonl"
             ledger.write_text('{"receipt_id": "r1"}\n', encoding="utf-8")
 
@@ -1536,7 +1545,7 @@ class TestCliVerifyRelease(unittest.TestCase):
         """L710-712: verify_release raises → error printed, rc=1."""
         import aiir.cli as cli
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             ledger = Path(td) / "receipts.jsonl"
             ledger.write_text('{"receipt_id": "r1"}\n', encoding="utf-8")
 
@@ -1583,7 +1592,7 @@ class TestCliVSAWrite(unittest.TestCase):
             },
         }
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
             ledger.parent.mkdir(parents=True)
@@ -1615,7 +1624,7 @@ class TestCliVSAWrite(unittest.TestCase):
             "intoto_statement": {"_type": "https://in-toto.io/Statement/v1"},
         }
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
             ledger.parent.mkdir(parents=True)
             ledger.write_text('{"receipt_id": "test"}\n', encoding="utf-8")
@@ -1653,7 +1662,7 @@ class TestCliGitlabCIOutput(unittest.TestCase):
             "commit": {"sha": "aaa"},
             "ai_attestation": {"is_ai_authored": False},
         }
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             # Init a git repo
             os.system(
@@ -1680,7 +1689,7 @@ class TestCliGitlabCIOutput(unittest.TestCase):
             "CI_DOTENV_FILE": os.path.join(tempfile.gettempdir(), "ci.env"),
         }
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             os.system(
                 "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
@@ -1714,7 +1723,7 @@ class TestCliGitlabCIOutput(unittest.TestCase):
             "provenance": {"repository": None},
         }
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             os.system(
                 "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
@@ -1752,7 +1761,7 @@ class TestCliGitlabCIOutput(unittest.TestCase):
             "provenance": {"repository": "https://example.com/repo"},
         }
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             os.system(
                 "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
@@ -1793,7 +1802,7 @@ class TestCliGitlabCIOutput(unittest.TestCase):
             "provenance": {"repository": "https://example.com/repo"},
         }
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             os.system(
                 "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
@@ -1826,7 +1835,7 @@ class TestCliGitHubActionOutput(unittest.TestCase):
         """L1072-1073: empty results with --github-action sets receipt_count=0."""
         import aiir.cli as cli
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             os.system(
                 "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
@@ -1870,7 +1879,7 @@ class TestCliSignFailure(unittest.TestCase):
             "provenance": {"repository": "https://example.com/repo"},
         }
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             os.system(
                 "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
@@ -1914,7 +1923,7 @@ class TestCliSignFailure(unittest.TestCase):
             "provenance": {"repository": "https://example.com/repo"},
         }
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             os.system(
                 "git init -q && git config user.email 't@t.com' && git config user.name 'T' && touch f && git add f && git commit -q -m init"
@@ -1961,7 +1970,7 @@ class TestMcpSafeVerifyPath(unittest.TestCase):
         """L119: resolved file that doesn't exist raises ValueError."""
         import aiir.mcp_server as mcp
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             with self.assertRaises(ValueError) as ctx:
                 mcp._safe_verify_path("nonexistent.json")
@@ -1981,7 +1990,8 @@ class TestMcpVerifyHandler(unittest.TestCase):
         """L438: verify handler returns success for valid receipt."""
         import aiir.mcp_server as mcp
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
+            td = str(Path(td).resolve())  # macOS: /tmp → /private/tmp
             os.chdir(td)
             rf = Path(td) / "receipt.json"
             rf.write_text('{"valid": true}', encoding="utf-8")
@@ -1996,7 +2006,8 @@ class TestMcpVerifyHandler(unittest.TestCase):
         """Verify handler returns failure for invalid receipt."""
         import aiir.mcp_server as mcp
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
+            td = str(Path(td).resolve())  # macOS: /tmp → /private/tmp
             os.chdir(td)
             rf = Path(td) / "receipt.json"
             rf.write_text('{"valid": false}', encoding="utf-8")
@@ -2033,7 +2044,7 @@ class TestMcpVerifyReleaseHandler(unittest.TestCase):
             "policy_violations": [],
         }
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
             ledger.parent.mkdir(parents=True)
@@ -2056,7 +2067,8 @@ class TestMcpVerifyReleaseHandler(unittest.TestCase):
         """verify_release handler with a file path policy."""
         import aiir.mcp_server as mcp
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
+            td = str(Path(td).resolve())  # macOS: /tmp → /private/tmp
             os.chdir(td)
             policy_file = Path(td) / "policy.json"
             policy_file.write_text('{"max_ai_percent": 50}', encoding="utf-8")
@@ -2086,7 +2098,7 @@ class TestMcpVerifyReleaseHandler(unittest.TestCase):
         """L540: verify_release raises FileNotFoundError → isError."""
         import aiir.mcp_server as mcp
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
             ledger.parent.mkdir(parents=True)
@@ -2102,7 +2114,7 @@ class TestMcpVerifyReleaseHandler(unittest.TestCase):
         """L528-529: policy arg is a bad file path → ValueError from _safe_verify_path."""
         import aiir.mcp_server as mcp
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             # Policy path that doesn't exist, not a preset name
             result = mcp._handle_aiir_verify_release(
@@ -2114,7 +2126,7 @@ class TestMcpVerifyReleaseHandler(unittest.TestCase):
         """L541-542: unexpected Exception from verify_release."""
         import aiir.mcp_server as mcp
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
             ledger.parent.mkdir(parents=True)
@@ -2140,7 +2152,7 @@ class TestMcpGitlabSummaryHandler(unittest.TestCase):
         """L579-580: empty receipts returns guidance message."""
         import aiir.mcp_server as mcp
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             # Create empty ledger
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
@@ -2155,7 +2167,7 @@ class TestMcpGitlabSummaryHandler(unittest.TestCase):
         """No ledger file returns guidance message."""
         import aiir.mcp_server as mcp
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             result = mcp._handle_aiir_gitlab_summary({})
         text = result["content"][0]["text"]
@@ -2171,7 +2183,7 @@ class TestMcpGitlabSummaryHandler(unittest.TestCase):
             "ai_attestation": {"authorship_class": "human"},
             "content_hash": "sha256:abc",
         }
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
             ledger.parent.mkdir(parents=True)
@@ -2192,7 +2204,7 @@ class TestMcpGitlabSummaryHandler(unittest.TestCase):
             "ai_attestation": {"authorship_class": "human"},
             "content_hash": "sha256:abc",
         }
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
             ledger.parent.mkdir(parents=True)
@@ -2218,7 +2230,7 @@ class TestMcpGitlabSummaryHandler(unittest.TestCase):
             "ai_attestation": {"authorship_class": "human"},
             "content_hash": "sha256:abc",
         }
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
             ledger.parent.mkdir(parents=True)
@@ -2238,7 +2250,7 @@ class TestMcpGitlabSummaryHandler(unittest.TestCase):
         """L579-580: malformed JSON line in ledger is skipped (JSONDecodeError)."""
         import aiir.mcp_server as mcp
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
             ledger.parent.mkdir(parents=True)
@@ -2268,7 +2280,7 @@ class TestMcpGitlabSummaryHandler(unittest.TestCase):
             "ai_attestation": {"authorship_class": "human"},
             "content_hash": "sha256:abc",
         }
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
             ledger.parent.mkdir(parents=True)
@@ -2414,7 +2426,7 @@ class TestMcpGraphQLError(unittest.TestCase):
         """MCP handler handles GraphQL errors gracefully."""
         import aiir.mcp_server as mcp
 
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             os.chdir(td)
             ledger = Path(td) / ".aiir" / "receipts.jsonl"
             ledger.parent.mkdir(parents=True)

@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -14,6 +15,10 @@ from unittest.mock import patch
 
 # Import the module under test
 import aiir.cli as cli
+
+# On Python 3.12+, is_symlink() routes through Path.stat(follow_symlinks=False),
+# adding one extra stat() call before the explicit stat-for-size call.
+_STAT_GUARD_CALLS = 3 if sys.version_info >= (3, 12) else 2
 
 
 class TestSafeVerifyPathNoDeadCode(unittest.TestCase):
@@ -492,9 +497,9 @@ class TestVerifyReceiptFileEdgeCases(unittest.TestCase):
 
             def stat_bomb(*a, **kw):
                 call_count[0] += 1
-                # Let exists() and is_symlink() succeed (calls 1 & 2),
-                # but fail on the actual stat-for-size call (call 3).
-                if call_count[0] >= 3:
+                # Let exists()/is_file() and is_symlink() guard calls
+                # succeed, then fail on the explicit stat-for-size call.
+                if call_count[0] >= _STAT_GUARD_CALLS:
                     raise OSError("disk error")
                 return orig_stat(*a, **kw)
 

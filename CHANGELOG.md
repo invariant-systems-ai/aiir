@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.4] — 2026-03-11
+
+### Fixed
+
+- **CI fully green**: Closed all 4 CI failures from v1.2.3 release.
+- **Ruff lint**: Removed 4 unused imports and fixed F821 type annotation in
+  `test_transport_attestation.py`.
+- **Ruff format**: Applied canonical formatting to new test files.
+- **Markdown lint**: Fixed 30+ violations (MD032 blanks-around-lists, MD034 bare
+  URLs, MD049 emphasis style, MD007/MD029 list indentation, MD056 table column
+  count). Added `.markdownlint-cli2.yaml` to ignore `node_modules`. Disabled
+  MD060 (compact tables are project style).
+- **Coverage 100%**: Added 14 coverage-gap tests in `test_coverage_gaps.py`
+  covering invalid tree/parent SHA validation (`_detect.py`), DAG binding field
+  validation (`_schema.py`), review attestation flags and CI auto-detection
+  (`cli.py`). All 1682 tests pass.
+
 ## [1.2.3] — 2026-03-11
 
 ### Added

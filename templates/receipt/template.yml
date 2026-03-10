@@ -94,11 +94,16 @@ spec:
       if [ "$[[ inputs.gl-sast-report ]]" = "true" ]; then
         SAST_FLAG="--gl-sast-report gl-sast-report.json"
       fi
-      if [ -n "$CI_COMMIT_BEFORE_SHA" ] && [ "$CI_COMMIT_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+      if [ -n "$CI_COMMIT_BEFORE_SHA" ] && [ "$CI_COMMIT_BEFORE_SHA" != "0000000000000000000000000000000000000000" ] && git cat-file -e "$CI_COMMIT_BEFORE_SHA" 2>/dev/null; then
         aiir --range "${CI_COMMIT_BEFORE_SHA}..${CI_COMMIT_SHA}" \
           --output "$[[ inputs.output-dir ]]/" --pretty --gitlab-ci \
           $AI_FLAG $SIGN_FLAG $SAST_FLAG $[[ inputs.extra-args ]]
       else
+        # Null SHA, missing SHA (force-push/rebase), or empty before —
+        # fall back to receipting just the tip commit.
+        if [ -n "$CI_COMMIT_BEFORE_SHA" ] && [ "$CI_COMMIT_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+          echo "⚠️  Before SHA ${CI_COMMIT_BEFORE_SHA:0:12} not reachable (force-push?). Falling back to HEAD."
+        fi
         aiir --output "$[[ inputs.output-dir ]]/" --pretty --gitlab-ci \
           $AI_FLAG $SIGN_FLAG $SAST_FLAG $[[ inputs.extra-args ]]
       fi

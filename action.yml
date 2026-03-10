@@ -73,6 +73,12 @@ runs:
           if [ "$PUSH_BEFORE" = "0000000000000000000000000000000000000000" ]; then
             EMPTY_TREE=$(git hash-object -t tree /dev/null)
             RANGE="${EMPTY_TREE}..HEAD"
+          elif ! git cat-file -e "$PUSH_BEFORE" 2>/dev/null; then
+            # Force-push or history rewrite — the before SHA no longer
+            # exists in the fetched history.  Fall back to HEAD~1..HEAD
+            # so we still receipt at least the tip commit.
+            echo "::warning::Before SHA ${PUSH_BEFORE:0:12} not reachable (force-push/rebase?). Falling back to HEAD~1..HEAD."
+            RANGE="HEAD~1..HEAD"
           else
             RANGE="${PUSH_BEFORE}..${PUSH_AFTER}"
           fi

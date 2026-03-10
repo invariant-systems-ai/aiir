@@ -42,6 +42,41 @@ jobs:
           echo "Receipts generated: ${RECEIPT_COUNT}"
           echo "AI-authored: ${AI_COMMIT_COUNT}"
 
+      # ── Verify every receipt we just generated ──
+      # This is the dogfood proof: AIIR validates its own output.
+      - name: Verify receipt integrity
+        run: |
+          FAIL=0
+          for receipt in .receipts/*.json; do
+            [ -f "$receipt" ] || continue
+            # Skip .sigstore bundles (not receipt JSON)
+            case "$receipt" in *.sigstore*) continue ;; esac
+            if PYTHONPATH="$GITHUB_WORKSPACE" python -P -m aiir --verify "$receipt" --explain 2>&1; then
+              echo "  ✅ $(basename "$receipt")"
+            else
+              echo "  ❌ $(basename "$receipt")"
+              FAIL=1
+            fi
+          done
+          if [ "$FAIL" -eq 1 ]; then
+            echo "::error::One or more receipts failed integrity verification"
+            exit 1
+          fi
+          echo "✅ All receipts passed content-addressed integrity verification"
+
+      # ── Chain integrity: no gaps in the receipts branch ──
+      - name: Check receipt chain continuity
+        run: |
+          # Count receipts on the branch (if it exists) and verify
+          # the new batch adds exactly the expected number of files.
+          EXPECTED="${{ steps.receipt.outputs.receipt_count }}"
+          ACTUAL=$(ls -1 .receipts/*.json 2>/dev/null | grep -v '.sigstore' | wc -l)
+          if [ "$ACTUAL" -ne "$EXPECTED" ]; then
+            echo "::warning::Receipt count mismatch: expected=${EXPECTED} actual=${ACTUAL}"
+          else
+            echo "✅ Receipt count matches: ${ACTUAL} receipts for this push"
+          fi
+
       - name: Push receipts to receipts branch
         env:
           GH_TOKEN: ${{ github.token }}

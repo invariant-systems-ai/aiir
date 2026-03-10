@@ -105,7 +105,10 @@ def _make_valid_receipt(**overrides) -> dict:
 
 
 class TestHostileAngle1CanonicalDeterminism(unittest.TestCase):
-    """Attack canonical JSON serialization and content-addressing."""
+    """Attack canonical JSON serialization and content-addressing.
+
+    Covers: T-01 (receipt hash tampering), D-07 (deep JSON nesting).
+    """
 
     # ── A1-01: Unicode NFC vs NFKC key ordering ──
     def test_a1_01_unicode_key_ordering_attack(self):
@@ -237,7 +240,10 @@ class TestHostileAngle1CanonicalDeterminism(unittest.TestCase):
 
 
 class TestHostileAngle2DetectionEvasion(unittest.TestCase):
-    """Attack AI signal detection — try to make AI commits look human."""
+    """Attack AI signal detection — try to make AI commits look human.
+
+    Covers: S-01 (ZWJ evasion), S-02 (homoglyph evasion), R-01 (AI denial).
+    """
 
     # ── A2-01: Armenian homoglyph bypass ──
     def test_a2_01_armenian_homoglyph_evasion(self):
@@ -638,7 +644,10 @@ class TestHostileAngle3VerificationBypass(unittest.TestCase):
 
 
 class TestHostileAngle4PolicyEscape(unittest.TestCase):
-    """Attack the policy engine — bypass enforcement, manipulate thresholds."""
+    """Attack the policy engine — bypass enforcement, manipulate thresholds.
+
+    Covers: T-01 (tampered policy evaluation), R-01 (AI usage denial).
+    """
 
     # ── A4-01: CRITICAL — ai-assisted vs ai_assisted normalization gap ──
     def test_a4_01_ai_assisted_normalization_gap(self):
@@ -810,7 +819,13 @@ class TestHostileAngle4PolicyEscape(unittest.TestCase):
 
 
 class TestHostileAngle5SupplyChain(unittest.TestCase):
-    """Attack supply-chain integrations — in-toto, MCP, ledger, CLI."""
+    """Attack supply-chain integrations — in-toto, MCP, ledger, CLI.
+
+    Covers: T-01 (receipt tampering), T-03 (path traversal), T-04 (output
+    injection), T-05 (symlink attack), D-01 (unbounded loop), D-03
+    (subprocess hang), D-04 (oversized file), E-03 (workflow injection),
+    E-05 (terminal escape), E-06 (path traversal in MCP/ledger).
+    """
 
     # ── A5-01: in-toto envelope with tampered predicate ──
     def test_a5_01_intoto_wraps_without_verifying(self):
@@ -1049,7 +1064,11 @@ class TestHostileAngle5SupplyChain(unittest.TestCase):
 
 
 class TestHostileCrossAngle(unittest.TestCase):
-    """Multi-angle combined attacks that chain vulnerabilities."""
+    """Multi-angle combined attacks that chain vulnerabilities.
+
+    Covers: S-01 (ZWJ evasion), T-01 (receipt tampering), R-01 (AI
+    usage denial), E-05 (terminal escape).
+    """
 
     # ── X-01: Detection evasion → schema mismatch → policy bypass ──
     def test_x01_detection_to_schema_to_policy_chain(self):
@@ -1178,7 +1197,10 @@ class TestHostileCrossAngle(unittest.TestCase):
 
 
 class TestHostileAngle2NormalizationEdgeCases(unittest.TestCase):
-    """Deep-dive into _normalize_for_detection edge cases."""
+    """Deep-dive into _normalize_for_detection edge cases.
+
+    Covers: S-01 (ZWJ evasion), S-02 (homoglyph evasion).
+    """
 
     def test_combining_diacritical_stripping(self):
         """Verify combining marks are stripped after NFKC.
@@ -1234,7 +1256,11 @@ class TestHostileAngle2NormalizationEdgeCases(unittest.TestCase):
 
 
 class TestHostileAngle3SchemaAttacks(unittest.TestCase):
-    """Deep-dive into _schema.py validation bypasses."""
+    """Deep-dive into _schema.py validation bypasses.
+
+    Covers: S-04 (forged receipt), T-01 (hash tampering), I-05 (summary
+    output injection), D-05 (receipt array DoS).
+    """
 
     def test_bool_int_confusion_files_changed(self):
         """Pass True (bool) for files_changed (expected: int).
@@ -1333,7 +1359,10 @@ class TestHostileAngle3SchemaAttacks(unittest.TestCase):
 
 
 class TestHostileAngle1TerminalEscapes(unittest.TestCase):
-    """Comprehensive terminal injection attacks."""
+    """Comprehensive terminal injection attacks.
+
+    Covers: E-05 (terminal escape injection).
+    """
 
     def test_ansi_cursor_up_overwrite(self):
         """ESC[A moves cursor up — could overwrite previous output lines."""
@@ -1382,7 +1411,10 @@ class TestHostileAngle1TerminalEscapes(unittest.TestCase):
 
 
 class TestHostileAngle5MCPProtocol(unittest.TestCase):
-    """Attack the MCP JSON-RPC protocol layer."""
+    """Attack the MCP JSON-RPC protocol layer.
+
+    Covers: T-03 (path traversal), D-06 (overlong ref), E-06 (MCP path traversal).
+    """
 
     def test_missing_jsonrpc_field(self):
         """MCP message without jsonrpc field should be rejected."""
@@ -1429,7 +1461,10 @@ class TestHostileAngle5MCPProtocol(unittest.TestCase):
 
 
 class TestHostileAngle5MarkdownSanitization(unittest.TestCase):
-    """Attack _sanitize_md for GFM injection."""
+    """Attack _sanitize_md for GFM injection.
+
+    Covers: S-01 (zero-width evasion), E-04 (XSS via GFM summary).
+    """
 
     def test_pipe_injection_table_break(self):
         """Pipe characters in commit subjects break GFM table layout."""

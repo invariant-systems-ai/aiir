@@ -409,8 +409,6 @@ def format_receipt_detail(receipt: Dict[str, Any], signed: str = "none") -> str:
         extensions = {}
 
     def _safe(obj: Any, key: str, default: str = "") -> str:
-        if not isinstance(obj, dict):
-            return default
         return _strip_terminal_escapes(str(obj.get(key, default)))
 
     def _safe_dict(obj: Any, key: str) -> dict:

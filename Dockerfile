@@ -26,7 +26,7 @@ COPY . /src/
 
 # Upgrade base-image packages flagged by Trivy (CVE-2026-23949, CVE-2026-24049)
 # hadolint ignore=DL3013
-RUN pip install --no-cache-dir --upgrade pip setuptools>=82.0.1 wheel>=0.46.2
+RUN pip install --no-cache-dir --upgrade pip "setuptools>=82.0.1" "wheel>=0.46.2"
 
 # Install AIIR:
 #   • AIIR_VERSION set  → install pinned version from PyPI  (publish.yml)

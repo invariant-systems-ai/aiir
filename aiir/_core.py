@@ -1007,7 +1007,9 @@ def _run_git(args: List[str], cwd: Optional[str] = None) -> str:
         stderr_safe = result.stderr.strip().split("\n")[0][:200]
         # Redact anything that looks like a filesystem path to
         # prevent leaking internal directory structure in error messages.
+        # Unix paths (/foo/bar) and Windows paths (C:\foo\bar).
         stderr_safe = re.sub(r"/[\w./-]{5,}", "<path>", stderr_safe)
+        stderr_safe = re.sub(r"[A-Za-z]:[\\][\w.\\/-]{3,}", "<path>", stderr_safe)
         # Strip terminal escape sequences — a crafted ref name
         # (e.g., containing ESC[2J) would be echoed in git's stderr and
         # survive the truncation + path-redaction above.

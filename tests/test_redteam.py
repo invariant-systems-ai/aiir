@@ -2371,8 +2371,8 @@ class TestPublicBasicR8(unittest.TestCase):
         tm = Path(__file__).parent.parent / "THREAT_MODEL.md"
         content = tm.read_text(encoding="utf-8")
         self.assertIn("comprehensive", content)
-        # Should mention 142 total controls
-        self.assertIn("142 total security controls", content)
+        # Should mention 147 total controls (updated after security audit)
+        self.assertIn("147 total security controls", content)
 
     def test_pyproject_scripts_match_actual_entrypoints(self):
         """Every script in pyproject.toml must resolve to a real callable."""

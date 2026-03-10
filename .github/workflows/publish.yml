@@ -207,7 +207,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
           python-version: "3.12"
       - name: Sync version strings
@@ -256,6 +256,12 @@ jobs:
           # published, skip rather than fail.  PyPI is immutable — same version
           # + same content is a no-op; different content is rejected regardless.
           skip-existing: true
+          # PEP 740: Generate and upload digital attestations (SLSA provenance
+          # + PyPI Publish predicates) for every wheel and sdist.  Requires
+          # Trusted Publishing (OIDC) — no static API tokens or key management.
+          # Attestations are signed with short-lived OIDC identities and can be
+          # verified via PyPI's Integrity API.
+          attestations: true
         # No API token needed — uses OIDC via Trusted Publisher config on PyPI
 
   # ── Step 3b: SLSA Provenance Attestation ───────────────────────────
@@ -272,10 +278,14 @@ jobs:
         with:
           name: dist
           path: dist/
-      - name: Generate SLSA provenance attestation
+      - name: Generate SLSA provenance attestation (wheel)
         uses: actions/attest-build-provenance@db473fddc028af60658334401dc6fa3ffd8669fd  # v2.3.0
         with:
           subject-path: 'dist/*.whl'
+      - name: Generate SLSA provenance attestation (sdist)
+        uses: actions/attest-build-provenance@db473fddc028af60658334401dc6fa3ffd8669fd  # v2.3.0
+        with:
+          subject-path: 'dist/*.tar.gz'
 
   # ── Step 4: Verify PyPI ────────────────────────────────────────────
   verify:
@@ -301,6 +311,66 @@ jobs:
           done
           echo "::error::PyPI did not update to $TAG within 3 minutes"
           exit 1
+
+      - name: Verify PEP 740 attestations via PyPI Integrity API
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "🔍 Checking PEP 740 attestations for aiir==$TAG..."
+
+          # Fetch the release file list from PyPI JSON API
+          FILES=$(curl -sf "https://pypi.org/pypi/aiir/${TAG}/json" \
+            | python3 -c "
+          import sys, json
+          data = json.load(sys.stdin)
+          for url_info in data.get('urls', []):
+              print(url_info['filename'])
+          ")
+
+          CHECKED=0
+          ATTESTED=0
+          for FILE in $FILES; do
+            CHECKED=$((CHECKED + 1))
+            echo "  Checking attestation for: $FILE"
+
+            # Query the Integrity API for provenance attestations.
+            # Endpoint: GET /integrity/aiir/<version>/<filename>/provenance
+            HTTP_CODE=$(curl -s -o /tmp/provenance.json -w "%{http_code}" \
+              "https://pypi.org/integrity/aiir/${TAG}/${FILE}/provenance" 2>/dev/null || echo "000")
+
+            if [ "$HTTP_CODE" = "200" ]; then
+              # Verify the response contains attestation bundles
+              HAS_ATTESTATIONS=$(python3 -c "
+          import sys, json
+          try:
+              data = json.load(open('/tmp/provenance.json'))
+              attestations = data.get('attestation_bundles', data.get('attestations', []))
+              print('yes' if attestations else 'no')
+          except Exception:
+              print('no')
+          " 2>/dev/null || echo "no")
+
+              if [ "$HAS_ATTESTATIONS" = "yes" ]; then
+                ATTESTED=$((ATTESTED + 1))
+                echo "    ✅ Attestation found"
+              else
+                echo "    ⚠️  200 OK but no attestation bundles in response"
+              fi
+            elif [ "$HTTP_CODE" = "404" ]; then
+              echo "    ℹ️  No attestation yet (404) — may still be propagating"
+            else
+              echo "    ⚠️  Integrity API returned HTTP $HTTP_CODE"
+            fi
+          done
+
+          echo ""
+          echo "📊 Attestation summary: $ATTESTED/$CHECKED files attested"
+          if [ "$ATTESTED" -eq "$CHECKED" ] && [ "$CHECKED" -gt 0 ]; then
+            echo "✅ All release artifacts have PEP 740 attestations"
+          elif [ "$ATTESTED" -gt 0 ]; then
+            echo "⚠️  Partial attestation coverage ($ATTESTED/$CHECKED)"
+          else
+            echo "::warning::No PEP 740 attestations found — they may still be propagating"
+          fi
 
   # ── Step 4b: Publish JS SDK to npm ───────────────────────────────────
   publish-npm:
@@ -393,6 +463,12 @@ jobs:
     continue-on-error: true
     steps:
       - name: Trigger website version bump
+        # WEBSITE_DISPATCH_TOKEN: fine-grained PAT scoped to:
+        #   - repo: invariant-systems-ai/invariantsystems.io
+        #   - permissions: contents:read + metadata:read (dispatch only)
+        # Rotate every 90 days.  If absent, the website self-heals on
+        # its 6-hour cron schedule — this step is an accelerator, not
+        # a hard dependency.
         env:
           GH_TOKEN: ${{ secrets.WEBSITE_DISPATCH_TOKEN }}
         run: |

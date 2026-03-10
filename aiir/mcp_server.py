@@ -77,11 +77,28 @@ SERVER_VERSION = CLI_VERSION
 PROTOCOL_VERSION = "2025-03-26"
 
 # ---------------------------------------------------------------------------
-# Security: Path restriction for verify
+# Security: Path restriction for verify + ledger
 # ---------------------------------------------------------------------------
 
 # Maximum path length to prevent DoS via path parsing
 _MAX_PATH_LEN = 4096
+
+
+def _safe_ledger_dir() -> Path:
+    """Return the ledger directory, validated to be within cwd.
+
+    Even though the path is hardcoded to ``.aiir/``, a symlink at that
+    location could redirect reads outside the repository.  This check
+    mirrors the defense-in-depth pattern used by :func:`_safe_verify_path`.
+
+    Raises ValueError if the resolved path escapes cwd.
+    """
+    cwd = Path.cwd().resolve()
+    ledger_dir = cwd / ".aiir"
+    resolved = ledger_dir.resolve()
+    if not str(resolved).startswith(str(cwd)):
+        raise ValueError("Ledger directory resolves outside the working directory")
+    return ledger_dir
 
 
 def _safe_verify_path(filepath: str) -> str:
@@ -138,8 +155,9 @@ def _sanitize_error(error: Exception) -> str:
     # Only show the first line, truncated
     first_line = msg.split("\n")[0][:_MAX_ERROR_LEN]
 
-    # Redact anything that looks like a filesystem path.
+    # Redact anything that looks like a filesystem path (Unix + Windows).
     first_line = re.sub(r"/[\w./-]{5,}", "<path>", first_line)
+    first_line = re.sub(r"[A-Za-z]:[\\][\w.\\/-]{3,}", "<path>", first_line)
 
     return first_line
 
@@ -450,7 +468,7 @@ def _handle_aiir_verify(args: Dict[str, Any]) -> Dict[str, Any]:
 def _handle_aiir_stats(args: Dict[str, Any]) -> Dict[str, Any]:
     """Return ledger statistics for the current repository."""
     try:
-        ledger_dir = Path.cwd() / ".aiir"
+        ledger_dir = _safe_ledger_dir()
         _, _, index_path = _ledger_paths(str(ledger_dir))
         if not Path(index_path).is_file():
             return _text_result(
@@ -490,7 +508,7 @@ def _handle_aiir_policy_check(args: Dict[str, Any]) -> Dict[str, Any]:
         max_ai_pct = 50.0
 
     try:
-        ledger_dir = Path.cwd() / ".aiir"
+        ledger_dir = _safe_ledger_dir()
         _, _, index_path = _ledger_paths(str(ledger_dir))
         if not Path(index_path).is_file():
             return _text_result(
@@ -510,7 +528,7 @@ def _handle_aiir_verify_release(args: Dict[str, Any]) -> Dict[str, Any]:
     policy_arg = args.get("policy")
     emit_intoto = args.get("emit_intoto", False)
 
-    ledger_path = str(Path.cwd() / ".aiir" / "receipts.jsonl")
+    ledger_path = str(_safe_ledger_dir() / "receipts.jsonl")
 
     # Determine policy
     from aiir._policy import POLICY_PRESETS as _PP
@@ -562,7 +580,7 @@ def _handle_aiir_gitlab_summary(args: Dict[str, Any]) -> Dict[str, Any]:
             receipts = generate_receipts_for_range(range_spec, cwd=None)
         else:
             # Load from ledger
-            ledger_path = Path.cwd() / ".aiir" / "receipts.jsonl"
+            ledger_path = _safe_ledger_dir() / "receipts.jsonl"
             if not ledger_path.is_file():
                 return _text_result(
                     "No AIIR ledger found in this repository.\n"

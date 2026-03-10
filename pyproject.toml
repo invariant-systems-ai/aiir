@@ -138,20 +138,12 @@ markers = [
 # a surviving mutant represents a real missed check.
 # We point at the entire package so copy_src_dir brings __init__.py, _core.py, etc.
 paths_to_mutate = ["aiir/"]
-# Only mutate the five core modules; skip CLI, MCP, integrations, etc.
+# Skip non-security boilerplate; all security-critical modules are mutated.
 do_not_mutate = [
     "aiir/__init__.py",
     "aiir/__main__.py",
-    "aiir/cli.py",
-    "aiir/mcp_server.py",
-    "aiir/_core.py",
     "aiir/_explain.py",
-    "aiir/_github.py",
-    "aiir/_gitlab.py",
-    "aiir/_ledger.py",
-    "aiir/_sign.py",
     "aiir/_stats.py",
-    "aiir/_verify_release.py",
 ]
 # Focus test runner on relevant tests for speed.
 # NOTE: tests_dir is appended to test selection; omit when using explicit files.

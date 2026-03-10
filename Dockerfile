@@ -14,7 +14,7 @@
 # Build (pinned PyPI version — deterministic, used by publish.yml):
 #   docker build --build-arg AIIR_VERSION=1.0.15 -t invariantsystems/aiir:1.0.15 .
 
-FROM python:3.11-slim AS base
+FROM python:3.11-slim@sha256:d6e4d224f70f9e0172a06a3a2eba2f768eb146811a349278b38fff3a36463b47 AS base
 
 # Security: non-root user
 RUN groupadd --gid 1000 aiir && \

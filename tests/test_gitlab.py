@@ -479,12 +479,28 @@ class TestValidateWebhookToken(unittest.TestCase):
         """Wrong token returns False."""
         self.assertFalse(validate_webhook_token("wrong", expected_token="secret123"))
 
-    def test_no_secret_configured_permissive(self):
-        """When no secret is configured, validation passes (permissive)."""
-        with patch.dict(os.environ, {}, clear=True):
-            if "AIIR_WEBHOOK_SECRET" in os.environ:
-                del os.environ["AIIR_WEBHOOK_SECRET"]
+    def test_no_secret_configured_rejects_by_default(self):
+        """When no secret is configured, validation fails (fail-closed)."""
+        env = {k: v for k, v in os.environ.items()
+               if k not in ("AIIR_WEBHOOK_SECRET", "AIIR_WEBHOOK_ALLOW_UNSIGNED")}
+        with patch.dict(os.environ, env, clear=True):
+            self.assertFalse(validate_webhook_token("anything", expected_token=""))
+
+    def test_no_secret_allows_when_opt_in(self):
+        """When AIIR_WEBHOOK_ALLOW_UNSIGNED=1, unsigned webhooks are accepted."""
+        env = {k: v for k, v in os.environ.items()
+               if k != "AIIR_WEBHOOK_SECRET"}
+        env["AIIR_WEBHOOK_ALLOW_UNSIGNED"] = "1"
+        with patch.dict(os.environ, env, clear=True):
             self.assertTrue(validate_webhook_token("anything", expected_token=""))
+
+    def test_no_secret_rejects_when_opt_in_wrong_value(self):
+        """AIIR_WEBHOOK_ALLOW_UNSIGNED must be exactly '1'."""
+        env = {k: v for k, v in os.environ.items()
+               if k != "AIIR_WEBHOOK_SECRET"}
+        env["AIIR_WEBHOOK_ALLOW_UNSIGNED"] = "true"
+        with patch.dict(os.environ, env, clear=True):
+            self.assertFalse(validate_webhook_token("anything", expected_token=""))
 
     def test_env_var_secret(self):
         """Token validated against AIIR_WEBHOOK_SECRET env var."""
@@ -499,28 +515,37 @@ class TestValidateWebhookToken(unittest.TestCase):
 
 
 class TestGraphQLQuery(unittest.TestCase):
-    """Test GraphQL query building."""
+    """Test GraphQL query building with parameterized variables."""
 
     def test_query_structure(self):
-        """GraphQL query has correct structure."""
-        query = build_receipts_graphql_query("group/project")
-        self.assertIn("project(fullPath:", query)
-        self.assertIn("group/project", query)
-        self.assertIn("packageFiles", query)
-        self.assertIn("GENERIC", query)
+        """GraphQL query has correct structure with parameterized variables."""
+        result = build_receipts_graphql_query("group/project")
+        self.assertIsInstance(result, dict)
+        self.assertIn("query", result)
+        self.assertIn("variables", result)
+        query_text = result["query"]
+        self.assertIn("$fullPath", query_text)
+        self.assertIn("$pkgName", query_text)
+        self.assertIn("packageFiles", query_text)
+        self.assertIn("GENERIC", query_text)
+        # Variables hold the actual values, not the query text
+        self.assertEqual(result["variables"]["fullPath"], "group/project")
+        self.assertEqual(result["variables"]["pkgName"], "aiir-receipts")
 
     def test_custom_package_name(self):
-        """Custom package name is used in query."""
-        query = build_receipts_graphql_query("g/p", package_name="custom-receipts")
-        self.assertIn("custom-receipts", query)
+        """Custom package name is in variables, not interpolated into query."""
+        result = build_receipts_graphql_query("g/p", package_name="custom-receipts")
+        self.assertEqual(result["variables"]["pkgName"], "custom-receipts")
+        # The query itself uses $pkgName, never the literal value
+        self.assertNotIn("custom-receipts", result["query"])
 
     def test_injection_prevention(self):
-        """Quotes in project path are escaped so they cannot close the string."""
-        query = build_receipts_graphql_query('group/"evil')
-        # The raw quote should be escaped to \" so it cannot break out
-        self.assertIn('\\"evil', query)
-        # A bare unescaped " should NOT appear right before evil
-        self.assertNotIn('/"evil"', query)
+        """Malicious project path is safely kept in variables, not in query."""
+        result = build_receipts_graphql_query('group/"evil')
+        # The dangerous value lives only in the variables dict
+        self.assertEqual(result["variables"]["fullPath"], 'group/"evil')
+        # The query text itself never contains the user input
+        self.assertNotIn('"evil', result["query"])
 
 
 # ---------------------------------------------------------------------------
@@ -763,6 +788,31 @@ class TestQueryGitlabGraphQL(unittest.TestCase):
                     req.get_header("Authorization"), "Bearer glpat-test123"
                 )
                 self.assertIn(b"currentUser", req.data)
+
+    def test_variables_included_in_payload(self):
+        """When variables are provided, they appear in the JSON payload."""
+        response_data = json.dumps(
+            {"data": {"project": {"name": "test"}}}
+        ).encode("utf-8")
+
+        mock_resp = unittest.mock.MagicMock()
+        mock_resp.read.return_value = response_data
+        mock_resp.__enter__ = lambda s: s
+        mock_resp.__exit__ = unittest.mock.MagicMock(return_value=False)
+
+        variables = {"fullPath": "group/project", "pkgName": "aiir-receipts"}
+        with patch.dict(os.environ, {"GITLAB_TOKEN": "glpat-test123"}, clear=True):
+            with patch("aiir._gitlab.urlopen", return_value=mock_resp) as mock_url:
+                result = query_gitlab_graphql(
+                    "query($fullPath: ID!) { project(fullPath: $fullPath) { name } }",
+                    variables=variables,
+                )
+                self.assertEqual(result, {"project": {"name": "test"}})
+                req = mock_url.call_args[0][0]
+                payload = json.loads(req.data.decode("utf-8"))
+                self.assertIn("variables", payload)
+                self.assertEqual(payload["variables"]["fullPath"], "group/project")
+                self.assertEqual(payload["variables"]["pkgName"], "aiir-receipts")
 
     def test_custom_api_url(self):
         """Custom api_url is used for the request."""

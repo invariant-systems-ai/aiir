@@ -1,8 +1,8 @@
 # Threat Model — AIIR (AI Integrity Receipts)
 
-**Document version**: 3.0.0
-**CLI version**: 1.1.0
-**Date**: 2025-07-15 (updated 2026-03-08)
+**Document version**: 3.2.0
+**CLI version**: 1.2.1
+**Date**: 2025-07-15 (updated 2026-03-10)
 **Methodology**: STRIDE-per-element · DREAD risk scoring · Attack trees
 **Author**: Invariant Systems Security Team (supplemented by Hypothesis property-based fuzzing)
 
@@ -434,7 +434,13 @@ Cross-reference of all hardening fixes applied during security review.
 | R21-PUB-02 | Detection | Bot patterns expanded: +devin[bot], +devin-bot, +amazon-q, +tabnine, +gemini[bot], +gemini-bot (7 → 13) | E |
 | R21-TECH-01 | Subprocess | `_run_git` + `_hash_diff_streaming` pass `--no-optional-locks` — prevents CI lock contention on network FS | D |
 
-**142 total security controls.**
+| R22-SC-01 | Supply chain | PEP 740 digital attestations enabled on `pypa/gh-action-pypi-publish` (`attestations: true`) | T |
+| R22-SC-02 | Supply chain | SLSA provenance attestation covers both wheel and sdist (`actions/attest-build-provenance`) | T |
+| R22-SC-03 | Supply chain | Post-publish PyPI Integrity API verification in CI (`/integrity/<project>/<version>/<file>/provenance`) | T |
+| R22-SC-04 | Supply chain | Consumer verification script (`scripts/verify-pypi-provenance.py`) — stdlib-only, zero deps | T |
+| R22-SC-05 | Supply chain | Trusted Publishing OIDC — short-lived tokens, no static `PYPI_TOKEN` secret | S, T |
+
+**147 total security controls.**
 
 ## 8. Fuzzing Coverage Map
 
@@ -479,11 +485,13 @@ inputs per test run**.
 
 | Priority | Recommendation | Addresses |
 |----------|---------------|-----------|
+| ✅ Done | PEP 740 digital attestations on every PyPI release (SLSA + Publish predicates) | Supply chain |
+| ✅ Done | PyPI Integrity API verification in CI + consumer script | Supply chain |
+| ✅ Done | SLSA provenance attestation for both wheel and sdist | Supply chain |
 | P1 | Add `--strict-ai-detection` mode with configurable signal list | S-02 (homoglyphs), R-01 |
 | P1 | Integrate with GitHub Artifact Attestations API for immutable provenance | R-03 |
 | P2 | Add JSON Schema validation for receipt structure (structural validation beyond existing depth check) | D-07 |
 | P2 | Consider `resource.setrlimit` to cap memory/CPU in CLI process | D-02 |
-| P3 | Add SBOM-style dependency attestation for the action itself | Supply chain |
 | P3 | Fuzzing in CI with extended examples (10K+) and Hypothesis CI profile | All |
 
 ### 9.3 Operational
@@ -497,7 +505,6 @@ inputs per test run**.
 ## 10. Changelog
 
 | Version | Date | Changes |
-|---------|------|---------|
-| 3.1.0 | 2026-03-09 | Full Unicode TR39 confusable map — 669 entries across 69 scripts (was 36 hand-curated); S-02 upgraded to Mitigated; 842 tests, 39 AI signals; hostile red-team R9 (80 adversarial tests) |
+|---------|------|---------|| 3.2.0 | 2026-03-10 | PEP 740 attestations, PyPI Integrity API verification, SLSA provenance for wheel + sdist, consumer verification script; 5 new supply-chain controls (R22-SC-01–R22-SC-05); 147 total controls || 3.1.0 | 2026-03-09 | Full Unicode TR39 confusable map — 669 entries across 69 scripts (was 36 hand-curated); S-02 upgraded to Mitigated; 842 tests, 39 AI signals; hostile red-team R9 (80 adversarial tests) |
 | 3.0.0 | 2026-03-07 | v1.0.0 release — 142 security controls, 504 tests, 52 fuzz tests; 36 confusable mappings, 31 AI signals; comprehensive STRIDE/DREAD analysis |
 

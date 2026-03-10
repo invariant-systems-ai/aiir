@@ -17,6 +17,7 @@ SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
 import hashlib
+import html
 import json
 import logging
 import os
@@ -610,8 +611,13 @@ def validate_webhook_token(
 
     expected = expected_token or os.environ.get("AIIR_WEBHOOK_SECRET", "")
     if not expected:
-        logger.warning("AIIR_WEBHOOK_SECRET not set — webhook validation disabled")
-        return True  # Permissive when no secret configured
+        logger.warning(
+            "AIIR_WEBHOOK_SECRET not set — rejecting webhook "
+            "(set AIIR_WEBHOOK_ALLOW_UNSIGNED=1 to allow unsigned webhooks)"
+        )
+        # Fail-closed: reject all webhooks when no secret is configured,
+        # unless the operator explicitly opts in to unsigned webhooks.
+        return os.environ.get("AIIR_WEBHOOK_ALLOW_UNSIGNED") == "1"
     return hmac.compare_digest(request_token, expected)
 
 
@@ -623,13 +629,18 @@ def validate_webhook_token(
 def build_receipts_graphql_query(
     project_path: str,
     package_name: str = "aiir-receipts",
-) -> str:
-    """Build a GitLab GraphQL query to retrieve receipt data.
+) -> Dict[str, Any]:
+    """Build a GitLab GraphQL query with parameterized variables.
 
     AIIR receipts can be stored as GitLab Generic Package artifacts.
     This builds a query to list available receipt packages, enabling
     GitLab Duo Chat or other integrations to answer "what % of this
     MR was AI-written?"
+
+    Returns a dict with ``query`` and ``variables`` keys suitable for
+    passing directly to :func:`query_gitlab_graphql`.  Using GraphQL
+    variables instead of string interpolation prevents injection attacks
+    (even with backslash-escape bypasses).
 
     https://docs.gitlab.com/ee/api/graphql/reference/index.html
 
@@ -638,54 +649,58 @@ def build_receipts_graphql_query(
         package_name: Package name to search for.
 
     Returns:
-        GraphQL query string.
+        Dict with ``query`` (parameterized) and ``variables``.
     """
-    # Sanitize inputs against injection
-    safe_path = _strip_terminal_escapes(project_path).replace('"', '\\"')
-    safe_name = _strip_terminal_escapes(package_name).replace('"', '\\"')
-
-    return f'''{{
-  project(fullPath: "{safe_path}") {{
+    query = """\
+query($fullPath: ID!, $pkgName: String!) {
+  project(fullPath: $fullPath) {
     packages(
-      packageName: "{safe_name}"
+      packageName: $pkgName
       packageType: GENERIC
       first: 20
       sort: CREATED_DESC
-    ) {{
-      nodes {{
+    ) {
+      nodes {
         id
         name
         version
         createdAt
-        metadata {{
-          ... on ComposerMetadata {{
+        metadata {
+          ... on ComposerMetadata {
             composerJson
-          }}
-        }}
-        packageFiles(first: 50) {{
-          nodes {{
+          }
+        }
+        packageFiles(first: 50) {
+          nodes {
             fileName
             fileSha256
             size
             downloadPath
             createdAt
-          }}
-        }}
-      }}
-    }}
-  }}
-}}'''
+          }
+        }
+      }
+    }
+  }
+}"""
+    variables = {
+        "fullPath": _strip_terminal_escapes(project_path),
+        "pkgName": _strip_terminal_escapes(package_name),
+    }
+    return {"query": query, "variables": variables}
 
 
 def query_gitlab_graphql(
     query: str,
+    variables: Optional[Dict[str, Any]] = None,
     api_url: Optional[str] = None,
     token: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Execute a GraphQL query against the GitLab API.
 
     Args:
-        query: GraphQL query string.
+        query: GraphQL query string (should use ``$variable`` placeholders).
+        variables: GraphQL variable dict (prevents injection attacks).
         api_url: GitLab instance URL (auto-detected from CI_SERVER_URL).
         token: Auth token (uses GITLAB_TOKEN or CI_JOB_TOKEN).
 
@@ -709,7 +724,10 @@ def query_gitlab_graphql(
         "Authorization": f"Bearer {auth_token}",
     }
 
-    data = json.dumps({"query": query}).encode("utf-8")
+    payload: Dict[str, Any] = {"query": query}
+    if variables:
+        payload["variables"] = variables
+    data = json.dumps(payload).encode("utf-8")
     req = Request(url, data=data, headers=headers, method="POST")
 
     try:
@@ -788,7 +806,7 @@ def generate_dashboard_html(
             classes[cls] = classes.get(cls, 0) + 1
 
     ai_pct = (ai_count / total * 100) if total > 0 else 0
-    safe_project = _strip_terminal_escapes(project_name or "Project")
+    safe_project = html.escape(_strip_terminal_escapes(project_name or "Project"))
 
     # Build class breakdown rows
     class_rows = ""
@@ -797,7 +815,8 @@ def generate_dashboard_html(
         icon = {"human": "👤", "ai_assisted": "🤖", "bot": "⚙️", "ai+bot": "🤖⚙️"}.get(
             cls, "❓"
         )
-        class_rows += f"<tr><td>{icon} {_strip_terminal_escapes(cls)}</td><td>{count}</td><td>{pct:.1f}%</td></tr>\n"
+        safe_cls = html.escape(_strip_terminal_escapes(cls))
+        class_rows += f"<tr><td>{icon} {safe_cls}</td><td>{count}</td><td>{pct:.1f}%</td></tr>\n"
 
     # Build recent receipts rows (last 50)
     receipt_rows = ""
@@ -808,10 +827,10 @@ def generate_dashboard_html(
             commit = {}
         if not isinstance(ai, dict):
             ai = {}
-        sha = _strip_terminal_escapes(str(commit.get("sha", ""))[:8])
-        subj = _strip_terminal_escapes(str(commit.get("subject", "")))[:60]
-        cls = _strip_terminal_escapes(str(ai.get("authorship_class", "unknown")))
-        ts = _strip_terminal_escapes(str(r.get("timestamp", "")))[:19]
+        sha = html.escape(_strip_terminal_escapes(str(commit.get("sha", "")))[:8])
+        subj = html.escape(_strip_terminal_escapes(str(commit.get("subject", "")))[:60])
+        cls = html.escape(_strip_terminal_escapes(str(ai.get("authorship_class", "unknown"))))
+        ts = html.escape(_strip_terminal_escapes(str(r.get("timestamp", "")))[:19])
         receipt_rows += f"<tr><td><code>{sha}</code></td><td>{subj}</td><td>{cls}</td><td>{ts}</td></tr>\n"
 
     return f"""<!DOCTYPE html>

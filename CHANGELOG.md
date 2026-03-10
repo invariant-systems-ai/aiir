@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.2] — 2026-03-10
+
+### Added
+
+- **PEP 740 digital attestations**: Publish workflow now explicitly enables `attestations: true` on `pypa/gh-action-pypi-publish`. Every wheel and sdist uploaded to PyPI includes in-toto-style digital attestations (SLSA provenance + PyPI Publish predicates), cryptographically signed via short-lived OIDC identities from Trusted Publishing.
+- **SLSA provenance for sdist**: `actions/attest-build-provenance` now covers both `.whl` and `.tar.gz` artifacts (was wheel-only).
+- **PyPI Integrity API verification**: Post-publish CI step queries `GET /integrity/aiir/<version>/<file>/provenance` for every release artifact and reports attestation coverage.
+- **Consumer verification script** (`scripts/verify-pypi-provenance.py`): Zero-dependency (stdlib-only) tool for downstream consumers to verify PEP 740 attestations on any AIIR release. Supports `--strict` mode for CI gating.
+- **5 new supply-chain security controls** (R22-SC-01 through R22-SC-05) in THREAT_MODEL.md. **147 total controls.**
+
+### Changed
+
+- **SECURITY.md**: Added PyPI attestation verification section with consumer-facing instructions.
+- **THREAT_MODEL.md**: Updated to v3.2.0 — PEP 740 attestations, Integrity API verification, and SBOM attestation moved from "Future Hardening" to "Done".
+
 ## [1.2.1] — 2026-03-09
 
 ### Fixed

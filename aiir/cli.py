@@ -721,13 +721,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # Write in-toto VSA file if requested
         if getattr(args, "emit_vsa", None) and "intoto_statement" in vr_result:
             vsa_path = args.emit_vsa
-            if ".." in vsa_path or vsa_path.startswith("/"):
+            from pathlib import Path as _VsaPath
+
+            # Validate path: must resolve within cwd (no symlink escape)
+            _vsa_resolved = _VsaPath(vsa_path).resolve()
+            if not str(_vsa_resolved).startswith(str(_VsaPath.cwd().resolve())):
                 print(
                     f"{_e('error')} VSA path must be relative and within the project.",
                     file=sys.stderr,
                 )
                 return 1
-            from pathlib import Path as _VsaPath
 
             out = _VsaPath(vsa_path)
             out.parent.mkdir(parents=True, exist_ok=True)
@@ -776,14 +779,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print(f"{_e('error')} Export failed: {e}", file=sys.stderr)
             return 1
         export_path = args.export
-        # Validate export path — reject path traversal.
-        if ".." in export_path or export_path.startswith("/"):
+        # Validate export path — reject traversal via resolve().
+        from pathlib import Path
+
+        _export_resolved = Path(export_path).resolve()
+        if not str(_export_resolved).startswith(str(Path.cwd().resolve())):
             print(
                 f"{_e('error')} Export path must be relative and within the project.",
                 file=sys.stderr,
             )
             return 1
-        from pathlib import Path
 
         out = Path(export_path)
         out.parent.mkdir(parents=True, exist_ok=True)

@@ -2,9 +2,10 @@
 
 Tier 1: Exercises the untested direction of every partial branch (40 branches).
 Tier 2: Strengthens assertions on verify_receipt_file to kill 34 surviving mutants.
+Tier 1b: Closes the final 2 partial branches (explain.py dead-code fix + preset override test).
 
 Branch coverage gaps addressed (module → line → untested direction):
-  _explain.py       131→136     id-mismatch-only path (no hash mismatch)
+  _explain.py       131→136     id-mismatch-only path — DEAD CODE, converted elif→else
   _github.py        40→exit     GITHUB_OUTPUT not set
                     67→exit     GITHUB_STEP_SUMMARY not set
   _ledger.py        47→52      config file exists with valid instance_id
@@ -816,6 +817,39 @@ class TestVerifyReleaseBranchPolicyPresetUri(unittest.TestCase):
             pred = result.get("predicate", {})
             policy_uri = pred.get("policy", {}).get("uri", "")
             self.assertEqual(policy_uri, "aiir://presets/permissive")
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_policy_override_nullifies_preset(self):
+        """When policy_overrides clears preset, policy_uri falls back to inline://policy.
+
+        This exercises the False direction of branch 554→558: the ``elif
+        policy.get("preset"):`` guard evaluates to False, leaving policy_uri
+        at its default ``"inline://policy"``.
+        """
+        from aiir._verify_release import verify_release
+
+        tmpdir = tempfile.mkdtemp()
+        try:
+            ledger = Path(tmpdir, "receipts.jsonl")
+            receipt = {
+                "type": "aiir.commit_receipt",
+                "schema": "aiir/commit_receipt.v1",
+                "version": "1.0.0",
+                "commit": {"sha": "b" * 40, "subject": "test"},
+                "ai_attestation": {},
+                "provenance": {},
+                "receipt_id": "g1-override",
+                "content_hash": "sha256:" + "b" * 64,
+            }
+            ledger.write_text(json.dumps(receipt) + "\n")
+            result = verify_release(
+                receipts_path=str(ledger),
+                policy_overrides={"preset": ""},
+            )
+            pred = result.get("predicate", {})
+            policy_uri = pred.get("policy", {}).get("uri", "")
+            self.assertEqual(policy_uri, "inline://policy")
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
 

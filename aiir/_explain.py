@@ -128,7 +128,7 @@ def explain_verification(result: Dict[str, Any]) -> str:
                     "  The content_hash does not match the recomputed hash."
                     " One or more core fields were changed."
                 )
-            elif has_id_mismatch:
+            else:  # has_id_mismatch (only remaining case)
                 lines.append(
                     "  The receipt_id does not match the recomputed value."
                     " The receipt may have been re-issued with a different ID."

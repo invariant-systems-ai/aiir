@@ -38,13 +38,13 @@ jobs:
           persist-credentials: false
       - name: Build fuzz targets
         id: build
-        uses: google/clusterfuzzlite/actions/build_fuzzers@884713d53d006e0ccc6590749e3dc8f1ff9d5fef  # v1
+        uses: google/clusterfuzzlite/actions/build_fuzzers@82652fb49e77bc29c35da1167bb286e93c6bcc05  # v1
         with:
           language: python
           sanitizer: ${{ matrix.sanitizer }}
       - name: Run fuzz targets
         id: run
-        uses: google/clusterfuzzlite/actions/run_fuzzers@884713d53d006e0ccc6590749e3dc8f1ff9d5fef  # v1
+        uses: google/clusterfuzzlite/actions/run_fuzzers@82652fb49e77bc29c35da1167bb286e93c6bcc05  # v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fuzz-seconds: 300
@@ -69,13 +69,13 @@ jobs:
           persist-credentials: false
       - name: Build fuzz targets
         id: build
-        uses: google/clusterfuzzlite/actions/build_fuzzers@884713d53d006e0ccc6590749e3dc8f1ff9d5fef  # v1
+        uses: google/clusterfuzzlite/actions/build_fuzzers@82652fb49e77bc29c35da1167bb286e93c6bcc05  # v1
         with:
           language: python
           sanitizer: ${{ matrix.sanitizer }}
       - name: Run fuzz targets
         id: run
-        uses: google/clusterfuzzlite/actions/run_fuzzers@884713d53d006e0ccc6590749e3dc8f1ff9d5fef  # v1
+        uses: google/clusterfuzzlite/actions/run_fuzzers@82652fb49e77bc29c35da1167bb286e93c6bcc05  # v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fuzz-seconds: 600

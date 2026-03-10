@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025-2026 Invariant Systems, Inc.
 """
 AIIR internal — deterministic Canonical CBOR helpers.
 

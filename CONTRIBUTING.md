@@ -38,7 +38,7 @@ python -m pytest tests/ -q  # 1030+ tests, ~2 min
 All contributions must include a `Signed-off-by` line certifying the
 [Developer Certificate of Origin v1.1](https://developercertificate.org/):
 
-```
+```text
 Signed-off-by: Your Name <your@email.com>
 ```
 

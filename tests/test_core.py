@@ -873,9 +873,12 @@ class TestShaValidation(unittest.TestCase):
     def test_valid_sha1_accepted(self, mock_git):
         """A standard 40-hex SHA-1 should pass validation."""
         sha = "a" * 40
+        tree_sha = "c" * 40
         fmt_line = f"{sha}\x00Author\x00a@e\x00date\x00CN\x00c@e\x00date\x00subject"
         mock_git.side_effect = [
             fmt_line + "\n",  # git log --format
+            tree_sha + "\n",  # git rev-parse {sha}^{tree}
+            "\n",  # git rev-parse {sha}^@ (no parents = root)
             "body\n",  # git log --format=%B
             "parent\n",  # git rev-parse --verify
             "stat\n",  # git diff --stat
@@ -889,9 +892,12 @@ class TestShaValidation(unittest.TestCase):
     def test_valid_sha256_accepted(self, mock_git):
         """A 64-hex SHA-256 hash should also pass validation."""
         sha = "b" * 64
+        tree_sha = "d" * 64
         fmt_line = f"{sha}\x00Author\x00a@e\x00date\x00CN\x00c@e\x00date\x00subject"
         mock_git.side_effect = [
             fmt_line + "\n",
+            tree_sha + "\n",  # git rev-parse {sha}^{tree}
+            "\n",  # git rev-parse {sha}^@ (no parents)
             "body\n",
             "parent\n",
             "stat\n",

@@ -734,10 +734,22 @@ class TestSchemaIntegrity(unittest.TestCase):
 
     def test_commit_receipt_schema_valid_json(self):
         path = AIIR_ROOT / "schemas" / "commit_receipt.v1.schema.json"
-        self.assertTrue(path.is_file(), "commit receipt schema missing")
+        self.assertTrue(path.is_file(), "commit receipt v1 schema missing")
         schema = json.loads(_read(path))
         self.assertIn("$schema", schema)
         self.assertIn("properties", schema)
+
+    def test_commit_receipt_v2_schema_valid_json(self):
+        path = AIIR_ROOT / "schemas" / "commit_receipt.v2.schema.json"
+        self.assertTrue(path.is_file(), "commit receipt v2 schema missing")
+        schema = json.loads(_read(path))
+        self.assertIn("$schema", schema)
+        self.assertIn("properties", schema)
+        # v2 must define tree_sha and parent_shas in Commit
+        commit_def = schema.get("$defs", {}).get("Commit", {})
+        commit_props = commit_def.get("properties", {})
+        self.assertIn("tree_sha", commit_props, "v2 schema missing tree_sha")
+        self.assertIn("parent_shas", commit_props, "v2 schema missing parent_shas")
 
     def test_verification_summary_schema_valid_json(self):
         path = AIIR_ROOT / "schemas" / "verification_summary.v1.schema.json"

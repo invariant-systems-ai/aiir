@@ -492,7 +492,15 @@ class TestMcpGitLabSummary(unittest.TestCase):
         mock_gen.return_value = [_make_test_receipt()]
         result = _handle_aiir_gitlab_summary({"range": "HEAD~3..HEAD"})
 
-        mock_gen.assert_called_once_with("HEAD~3..HEAD", cwd=None)
+        mock_gen.assert_called_once_with(
+            "HEAD~3..HEAD",
+            cwd=None,
+            generator="aiir.mcp",
+            agent_attestation={
+                "run_context": "mcp",
+                "confidence": "transport",
+            },
+        )
         text = result["content"][0]["text"]
         self.assertIn("AIIR Receipt Summary", text)
 

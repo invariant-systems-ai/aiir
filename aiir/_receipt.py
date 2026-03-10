@@ -112,6 +112,11 @@ def build_commit_receipt(
         "version": CLI_VERSION,
         "commit": {
             "sha": commit.sha,
+            # DAG binding — tree SHA captures directory state, parent SHAs
+            # capture graph position.  Together they make receipt laundering
+            # (reusing a receipt across commits) structurally impossible.
+            "tree_sha": commit.tree_sha,
+            "parent_shas": commit.parent_shas,
             "author": {
                 "name": commit.author_name,
                 "email": commit.author_email,
@@ -198,6 +203,7 @@ def build_review_receipt(
     cwd: Optional[str] = None,
     instance_id: Optional[str] = None,
     namespace: Optional[str] = None,
+    agent_attestation: Optional[Dict[str, Any]] = None,
     generator: str = "aiir.cli",
 ) -> Dict[str, Any]:
     """Build a review receipt attesting that a human reviewed a commit.
@@ -215,6 +221,7 @@ def build_review_receipt(
         cwd: Repository root (for provenance).
         instance_id: Optional instance identifier.
         namespace: Optional namespace.
+        agent_attestation: Optional agent attestation dict (tool_id, model_class, etc.).
         generator: Generator identifier.
 
     Returns:
@@ -281,6 +288,11 @@ def build_review_receipt(
         "extensions": {
             **(({"instance_id": instance_id}) if instance_id else {}),
             **(({"namespace": namespace}) if namespace else {}),
+            **(
+                ({"agent_attestation": _sanitize_agent_attestation(agent_attestation)})
+                if agent_attestation
+                else {}
+            ),
         },
     }
 

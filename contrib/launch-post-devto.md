@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD041 MD003 MD022 MD034 -->
 ---
 title: "AI writes 40% of your code. Here's how to audit it."
 description: "Introducing AIIR — open-source cryptographic receipts for commits with declared AI involvement. EU AI Act compliance, SOC 2 evidence, and engineering visibility in one tool."
@@ -51,6 +52,7 @@ AIIR receipts provide:
 
 Auditors are starting to ask about AI code provenance. AIIR receipts slot directly into your control evidence:
 
+<!-- markdownlint-disable-next-line MD036 -->
 > *"We track all AI involvement in code commits using content-addressed receipts with cryptographic integrity verification."*
 
 That's a sentence your auditor wants to hear.
@@ -97,7 +99,7 @@ Then just say: *"receipt the last 5 commits"* in Claude Chat.
 ```yaml
 repos:
   - repo: https://github.com/invariant-systems-ai/aiir
-    rev: v1.2.2
+    rev: v1.2.3
     hooks:
       - id: aiir-receipt
 ```

@@ -4,7 +4,7 @@
 
 ## Current Architecture (v1.0.x)
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │  CLI / GitHub Action / MCP Server                           │
 │  (aiir/cli.py, action.yml, mcp_server.py)                   │

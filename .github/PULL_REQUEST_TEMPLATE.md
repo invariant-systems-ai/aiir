@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD041 -->
 ## Description
 
 <!-- What does this PR do? Why? -->

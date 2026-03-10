@@ -16,6 +16,7 @@ setup needed.
 
 ### 1. Create the compliance framework
 
+<!-- markdownlint-disable-next-line MD036 -->
 **Group → Settings → Compliance → Frameworks → New framework**
 
 - **Name**: `AI Policy — AIIR Receipts`

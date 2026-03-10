@@ -32,6 +32,7 @@ include:
 ```
 
 That's it. Every push and MR now:
+
 - generates receipts in `.aiir-receipts/`
 - signs them with Sigstore (GitLab OIDC)
 - reports AI findings to the Security Dashboard
@@ -41,7 +42,7 @@ That's it. Every push and MR now:
 
 ```yaml
 include:
-  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.2.2/templates/gitlab-ci.yml'
+  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.2.3/templates/gitlab-ci.yml'
 ```
 
 ### Option C: Full control (copy-paste)
@@ -51,7 +52,7 @@ self-contained pipeline with all features enabled and annotated.
 
 ## The pipeline flow
 
-```
+```text
 MR opened
   │
   ├─► aiir-receipt-mr

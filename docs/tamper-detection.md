@@ -13,7 +13,7 @@ This guide walks through exactly what happens when a receipt is modified.
 
 A receipt has **six core fields** that contribute to the hash:
 
-```
+```text
 CORE_KEYS = {"type", "schema", "version", "commit", "ai_attestation", "provenance"}
 ```
 

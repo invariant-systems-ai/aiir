@@ -9,13 +9,13 @@
 
 ## Title
 
-```
+```text
 Show HN: AIIR – prove which git commits used AI (open source, offline, no signup)
 ```
 
 Alternative titles (pick what feels right on the day):
 
-```
+```text
 Show HN: AIIR – tamper-evident receipts for AI-assisted git commits
 Show HN: AIIR – track which commits used Copilot/Claude/ChatGPT, cryptographically
 ```
@@ -36,7 +36,7 @@ one byte of the receipt — the hash breaks. That's the tamper detection.
 
 **Try it**:
 
-```
+```bash
 pip install aiir
 cd any-repo
 aiir --pretty
@@ -62,7 +62,7 @@ every PyPI release. CycloneDX SBOM on every GitHub release. OpenSSF
 Scorecard. We receipt our own repo — every commit to main gets a receipt
 committed back automatically, and you can verify them:
 
-```
+```bash
 for f in .receipts/*.json; do aiir --verify "$f"; done
 ```
 
@@ -75,12 +75,12 @@ component, MCP tool (works with Claude Desktop, VS Code Copilot, Cursor, etc.),
 Docker, pre-commit hook. Also works with Azure Pipelines, Bitbucket, CircleCI,
 Jenkins.
 
-**Browser verifier**: https://invariantsystems.io/verify — paste a receipt,
+**Browser verifier**: <https://invariantsystems.io/verify> — paste a receipt,
 verification runs entirely client-side. No upload, no server processing.
 
-Repo: https://github.com/invariant-systems-ai/aiir
-Docs: https://invariantsystems.io/docs
-Spec: https://invariantsystems.io/spec (formal specification with 25
+Repo: <https://github.com/invariant-systems-ai/aiir>
+Docs: <https://invariantsystems.io/docs>
+Spec: <https://invariantsystems.io/spec> (formal specification with 25
 conformance test vectors)
 
 Happy to answer questions about the design, the detection heuristics, why

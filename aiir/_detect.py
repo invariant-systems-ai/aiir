@@ -200,6 +200,21 @@ def get_commit_info(commit_ref: str = "HEAD", cwd: Optional[str] = None) -> Comm
     if not re.match(r"^[0-9a-f]{40,64}$", sha):
         raise ValueError(f"Invalid commit SHA format: {sha[:80]!r}")
 
+    # Tree SHA — captures full directory state (DAG binding, R24-DAG-01).
+    # Without this, a receipt is bound to commit SHA + diff content but
+    # not the resulting tree, leaving a theoretical laundering vector.
+    tree_sha = _run_git(["rev-parse", f"{sha}^{{tree}}"], cwd=cwd).strip()
+    if not re.match(r"^[0-9a-f]{40,64}$", tree_sha):
+        raise ValueError(f"Invalid tree SHA format: {tree_sha[:80]!r}")
+
+    # Parent SHAs — captures DAG position (R24-DAG-02).
+    # Empty list for root commits (no parents).
+    parent_shas_raw = _run_git(["rev-parse", f"{sha}^@"], cwd=cwd).strip()
+    parent_shas = [p for p in parent_shas_raw.split("\n") if p.strip()]
+    for p_sha in parent_shas:
+        if not re.match(r"^[0-9a-f]{40,64}$", p_sha):
+            raise ValueError(f"Invalid parent SHA format: {p_sha[:80]!r}")
+
     # Full commit message body
     body = _run_git(
         ["log", "-1", "--no-mailmap", "--format=%B", commit_ref], cwd=cwd
@@ -279,6 +294,8 @@ def get_commit_info(commit_ref: str = "HEAD", cwd: Optional[str] = None) -> Comm
         bot_signals_detected=bot_signals,
         is_bot_authored=is_bot,
         authorship_class=authorship_class,
+        tree_sha=tree_sha,
+        parent_shas=parent_shas,
     )
 
 

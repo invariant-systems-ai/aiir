@@ -4,15 +4,35 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.3] — 2026-03-11
+
+### Added
+
+- **Markdown lint enforcement**: Fixed all 78 markdown lint violations across 20 files and re-enabled all suppressed rules in `.markdownlint.yaml`. CI now enforces the full rule set.
+- **Verification pipeline documentation**: New "How It Works — The Verification Pipeline" section in README with ASCII architecture diagram showing `git commit → receipt → Sigstore → policy → VSA → CI gate`.
+- **Example gallery** (`examples/README.md`): Real receipt JSON, verification output, CI check mockup, policy evaluation example, and badge usage guide.
+- **GitHub community profile**: Added `.github/SECURITY.md` for detection and `.github/ISSUE_TEMPLATE/config.yml` with security policy redirect and discussions link.
+- **CI badge**: Added CI status badge to README badge row.
+
+### Changed
+
+- **README messaging**: Tagline updated from consumer-style to infra-grade positioning. Test count updated to 1600+. Audience-specific bullets for developers, security teams, and auditors.
+
 ## [1.2.2] — 2026-03-10
 
 ### Added
 
+- **DAG binding hardening** (`commit_receipt.v2`): Receipt core now includes `tree_sha` (directory state) and `parent_shas` (graph position) in the hashed `commit` object. Closes the theoretical "receipt laundering" vector identified in red-team review — a receipt is now cryptographically bound to the commit's exact position in the DAG, not just its content hash. Backwards-compatible: v1 receipts still verify. JSON Schema: `schemas/commit_receipt.v2.schema.json`. New controls: R24-DAG-01, R24-DAG-02.
 - **P0: GitHub Check Run** (`create_check_run()`): AIIR verification now posts a visible `aiir/verify` check run on every PR when running as a GitHub Action. Enforceable via branch protection rules. Requires `checks: write` permission.
 - **P1: Review Receipts** (`build_review_receipt()`, `--review`): New receipt type (`aiir/review_receipt.v1`) for human review attestations. Content-addressed, schema-validated, appended to the same ledger. Supports `--review-outcome` (approved/rejected/commented) and `--review-comment`. JSON Schema: `schemas/review_receipt.v1.schema.json`.
 - **P2: Project Init** (`--init`): Scaffold a `.aiir/` directory with `receipts.jsonl`, `index.json`, `config.json`, `.gitignore`, and optional `policy.json`. Path-traversal guarded. Idempotent (safe to re-run).
 - **P3: PR Comment** (`post_pr_comment()`): Automatic receipt summary comment on every PR in GitHub Actions mode. Idempotent (updates existing comment via hidden HTML marker). Requires `pull-requests: write` permission.
 - **P4: Commit Trailers** (`format_commit_trailer()`, `--trailer`): Print `AIIR-Receipt`, `AIIR-Type`, `AIIR-AI`, `AIIR-Verified` trailer lines suitable for `git interpret-trailers`. Terminal-escape sanitized, capped at 10 trailers.
+- **Transport-level agent attestation** (`extensions.agent_attestation`): 3-tier confidence model for AI authorship evidence:
+  - `"declared"` — self-reported via `--agent-tool`/`--agent-model`/`--agent-context` CLI flags (existing).
+  - `"transport"` — **NEW**: MCP server auto-populates `confidence: "transport"` because the MCP protocol itself guarantees an AI client invoked the tool. Generator stamped as `aiir.mcp`.
+  - `"environment"` — **NEW**: CI auto-detection reads `GITHUB_ACTOR` / `GITLAB_USER_LOGIN` and auto-populates attestation when the actor matches known AI/bot patterns (e.g., `copilot`, `dependabot[bot]`, `gitlab-duo`). Explicit `--agent-*` flags always take precedence.
+  - Review receipts (`build_review_receipt`) now accept and propagate `agent_attestation`.
 - **PEP 740 digital attestations**: Publish workflow now explicitly enables `attestations: true` on `pypa/gh-action-pypi-publish`. Every wheel and sdist uploaded to PyPI includes in-toto-style digital attestations (SLSA provenance + PyPI Publish predicates), cryptographically signed via short-lived OIDC identities from Trusted Publishing.
 - **SLSA provenance for sdist**: `actions/attest-build-provenance` now covers both `.whl` and `.tar.gz` artifacts (was wheel-only).
 - **PyPI Integrity API verification**: Post-publish CI step queries `GET /integrity/aiir/<version>/<file>/provenance` for every release artifact and reports attestation coverage.
@@ -28,6 +48,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Fixed
 
+- **MCP server generator identity**: MCP server called `generate_receipt()`/`generate_receipts_for_range()` without `generator` or `agent_attestation` — receipts from MCP were indistinguishable from CLI receipts. Now stamps `generator: "aiir.mcp"` and `agent_attestation.confidence: "transport"` on all 3 call sites (`_handle_aiir_receipt` single + range, `_handle_aiir_gitlab_summary`).
+- **Review receipt attestation gap**: `build_review_receipt()` did not accept `agent_attestation`. Now propagates `--agent-*` flags and CI auto-detection to review receipts.
 - **PR comment markdown injection**: `_format_pr_comment()` now uses `_sanitize_md()` instead of `_strip_terminal_escapes()` — neutralises markdown metacharacters (`|`, `` ` ``, `<`) in user-controlled fields rendered in GitHub PR comment tables.
 - **`--init` path traversal**: Replaced `startswith()` with `relative_to()` to prevent prefix-collision attacks (`/repo` vs `/repo_evil`).
 - **`--review` ref resolution**: CLI now resolves symbolic refs (e.g., `HEAD`) to full hex SHAs via `git rev-parse` before building review receipts. Previously, `--review HEAD` produced a receipt with `reviewed_commit.sha = "HEAD"`, which violated the JSON Schema.

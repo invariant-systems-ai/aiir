@@ -85,6 +85,7 @@ if __name__ == "__main__":
 
 ### 2. Configure the webhook in GitLab
 
+<!-- markdownlint-disable-next-line MD036 -->
 **Project → Settings → Webhooks → Add webhook**
 
 - **URL**: `https://your-server.example.com/aiir/webhook`

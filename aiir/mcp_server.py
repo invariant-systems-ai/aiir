@@ -402,6 +402,13 @@ def _handle_aiir_receipt(args: Dict[str, Any]) -> Dict[str, Any]:
     range_spec = args.get("range")
     commit_ref = args.get("commit", "HEAD")
 
+    # Transport-level attestation: the MCP protocol guarantees an AI
+    # client invoked this tool, so confidence is stronger than "declared".
+    _mcp_attestation = {
+        "run_context": "mcp",
+        "confidence": "transport",
+    }
+
     try:
         if range_spec:
             receipts = generate_receipts_for_range(
@@ -409,6 +416,8 @@ def _handle_aiir_receipt(args: Dict[str, Any]) -> Dict[str, Any]:
                 cwd=None,
                 ai_only=ai_only,
                 redact_files=redact_files,
+                generator="aiir.mcp",
+                agent_attestation=_mcp_attestation,
             )
         else:
             receipt = generate_receipt(
@@ -416,6 +425,8 @@ def _handle_aiir_receipt(args: Dict[str, Any]) -> Dict[str, Any]:
                 cwd=None,
                 ai_only=ai_only,
                 redact_files=redact_files,
+                generator="aiir.mcp",
+                agent_attestation=_mcp_attestation,
             )
             receipts = [receipt] if receipt else []
 
@@ -577,7 +588,15 @@ def _handle_aiir_gitlab_summary(args: Dict[str, Any]) -> Dict[str, Any]:
     try:
         if range_spec:
             # Generate receipts for the specified range
-            receipts = generate_receipts_for_range(range_spec, cwd=None)
+            receipts = generate_receipts_for_range(
+                range_spec,
+                cwd=None,
+                generator="aiir.mcp",
+                agent_attestation={
+                    "run_context": "mcp",
+                    "confidence": "transport",
+                },
+            )
         else:
             # Load from ledger
             ledger_path = _safe_ledger_dir() / "receipts.jsonl"

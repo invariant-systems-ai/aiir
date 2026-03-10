@@ -59,6 +59,7 @@ If you fork AIIR, please choose a **distinct name** that does not include
 We encourage interoperability. If your tool produces receipts that conform
 to the AIIR receipt JSON schema and pass `aiir verify`, you may state:
 
+<!-- markdownlint-disable-next-line MD036 -->
 > _"Compatible with the AIIR receipt format"_
 
 You may **not** state or imply that your tool **is** AIIR, or that it has
@@ -110,6 +111,7 @@ test vectors.
 
 For trademark use not covered above, contact:
 
+<!-- markdownlint-disable-next-line MD036 -->
 **trademark@invariantsystems.io**
 
 We're generally friendly about legitimate use. Just ask first.

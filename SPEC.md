@@ -29,6 +29,7 @@ described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
 ### 1.2 Reference Implementation
 
 The reference implementation is the `aiir` Python package:
+
 - Repository: <https://github.com/invariant-systems-ai/aiir>
 - PyPI: <https://pypi.org/project/aiir/>
 - License: Apache-2.0
@@ -62,7 +63,7 @@ A receipt is a JSON object with the following top-level fields:
 The **core** of a receipt is the subset of fields that contribute to the
 content hash. The core keys are exactly:
 
-```
+```text
 CORE_KEYS = {"type", "schema", "version", "commit", "ai_attestation", "provenance"}
 ```
 
@@ -192,7 +193,7 @@ for the same input object.
 
 ### 6.1 Algorithm
 
-```
+```text
 canonical_json(obj) → UTF-8 string
 ```
 
@@ -221,12 +222,14 @@ to prevent stack overflow attacks. The depth check SHOULD be iterative
 ### 6.4 Examples
 
 Input:
+
 ```json
 {"b": 1, "a": {"d": 2, "c": 3}}
 ```
 
 Canonical output:
-```
+
+```text
 {"a":{"c":3,"d":2},"b":1}
 ```
 
@@ -278,7 +281,7 @@ the current receipt schema.
 
 ### 7.1 Content Hash
 
-```
+```text
 content_hash = "sha256:" + hex(SHA-256(canonical_json(core)))
 ```
 
@@ -292,7 +295,7 @@ The SHA-256 is computed over the UTF-8 encoding of the canonical JSON string.
 
 ### 7.2 Receipt ID
 
-```
+```text
 receipt_id = "g1-" + hex(SHA-256(canonical_json(core)))[:32]
 ```
 
@@ -363,6 +366,7 @@ To verify a receipt, an implementation MUST:
 
 7. **Hash computation**: Compute:
    - `expected_hash = "sha256:" + hex(SHA-256(core_json.encode("utf-8")))`
+<!-- markdownlint-disable-next-line MD011 -->
    - `expected_id = "g1-" + hex(SHA-256(core_json.encode("utf-8")))[:32]`
 
 8. **Constant-time comparison**: Compare `expected_hash` against
@@ -462,7 +466,7 @@ threat models:
 | MCP `aiir_generate` | N/A | CWD boundary enforced | Prevent AI-directed writes outside project. |
 | GitHub Action | Runner workspace | Runner workspace | Sandboxed by Actions runtime. |
 
-See [THREAT_MODEL.md](THREAT_MODEL.md) for the full STRIDE analysis (147 controls).
+See [THREAT_MODEL.md](THREAT_MODEL.md) for the full STRIDE analysis (153 controls).
 
 ---
 
@@ -510,7 +514,7 @@ The following media type registration is prepared per
 
 The in-toto predicate type URI is:
 
-```
+```text
 https://invariantsystems.io/predicates/aiir/commit_receipt/v1
 ```
 
@@ -523,7 +527,7 @@ with links to the specification and schema.
 
 The JSON Schema `$id` URI is:
 
-```
+```text
 https://invariantsystems.io/schemas/aiir/commit_receipt.v1.schema.json
 ```
 

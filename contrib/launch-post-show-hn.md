@@ -25,6 +25,7 @@ One command. Zero dependencies. Apache 2.0.
 4. **Signing** (optional): Sigstore keyless signing for non-repudiation
 
 A receipt looks like this:
+
 ```json
 {
   "type": "aiir.commit_receipt",
@@ -74,9 +75,9 @@ A receipt looks like this:
 
 ## Links
 
-- GitHub: https://github.com/invariant-systems-ai/aiir
-- PyPI: https://pypi.org/project/aiir/
-- Spec: https://github.com/invariant-systems-ai/aiir/blob/main/SPEC.md
-- Website: https://invariantsystems.io
+- GitHub: <https://github.com/invariant-systems-ai/aiir>
+- PyPI: <https://pypi.org/project/aiir/>
+- Spec: <https://github.com/invariant-systems-ai/aiir/blob/main/SPEC.md>
+- Website: <https://invariantsystems.io>
 
 Built by Invariant Systems. We'd love feedback — especially from folks dealing with AI compliance in regulated industries.

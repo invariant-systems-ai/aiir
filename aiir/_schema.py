@@ -72,9 +72,10 @@ def validate_receipt_schema(receipt: Any) -> List[str]:
     # ── Type and schema constants ──
     if receipt["type"] != "aiir.commit_receipt":
         errors.append(f"type must be 'aiir.commit_receipt', got {receipt['type']!r}")
-    if receipt["schema"] != "aiir/commit_receipt.v1":
+    _VALID_SCHEMAS = ("aiir/commit_receipt.v1", "aiir/commit_receipt.v2")
+    if receipt["schema"] not in _VALID_SCHEMAS:
         errors.append(
-            f"schema must be 'aiir/commit_receipt.v1', got {receipt['schema']!r}"
+            f"schema must be one of {_VALID_SCHEMAS}, got {receipt['schema']!r}"
         )
 
     # ── Version format ──
@@ -188,6 +189,31 @@ def _validate_commit(commit: Dict[str, Any], errors: List[str]) -> None:
 
     if commit.get("files_capped") is not None and commit["files_capped"] is not True:
         errors.append("commit.files_capped must be true when present")
+
+    # v2 DAG binding fields (optional for v1 backwards compat)
+    tree_sha = commit.get("tree_sha")
+    if tree_sha is not None:
+        if not isinstance(tree_sha, str):
+            errors.append(
+                f"commit.tree_sha must be a string, got {type(tree_sha).__name__}"
+            )
+        elif tree_sha and not _RE_SHA_HEX.match(tree_sha):
+            errors.append(
+                f"commit.tree_sha must be 40-64 lowercase hex chars, got {tree_sha!r}"
+            )
+    parent_shas = commit.get("parent_shas")
+    if parent_shas is not None:
+        if not isinstance(parent_shas, list):
+            errors.append(
+                f"commit.parent_shas must be an array, got {type(parent_shas).__name__}"
+            )
+        else:
+            for i, p in enumerate(parent_shas):
+                if not isinstance(p, str) or not _RE_SHA_HEX.match(p):
+                    errors.append(
+                        f"commit.parent_shas[{i}] must be 40-64 lowercase hex chars"
+                    )
+                    break  # Don't flood errors
 
 
 def _validate_git_identity(

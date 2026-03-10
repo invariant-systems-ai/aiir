@@ -92,6 +92,7 @@ security tests are added.
 ---
 
 *Generated from test suite analysis on 2026-03-09.  Verify with:*
+
 ```bash
 grep -rn "Covers:" tests/ | sort
 ```

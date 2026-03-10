@@ -36,7 +36,7 @@ _HAS_FCHMOD = hasattr(os, "fchmod")
 # Constants
 # ---------------------------------------------------------------------------
 
-RECEIPT_SCHEMA_VERSION = "aiir/commit_receipt.v1"
+RECEIPT_SCHEMA_VERSION = "aiir/commit_receipt.v2"
 
 # Single source of truth — __version__ lives in __init__.py only.
 from aiir import __version__ as CLI_VERSION  # noqa: E402, F401  # re-exported
@@ -939,6 +939,12 @@ class CommitInfo:
     # Values: "human", "ai-assisted", "bot-generated", "ai+bot", "unknown".
     # Derived from is_ai_authored / is_bot_authored at detection time.
     authorship_class: str = "human"
+    # DAG binding — captures full directory state and graph position.
+    # Added in schema v2 to close the "receipt laundering" gap identified
+    # in red-team review: without tree/parent SHAs, a receipt could
+    # theoretically be reused across commits with identical diffs.
+    tree_sha: str = ""  # git rev-parse {sha}^{tree}
+    parent_shas: List[str] = field(default_factory=list)  # git rev-parse {sha}^@
 
 
 # ---------------------------------------------------------------------------

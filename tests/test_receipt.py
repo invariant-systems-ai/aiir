@@ -240,7 +240,7 @@ class TestPublicBasic(unittest.TestCase):
         commit = self._make_commit()
         receipt = cli.build_commit_receipt(commit)
         self.assertEqual(receipt["type"], "aiir.commit_receipt")
-        self.assertEqual(receipt["schema"], "aiir/commit_receipt.v1")
+        self.assertEqual(receipt["schema"], "aiir/commit_receipt.v2")
 
     def test_help_text_contains_url(self):
         """--help epilog should contain the project URL for first-time users."""

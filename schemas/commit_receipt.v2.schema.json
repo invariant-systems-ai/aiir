@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://invariantsystems.io/schemas/aiir/commit_receipt.v2.schema.json",
+  "title": "AIIR Commit Receipt v2",
+  "description": "Content-addressed cryptographic receipt for a git commit with AI authorship attestation and DAG binding. Schema: aiir/commit_receipt.v2. Backwards-compatible with v1 — adds tree_sha and parent_shas to the commit object for full DAG position binding.",
+  "type": "object",
+  "required": [
+    "type",
+    "schema",
+    "version",
+    "commit",
+    "ai_attestation",
+    "provenance",
+    "receipt_id",
+    "content_hash",
+    "timestamp",
+    "extensions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "const": "aiir.commit_receipt",
+      "description": "Receipt type identifier. MUST be the literal string 'aiir.commit_receipt'."
+    },
+    "schema": {
+      "const": "aiir/commit_receipt.v2",
+      "description": "Schema version identifier. MUST be the literal string 'aiir/commit_receipt.v2'."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([.+\\-][0-9a-zA-Z.+\\-]*)?$",
+      "description": "SemVer version of the tool that generated this receipt."
+    },
+    "commit": {
+      "$ref": "#/$defs/Commit",
+      "description": "Git commit metadata, content hashes, and DAG binding."
+    },
+    "ai_attestation": {
+      "$ref": "#/$defs/AIAttestation",
+      "description": "AI authorship detection results for the commit."
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "description": "Tool and repository provenance metadata."
+    },
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^g1-[0-9a-f]{32}$",
+      "description": "Content-addressed receipt identifier: 'g1-' + SHA-256(canonical_json(CORE))[:32]. The 'g1' prefix denotes generation 1 of the ID scheme."
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "Full SHA-256 hash of the canonical JSON of CORE_KEYS: 'sha256:' + SHA-256(canonical_json(CORE))."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 UTC timestamp of receipt generation. NOT part of CORE_KEYS — does not affect content_hash."
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Extension point for downstream integrations. NOT part of CORE_KEYS — does not affect content_hash. May contain 'instance_id', 'namespace', 'agent_attestation', or custom keys.",
+      "additionalProperties": true,
+      "properties": {
+        "instance_id": {
+          "type": "string",
+          "description": "Optional user-supplied instance identifier for multi-tenant deployments."
+        },
+        "namespace": {
+          "type": "string",
+          "description": "Optional user-supplied namespace for organizational grouping."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Commit": {
+      "type": "object",
+      "description": "Git commit metadata with DAG binding. All string fields are sanitized: NUL bytes, terminal escapes, and URL credentials are stripped.",
+      "required": [
+        "sha",
+        "tree_sha",
+        "parent_shas",
+        "author",
+        "committer",
+        "subject",
+        "message_hash",
+        "diff_hash",
+        "files_changed"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$|^[0-9a-f]{64}$",
+          "description": "Full hex SHA of the git commit (40 chars for SHA-1, 64 for SHA-256)."
+        },
+        "tree_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$|^[0-9a-f]{64}$|^$",
+          "description": "Full hex SHA of the commit's tree object. Captures the complete directory state. Added in v2 for DAG binding — prevents receipt laundering across commits with identical diffs but different trees."
+        },
+        "parent_shas": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$|^[0-9a-f]{64}$"
+          },
+          "description": "Ordered list of parent commit SHAs. Empty array for root commits, single element for normal commits, two+ for merges. Captures DAG position — prevents receipt reuse across different graph locations."
+        },
+        "author": {
+          "$ref": "#/$defs/GitIdentity",
+          "description": "Git author identity (from git log --format)."
+        },
+        "committer": {
+          "$ref": "#/$defs/GitIdentity",
+          "description": "Git committer identity (from git log --format)."
+        },
+        "subject": {
+          "type": "string",
+          "maxLength": 4096,
+          "description": "First line of the commit message."
+        },
+        "message_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "description": "SHA-256 hash of the full commit message body: 'sha256:' + SHA-256(body)."
+        },
+        "diff_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "description": "SHA-256 hash of the full git diff (streamed in 64KB chunks): 'sha256:' + SHA-256(diff)."
+        },
+        "files_changed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of files changed in the commit."
+        },
+        "files": {
+          "type": "array",
+          "items": { "type": "string" },
+          "maxItems": 100,
+          "description": "List of changed file paths (capped at 100). Present when --redact-files is NOT set."
+        },
+        "files_redacted": {
+          "const": true,
+          "description": "Present (and true) when --redact-files is set. Mutually exclusive with 'files'."
+        },
+        "files_capped": {
+          "const": true,
+          "description": "Present (and true) when the file list was truncated at 100 entries."
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["files"],
+          "not": { "required": ["files_redacted"] }
+        },
+        {
+          "required": ["files_redacted"],
+          "not": { "required": ["files"] }
+        }
+      ]
+    },
+    "GitIdentity": {
+      "type": "object",
+      "required": ["name", "email", "date"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 1024,
+          "description": "Git identity name."
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 1024,
+          "description": "Git identity email."
+        },
+        "date": {
+          "type": "string",
+          "description": "Git identity date (RFC 3339 or git default format)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "AIAttestation": {
+      "type": "object",
+      "required": [
+        "is_ai_authored",
+        "signals_detected",
+        "signal_count",
+        "detection_method"
+      ],
+      "properties": {
+        "is_ai_authored": {
+          "type": "boolean",
+          "description": "True if any AI authorship signal was detected in the commit."
+        },
+        "signals_detected": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of detected AI authorship signals (e.g., 'co-authored-by: copilot', 'signed-off-by: dependabot')."
+        },
+        "signal_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of signals detected. MUST equal len(signals_detected)."
+        },
+        "is_bot_authored": {
+          "type": "boolean",
+          "description": "True if the commit author/committer matches a known bot pattern."
+        },
+        "bot_signals_detected": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of detected bot authorship signals."
+        },
+        "bot_signal_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of bot signals detected. MUST equal len(bot_signals_detected)."
+        },
+        "authorship_class": {
+          "type": "string",
+          "enum": ["human", "ai_assisted", "bot", "ai+bot"],
+          "description": "Classification of commit authorship."
+        },
+        "detection_method": {
+          "type": "string",
+          "description": "Detection algorithm identifier (e.g., 'heuristic_v2')."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Provenance": {
+      "type": "object",
+      "required": ["repository", "tool", "generator"],
+      "properties": {
+        "repository": {
+          "type": ["string", "null"],
+          "description": "Git remote origin URL (credentials stripped). Null when no remote is configured."
+        },
+        "tool": {
+          "type": "string",
+          "pattern": "^https://github\\.com/invariant-systems-ai/aiir@",
+          "description": "URI-based tool identifier for SLSA/in-toto compatibility."
+        },
+        "generator": {
+          "type": "string",
+          "description": "Generator identifier (e.g., 'aiir.cli', 'aiir.action', 'aiir.mcp')."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

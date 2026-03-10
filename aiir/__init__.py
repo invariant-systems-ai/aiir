@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
 
-__version__ = "1.2.2"
+__version__ = "1.2.3"
 
 # ---------------------------------------------------------------------------
 # Public API — importable via `from aiir import ...`

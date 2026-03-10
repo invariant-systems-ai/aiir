@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+blank_issues_enabled: true
+contact_links:
+  - name: Security Vulnerability
+    url: https://github.com/invariant-systems-ai/aiir/security/policy
+    about: Please report security vulnerabilities via our security policy — do NOT open a public issue.
+  - name: Discussions
+    url: https://github.com/invariant-systems-ai/aiir/discussions
+    about: Ask questions, share ideas, or discuss AIIR usage.

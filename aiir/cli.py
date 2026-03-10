@@ -749,6 +749,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
             return 1
 
+        # Build agent attestation from CLI flags (if any).
+        _review_attestation = None
+        if (
+            getattr(args, "agent_tool", None)
+            or getattr(args, "agent_model", None)
+            or getattr(args, "agent_context", None)
+        ):
+            _review_attestation = {}
+            if args.agent_tool:
+                _review_attestation["tool_id"] = args.agent_tool
+            if args.agent_model:
+                _review_attestation["model_class"] = args.agent_model
+            if args.agent_context:
+                _review_attestation["run_context"] = args.agent_context
+            _review_attestation["confidence"] = "declared"
+
+        # Determine generator ID based on integration mode
+        _review_generator = "aiir.cli"
+        if getattr(args, "github_action", False):
+            _review_generator = "aiir.github"
+        elif getattr(args, "gitlab_ci", False):
+            _review_generator = "aiir.gitlab"
+
         try:
             review_receipt = build_review_receipt(
                 reviewed_commit=reviewed_sha,
@@ -757,7 +780,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 review_outcome=args.review_outcome,
                 comment=args.review_comment,
                 cwd=cwd_review,
-                generator="aiir.cli",
+                agent_attestation=_review_attestation,
+                generator=_review_generator,
             )
         except (ValueError, RuntimeError) as e:
             print(f"{_e('error')} {e}", file=sys.stderr)
@@ -1228,6 +1252,51 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         generator = "aiir.github"
     elif args.gitlab_ci:
         generator = "aiir.gitlab"
+
+    # --- CI environment auto-detection ---
+    # When running in GitHub Actions or GitLab CI, the environment tells us
+    # whether an AI/bot actor triggered the workflow.  This is stronger than
+    # "declared" (self-reported) because the CI platform sets these variables,
+    # not the caller.  We only auto-populate if the user did NOT explicitly
+    # set --agent-* flags (explicit always wins).
+    if agent_attestation is None and (args.github_action or args.gitlab_ci):
+        _ci_actor: Optional[str] = None
+        _ci_context: Optional[str] = None
+        if args.github_action:
+            _ci_actor = os.environ.get("GITHUB_ACTOR", "")
+            _ci_context = "github-actions"
+        elif args.gitlab_ci:
+            _ci_actor = os.environ.get(
+                "GITLAB_USER_LOGIN", os.environ.get("GITLAB_USER_NAME", "")
+            )
+            _ci_context = "gitlab-ci"
+
+        # Known AI/bot actor patterns in CI environments
+        _ci_ai_actors = {
+            "copilot",
+            "github-copilot",
+            "devin",
+            "coderabbit",
+            "amazon-q",
+            "gitlab-duo",
+        }
+        _ci_bot_actors = {
+            "github-actions[bot]",
+            "dependabot[bot]",
+            "renovate[bot]",
+            "snyk-bot",
+            "gitlab-bot",
+        }
+        if _ci_actor:
+            _actor_lower = _ci_actor.lower()
+            _is_ai = any(p in _actor_lower for p in _ci_ai_actors)
+            _is_bot = any(p in _actor_lower for p in _ci_bot_actors)
+            if _is_ai or _is_bot:
+                agent_attestation = {
+                    "tool_id": _ci_actor,
+                    "run_context": _ci_context,
+                    "confidence": "environment",
+                }
 
     try:
         if args.range_spec:

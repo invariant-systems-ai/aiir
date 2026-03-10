@@ -49,7 +49,7 @@ detector will flag it as AI-assisted.
 
 ### Example output
 
-```
+```text
 ┌─ Receipt: g1-a3f8b2c1d4e5f6a7b8c9d0e1
 │  Commit:  c4dec85630
 │  Subject: claude: auto-commit

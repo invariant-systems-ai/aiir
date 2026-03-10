@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD041 -->
 <p align="center">
   <a href="https://invariantsystems.io">
     <img src="docs/logo.svg" alt="Invariant Systems" width="120" height="120">
@@ -6,15 +7,18 @@
 
 # AIIR — AI Integrity Receipts
 
-**Tamper-evident receipts for commits with declared AI involvement.** 🧾
+**Verifiable provenance for AI-assisted commits. Generate receipts. Verify releases. Attest for auditors.** 🧾
+
+> `git commit` → receipt → policy evaluation → signed [Verification Summary Attestation](https://slsa.dev/spec/v1.0/verification_summary) (VSA)
 
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-AIIR-blue?logo=github)](https://github.com/marketplace/actions/aiir-ai-integrity-receipts)
 [![PyPI](https://img.shields.io/pypi/v/aiir?color=blue)](https://pypi.org/project/aiir/)
+[![CI](https://github.com/invariant-systems-ai/aiir/actions/workflows/ci.yml/badge.svg)](https://github.com/invariant-systems-ai/aiir/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/invariant-systems-ai/aiir)
 [![GitLab CI/CD Catalog](https://img.shields.io/badge/GitLab-CI%2FCD%20Catalog-orange?logo=gitlab)](https://gitlab.com/explore/catalog/invariant-systems/aiir)
-[![AIIR Receipted](https://img.shields.io/badge/AIIR-Receipted%20✓-blue)](https://github.com/invariant-systems-ai/aiir)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/invariant-systems-ai/aiir/badge)](https://scorecard.dev/viewer/?uri=github.com/invariant-systems-ai/aiir)
+[![AIIR Receipted](https://img.shields.io/badge/AIIR-Receipted%20✓-blue)](https://github.com/invariant-systems-ai/aiir)
 
 <p align="center">
   <img src="docs/demo.svg" alt="AIIR terminal demo — pip install aiir && aiir --pretty" width="720">
@@ -46,7 +50,7 @@ AIIR answers both questions. **Generate** receipts for every commit. **Verify** 
 
 ## What's a receipt?
 
-```
+```text
 ┌─ Receipt: g1-a3f8b2c1d4e5f6a7b8c9d0e1...
 │  Commit:  c4dec85630
 │  Subject: feat: add new auth middleware
@@ -61,6 +65,32 @@ AIIR answers both questions. **Generate** receipts for every commit. **Verify** 
 Every commit gets a **content-addressed** receipt — a JSON object that records *what* was committed, *who* wrote it, and *whether AI was involved*. Change one character? The hash breaks. That's **integrity** (tamper detection).
 
 For **authenticity** (proving *who* generated the receipt), enable Sigstore keyless signing — see [Sigstore signing](#sigstore-signing) below. Without signing, receipts prove internal consistency but not provenance — anyone who can run `aiir` on the same commit can produce an equivalent receipt.
+
+---
+
+## How It Works — The Verification Pipeline
+
+AIIR operates at three levels, matching modern supply-chain security architecture:
+
+```text
+git commit
+    ↓
+AIIR receipt (content-addressed, per-commit)
+    ↓
+Sigstore signing (OIDC identity, transparency log)
+    ↓
+Policy evaluation (org rules, AI-usage thresholds)
+    ↓
+Verification Summary Attestation (in-toto Statement v1)
+    ↓
+CI gate (PASS / FAIL — enforceable via branch protection)
+```
+
+This aligns directly with [SLSA](https://slsa.dev), [Sigstore](https://sigstore.dev), and [in-toto](https://in-toto.io) — the same stack used by npm, PyPI, Kubernetes, and the Linux kernel.
+
+**For developers**: Add `aiir` to your CI and get a pass/fail check on every PR.
+**For security teams**: Get policy-evaluated verification results as signed attestations.
+**For auditors**: Query the JSONL ledger or VSA artifacts — every claim is cryptographically verifiable.
 
 ---
 
@@ -217,6 +247,7 @@ Signing is **on by default** — each receipt gets a Sigstore bundle (Fulcio cer
 Artifacts uploaded automatically when `output-dir` is set.
 
 > **Automatic PR integration**: When `GITHUB_TOKEN` is available, the Action automatically:
+>
 > - **Creates an `aiir/verify` Check Run** — visible as a pass/fail status check on every PR (enforce via branch protection). Requires `checks: write`.
 > - **Posts a receipt summary comment** — idempotent (updates in place, no comment spam). Requires `pull-requests: write`.
 
@@ -254,7 +285,7 @@ jobs:
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/invariant-systems-ai/aiir
-    rev: v1.2.2
+    rev: v1.2.3
     hooks:
       - id: aiir
 ```
@@ -283,7 +314,7 @@ All inputs are optional and typed:
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
 | `stage` | string | `test` | Pipeline stage |
-| `version` | string | `1.2.2` | AIIR version from PyPI |
+| `version` | string | `1.2.3` | AIIR version from PyPI |
 | `ai-only` | boolean | `false` | Only receipt AI-authored commits |
 | `output-dir` | string | `.aiir-receipts` | Artifact output directory |
 | `artifact-expiry` | string | `90 days` | Artifact retention |
@@ -296,7 +327,7 @@ All inputs are optional and typed:
 
 ```yaml
 include:
-  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.2.2/templates/gitlab-ci.yml'
+  - remote: 'https://raw.githubusercontent.com/invariant-systems-ai/aiir/v1.2.3/templates/gitlab-ci.yml'
 ```
 
 **Self-hosted GitLab?** Mirror the repo and use `project:` instead:
@@ -304,7 +335,7 @@ include:
 ```yaml
 include:
   - project: 'your-group/aiir'
-    ref: 'v1.2.2'
+    ref: 'v1.2.3'
     file: '/templates/gitlab-ci.yml'
 ```
 
@@ -452,6 +483,7 @@ Commits made by CI bots and automated dependency tools. These are *not* gen-AI a
 AI detection uses `heuristic_v2` — matching on commit metadata signals.
 
 **What it catches:**
+
 - Commits with `Co-authored-by: Copilot` or similar trailers
 - Bot-authored commits (Dependabot, Renovate) — classified separately as `bot`
 - Explicit AI markers (`AI-generated`, `Generated by ChatGPT`, etc.)
@@ -475,7 +507,7 @@ This is by design — AIIR receipts what's *declared*, not what's hidden. Receip
 
 By default, `aiir` appends receipts to a local JSONL ledger:
 
-```
+```text
 .aiir/
 ├── receipts.jsonl   # One receipt per line (append-only)
 └── index.json       # Auto-maintained lookup index
@@ -564,7 +596,11 @@ Each receipt is a content-addressed JSON document:
 > **`authorship_class`** = structured category: `"human"`, `"ai_assisted"`, `"bot"`, or `"ai+bot"`.
 > These are fully independent — a Dependabot commit gets `bot`, not `ai_assisted`.
 
+<!-- -->
+
 > **Note**: Unsigned receipts are *tamper-evident*, not *tamper-proof*. Anyone who can re-run `aiir` on the same commit can recreate a matching receipt. For cryptographic non-repudiation, enable [Sigstore signing](#sigstore-signing).
+
+<!-- -->
 
 > **Receipt identity depends on repository provenance.**
 > The `provenance.repository` field (your `git remote get-url origin`) is part
@@ -738,6 +774,7 @@ pip install aiir
 ```
 
 **Claude Desktop** (`claude_desktop_config.json`):
+
 ```json
 {
   "mcpServers": {
@@ -750,6 +787,7 @@ pip install aiir
 ```
 
 **VS Code / Copilot** (`.vscode/mcp.json`):
+
 ```json
 {
   "servers": {
@@ -762,6 +800,7 @@ pip install aiir
 ```
 
 **Cursor** (`.cursor/mcp.json`):
+
 ```json
 {
   "mcpServers": {
@@ -774,6 +813,7 @@ pip install aiir
 ```
 
 **Continue** (`.continue/mcpServers/aiir.yaml`):
+
 ```yaml
 name: AIIR
 version: 0.0.1
@@ -789,6 +829,7 @@ Or copy any JSON MCP config (e.g., from Claude Desktop) into `.continue/mcpServe
 Continue auto-discovers it.
 
 **Cline** (open MCP Servers panel → add to `cline_mcp_settings.json`):
+
 ```json
 {
   "mcpServers": {
@@ -801,6 +842,7 @@ Continue auto-discovers it.
 ```
 
 **Windsurf** (`~/.codeium/windsurf/mcp_config.json`):
+
 ```json
 {
   "mcpServers": {
@@ -942,7 +984,7 @@ Everything below is verifiable. No testimonials-behind-a-login — just public a
 | Proof | What it proves | Verify it |
 |-------|---------------|-----------|
 | **This repo receipts itself** | Dogfood — AIIR generates its own receipts on every push to `main` | `for f in .receipts/*.json; do aiir --verify "$f"; done` |
-| **1170+ tests, 92%+ coverage** | Every release passes Python 3.9–3.13 × Ubuntu/macOS/Windows | [CI runs](https://github.com/invariant-systems-ai/aiir/actions/workflows/ci.yml) |
+| **1600+ tests, 100% coverage** | Every release passes Python 3.9–3.13 × Ubuntu/macOS/Windows | [CI runs](https://github.com/invariant-systems-ai/aiir/actions/workflows/ci.yml) |
 | **25 conformance test vectors** | Third-party implementors can verify their hashing against ours | [schemas/test_vectors.json](schemas/test_vectors.json) |
 | **Public threat model** | Full STRIDE/DREAD analysis — we show attackers what we defend against | [THREAT_MODEL.md](THREAT_MODEL.md) |
 | **SLSA provenance on every release** | PyPI wheel has a verifiable build attestation | `gh attestation verify aiir-*.whl --repo invariant-systems-ai/aiir` |
@@ -960,10 +1002,11 @@ on every push to `main` and commits them back to `.receipts/`. Locally, the
 
 ## Security
 
-Extensive [security controls](THREAT_MODEL.md). 1170+ tests. Zero dependencies.
+Extensive [security controls](THREAT_MODEL.md). 1600+ tests. Zero dependencies.
 
 See [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), and
 [Tamper Detection](docs/tamper-detection.md).
+
 ### Trust Tiers
 
 Receipts exist at three trust levels. Choose the right one for your use case:

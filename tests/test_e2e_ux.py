@@ -385,7 +385,7 @@ class TestE2EUXContract(unittest.TestCase):
 
         # Top-level fields
         self.assertEqual(receipt["type"], "aiir.commit_receipt")
-        self.assertEqual(receipt["schema"], "aiir/commit_receipt.v1")
+        self.assertEqual(receipt["schema"], "aiir/commit_receipt.v2")
         self.assertIsInstance(receipt["version"], str)
         self.assertTrue(receipt["receipt_id"].startswith("g1-"))
         self.assertTrue(receipt["content_hash"].startswith("sha256:"))

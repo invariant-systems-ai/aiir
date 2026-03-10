@@ -770,24 +770,31 @@ class TestSchemaIntegrity(unittest.TestCase):
 # ═══════════════════════════════════════════════════════════════════════════
 
 
+def _decode_guard_patterns() -> list[str]:
+    """Decode reference-guard patterns from their stored representation."""
+    import base64 as _b64
+    # Encoded patterns for internal reference guards — do not inline plaintext.
+    _enc = [
+        b"aHViXC5pbnZhcmlhbnRzeXN0ZW1zXC5pbw==",
+        b"aW52YXJpYW50LXN5c3RlbXMtd29ya3NwYWNl",
+        b"a2FsZWlkb3MtY29yZQ==",
+        b"TWV0YUlEMjU2",
+        b"aHYxNQ==",
+        b"Q29kb242NA==",
+        b"a2dyYXBoXC5qc29ubA==",
+        b"dHJhY2UtbWFwIGFsZ2VicmE=",
+    ]
+    return [_b64.b64decode(e).decode() for e in _enc]
+
+
 @unittest.skipUnless(SITE_EXISTS, "Website repo not found — set AIIR_SITE_DIR")
 class TestContentTierPolicy(unittest.TestCase):
-    """T0 surfaces must not reference T1+ resources."""
+    """Public surfaces must not reference internal-only resources."""
 
-    # Patterns that should NEVER appear on T0 public pages
-    FORBIDDEN_PATTERNS = [
-        r"hub\.invariantsystems\.io",  # internal reference
-        r"internal-workspace",  # internal reference
-        r"internal-module",  # internal reference
-        r"InternalID",  # internal reference
-        r"ivec",  # internal reference
-        r"InternalCodec",  # internal reference
-        r"internal\.ledger",  # internal reference
-        r"internal algebra",  # internal reference
-    ]
+    FORBIDDEN_PATTERNS = _decode_guard_patterns()
 
-    def test_no_tier_leaks_in_html(self):
-        """No T1+ content tier references in any HTML page."""
+    def test_no_internal_refs_in_html(self):
+        """No internal-only references in any HTML page."""
         violations = []
         for page in SITE_DIR.glob("*.html"):
             content = _read(page)
@@ -798,26 +805,26 @@ class TestContentTierPolicy(unittest.TestCase):
         self.assertEqual(
             violations,
             [],
-            "Content-tier leaks found on T0 pages:\n"
+            "Internal references found on public pages:\n"
             + "\n".join(f"  {page}: matched '{pat}'" for page, pat in violations),
         )
 
-    def test_no_tier_leaks_in_readme(self):
-        """AIIR README (T0) must not reference private monorepo."""
+    def test_no_internal_refs_in_readme(self):
+        """AIIR README must not reference internal resources."""
         readme = _read(AIIR_ROOT / "README.md")
         for pattern in self.FORBIDDEN_PATTERNS:
             self.assertIsNone(
                 re.search(pattern, readme, re.IGNORECASE),
-                f"AIIR README contains T1+ reference: {pattern}",
+                f"README contains internal reference: {pattern}",
             )
 
-    def test_no_tier_leaks_in_mcp_manifest(self):
-        """MCP manifest (T0) must not reference internal resources."""
+    def test_no_internal_refs_in_mcp_manifest(self):
+        """MCP manifest must not reference internal resources."""
         content = _read(AIIR_ROOT / "mcp-manifest.json")
         for pattern in self.FORBIDDEN_PATTERNS:
             self.assertIsNone(
                 re.search(pattern, content, re.IGNORECASE),
-                f"mcp-manifest.json contains T1+ reference: {pattern}",
+                f"mcp-manifest.json contains internal reference: {pattern}",
             )
 
 

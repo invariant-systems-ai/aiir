@@ -1662,6 +1662,9 @@ class TestPrettyPlusOutput(unittest.TestCase):
             self.assertGreaterEqual(
                 len(files), 1, "Receipt file must be written when --output is set"
             )
+            cbor_files = list(Path(out_dir).glob("receipt_*.cbor"))
+            self.assertEqual(len(cbor_files), len(files))
+            self.assertGreater(cbor_files[0].stat().st_size, 0)
             # File content should be valid JSON
             content = files[0].read_text()
             receipt = json.loads(content)
@@ -1712,6 +1715,8 @@ class TestPrettyPlusOutput(unittest.TestCase):
             # File should be written
             files = list(Path(out_dir).glob("receipt_*.json"))
             self.assertGreaterEqual(len(files), 1)
+            cbor_files = list(Path(out_dir).glob("receipt_*.cbor"))
+            self.assertEqual(len(cbor_files), len(files))
             # stdout should NOT contain pretty box-drawing
             stdout_text = captured.getvalue()
             self.assertNotIn(

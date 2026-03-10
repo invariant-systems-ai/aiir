@@ -16,6 +16,13 @@ __version__ = "1.2.4"
 # Public API — importable via `from aiir import ...`
 # ---------------------------------------------------------------------------
 
+from aiir._canonical_cbor import (  # noqa: F401
+    CANONICAL_OBJECT_SCHEMA,
+    CANONICAL_OBJECT_TYPE,
+    build_canonical_object_envelope,
+    canonical_cbor_bytes,
+    canonical_cbor_sha256,
+)
 from aiir._core import _canonical_json, _sha256  # noqa: F401
 from aiir._detect import detect_ai_signals  # noqa: F401
 from aiir._explain import explain_verification  # noqa: F401
@@ -104,6 +111,11 @@ __all__ = [
     "build_receipts_graphql_query",
     "enforce_approval_rules",
     # Low-level (for third-party implementors)
+    "CANONICAL_OBJECT_SCHEMA",
+    "CANONICAL_OBJECT_TYPE",
+    "build_canonical_object_envelope",
+    "canonical_cbor_bytes",
+    "canonical_cbor_sha256",
     "_canonical_json",
     "_sha256",
 ]

@@ -260,9 +260,7 @@ class TestCIEnvironmentAutoDetection(unittest.TestCase):
         }
         import aiir.cli as cli
 
-        with patch.dict(
-            os.environ, {"GITHUB_ACTOR": "human-developer"}, clear=False
-        ):
+        with patch.dict(os.environ, {"GITHUB_ACTOR": "human-developer"}, clear=False):
             cli.main(["--json", "--github-action", "--commit", "HEAD"])
 
         _, kwargs = mock_gen.call_args
@@ -280,9 +278,7 @@ class TestCIEnvironmentAutoDetection(unittest.TestCase):
         }
         import aiir.cli as cli
 
-        with patch.dict(
-            os.environ, {"GITLAB_USER_LOGIN": "gitlab-duo"}, clear=False
-        ):
+        with patch.dict(os.environ, {"GITLAB_USER_LOGIN": "gitlab-duo"}, clear=False):
             cli.main(["--json", "--gitlab-ci", "--commit", "HEAD"])
 
         _, kwargs = mock_gen.call_args

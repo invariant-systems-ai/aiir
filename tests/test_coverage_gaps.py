@@ -198,7 +198,9 @@ class TestSchemaParentShasValidation(unittest.TestCase):
         receipt["commit"]["parent_shas"] = "not-a-list"
         errors = validate_receipt_schema(receipt)
         parent_errors = [e for e in errors if "parent_shas" in e and "array" in e]
-        self.assertTrue(parent_errors, f"Expected parent_shas array error, got: {errors}")
+        self.assertTrue(
+            parent_errors, f"Expected parent_shas array error, got: {errors}"
+        )
 
     def test_parent_shas_with_invalid_entry(self):
         """parent_shas = ['a'*40, 'INVALID'] → error on invalid entry."""
@@ -206,7 +208,9 @@ class TestSchemaParentShasValidation(unittest.TestCase):
         receipt["commit"]["parent_shas"] = ["a" * 40, "INVALID_HEX_VALUE"]
         errors = validate_receipt_schema(receipt)
         parent_errors = [e for e in errors if "parent_shas[" in e]
-        self.assertTrue(parent_errors, f"Expected parent_shas entry error, got: {errors}")
+        self.assertTrue(
+            parent_errors, f"Expected parent_shas entry error, got: {errors}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -227,9 +231,18 @@ class TestCliReviewAgentAttestation(unittest.TestCase):
             "review_outcome": "approved",
         }
         with (
-            patch("aiir.cli.build_review_receipt", return_value=review_receipt) as mock_build,
+            patch(
+                "aiir.cli.build_review_receipt", return_value=review_receipt
+            ) as mock_build,
             patch("aiir.cli.write_receipt", return_value="stdout:json"),
-            patch("aiir.cli._run_git", side_effect=lambda args, cwd=None: "a" * 40 + "\n" if "rev-parse" in args else "Test User\n" if "user.name" in args else "test@test.com\n"),
+            patch(
+                "aiir.cli._run_git",
+                side_effect=lambda args, cwd=None: "a" * 40 + "\n"
+                if "rev-parse" in args
+                else "Test User\n"
+                if "user.name" in args
+                else "test@test.com\n",
+            ),
             patch("sys.stderr", io.StringIO()),
             patch("sys.stdout", io.StringIO()),
         ):
@@ -313,7 +326,9 @@ class TestCliCiAutoDetection(unittest.TestCase):
         )
         kw = call.kwargs if call.kwargs else call[1]
         att = kw.get("agent_attestation")
-        self.assertIsNotNone(att, "Agent attestation should be auto-populated for copilot actor")
+        self.assertIsNotNone(
+            att, "Agent attestation should be auto-populated for copilot actor"
+        )
         self.assertEqual(att["confidence"], "environment")
         self.assertEqual(att["tool_id"], "copilot")
         self.assertEqual(att["run_context"], "github-actions")
@@ -326,7 +341,9 @@ class TestCliCiAutoDetection(unittest.TestCase):
         )
         kw = call.kwargs if call.kwargs else call[1]
         att = kw.get("agent_attestation")
-        self.assertIsNotNone(att, "Agent attestation should be auto-populated for dependabot")
+        self.assertIsNotNone(
+            att, "Agent attestation should be auto-populated for dependabot"
+        )
         self.assertEqual(att["confidence"], "environment")
 
     def test_gitlab_ci_bot_actor_detected(self):
@@ -337,7 +354,9 @@ class TestCliCiAutoDetection(unittest.TestCase):
         )
         kw = call.kwargs if call.kwargs else call[1]
         att = kw.get("agent_attestation")
-        self.assertIsNotNone(att, "Agent attestation should be auto-populated for gitlab-bot")
+        self.assertIsNotNone(
+            att, "Agent attestation should be auto-populated for gitlab-bot"
+        )
         self.assertEqual(att["confidence"], "environment")
         self.assertEqual(att["run_context"], "gitlab-ci")
 

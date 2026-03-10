@@ -24,11 +24,14 @@ SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
 import json
-import pytest
-from hypothesis import given, settings, HealthCheck
-from hypothesis import strategies as st
 
-from aiir._core import _canonical_json
+import pytest
+
+hypothesis = pytest.importorskip("hypothesis", reason="hypothesis not installed")
+from hypothesis import given, settings, HealthCheck  # noqa: E402
+from hypothesis import strategies as st  # noqa: E402
+
+from aiir._core import _canonical_json  # noqa: E402
 
 # ── rfc8785 availability gate ─────────────────────────────────────────
 

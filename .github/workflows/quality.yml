@@ -46,7 +46,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Run markdownlint
-        uses: DavidAnson/markdownlint-cli2-action@05f32210e84442804257b2f7a6dc4220dbc1c8e5  # v19.0.0
+        uses: DavidAnson/markdownlint-cli2-action@a23dae216ce3fee4db69da41fed90d2a4af801cf  # v19.0.0
         with:
           globs: "**/*.md"
 
@@ -68,6 +68,9 @@ jobs:
             --exclude 'https://pypi.org/project/aiir'
             --exclude 'localhost'
             --exclude '127.0.0.1'
+            --exclude 'https://docs.gitlab.com'
+            --exclude 'https://modeltrademarkguidelines.org'
+            --exclude 'https://invariantsystems.io/blog/'
             --timeout 30
             --max-retries 3
             '**/*.md'
@@ -83,7 +86,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install typos
-        uses: crate-ci/typos@b1ae8d918b6e85bd611117f3d9a1b6e5a5efc0b9  # v1.29.5
+        uses: crate-ci/typos@11ca4583f2f3f74c7e7785c0ecb20fe2c99a4308  # v1.29.5
         with:
           config: .typos.toml
 

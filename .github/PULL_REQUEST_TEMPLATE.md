@@ -11,7 +11,7 @@
 
 ## Checklist
 
-- [ ] I have read the [CONTRIBUTING](CONTRIBUTING.md) guide
+- [ ] I have read the [CONTRIBUTING](../CONTRIBUTING.md) guide
 - [ ] My code follows the project's style (zero runtime dependencies, all inputs validated)
 - [ ] I have added tests that prove my fix/feature works
 - [ ] All tests pass (`python -m pytest tests/ -q`)

@@ -622,10 +622,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ledger_dir = args.ledger if args.ledger else _LEDGER_DIR
         aiir_path = _InitPath(ledger_dir)
 
-        # Guard: don't escape project root
+        # Guard: don't escape project root.
+        # Use relative_to() — NOT startswith() — to prevent the
+        # prefix-collision bug: /repo vs /repo_evil both pass startswith.
+        # (Same pattern as write_receipt's path traversal guard.)
         try:
             resolved = aiir_path.resolve()
-            if not str(resolved).startswith(str(_InitPath.cwd().resolve())):
+            cwd_resolved = _InitPath.cwd().resolve()
+            try:
+                resolved.relative_to(cwd_resolved)
+            except ValueError:
                 print(
                     f"{_e('error')} Ledger dir must be within the project root.",
                     file=sys.stderr,
@@ -715,6 +721,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print(f"{_e('error')} {e}", file=sys.stderr)
             return 1
 
+        # Resolve the ref to a full SHA — the review receipt schema requires
+        # a hex SHA (^[0-9a-f]{40}$ or ^[0-9a-f]{64}$), not a symbolic ref
+        # like "HEAD" or a short SHA like "abc1234".
+        reviewed_ref = args.review
+        try:
+            reviewed_sha = _run_git(
+                ["rev-parse", reviewed_ref], cwd=cwd_review
+            ).strip()
+            if not reviewed_sha:
+                raise RuntimeError(f"Could not resolve ref: {reviewed_ref}")
+        except RuntimeError as e:
+            print(f"{_e('error')} {e}", file=sys.stderr)
+            return 1
+
         # Get reviewer identity from git config
         try:
             reviewer_name = _run_git(
@@ -737,7 +757,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         try:
             review_receipt = build_review_receipt(
-                reviewed_commit=args.review,
+                reviewed_commit=reviewed_sha,
                 reviewer_name=reviewer_name,
                 reviewer_email=reviewer_email,
                 review_outcome=args.review_outcome,
@@ -770,7 +790,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         if not args.quiet:
             rid = review_receipt.get("receipt_id", "")[:24]
-            sha_short = args.review[:12]
+            sha_short = reviewed_sha[:12]
             print(
                 f"\n{_e('ok')} Review receipt: {rid}…",
                 file=sys.stderr,
@@ -1526,9 +1546,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         f"   {_e('ok')} Posted receipt summary to PR",
                         file=sys.stderr,
                     )
-            except RuntimeError:
+            except RuntimeError as e:
                 # Non-fatal — PR comment is best-effort (may not be a PR context)
-                pass
+                logger.debug("PR comment skipped: %s", e)
 
     # GitLab CI integration
     if args.gitlab_ci:

@@ -151,6 +151,17 @@ aiir --sign --in-toto --output .receipts/
 # Attach agent attestation metadata (Copilot, Cursor, Claude, etc.)
 aiir --agent-tool copilot --agent-model gpt-4o --agent-context ide
 
+# Initialize .aiir/ directory for a new project
+aiir --init                        # scaffolds receipts.jsonl, index, config, .gitignore
+aiir --init --policy strict        # also creates policy.json
+
+# Review receipts — human attestation that a commit was reviewed
+aiir --review HEAD                 # defaults to "approved"
+aiir --review abc123 --review-outcome rejected --review-comment "needs refactor"
+
+# Commit trailers — append AIIR metadata to git commit messages
+aiir --trailer                     # prints AIIR-Receipt, AIIR-Type, AIIR-AI, AIIR-Verified
+
 # Policy engine — initialise and enforce org-wide rules
 aiir --policy-init strict          # creates .aiir/policy.json
 aiir --check --policy strict       # CI gate: fail if policy violated
@@ -185,8 +196,10 @@ on:
   pull_request:
 
 permissions:
-  id-token: write   # Required for Sigstore keyless signing
+  id-token: write      # Required for Sigstore keyless signing
   contents: read
+  checks: write        # P0: aiir/verify Check Run on every PR
+  pull-requests: write # P3: automatic receipt summary comment on PRs
 
 jobs:
   receipt:
@@ -202,6 +215,10 @@ jobs:
 
 Signing is **on by default** — each receipt gets a Sigstore bundle (Fulcio certificate + Rekor transparency log entry).
 Artifacts uploaded automatically when `output-dir` is set.
+
+> **Automatic PR integration**: When `GITHUB_TOKEN` is available, the Action automatically:
+> - **Creates an `aiir/verify` Check Run** — visible as a pass/fail status check on every PR (enforce via branch protection). Requires `checks: write`.
+> - **Posts a receipt summary comment** — idempotent (updates in place, no comment spam). Requires `pull-requests: write`.
 
 <details>
 <summary><strong>Unsigned (opt out of signing, no permissions needed)</strong></summary>

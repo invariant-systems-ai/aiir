@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
+- **P0: GitHub Check Run** (`create_check_run()`): AIIR verification now posts a visible `aiir/verify` check run on every PR when running as a GitHub Action. Enforceable via branch protection rules. Requires `checks: write` permission.
+- **P1: Review Receipts** (`build_review_receipt()`, `--review`): New receipt type (`aiir/review_receipt.v1`) for human review attestations. Content-addressed, schema-validated, appended to the same ledger. Supports `--review-outcome` (approved/rejected/commented) and `--review-comment`. JSON Schema: `schemas/review_receipt.v1.schema.json`.
+- **P2: Project Init** (`--init`): Scaffold a `.aiir/` directory with `receipts.jsonl`, `index.json`, `config.json`, `.gitignore`, and optional `policy.json`. Path-traversal guarded. Idempotent (safe to re-run).
+- **P3: PR Comment** (`post_pr_comment()`): Automatic receipt summary comment on every PR in GitHub Actions mode. Idempotent (updates existing comment via hidden HTML marker). Requires `pull-requests: write` permission.
+- **P4: Commit Trailers** (`format_commit_trailer()`, `--trailer`): Print `AIIR-Receipt`, `AIIR-Type`, `AIIR-AI`, `AIIR-Verified` trailer lines suitable for `git interpret-trailers`. Terminal-escape sanitized, capped at 10 trailers.
 - **PEP 740 digital attestations**: Publish workflow now explicitly enables `attestations: true` on `pypa/gh-action-pypi-publish`. Every wheel and sdist uploaded to PyPI includes in-toto-style digital attestations (SLSA provenance + PyPI Publish predicates), cryptographically signed via short-lived OIDC identities from Trusted Publishing.
 - **SLSA provenance for sdist**: `actions/attest-build-provenance` now covers both `.whl` and `.tar.gz` artifacts (was wheel-only).
 - **PyPI Integrity API verification**: Post-publish CI step queries `GET /integrity/aiir/<version>/<file>/provenance` for every release artifact and reports attestation coverage.
@@ -20,6 +25,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 - **SECURITY.md**: Added PyPI attestation verification section with consumer-facing instructions.
 - **THREAT_MODEL.md**: Updated to v3.2.0 — PEP 740 attestations, Integrity API verification, and SBOM attestation moved from "Future Hardening" to "Done".
+
+### Fixed
+
+- **PR comment markdown injection**: `_format_pr_comment()` now uses `_sanitize_md()` instead of `_strip_terminal_escapes()` — neutralises markdown metacharacters (`|`, `` ` ``, `<`) in user-controlled fields rendered in GitHub PR comment tables.
+- **`--init` path traversal**: Replaced `startswith()` with `relative_to()` to prevent prefix-collision attacks (`/repo` vs `/repo_evil`).
+- **`--review` ref resolution**: CLI now resolves symbolic refs (e.g., `HEAD`) to full hex SHAs via `git rev-parse` before building review receipts. Previously, `--review HEAD` produced a receipt with `reviewed_commit.sha = "HEAD"`, which violated the JSON Schema.
+- **PR number validation**: `post_pr_comment()` now validates that the PR number is numeric, preventing URL path injection via crafted event payloads.
+- **Check Run code spans**: `create_check_run()` now uses double-backtick delimiters (consistent with `format_github_summary()`) to prevent code-span breakage from embedded backticks.
 
 ## [1.2.1] — 2026-03-09
 

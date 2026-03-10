@@ -1844,6 +1844,8 @@ class TestReviewErrorPaths(unittest.TestCase):
         original_run_git = cli._run_git
 
         def _mock_run_git(args, **kwargs):
+            if args[0] == "rev-parse":
+                return "a" * 40  # fake resolved SHA
             if args == ["config", "user.name"]:
                 return ""  # empty name
             if args == ["config", "user.email"]:
@@ -2005,6 +2007,97 @@ class TestCheckRunFailureQuiet(unittest.TestCase):
 
         self.assertEqual(rc, 0)
         self.assertNotIn("Could not create check run", stderr_buf.getvalue())
+
+
+# ===========================================================================
+# Coverage: hostile review fixes
+# ===========================================================================
+
+
+class TestPrNumberValidation(unittest.TestCase):
+    """post_pr_comment validates pr_number is numeric."""
+
+    def test_non_numeric_pr_number_raises(self):
+        """Non-numeric PR number → RuntimeError."""
+        env = {"GITHUB_REPOSITORY": "test/repo", "GITHUB_TOKEN": "ghp_test"}
+        with patch.dict(os.environ, env, clear=True):
+            with self.assertRaises(RuntimeError) as ctx:
+                post_pr_comment([_make_receipt()], pr_number="foo/../../bar")
+            self.assertIn("must be numeric", str(ctx.exception))
+
+    def test_numeric_pr_number_accepted(self):
+        """Numeric PR number passes validation and reaches API call."""
+        mock_resp_list = MagicMock()
+        mock_resp_list.read.return_value = b"[]"
+        mock_resp_list.__enter__ = lambda s: s
+        mock_resp_list.__exit__ = MagicMock(return_value=False)
+
+        mock_resp_post = MagicMock()
+        mock_resp_post.read.return_value = b'{"id": 1}'
+        mock_resp_post.__enter__ = lambda s: s
+        mock_resp_post.__exit__ = MagicMock(return_value=False)
+
+        env = {
+            "GITHUB_REPOSITORY": "test/repo",
+            "GITHUB_TOKEN": "ghp_test",
+            "GITHUB_API_URL": "https://api.github.com",
+        }
+        with patch.dict(os.environ, env, clear=True):
+            with patch("aiir._github.urlopen", side_effect=[mock_resp_list, mock_resp_post]):
+                result = post_pr_comment([_make_receipt()], pr_number="99")
+        self.assertEqual(result, {"id": 1})
+
+
+class TestReviewRevParseErrorPaths(unittest.TestCase):
+    """Cover the rev-parse resolution error paths in --review."""
+
+    def test_review_rev_parse_fails(self):
+        """--review when git rev-parse fails → error + return 1."""
+        import io, contextlib
+
+        def _mock_run_git(args, **kwargs):
+            if args[0] == "rev-parse":
+                raise RuntimeError("fatal: bad revision 'BADREF'")
+            return "TestUser"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            old_cwd = os.getcwd()
+            stderr_buf = io.StringIO()
+            stdout_buf = io.StringIO()
+            try:
+                os.chdir(tmpdir)
+                with patch("aiir.cli.get_repo_root", return_value=tmpdir):
+                    with patch("aiir.cli._run_git", side_effect=_mock_run_git):
+                        with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                            rc = cli.main(["--review", "BADREF"])
+            finally:
+                os.chdir(old_cwd)
+            self.assertEqual(rc, 1)
+            self.assertIn("bad revision", stderr_buf.getvalue())
+
+    def test_review_rev_parse_empty(self):
+        """--review when git rev-parse returns empty → error + return 1."""
+        import io, contextlib
+
+        def _mock_run_git(args, **kwargs):
+            if args[0] == "rev-parse":
+                return ""  # empty result
+            return "TestUser"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            old_cwd = os.getcwd()
+            stderr_buf = io.StringIO()
+            stdout_buf = io.StringIO()
+            try:
+                os.chdir(tmpdir)
+                with patch("aiir.cli.get_repo_root", return_value=tmpdir):
+                    with patch("aiir.cli._run_git", side_effect=_mock_run_git):
+                        with contextlib.redirect_stdout(stdout_buf), contextlib.redirect_stderr(stderr_buf):
+                            rc = cli.main(["--review", "HEAD"])
+            finally:
+                os.chdir(old_cwd)
+            self.assertEqual(rc, 1)
+            self.assertIn("Could not resolve ref", stderr_buf.getvalue())
 
 
 if __name__ == "__main__":

@@ -991,7 +991,8 @@ class TestCliBranchSignFailure(unittest.TestCase):
                 patch("aiir.cli.generate_receipt", return_value=receipt),
                 patch("aiir.cli.write_receipt", return_value=receipt_path),
                 patch("aiir.cli.sign_receipt_file", side_effect=RuntimeError("mock sign error")),
-                patch("os.remove") as mock_remove,
+                patch("aiir.cli._sigstore_available", return_value=True),
+                patch("aiir.cli.os.remove") as mock_remove,
                 patch("sys.stderr", io.StringIO()),
                 patch("sys.stdout", io.StringIO()),
             ):

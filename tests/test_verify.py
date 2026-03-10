@@ -7,7 +7,6 @@ from __future__ import annotations
 import json
 import os
 import shutil
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,10 +14,6 @@ from unittest.mock import patch
 
 # Import the module under test
 import aiir.cli as cli
-
-# On Python 3.11+, is_symlink() routes through Path.stat(follow_symlinks=False),
-# adding one extra stat() call before the explicit stat-for-size call.
-_STAT_GUARD_CALLS = 3 if sys.version_info >= (3, 11) else 2
 
 
 class TestSafeVerifyPathNoDeadCode(unittest.TestCase):
@@ -491,19 +486,17 @@ class TestVerifyReceiptFileEdgeCases(unittest.TestCase):
         try:
             real = Path(tmpdir, "file.json")
             real.write_text("{}")
-            orig_stat = real.stat
+            # Capture real guard return values, then mock the guards and
+            # stat separately.  This avoids fragile call-count thresholds
+            # that vary across Python 3.9-3.13 (lstat routing changes).
+            real_exists = real.exists()       # True
+            real_is_symlink = real.is_symlink()  # False
 
-            call_count = [0]
-
-            def stat_bomb(*a, **kw):
-                call_count[0] += 1
-                # Let exists()/is_file() and is_symlink() guard calls
-                # succeed, then fail on the explicit stat-for-size call.
-                if call_count[0] >= _STAT_GUARD_CALLS:
-                    raise OSError("disk error")
-                return orig_stat(*a, **kw)
-
-            with patch.object(type(real), "stat", side_effect=stat_bomb):
+            with (
+                patch.object(type(real), "exists", return_value=real_exists),
+                patch.object(type(real), "is_symlink", return_value=real_is_symlink),
+                patch.object(type(real), "stat", side_effect=OSError("disk error")),
+            ):
                 result = cli.verify_receipt_file(str(real))
             self._assert_standard_error_result(result, "Cannot stat")
         finally:

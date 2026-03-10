@@ -71,45 +71,48 @@ class TestCheckLicenses(unittest.TestCase):
                 "License": "Mozilla Public License 2.0",
             },
         ]
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            json.dump(pkgs, f)
-            f.flush()
-            try:
-                with mock.patch("sys.argv", ["check_licenses.py", f.name]):
-                    result = self.mod.main()
-                self.assertEqual(result, 0)
-            finally:
-                os.unlink(f.name)
+        tf = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+        tf_name = tf.name
+        json.dump(pkgs, tf)
+        tf.close()  # close before test reads — required on Windows
+        try:
+            with mock.patch("sys.argv", ["check_licenses.py", tf_name]):
+                result = self.mod.main()
+            self.assertEqual(result, 0)
+        finally:
+            os.unlink(tf_name)
 
     def test_unapproved_license(self):
         """Package with unapproved license → exit 1."""
         pkgs = [
             {"Name": "evil-lib", "Version": "1.0", "License": "Proprietary"},
         ]
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            json.dump(pkgs, f)
-            f.flush()
-            try:
-                with mock.patch("sys.argv", ["check_licenses.py", f.name]):
-                    result = self.mod.main()
-                self.assertEqual(result, 1)
-            finally:
-                os.unlink(f.name)
+        tf = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+        tf_name = tf.name
+        json.dump(pkgs, tf)
+        tf.close()
+        try:
+            with mock.patch("sys.argv", ["check_licenses.py", tf_name]):
+                result = self.mod.main()
+            self.assertEqual(result, 1)
+        finally:
+            os.unlink(tf_name)
 
     def test_skipped_package_ignored(self):
         """Packages in SKIP_PACKAGES are not checked."""
         pkgs = [
             {"Name": "aiir", "Version": "1.0", "License": "UNKNOWN"},
         ]
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            json.dump(pkgs, f)
-            f.flush()
-            try:
-                with mock.patch("sys.argv", ["check_licenses.py", f.name]):
-                    result = self.mod.main()
-                self.assertEqual(result, 0)
-            finally:
-                os.unlink(f.name)
+        tf = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+        tf_name = tf.name
+        json.dump(pkgs, tf)
+        tf.close()
+        try:
+            with mock.patch("sys.argv", ["check_licenses.py", tf_name]):
+                result = self.mod.main()
+            self.assertEqual(result, 0)
+        finally:
+            os.unlink(tf_name)
 
     def test_no_args(self):
         """Missing CLI argument → exit 2."""

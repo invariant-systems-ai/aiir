@@ -39,10 +39,6 @@ _TD_KWARGS: dict = (
     {"ignore_cleanup_errors": True} if sys.version_info >= (3, 10) else {}
 )
 
-# On Python 3.11+, is_symlink() routes through Path.stat(follow_symlinks=False),
-# adding one extra stat() call before the explicit stat-for-size call.
-_STAT_GUARD_CALLS = 3 if sys.version_info >= (3, 11) else 2
-
 # ---------------------------------------------------------------------------
 # _core.py — shell metachar in git ref (L849), URL port (L1146)
 # ---------------------------------------------------------------------------
@@ -812,18 +808,17 @@ class TestVerifyReleaseLedgerEdges(unittest.TestCase):
         with tempfile.TemporaryDirectory(**_TD_KWARGS) as td:
             f = Path(td) / "ledger.jsonl"
             f.write_text('{"x":1}\n', encoding="utf-8")
-            real_stat = Path.stat
-            call_count = [0]
+            # Capture real guard results, then replace the guards and
+            # make stat() always raise.  This avoids fragile call-count
+            # thresholds that vary across Python 3.9-3.13.
+            real_is_file = f.is_file()       # True
+            real_is_symlink = f.is_symlink() # False
 
-            def stat_side_effect(self_path, *a, **kw):
-                call_count[0] += 1
-                # Let is_file() and is_symlink() guard calls succeed,
-                # then fail on the explicit stat-for-size call.
-                if call_count[0] >= _STAT_GUARD_CALLS:
-                    raise OSError("perm denied")
-                return real_stat(self_path, *a, **kw)
-
-            with patch.object(Path, "stat", stat_side_effect):
+            with (
+                patch.object(Path, "is_file", return_value=real_is_file),
+                patch.object(Path, "is_symlink", return_value=real_is_symlink),
+                patch.object(Path, "stat", side_effect=OSError("perm denied")),
+            ):
                 with self.assertRaises(ValueError) as ctx:
                     _load_receipts_from_ledger(str(f))
                 self.assertIn("Cannot stat", str(ctx.exception))
@@ -936,19 +931,21 @@ class TestVerifyReleasePolicyFile(unittest.TestCase):
             policy.write_text('{"preset": "balanced"}', encoding="utf-8")
             ledger = Path(td) / "receipts.jsonl"
             ledger.write_text('{"receipt_id": "test"}\n', encoding="utf-8")
+            # Mock the guard methods so they don't route through stat(),
+            # then make stat() raise only for the policy path.  This
+            # avoids fragile call-count thresholds that vary by version.
             real_stat = Path.stat
-            # Allow is_file() and is_symlink() to succeed for the policy
-            # file, then fail on the explicit stat() in verify_release.
-            policy_calls = [0]
 
             def stat_side_effect(self_path, *a, **kw):
                 if str(self_path) == str(policy):
-                    policy_calls[0] += 1
-                    if policy_calls[0] >= _STAT_GUARD_CALLS:
-                        raise OSError("disk error")
+                    raise OSError("disk error")
                 return real_stat(self_path, *a, **kw)
 
-            with patch.object(Path, "stat", stat_side_effect):
+            with (
+                patch.object(Path, "is_file", return_value=True),
+                patch.object(Path, "is_symlink", return_value=False),
+                patch.object(Path, "stat", stat_side_effect),
+            ):
                 with self.assertRaises(ValueError) as ctx:
                     verify_release(
                         receipts_path=str(ledger),

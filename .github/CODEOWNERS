@@ -1,12 +1,28 @@
 # CODEOWNERS — require review for security-critical paths.
 # See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# The branch ruleset "main — production gate" enforces CODEOWNERS review.
+# Dependabot PRs are auto-approved for minor/patch updates.
 
 # Default: all changes require review from an org owner
 *                           @Boatlover
 
-# Security policy and threat model
+# ── Security-critical (extra scrutiny) ──────────────────────────────
+# Cryptographic verification — supply chain integrity core
+aiir/_verify.py             @Boatlover
+aiir/_schema.py             @Boatlover
+aiir/_detect.py             @Boatlover
+
+# Security policy, threat model, and licensing
 SECURITY.md                 @Boatlover
 THREAT_MODEL.md             @Boatlover
+LICENSE                     @Boatlover
 
-# CI workflows
+# CI/CD workflows — supply chain attack surface
 .github/workflows/          @Boatlover
+.github/CODEOWNERS          @Boatlover
+.github/dependabot.yml      @Boatlover
+
+# GitHub Action definition — runs in user CI environments
+action.yml                  @Boatlover
+Dockerfile                  @Boatlover

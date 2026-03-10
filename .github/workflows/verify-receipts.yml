@@ -43,14 +43,15 @@ on:
         default: "3.12"
         type: string
 
-permissions:
-  contents: read
-  checks: write    # Required to create Check Run annotations
+permissions: read-all
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      checks: write    # Required to create Check Run annotations
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:

@@ -23,8 +23,7 @@ concurrency:
   # Never cancel a running publish — half-published state is worse than waiting
   cancel-in-progress: false
 
-permissions:
-  contents: write  # For creating the GitHub Release
+permissions: read-all
 
 jobs:
   # ── Gate: verify CI tests passed on this commit ────────────────────
@@ -46,15 +45,15 @@ jobs:
             STATUS=$(gh api "repos/${{ github.repository }}/commits/${COMMIT}/status" \
               --jq '.state' 2>/dev/null || echo "unknown")
 
-            # Also check for check-runs (Actions use check-runs, not statuses).
-            # Filter for actual CI jobs only: "test (...)" matrix jobs and the
-            # "ci-ok" rollup gate.  Exclude "smoke-test" (Action Health) which
-            # runs independently and should not block publishing.
+            # Check for required rollup gates: ci-ok, quality-ok, security-ok.
+            # These three gates aggregate ALL sub-checks in their respective
+            # workflows.  Also include individual test matrix jobs so we can
+            # surface pending state before rollup gates appear.
             #
             # Dedup by name (keep latest started_at) so cancelled runs from
             # prior pushes don't shadow fresh runs from the tag push.
             CHECKS=$(gh api "repos/${{ github.repository }}/commits/${COMMIT}/check-runs" \
-              --jq '[.check_runs[] | select(.name | test("^test \\(|^ci-ok$"; "i"))] | group_by(.name) | [.[] | sort_by(.started_at) | last] | {total: length, success: [.[] | select(.conclusion == "success")] | length, pending: [.[] | select(.status != "completed")] | length, cancelled: [.[] | select(.conclusion == "cancelled")] | length}' \
+              --jq '[.check_runs[] | select(.name | test("^test \\(|^ci-ok$|^quality-ok$|^security-ok$"; "i"))] | group_by(.name) | [.[] | sort_by(.started_at) | last] | {total: length, success: [.[] | select(.conclusion == "success")] | length, pending: [.[] | select(.status != "completed")] | length, cancelled: [.[] | select(.conclusion == "cancelled")] | length}' \
               2>/dev/null || echo '{"total":0,"success":0,"pending":0,"cancelled":0}')
 
             TOTAL=$(echo "$CHECKS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total',0))")
@@ -124,6 +123,8 @@ jobs:
     needs: preflight
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Create GitHub Release
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
@@ -374,7 +375,7 @@ jobs:
 
   # ── Step 4b: Publish JS SDK to npm ───────────────────────────────────
   publish-npm:
-    needs: preflight
+    needs: [preflight, verify]
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
@@ -459,6 +460,8 @@ jobs:
     needs: [verify, docker, publish-npm]
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     # Non-blocking: website has a 6-hour self-heal schedule as backup
     continue-on-error: true
     steps:

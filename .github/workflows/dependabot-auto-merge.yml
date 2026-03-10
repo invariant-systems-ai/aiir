@@ -27,15 +27,16 @@ on:
   pull_request_target:
     types: [opened, synchronize, reopened]
 
-permissions:
-  contents: write       # Enable auto-merge
-  pull-requests: write  # Approve PRs
+permissions: read-all
 
 jobs:
   auto-merge:
     if: github.actor == 'dependabot[bot]'
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    permissions:
+      contents: write       # Enable auto-merge
+      pull-requests: write  # Approve PRs
     steps:
       - name: Fetch Dependabot metadata
         id: metadata

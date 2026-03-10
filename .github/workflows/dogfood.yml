@@ -15,14 +15,15 @@ concurrency:
   group: dogfood-${{ github.sha }}
   cancel-in-progress: false
 
-permissions:
-  contents: write
-  id-token: write   # Sigstore keyless signing (OIDC)
+permissions: read-all
 
 jobs:
   receipt:
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # Push to receipts branch
+      id-token: write    # Sigstore keyless signing (OIDC)
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:

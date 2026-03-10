@@ -9,7 +9,7 @@ git clone https://github.com/invariant-systems-ai/aiir.git
 cd aiir
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"    # installs pytest + hypothesis
-python -m pytest tests/ -q  # 1030+ tests, ~2 min
+python -m pytest tests/ -q  # 1680+ tests, ~4 min
 ```
 
 > **Note**: `pip install -e ".[dev]"` installs `hypothesis` (property-based fuzz
@@ -29,9 +29,41 @@ python -m pytest tests/ -q  # 1030+ tests, ~2 min
 1. Fork the repo and create a feature branch from `main`
 2. Write tests for any new functionality
 3. Run the full test suite: `python -m pytest tests/ -q`
-4. Ensure zero lint errors and all tests pass
-5. **Sign off every commit** (see DCO below)
+4. Run quality checks: `ruff check . && ruff format --check aiir/ tests/ scripts/`
+5. **Sign off every commit** (see DCO below): `git commit -s`
 6. Open a PR with a clear description of the change
+
+### CI gates (all must pass before merge)
+
+PRs to `main` require **all three** status checks to pass:
+
+| Gate | Workflow | What it checks |
+|---|---|---|
+| `ci-ok` | Tests | Full test matrix (Python 3.9–3.13), 100% coverage |
+| `quality-ok` | Quality | Type checking, markdown lint, hadolint, YAML, SPDX, spelling |
+| `security-ok` | Security | Gitleaks, Bandit, Semgrep, ruff, pip-audit, license check |
+
+Plus: **1 approving review** from a CODEOWNER, all review threads resolved,
+and the last push must be approved (prevents sneaking in changes after approval).
+
+> **Copilot code review** is enabled — it will automatically review your PR
+> against our [review instructions](.github/copilot-review-instructions.md).
+> Human review is still required.
+
+### Dependabot PRs
+
+Minor/patch dependency updates are auto-approved and auto-merged after CI
+passes. Major version bumps require human review.
+
+### Release process
+
+Only repository admins can create releases:
+
+1. All CI must be GREEN on `main`
+2. Bump version in `aiir/__init__.py` (single source of truth)
+3. Run `python scripts/sync-version.py --fix` to propagate
+4. Commit, tag `vX.Y.Z`, push — the Publish workflow handles the rest
+5. PyPI and npm only publish **after** CI + verification pass
 
 ### Developer Certificate of Origin (DCO)
 
@@ -60,7 +92,7 @@ Use clear, descriptive commit messages. Examples:
 ## Code standards
 
 - **Zero runtime dependencies.** This is a hard rule. AIIR ships with nothing but the Python standard library.
-- **Test everything.** We maintain 1030+ tests across unit, integration, security, and fuzz suites.
+- **Test everything.** We maintain 1680+ tests across unit, integration, security, and fuzz suites. 100% coverage enforced.
 - **Security-first.** All inputs are validated. All outputs are deterministic. See the [Threat Model](THREAT_MODEL.md).
 
 ## Development setup

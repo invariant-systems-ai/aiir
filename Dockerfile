@@ -24,6 +24,9 @@ RUN groupadd --gid 1000 aiir && \
 # .dockerignore whitelists only aiir/, pyproject.toml, LICENSE, README, CHANGELOG.
 COPY . /src/
 
+# Upgrade base-image packages flagged by Trivy (CVE-2026-23949, CVE-2026-24049)
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
 # Install AIIR:
 #   • AIIR_VERSION set  → install pinned version from PyPI  (publish.yml)
 #   • AIIR_VERSION empty → install from local source         (self-healing)

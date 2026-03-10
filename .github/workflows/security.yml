@@ -58,7 +58,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install SAST tools
-        run: pip install bandit[toml]
+        run: pip install --require-hashes --no-deps -r .github/requirements/bandit.txt
       - name: Run Bandit (security linter)
         run: |
           # -ll = fail on MEDIUM severity and above
@@ -85,7 +85,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install Semgrep
-        run: pip install semgrep
+        run: pip install --require-hashes --no-deps -r .github/requirements/semgrep.txt
       - name: Run Semgrep (security + crypto rules)
         run: |
           # p/python         — Python-specific security rules (2,500+)
@@ -125,7 +125,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install Ruff
-        run: pip install 'ruff==0.14.10'
+        run: pip install --require-hashes --no-deps -r .github/requirements/ruff.txt
       - name: Run Ruff (lint + format check)
         run: |
           ruff check aiir/ tests/ scripts/
@@ -144,7 +144,7 @@ jobs:
           python-version: "3.13"
       - name: Install pip-audit and project extras
         run: |
-          pip install pip-audit
+          pip install --require-hashes --no-deps -r .github/requirements/pip-audit.txt
           pip install ".[dev,sign]"
       - name: Audit dependencies
         run: |
@@ -176,7 +176,7 @@ jobs:
           python-version: "3.13"
       - name: Install license checker
         run: |
-          pip install pip-licenses
+          pip install --require-hashes --no-deps -r .github/requirements/pip-licenses.txt
           pip install ".[dev,sign]"
       - name: Verify license policy
         run: |

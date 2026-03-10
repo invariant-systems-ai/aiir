@@ -33,7 +33,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install mypy
-        run: pip install 'mypy>=1.10,<2' pytest hypothesis
+        run: pip install --require-hashes --no-deps -r .github/requirements/typecheck.txt
       - name: Run mypy
         run: mypy aiir/
 
@@ -119,7 +119,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install yamllint
-        run: pip install yamllint
+        run: pip install --require-hashes --no-deps -r .github/requirements/yamllint.txt
       - name: Lint YAML templates and examples
         run: |
           yamllint -d "{extends: relaxed, rules: {line-length: disable}}" \

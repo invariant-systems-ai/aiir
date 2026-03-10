@@ -52,7 +52,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install mutmut pytest hypothesis
+        run: pip install --require-hashes --no-deps -r .github/requirements/mutation.txt
 
       - name: Run mutation smoke test (_verify.py only)
         run: |
@@ -112,7 +112,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install mutmut pytest hypothesis
+        run: pip install --require-hashes --no-deps -r .github/requirements/mutation.txt
 
       - name: Run full mutation test
         run: |

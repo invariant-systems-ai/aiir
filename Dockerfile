@@ -25,8 +25,9 @@ RUN groupadd --gid 1000 aiir && \
 COPY . /src/
 
 # Upgrade base-image packages flagged by Trivy (CVE-2026-23949, CVE-2026-24049)
-# hadolint ignore=DL3013
-RUN pip install --no-cache-dir --upgrade pip "setuptools>=82.0.1" "wheel>=0.46.2"
+COPY .github/requirements/docker-base.txt /tmp/docker-base.txt
+RUN pip install --no-cache-dir --require-hashes -r /tmp/docker-base.txt && \
+    rm /tmp/docker-base.txt
 
 # Install AIIR:
 #   • AIIR_VERSION set  → install pinned version from PyPI  (publish.yml)

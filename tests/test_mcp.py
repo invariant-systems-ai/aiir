@@ -539,3 +539,26 @@ class TestMcpGitLabSummary(unittest.TestCase):
             finally:
                 os.chdir(old_cwd)
         self.assertIn("content", result)
+
+
+class TestSafeLedgerDirEscape(unittest.TestCase):
+    """_safe_ledger_dir must reject .aiir symlinks escaping cwd."""
+
+    def test_symlink_escape_rejected(self):
+        import tempfile
+        from aiir.mcp_server import _safe_ledger_dir
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            work = Path(tmpdir) / "repo"
+            work.mkdir()
+            outside = Path(tmpdir) / "evil"
+            outside.mkdir()
+            # Symlink .aiir -> ../evil (escapes repo)
+            (work / ".aiir").symlink_to(outside)
+            old_cwd = os.getcwd()
+            try:
+                os.chdir(work)
+                with self.assertRaises(ValueError):
+                    _safe_ledger_dir()
+            finally:
+                os.chdir(old_cwd)

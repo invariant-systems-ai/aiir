@@ -353,7 +353,7 @@ class TestCLILedgerError(_CLIBase):
 
         # Make the ledger dir read-only to force write error.
         # The CLI should handle the PermissionError gracefully.
-        os.chmod(self._ledger_dir, 0o555)
+        os.chmod(self._ledger_dir, 0o500)
         try:
             rc = cli_main(
                 [
@@ -369,7 +369,7 @@ class TestCLILedgerError(_CLIBase):
         except PermissionError:
             pass  # Also acceptable — the error propagated
         finally:
-            os.chmod(self._ledger_dir, 0o755)
+            os.chmod(self._ledger_dir, 0o700)
 
 
 class TestCLIGitHubActionOverflow(_CLIBase):

@@ -67,7 +67,23 @@ jobs:
           done
 
       - name: Install aiir from PyPI
-        run: pip install --no-deps "aiir==${{ steps.ver.outputs.version }}"
+        shell: bash
+        env:
+          TARGET: ${{ steps.ver.outputs.version }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import urllib.request
+
+          version = "${{ steps.ver.outputs.version }}"
+          data = json.load(urllib.request.urlopen(f"https://pypi.org/pypi/aiir/{version}/json"))
+          hashes = [f"--hash=sha256:{f['digests']['sha256']}" for f in data.get("urls", [])]
+          if not hashes:
+              raise SystemExit("No distribution hashes found on PyPI")
+          with open("/tmp/aiir-install.requirements.txt", "w", encoding="utf-8") as out:
+              out.write(f"aiir=={version} {' '.join(hashes)}\n")
+          PY
+          pip install --require-hashes --no-deps -r /tmp/aiir-install.requirements.txt
 
       - name: "Check: version string matches"
         shell: bash

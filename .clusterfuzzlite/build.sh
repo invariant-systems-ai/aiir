@@ -1,8 +1,9 @@
 #!/bin/bash -eu
 # Build script for ClusterFuzzLite / OSS-Fuzz.
-# Installs the project and compiles Atheris-based fuzz targets.
+# Compiles Atheris-based fuzz targets against source tree without networked
+# package resolution.
 
-pip3 install --no-deps .
+export PYTHONPATH="/src/aiir:${PYTHONPATH:-}"
 
 # Compile each fuzz target in .clusterfuzzlite/
 for fuzzer in /src/aiir/.clusterfuzzlite/fuzz_*.py; do

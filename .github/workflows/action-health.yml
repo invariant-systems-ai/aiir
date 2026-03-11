@@ -187,8 +187,6 @@ jobs:
       - name: PyPI version check
         run: |
           # Verify the installed CLI matches the published version
-          pip install aiir
-          INSTALLED=$(python3 -c "import aiir; print(aiir.__version__)")
           LATEST=$(python3 -c "
           import json, urllib.request
           try:
@@ -197,6 +195,12 @@ jobs:
           except Exception:
               print('unknown')
           ")
+          if [ "$LATEST" = "unknown" ]; then
+            echo "::warning::Could not resolve latest aiir version from PyPI"
+            exit 0
+          fi
+          pip install --no-deps "aiir==$LATEST"
+          INSTALLED=$(python3 -c "import aiir; print(aiir.__version__)")
           if [ "$INSTALLED" != "$LATEST" ]; then
             echo "::warning::Installed ($INSTALLED) ≠ PyPI latest ($LATEST)"
           else

@@ -67,7 +67,7 @@ jobs:
           done
 
       - name: Install aiir from PyPI
-        run: pip install "aiir==${{ steps.ver.outputs.version }}"
+        run: pip install --no-deps "aiir==${{ steps.ver.outputs.version }}"
 
       - name: "Check: version string matches"
         shell: bash

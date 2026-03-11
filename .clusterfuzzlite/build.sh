@@ -2,7 +2,7 @@
 # Build script for ClusterFuzzLite / OSS-Fuzz.
 # Installs the project and compiles Atheris-based fuzz targets.
 
-pip3 install .
+pip3 install --no-deps .
 
 # Compile each fuzz target in .clusterfuzzlite/
 for fuzzer in /src/aiir/.clusterfuzzlite/fuzz_*.py; do

@@ -1,0 +1,91 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "d367476cc2e207012c26482dd8abed097af21b17",
+    "tree_sha": "08c76084194d432450eaad92dbf9542f8428dd0b",
+    "parent_shas": [
+      "ae10e9d4809f59f0f90e0d6cf30ebb771dbb3070"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T18:57:22-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T18:57:22-04:00"
+    },
+    "subject": "feat: adversarial corpus (32 fixtures) + encoder interop vectors (8 vectors) (#36)",
+    "message_hash": "sha256:04afd77106aeb8de5669ff929d3a98557d5df86b527ee92ceed25b21b5657188",
+    "diff_hash": "sha256:8cb2caf632e9e36e5f94fc132ca656e87331bab6f478d201b239b01f954e80a8",
+    "files_changed": 44,
+    "files": [
+      "SPEC.md",
+      "docs/governance-adoption-plan.md",
+      "docs/implementers.md",
+      "docs/standards-readiness.md",
+      "schemas/test-vectors/encoder_interop_vectors.json",
+      "schemas/test-vectors/generate_encoder_vectors.py",
+      "schemas/test-vectors/test_encoder_vectors.py",
+      "sdks/js/test_encoder_vectors.mjs",
+      "tests/adversarial/README.md",
+      "tests/adversarial/bypass/adv-BYP-001.json",
+      "tests/adversarial/bypass/adv-BYP-002.json",
+      "tests/adversarial/bypass/adv-BYP-003.json",
+      "tests/adversarial/bypass/adv-BYP-004.json",
+      "tests/adversarial/bypass/adv-BYP-005.json",
+      "tests/adversarial/bypass/adv-BYP-006.json",
+      "tests/adversarial/bypass/adv-BYP-007.json",
+      "tests/adversarial/corpus.json",
+      "tests/adversarial/generate_corpus.py",
+      "tests/adversarial/injection/adv-INJ-001.json",
+      "tests/adversarial/injection/adv-INJ-002.json",
+      "tests/adversarial/injection/adv-INJ-003.json",
+      "tests/adversarial/injection/adv-INJ-004.json",
+      "tests/adversarial/injection/adv-INJ-005.json",
+      "tests/adversarial/injection/adv-INJ-006.json",
+      "tests/adversarial/injection/adv-INJ-007.json",
+      "tests/adversarial/parsing/adv-PAR-001.json",
+      "tests/adversarial/parsing/adv-PAR-002.json",
+      "tests/adversarial/parsing/adv-PAR-003.json",
+      "tests/adversarial/parsing/adv-PAR-004.json",
+      "tests/adversarial/parsing/adv-PAR-005.json",
+      "tests/adversarial/parsing/adv-PAR-006.json",
+      "tests/adversarial/parsing/adv-PAR-007.json",
+      "tests/adversarial/parsing/adv-PAR-008.json",
+      "tests/adversarial/parsing/adv-PAR-009.json",
+      "tests/adversarial/parsing/adv-PAR-010.json",
+      "tests/adversarial/tampering/adv-TAM-001.json",
+      "tests/adversarial/tampering/adv-TAM-002.json",
+      "tests/adversarial/tampering/adv-TAM-003.json",
+      "tests/adversarial/tampering/adv-TAM-004.json",
+      "tests/adversarial/tampering/adv-TAM-005.json",
+      "tests/adversarial/tampering/adv-TAM-006.json",
+      "tests/adversarial/tampering/adv-TAM-007.json",
+      "tests/adversarial/tampering/adv-TAM-008.json",
+      "tests/adversarial/test_adversarial.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.github"
+  },
+  "receipt_id": "g1-710f33745827694b581b5f54d1365208",
+  "content_hash": "sha256:710f33745827694b581b5f54d1365208b75a637f0bf233e48c50c807d6f3d075",
+  "timestamp": "2026-03-11T22:57:42Z",
+  "extensions": {}
+}

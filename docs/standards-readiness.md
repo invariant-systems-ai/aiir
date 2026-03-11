@@ -16,14 +16,14 @@ Last updated: 2026-03-11
 | Category | Score (0–5) | Status | Key gap |
 |---|---|---|---|
 | 🔴 Governance | 1.8 | ❌ red | No neutral IP home, no IETF draft, single-org steering |
-| 🟡 Reliability | 4.1 | 🟡 yellow | Smoke test now live; adversarial corpus not yet published |
-| 🟡 Interoperability | 3.4 | 🟡 yellow | Conformance manifest published; no second implementation yet |
+| ✅ Reliability | 4.5 | ✅ green | Adversarial corpus published; second impl needed for 5.0 |
+| 🟡 Interoperability | 3.8 | 🟡 yellow | JS verifier passes all encoder vectors; Rust CBOR verifier; external impl needed for 5.0 |
 | 🔴 Adoption | 1.7 | ❌ red | Dogfooding only; no external pilots on record |
-| 🟡 Consistency | 3.6 | 🟡 yellow | Canonical source defined; CDDL grammar published |
+| ✅ Consistency | 4.0 | ✅ green | Encoder interop vectors published; external review needed for 5.0 |
 | **Open P0s** | 0 | ✅ green | |
 
 > **Green target**: ≥ 3.5/5 on all 5 categories for 4 consecutive weeks.
-> Current: 0 green categories out of 5.
+> Current: 3 green categories out of 5.
 
 ---
 
@@ -33,13 +33,13 @@ Last updated: 2026-03-11 · Cycle: 2026-W11
 
 | Dimension | Weight | Score (0–5) | Weighted | Gap |
 |---|---|---|---|---|
-| Technical completeness | 20 | 4.3 | 17.2 | Encoder interop suite (cross-language vectors) |
-| Reference implementation quality | 20 | 4.2 | 16.8 | Published adversarial corpus; second implementation |
+| Technical completeness | 20 | 4.6 | 18.4 | External review for 5.0 |
+| Reference implementation quality | 20 | 4.5 | 18.0 | External (non-Invariant) implementation for 5.0 |
 | Specification clarity | 15 | 4.2 | 12.6 | External review |
-| Reliability & ecosystem | 15 | 3.9 | 11.7 | Third-party verifier; SDK breadth |
+| Reliability & ecosystem | 15 | 4.2 | 12.6 | Community plugins; external verifier |
 | Governance neutrality | 20 | 1.8 | 7.2 | Multi-stakeholder body; neutral IP home |
 | Adoption maturity | 10 | 1.7 | 3.4 | Published case studies; integrations in the wild |
-| **Composite** | **100** | | **68.9** | |
+| **Composite** | **100** | | **72.2** | |
 
 *5-category → 6-dimension mapping*: Governance ≈ Governance neutrality. Reliability ≈ Technical completeness + Reference impl quality. Interoperability ≈ Reliability & ecosystem. Adoption ≈ Adoption maturity. Consistency ≈ Specification clarity + metric consistency.
 
@@ -63,14 +63,14 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | Schema versioning, multi-encoder interop defined |
 | 5 | CDDL/ABNF normative grammar; formal conformance suite |
 
-**Current: 4.3** — Schema versioned in `schemas/`; deterministic CBOR + JSON dual encoding; `schemas/conformance-manifest.json` published (2026-03-11); normative CDDL grammar in `schemas/receipt.cddl` covering JSON + CBOR wire formats (2026-03-11). Missing: cross-language encoder test corpus.
+**Current: 4.6** — Schema versioned in `schemas/`; deterministic CBOR + JSON dual encoding; `schemas/conformance-manifest.json` published (2026-03-11); normative CDDL grammar in `schemas/receipt.cddl` covering JSON + CBOR wire formats (2026-03-11); cross-language encoder interop test vectors published in `schemas/test-vectors/` (8 vectors covering key ordering, Unicode, booleans, numerics, boundary arrays — 2026-03-11). Missing: external review.
 *Last verified: 2026-03-11*
 
 **Gap tasks:**
 
 - [x] ~~Publish machine-readable conformance manifest~~ → `schemas/conformance-manifest.json` (2026-03-11)
 - [x] ~~Write CDDL grammar for the receipt schema~~ → `schemas/receipt.cddl` (2026-03-11)
-- [ ] Add encoder interop test vectors (at least: Python, Node, Go) in `schemas/test-vectors/`
+- [x] ~~Add encoder interop test vectors~~ → `schemas/test-vectors/encoder_interop_vectors.json` (2026-03-11)
 - [ ] Publish test vector registry linked from `SPEC.md`
 
 ---
@@ -86,14 +86,15 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | Mutation tested; fuzzing in CI; adversarial inputs in suite |
 | 5 | Formal adversarial corpus; independent implementation verified identical output |
 
-**Current: 4.2** — 100% statement + branch coverage (1860 tests, *last verified: 2026-03-11*); mutation testing; Atheris fuzzing in CI; structured adversarial rounds per release; post-release smoke tests now automated. Missing: published adversarial corpus; independent second implementation.
+**Current: 4.5** — 100% statement + branch coverage (1860 tests, *last verified: 2026-03-11*); mutation testing; Atheris fuzzing in CI; structured adversarial rounds per release; post-release smoke tests automated; **formal adversarial test corpus published** in `tests/adversarial/` — 32 fixtures across 4 categories (injection, tampering, parsing, bypass) with auto-discovery pytest runner (2026-03-11). **JS verifier (`sdks/js/`) passes 8/8 encoder interop vectors and 8/8 full receipt verifications** (2026-03-11); **Rust CBOR verifier (`sdks/rust/`) passes round-trip vectors** (2026-03-11). Missing: external (non-Invariant Systems) implementation.
 *Last verified: 2026-03-11*
 
 **Gap tasks:**
 
 - [x] ~~Post-release smoke test workflow~~ → `.github/workflows/release-smoke.yml` (2026-03-11)
-- [ ] Publish adversarial test fixtures in `tests/adversarial/` and include in release artifacts
-- [ ] Sponsor or document an independent implementation (Go or Rust reference)
+- [x] ~~Publish adversarial test fixtures~~ → `tests/adversarial/` (32 fixtures, 4 categories — 2026-03-11)
+- [x] ~~Document JS + Rust as second implementations~~ → `docs/implementers.md` (2026-03-11)
+- [ ] Sponsor or recruit an independent (external org) implementation
 
 ---
 
@@ -115,8 +116,8 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 
 - [x] ~~Publish change control + compatibility policy~~ → `SPEC_GOVERNANCE.md` (2026-03-11)
 - [x] ~~Add `schemas/receipt.cddl` (CDDL grammar; normative)~~ → (2026-03-11)
+- [x] ~~Add "Conformance Testing" section to `SPEC.md` referencing test vectors~~ → SPEC.md §13 updated (2026-03-11)
 - [ ] Solicit one external spec review (security researcher or standards professional)
-- [ ] Add "Conformance Testing" section to `SPEC.md` referencing test vectors
 
 ---
 
@@ -131,14 +132,14 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | Third-party verifier (non-AIIR) working; 2+ language SDKs |
 | 5 | 3+ independent verifiers; community plugin ecosystem |
 
-**Current: 3.9** — 38 public check runs on the latest `main` commit, with `ci-ok`, `quality-ok`, and `security-ok` enforced by branch protection (*last verified: 2026-03-11*); Python 3.9–3.13 × Ubuntu/Windows/macOS; GitHub + GitLab dual-publish; MCP tool; `docs/release-health.md` with P0 RCA policy and smoke test badge published. Missing: any non-Python verifier, community plugins.
+**Current: 4.2** — 38 public check runs on the latest `main` commit, with `ci-ok`, `quality-ok`, and `security-ok` enforced by branch protection (*last verified: 2026-03-11*); Python 3.9–3.13 × Ubuntu/Windows/macOS; GitHub + GitLab dual-publish; MCP tool; `docs/release-health.md` with P0 RCA policy and smoke test badge published; **JS verifier (`sdks/js/`) and Rust CBOR verifier (`sdks/rust/`) published — 2 language SDKs verified against test vectors** (2026-03-11). Missing: community plugins, external verifier.
 *Last verified: 2026-03-11*
 
 **Gap tasks:**
 
 - [x] ~~Release health page + P0 RCA policy~~ → `docs/release-health.md` (2026-03-11)
 - [x] ~~Post-release smoke tests~~ → `.github/workflows/release-smoke.yml` (2026-03-11)
-- [ ] Encourage or write a standalone receipt verifier in a second language (target: JavaScript/Node for browser use)
+- [x] ~~Write standalone receipt verifier in JS~~ → `sdks/js/aiir-verify.js` (Level 1 — 2026-03-11)
 - [ ] Document the MCP interface in `mcp-manifest.json` as a first-class integration point
 - [ ] Publish SDK guidance in `docs/sdks.md`
 
@@ -199,11 +200,11 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 
 | Metric | Canonical source | Last verified |
 |---|---|---|
-| Test count | `pytest --collect-only -q \| tail -1` | 2026-03-11 (1860 tests) |
+| Test count | `pytest --collect-only -q \| tail -1` | 2026-03-11 (1860 + 32 adversarial + 32 encoder = 1924 tests) |
 | CI check count | GitHub check-runs API on the latest `main` commit | 2026-03-11 (38 public checks; 3 required merge gates) |
 | Coverage | `pytest --cov=aiir --cov-fail-under=100` | 2026-03-11 (100%) |
 | Runtime dependencies | `pip show aiir \| grep Requires` | 2026-03-11 (0) |
-| Conformance vectors | `schemas/conformance-manifest.json` | 2026-03-11 (25 JSON + 24 CBOR) |
+| Conformance vectors | `schemas/conformance-manifest.json` | 2026-03-11 (25 JSON + 24 CBOR + 8 encoder interop) |
 | Release version | `aiir --version` / PyPI | 2026-03-11 (v1.2.5) |
 | Governance score | This doc, Governance Neutrality section | 2026-03-11 (2.2/5) |
 | Adoption score | `docs/implementers.md` | 2026-03-11 (1.7/5) |
@@ -214,6 +215,7 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 
 | Cycle | Date | Score | Key change |
 |---|---|---|---|
+| 2026-W11 | 2026-03-11 | 72.2 | Adversarial corpus (32 fixtures, 4 categories) → Reliability 4.5; encoder interop vectors (8 vectors) → Consistency 4.0; JS verifier passes all vectors → Interop 3.8; Reliability+Ecosystem 4.2; composite +3.3 |
 | 2026-W11 | 2026-03-11 | 68.9 | v1.1 scorecard → +1.4 CDDL: SPEC_GOVERNANCE.md, release-health.md, smoke tests, conformance-manifest.json, implementers.md, 5-category weekly model; normative CDDL grammar (schemas/receipt.cddl); SPEC.md section 1.3 + conformance-manifest updated |
 
 ---
@@ -232,8 +234,8 @@ Week 1–2 (Mar 2026): Governance mechanics + infrastructure [IN PROGRESS]
 
 Month 1 remainder (Mar 2026): Reliability + Consistency
   ✅ CDDL grammar (schemas/receipt.cddl)
-  ✦ Encoder interop test vectors (Node.js + Python reference)
-  ✦ Publish adversarial fixture corpus (tests/adversarial/)
+  ✅ Encoder interop test vectors (schemas/test-vectors/encoder_interop_vectors.json — 8 vectors)
+  ✅ Publish adversarial fixture corpus (tests/adversarial/ — 32 fixtures, 4 categories)
   ✦ "Last verified" dates on all website stat blocks
   Target: +5 pts → ~72.5
 

@@ -1,0 +1,12 @@
+{
+  "id": "adv-PAR-002",
+  "category": "parsing",
+  "description": "Receipt is JSON null",
+  "spec_section": "§7",
+  "receipt": null,
+  "expected": {
+    "valid": false,
+    "must_reject": true,
+    "error_pattern": "receipt is not a dict"
+  }
+}

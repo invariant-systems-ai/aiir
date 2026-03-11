@@ -1,0 +1,16 @@
+{
+  "id": "adv-PAR-003",
+  "category": "parsing",
+  "description": "Receipt is a JSON array",
+  "spec_section": "§7",
+  "receipt": [
+    1,
+    2,
+    3
+  ],
+  "expected": {
+    "valid": false,
+    "must_reject": true,
+    "error_pattern": "receipt is not a dict"
+  }
+}

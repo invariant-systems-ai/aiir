@@ -1,0 +1,206 @@
+{
+  "description": "AIIR adversarial test corpus — machine-readable fixture manifest",
+  "spec_version": "1.1.0",
+  "generated_by": "tests/adversarial/generate_corpus.py",
+  "categories": [
+    "bypass",
+    "injection",
+    "parsing",
+    "tampering"
+  ],
+  "total_fixtures": 32,
+  "fixtures": [
+    {
+      "id": "adv-INJ-001",
+      "category": "injection",
+      "description": "HTML script tag in version field — MUST be rejected by version format regex",
+      "file": "tests/adversarial/injection/adv-INJ-001.json"
+    },
+    {
+      "id": "adv-INJ-002",
+      "category": "injection",
+      "description": "Null byte in commit subject — hash mismatch after sanitization",
+      "file": "tests/adversarial/injection/adv-INJ-002.json"
+    },
+    {
+      "id": "adv-INJ-003",
+      "category": "injection",
+      "description": "Unicode bidi override (U+202E) in author name — visual spoofing attack",
+      "file": "tests/adversarial/injection/adv-INJ-003.json"
+    },
+    {
+      "id": "adv-INJ-004",
+      "category": "injection",
+      "description": "CRLF injection in file path — HTTP header injection vector",
+      "file": "tests/adversarial/injection/adv-INJ-004.json"
+    },
+    {
+      "id": "adv-INJ-005",
+      "category": "injection",
+      "description": "SQL injection payload in schema field — schema starts with aiir/ so passes prefix check, but hash mismatches",
+      "file": "tests/adversarial/injection/adv-INJ-005.json"
+    },
+    {
+      "id": "adv-INJ-006",
+      "category": "injection",
+      "description": "Zero-width space in authorship_class — detection evasion via invisible chars",
+      "file": "tests/adversarial/injection/adv-INJ-006.json"
+    },
+    {
+      "id": "adv-INJ-007",
+      "category": "injection",
+      "description": "Path traversal in files array (../../etc/passwd)",
+      "file": "tests/adversarial/injection/adv-INJ-007.json"
+    },
+    {
+      "id": "adv-TAM-001",
+      "category": "tampering",
+      "description": "Single bit flip in content_hash — MUST detect integrity violation",
+      "file": "tests/adversarial/tampering/adv-TAM-001.json"
+    },
+    {
+      "id": "adv-TAM-002",
+      "category": "tampering",
+      "description": "Swap content_hash and receipt_id — both should fail validation",
+      "file": "tests/adversarial/tampering/adv-TAM-002.json"
+    },
+    {
+      "id": "adv-TAM-003",
+      "category": "tampering",
+      "description": "Flip is_ai_authored flag without rehashing — AI attestation tampering",
+      "file": "tests/adversarial/tampering/adv-TAM-003.json"
+    },
+    {
+      "id": "adv-TAM-004",
+      "category": "tampering",
+      "description": "Change author email without rehashing — provenance tampering",
+      "file": "tests/adversarial/tampering/adv-TAM-004.json"
+    },
+    {
+      "id": "adv-TAM-005",
+      "category": "tampering",
+      "description": "Extra non-core key added — verifier MUST ignore extra keys in hash computation (valid receipt)",
+      "file": "tests/adversarial/tampering/adv-TAM-005.json"
+    },
+    {
+      "id": "adv-TAM-006",
+      "category": "tampering",
+      "description": "Truncated content_hash (20 chars) — MUST reject incomplete hash",
+      "file": "tests/adversarial/tampering/adv-TAM-006.json"
+    },
+    {
+      "id": "adv-TAM-007",
+      "category": "tampering",
+      "description": "Empty content_hash — MUST reject",
+      "file": "tests/adversarial/tampering/adv-TAM-007.json"
+    },
+    {
+      "id": "adv-TAM-008",
+      "category": "tampering",
+      "description": "content_hash with md5: prefix — wrong algorithm, MUST reject",
+      "file": "tests/adversarial/tampering/adv-TAM-008.json"
+    },
+    {
+      "id": "adv-PAR-001",
+      "category": "parsing",
+      "description": "Receipt is a plain string, not a JSON object",
+      "file": "tests/adversarial/parsing/adv-PAR-001.json"
+    },
+    {
+      "id": "adv-PAR-002",
+      "category": "parsing",
+      "description": "Receipt is JSON null",
+      "file": "tests/adversarial/parsing/adv-PAR-002.json"
+    },
+    {
+      "id": "adv-PAR-003",
+      "category": "parsing",
+      "description": "Receipt is a JSON array",
+      "file": "tests/adversarial/parsing/adv-PAR-003.json"
+    },
+    {
+      "id": "adv-PAR-004",
+      "category": "parsing",
+      "description": "Receipt is an integer",
+      "file": "tests/adversarial/parsing/adv-PAR-004.json"
+    },
+    {
+      "id": "adv-PAR-005",
+      "category": "parsing",
+      "description": "Deeply nested JSON (100 levels) in extensions — verifier must not crash; extensions excluded from hash so receipt is still valid",
+      "file": "tests/adversarial/parsing/adv-PAR-005.json"
+    },
+    {
+      "id": "adv-PAR-006",
+      "category": "parsing",
+      "description": "1 MB string in commit subject — resource exhaustion vector",
+      "file": "tests/adversarial/parsing/adv-PAR-006.json"
+    },
+    {
+      "id": "adv-PAR-007",
+      "category": "parsing",
+      "description": "Empty JSON object — no fields at all",
+      "file": "tests/adversarial/parsing/adv-PAR-007.json"
+    },
+    {
+      "id": "adv-PAR-008",
+      "category": "parsing",
+      "description": "Only type field present, all others missing",
+      "file": "tests/adversarial/parsing/adv-PAR-008.json"
+    },
+    {
+      "id": "adv-PAR-009",
+      "category": "parsing",
+      "description": "Version field is a float (1.0) instead of a string",
+      "file": "tests/adversarial/parsing/adv-PAR-009.json"
+    },
+    {
+      "id": "adv-PAR-010",
+      "category": "parsing",
+      "description": "Schema field is an array instead of a string",
+      "file": "tests/adversarial/parsing/adv-PAR-010.json"
+    },
+    {
+      "id": "adv-BYP-001",
+      "category": "bypass",
+      "description": "Receipt with valid hash but wrong type — type check MUST precede hash check",
+      "file": "tests/adversarial/bypass/adv-BYP-001.json"
+    },
+    {
+      "id": "adv-BYP-002",
+      "category": "bypass",
+      "description": "Receipt with valid hash but non-aiir schema prefix — schema check MUST precede hash check",
+      "file": "tests/adversarial/bypass/adv-BYP-002.json"
+    },
+    {
+      "id": "adv-BYP-003",
+      "category": "bypass",
+      "description": "Future schema version (v99) with valid hash — implementers decide accept/reject policy",
+      "file": "tests/adversarial/bypass/adv-BYP-003.json"
+    },
+    {
+      "id": "adv-BYP-004",
+      "category": "bypass",
+      "description": "Exact duplicate receipt (replay) — content-addressed so same id is expected; dedup is policy layer",
+      "file": "tests/adversarial/bypass/adv-BYP-004.json"
+    },
+    {
+      "id": "adv-BYP-005",
+      "category": "bypass",
+      "description": "Repository URL with embedded credentials — verifier should flag but receipt is structurally valid",
+      "file": "tests/adversarial/bypass/adv-BYP-005.json"
+    },
+    {
+      "id": "adv-BYP-006",
+      "category": "bypass",
+      "description": "Timestamp far in the future (2099) — structural integrity valid, policy layer should flag",
+      "file": "tests/adversarial/bypass/adv-BYP-006.json"
+    },
+    {
+      "id": "adv-BYP-007",
+      "category": "bypass",
+      "description": "receipt_id with correct g1- prefix but wrong hash — MUST be rejected",
+      "file": "tests/adversarial/bypass/adv-BYP-007.json"
+    }
+  ]
+}

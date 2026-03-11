@@ -485,16 +485,26 @@ See [THREAT_MODEL.md](THREAT_MODEL.md) for the full STRIDE analysis (153 control
 
 Machine-readable test vectors are provided at:
 
-- [`schemas/test_vectors.json`](schemas/test_vectors.json)
+- [`schemas/test_vectors.json`](schemas/test_vectors.json) — verification vectors (valid/invalid receipts)
+- [`schemas/test-vectors/encoder_interop_vectors.json`](schemas/test-vectors/encoder_interop_vectors.json) — encoder interop vectors (canonical JSON, content hash, receipt ID)
+- [`tests/adversarial/`](tests/adversarial/) — adversarial corpus (32 fixtures across injection, tampering, parsing, bypass categories)
 
-Each test vector includes:
+Each verification test vector includes:
 
 - A complete receipt JSON
 - Expected verification result (`valid: true/false`)
 - Expected error messages (if invalid)
 - A human-readable description
 
-Conforming implementations MUST pass all test vectors.
+Each encoder interop vector includes:
+
+- Input core fields (`input_core`)
+- Expected canonical JSON byte string (`canonical_json`)
+- Expected `content_hash` and `receipt_id`
+- Optional CBOR hex encoding (`cbor_hex`)
+- A full receipt for round-trip verification
+
+Conforming implementations MUST pass all verification and encoder interop test vectors.
 
 ---
 

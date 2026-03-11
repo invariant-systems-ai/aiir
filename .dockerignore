@@ -1,6 +1,7 @@
 # AIIR Docker image — ignore everything except what's needed
 *
 !aiir/
+!.clusterfuzzlite/
 !pyproject.toml
 !LICENSE
 !README.md

@@ -159,6 +159,7 @@ pytest_add_cli_args = [
     "--deselect=tests/test_verify.py::TestSafeVerifyPathNoDeadCode::test_no_raw_parts_variable",
     "--deselect=tests/test_verify.py::TestIterativeJsonDepthCheck::test_implementation_is_iterative",
     "--deselect=tests/test_hardening.py::TestConstantTimeComparisonGuard",
+    "--deselect=tests/test_properties.py::TestContentAddressingDeterministic::test_same_commit_same_receipt_id",
 ]
 pytest_add_cli_args_test_selection = [
     "tests/test_verify.py",

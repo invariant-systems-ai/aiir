@@ -1254,6 +1254,28 @@ class TestCrossPlatformFchmod(unittest.TestCase):
             finally:
                 os.chdir(old_cwd)
 
+    def test_write_receipt_recreates_missing_cbor_sidecar(self):
+        """Existing JSON receipt should regenerate a missing .cbor sidecar."""
+        receipt = _make_test_receipt()
+        old_cwd = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            try:
+                os.chdir(tmpdir)
+                out = os.path.join(tmpdir, "out")
+                os.makedirs(out)
+                path = Path(cli.write_receipt(receipt, output_dir=out))
+                cbor_path = path.with_suffix(".cbor")
+                self.assertTrue(cbor_path.exists())
+                cbor_path.unlink()
+
+                second_path = Path(cli.write_receipt(receipt, output_dir=out))
+
+                self.assertEqual(second_path, path)
+                self.assertTrue(cbor_path.exists())
+                self.assertGreater(cbor_path.stat().st_size, 0)
+            finally:
+                os.chdir(old_cwd)
+
     def test_save_config_without_fchmod(self):
         """_save_config should succeed when os.fchmod is unavailable."""
         with tempfile.TemporaryDirectory() as tmpdir:

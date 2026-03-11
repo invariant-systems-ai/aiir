@@ -525,6 +525,9 @@ class TestFuzzDetectAiSignals:
             and "gemini" not in message
             and "tabnine" not in message
             and "codegen" not in message
+            and "lovable" not in message
+            and "supermaven" not in message
+            and "codestral" not in message
             and "copilot" not in author_name
             and "dependabot" not in author_name
             and "renovate" not in author_name
@@ -536,6 +539,9 @@ class TestFuzzDetectAiSignals:
             and "amazon" not in author_name
             and "tabnine" not in author_name
             and "gemini" not in author_name
+            and "lovable" not in author_name
+            and "supermaven" not in author_name
+            and "codestral" not in author_name
         )
         result = cli.detect_ai_signals(message, author_name=author_name)
         ai_signals, bot_signals = result

@@ -84,7 +84,7 @@ jobs:
           base_ref="$(jq -r '.base.ref' <<<"$pr_json")"
           head_sha="$(jq -r '.head.sha' <<<"$pr_json")"
           head_repo="$(jq -r '.head.repo.full_name' <<<"$pr_json")"
-          author_assoc="$(jq -r '.author_association' <<<"$pr_json")"
+          author_login="$(jq -r '.user.login' <<<"$pr_json")"
           pr_url="$(jq -r '.html_url' <<<"$pr_json")"
 
           if [[ "$pr_state" != "open" || "$pr_draft" == "true" || "$base_ref" != "main" ]]; then
@@ -99,10 +99,14 @@ jobs:
             exit 0
           fi
 
-          case "$author_assoc" in
-            OWNER|MEMBER|COLLABORATOR) ;;
+          # Check author has write (push) access — more reliable than
+          # author_association which GITHUB_TOKEN may report as CONTRIBUTOR
+          # even for org members.
+          author_perm="$(gh api "repos/$REPO/collaborators/$author_login/permission" --jq '.permission' 2>/dev/null || echo "none")"
+          case "$author_perm" in
+            admin|write) ;;
             *)
-              echo "Author association is not first-party: $author_assoc"
+              echo "Author $author_login has permission '$author_perm'; not first-party"
               set_status success "AI gate skipped for non first-party author"
               gh pr merge "$pr_number" --disable-auto || true
               exit 0

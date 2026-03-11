@@ -214,8 +214,7 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 
 | Cycle | Date | Score | Key change |
 |---|---|---|---|
-| 2026-W11 | 2026-03-11 | 67.5 | v1.1 scorecard: SPEC_GOVERNANCE.md, release-health.md, smoke tests, conformance-manifest.json, implementers.md, 5-category weekly model |
-| 2026-W11 | 2026-03-11 | 68.9 | +1.4: normative CDDL grammar (`schemas/receipt.cddl`); SPEC.md section 1.3 + conformance-manifest updated |
+| 2026-W11 | 2026-03-11 | 68.9 | v1.1 scorecard → +1.4 CDDL: SPEC_GOVERNANCE.md, release-health.md, smoke tests, conformance-manifest.json, implementers.md, 5-category weekly model; normative CDDL grammar (schemas/receipt.cddl); SPEC.md section 1.3 + conformance-manifest updated |
 
 ---
 

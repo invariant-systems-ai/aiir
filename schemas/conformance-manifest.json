@@ -92,6 +92,13 @@
       "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
       "description": "JSON Schema for the AIIR Verification Summary Attestation (VSA) v1 format",
       "spec_version": "1.1.x"
+    },
+    {
+      "file": "schemas/receipt.cddl",
+      "url": "https://github.com/invariant-systems-ai/aiir/blob/main/schemas/receipt.cddl",
+      "schema_dialect": "RFC 8610 (CDDL)",
+      "description": "CDDL grammar for the AIIR commit receipt v1 format (JSON + CBOR wire formats)",
+      "spec_version": "1.1.x"
     }
   ],
   "implementations": [

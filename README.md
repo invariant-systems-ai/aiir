@@ -20,7 +20,7 @@
 [![GitLab CI/CD Catalog](https://img.shields.io/badge/GitLab-CI%2FCD%20Catalog-orange?logo=gitlab)](https://gitlab.com/explore/catalog/invariant-systems/aiir)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/invariant-systems-ai/aiir/badge)](https://scorecard.dev/viewer/?uri=github.com/invariant-systems-ai/aiir)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12134/badge)](https://www.bestpractices.dev/projects/12134)
-[![Standards Readiness](https://img.shields.io/badge/Standards--Readiness-67.5%2F100-orange)](docs/standards-readiness.md)
+[![Standards Readiness](https://img.shields.io/badge/Standards--Readiness-68.9%2F100-orange)](docs/standards-readiness.md)
 [![AIIR Receipted](https://img.shields.io/badge/AIIR-Receipted%20✓-blue)](https://github.com/invariant-systems-ai/aiir)
 
 <p align="center">
@@ -1039,6 +1039,7 @@ AIIR publishes a formal specification and machine-readable schema for third-part
 | [SPEC.md](SPEC.md) | Normative specification — canonical JSON, content addressing, verification algorithm (RFC 2119) |
 | [SPEC_GOVERNANCE.md](SPEC_GOVERNANCE.md) | Specification governance — change control, compatibility policy, extension registry, standards-track roadmap |
 | [schemas/commit_receipt.v1.schema.json](schemas/commit_receipt.v1.schema.json) | JSON Schema (draft 2020-12) for `aiir/commit_receipt.v1` |
+| [schemas/receipt.cddl](schemas/receipt.cddl) | CDDL grammar (RFC 8610) — normative for CBOR, informative for JSON |
 | [schemas/conformance-manifest.json](schemas/conformance-manifest.json) | Machine-readable implementer registry, test vector index, and extension registry |
 | [schemas/verification_summary.v1.schema.json](schemas/verification_summary.v1.schema.json) | JSON Schema for the Verification Summary Attestation (VSA) predicate |
 | [schemas/test_vectors.json](schemas/test_vectors.json) | 25 conformance test vectors with precomputed hashes |

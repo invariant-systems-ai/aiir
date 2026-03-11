@@ -40,6 +40,14 @@ A JSON Schema (draft 2020-12) is provided at:
 
 - [`schemas/commit_receipt.v1.schema.json`](schemas/commit_receipt.v1.schema.json)
 
+A CDDL grammar ([RFC 8610](https://www.rfc-editor.org/rfc/rfc8610)) covering
+both the JSON and CBOR wire formats is provided at:
+
+- [`schemas/receipt.cddl`](schemas/receipt.cddl)
+
+The CDDL grammar is **normative** for the CBOR canonical envelope and
+**informative** for the JSON encoding (which is fully specified by §6).
+
 ---
 
 ## 2. Receipt Structure

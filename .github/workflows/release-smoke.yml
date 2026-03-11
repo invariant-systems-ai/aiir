@@ -7,8 +7,7 @@ on:
     inputs:
       version:
         description: 'Version to smoke-test (e.g. 1.2.5). Required for workflow_dispatch runs.'
-        required: false
-        default: ''
+        required: true
 
 permissions:
   contents: read
@@ -174,7 +173,7 @@ jobs:
       - name: Open P0 alert issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ github.event.release.tag_name || github.event.inputs.version || 'latest' }}
+          VERSION: ${{ github.event.release.tag_name || github.event.inputs.version }}
         run: |
           gh issue create \
             --repo "$GITHUB_REPOSITORY" \

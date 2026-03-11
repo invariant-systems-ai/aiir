@@ -1223,7 +1223,7 @@ class TestMcpBranchVerifyReleasePreset(unittest.TestCase):
             patch("aiir.mcp_server.format_release_report", return_value="report text"),
         ):
             mock_vr.return_value = {"verificationResult": "PASSED", "reason": "ok"}
-            result = _handle_aiir_verify_release(
+            _handle_aiir_verify_release(
                 {
                     "commit_range": "HEAD~1..HEAD",
                     "policy": "strict",
@@ -1243,7 +1243,7 @@ class TestMcpBranchVerifyReleasePreset(unittest.TestCase):
             patch("aiir.mcp_server.format_release_report", return_value="report"),
         ):
             mock_vr.return_value = {"verificationResult": "PASSED", "reason": "ok"}
-            result = _handle_aiir_verify_release({"commit_range": "HEAD~1..HEAD"})
+            _handle_aiir_verify_release({"commit_range": "HEAD~1..HEAD"})
         call_kwargs = mock_vr.call_args.kwargs
         self.assertIsNone(call_kwargs.get("policy_preset"))
         self.assertIsNone(call_kwargs.get("policy_path"))
@@ -1264,7 +1264,7 @@ class TestMcpBranchVerifyReleasePreset(unittest.TestCase):
                 ),
             ):
                 mock_vr.return_value = {"verificationResult": "PASSED", "reason": "ok"}
-                result = _handle_aiir_verify_release(
+                _handle_aiir_verify_release(
                     {
                         "commit_range": "HEAD~1..HEAD",
                         "policy": str(policy_path),

@@ -121,6 +121,48 @@ class TestExplainVerification(unittest.TestCase):
         text = explain_verification(result)
         self.assertIn("... and 5 more", text)
 
+    def test_cbor_sidecar_verified(self):
+        result = {
+            "valid": True,
+            "cbor_sidecar": {
+                "valid": True,
+                "cbor_sha256": "sha256:abcdef1234567890",
+            },
+        }
+        text = explain_verification(result)
+        self.assertIn("CBOR sidecar: VERIFIED", text)
+        self.assertIn("round-trip", text)
+        self.assertIn("sha256:abcdef1234567890", text)
+
+    def test_cbor_sidecar_failed(self):
+        result = {
+            "valid": False,
+            "errors": ["content hash mismatch"],
+            "cbor_sidecar": {
+                "valid": False,
+                "errors": ["round-trip mismatch"],
+            },
+        }
+        text = explain_verification(result)
+        self.assertIn("CBOR sidecar: FAILED", text)
+        self.assertIn("round-trip mismatch", text)
+
+    def test_cbor_sidecar_verified_no_digest(self):
+        """CBOR valid but cbor_sha256 absent — should still say VERIFIED."""
+        result = {
+            "valid": True,
+            "cbor_sidecar": {"valid": True},
+        }
+        text = explain_verification(result)
+        self.assertIn("CBOR sidecar: VERIFIED", text)
+        self.assertNotIn("Digest:", text)
+
+    def test_cbor_sidecar_absent(self):
+        """No cbor_sidecar key — explain should not mention CBOR."""
+        result = {"valid": True}
+        text = explain_verification(result)
+        self.assertNotIn("CBOR", text)
+
 
 class TestExplainVerificationCLI(unittest.TestCase):
     """Test that --explain integrates with the CLI."""

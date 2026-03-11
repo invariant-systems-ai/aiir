@@ -170,4 +170,23 @@ def explain_verification(result: Dict[str, Any]) -> str:
         if len(schema_errors) > 10:
             lines.append(f"  ... and {len(schema_errors) - 10} more")
 
+    # CBOR sidecar cross-verification
+    cbor = result.get("cbor_sidecar")
+    if isinstance(cbor, dict):
+        lines.append("")
+        if cbor.get("valid"):
+            lines.append("CBOR sidecar: VERIFIED")
+            lines.append(
+                "  The canonical CBOR sidecar was decoded, re-encoded to"
+                " identical bytes (round-trip), and cross-verified against"
+                " the JSON receipt core."
+            )
+            if cbor.get("cbor_sha256"):
+                lines.append(f"  Digest: {cbor['cbor_sha256']}")
+        else:
+            cbor_errors = cbor.get("errors", [])
+            lines.append("CBOR sidecar: FAILED")
+            for ce in cbor_errors:
+                lines.append(f"  - {ce}")
+
     return "\n".join(lines)

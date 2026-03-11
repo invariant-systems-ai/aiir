@@ -45,9 +45,13 @@ jobs:
 
       # ── Verify every receipt we just generated ──
       # This is the dogfood proof: AIIR validates its own output.
+      # --verify auto-detects .cbor sidecars next to each .json file
+      # and cross-verifies them (round-trip + digest match).
       - name: Verify receipt integrity
         run: |
           FAIL=0
+          CBOR_OK=0
+          CBOR_FAIL=0
           for receipt in .receipts/*.json; do
             [ -f "$receipt" ] || continue
             # Skip .sigstore bundles (not receipt JSON)
@@ -58,12 +62,21 @@ jobs:
               echo "  ❌ $(basename "$receipt")"
               FAIL=1
             fi
+            # Check that the CBOR sidecar was generated
+            cbor="${receipt%.json}.cbor"
+            if [ -f "$cbor" ]; then
+              CBOR_OK=$((CBOR_OK + 1))
+            else
+              echo "  ⚠️  Missing CBOR sidecar: $(basename "$cbor")"
+              CBOR_FAIL=$((CBOR_FAIL + 1))
+            fi
           done
           if [ "$FAIL" -eq 1 ]; then
             echo "::error::One or more receipts failed integrity verification"
             exit 1
           fi
           echo "✅ All receipts passed content-addressed integrity verification"
+          echo "✅ CBOR sidecars: ${CBOR_OK} verified, ${CBOR_FAIL} missing"
 
       # ── Chain integrity: no gaps in the receipts branch ──
       - name: Check receipt chain continuity
@@ -118,7 +131,7 @@ jobs:
 
           cd "$WORK"
           cp "${GITHUB_WORKSPACE}/.receipts/"* . 2>/dev/null || true
-          git add *.json *.sigstore 2>/dev/null || true
+          git add *.json *.cbor *.sigstore 2>/dev/null || true
 
           if ! git diff --cached --quiet; then
             git commit -m "chore: receipts for ${GITHUB_SHA::12}"

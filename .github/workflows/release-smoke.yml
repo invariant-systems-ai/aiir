@@ -43,7 +43,7 @@ jobs:
           echo "Smoke-testing aiir==${VER}"
 
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
           python-version: ${{ matrix.python }}
 
@@ -69,7 +69,7 @@ jobs:
       - name: Install aiir from PyPI
         run: pip install "aiir==${{ steps.ver.outputs.version }}"
 
-      - name: Check: version string matches
+      - name: "Check: version string matches"
         shell: bash
         env:
           TARGET: ${{ steps.ver.outputs.version }}
@@ -95,7 +95,7 @@ jobs:
 
           Co-authored-by: Copilot <copilot@github.com>"
 
-      - name: Check: receipt generation
+      - name: "Check: receipt generation"
         shell: bash
         working-directory: smoke-repo
         run: |
@@ -107,7 +107,7 @@ jobs:
           fi
           echo "✅ Receipt generated"
 
-      - name: Check: JSONL ledger and verify
+      - name: "Check: JSONL ledger and verify"
         shell: bash
         working-directory: smoke-repo
         run: |
@@ -120,7 +120,7 @@ jobs:
           fi
           echo "✅ Verify passed"
 
-      - name: Check: CBOR round-trip hash consistency
+      - name: "Check: CBOR round-trip hash consistency"
         shell: bash
         working-directory: smoke-repo
         run: |

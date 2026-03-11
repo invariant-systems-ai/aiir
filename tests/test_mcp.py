@@ -20,8 +20,6 @@ class TestRedTeamMCP(unittest.TestCase):
 
     def test_r5_08_verify_receipt_signature_rejects_symlinks(self):
         """verify_receipt_signature must reject symlink receipt and bundle paths."""
-        import tempfile
-
         with tempfile.TemporaryDirectory() as td:
             # Create a real file and a symlink to it
             real = os.path.join(td, "real.json")

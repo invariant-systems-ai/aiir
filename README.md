@@ -27,6 +27,18 @@
   <img src="docs/demo.svg" alt="AIIR terminal demo — pip install aiir && aiir --pretty" width="720">
 </p>
 
+### Quick Start — 30 seconds
+
+```bash
+pip install aiir        # zero dependencies, Python 3.9+
+cd your-repo
+aiir --pretty           # receipt your last commit → .aiir/receipts.jsonl
+```
+
+> **CI?** Drop [`examples/github-actions`](examples/github-actions/.github/workflows/aiir.yml) into your repo, or `uses: invariant-systems-ai/aiir@v1` in any workflow.<br>
+> **GitLab?** See [`examples/gitlab-demo`](examples/gitlab-demo/.gitlab-ci.yml) or the [CI/CD Catalog component](https://gitlab.com/explore/catalog/invariant-systems/aiir).<br>
+> **MCP?** `aiir-mcp-server --stdio` — your AI assistant generates receipts automatically.
+
 ---
 
 ## Why?

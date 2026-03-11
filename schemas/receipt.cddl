@@ -1,0 +1,133 @@
+; AIIR Commit Receipt — CDDL Grammar (RFC 8610)
+;
+; Specification:  AIIR Commit Receipt Specification v1.1.0
+; Schema:         aiir/commit_receipt.v1
+; Normative ref:  SPEC.md §2–§8
+; License:        Apache-2.0
+; Date:           2026-03-11
+;
+; This grammar defines the wire format for AIIR commit receipts in both
+; JSON (RFC 8259) and CBOR (RFC 8949).  Implementations MUST produce
+; byte-identical content_hash and receipt_id values per SPEC.md §7.
+;
+; Conventions:
+;   - Strings use .regexp where a pattern constraint exists.
+;   - CORE_KEYS are the six fields whose canonical JSON encoding is
+;     hashed to produce content_hash and receipt_id (SPEC.md §2.1).
+;   - The CBOR canonical envelope (§A) wraps the core for CBOR
+;     round-trip determinism.
+
+; ── §1  Top-level receipt ────────────────────────────────────────────
+
+commit-receipt = {
+  type:            "aiir.commit_receipt",
+  schema:          "aiir/commit_receipt.v1",
+  version:         semver,
+  commit:          commit-object,
+  ai_attestation:  ai-attestation,
+  provenance:      provenance,
+  receipt_id:      receipt-id,
+  content_hash:    content-hash,
+  timestamp:       date-time,
+  extensions:      extensions,
+}
+
+; CORE_KEYS (§2.1) — only these six fields enter the content hash.
+commit-receipt-core = {
+  type:            "aiir.commit_receipt",
+  schema:          "aiir/commit_receipt.v1",
+  version:         semver,
+  commit:          commit-object,
+  ai_attestation:  ai-attestation,
+  provenance:      provenance,
+}
+
+; ── §2  Commit object ────────────────────────────────────────────────
+
+commit-object = {
+  sha:             git-sha,
+  author:          git-identity,
+  committer:       git-identity,
+  subject:         tstr .size (0..4096),
+  message_hash:    sha256-prefixed,
+  diff_hash:       sha256-prefixed,
+  files_changed:   uint,
+  (files-present // files-redacted),
+  ? files_capped:  true,
+}
+
+files-present = (
+  files:           [0*100 tstr],
+)
+
+files-redacted = (
+  files_redacted:  true,
+)
+
+; ── §3  Git identity ─────────────────────────────────────────────────
+
+git-identity = {
+  name:   tstr .size (0..1024),
+  email:  tstr .size (0..1024),
+  date:   tstr,                    ; RFC 3339 or git default format
+}
+
+; ── §4  AI attestation ───────────────────────────────────────────────
+
+ai-attestation = {
+  is_ai_authored:     bool,
+  signals_detected:   [* tstr],
+  signal_count:       uint,
+  detection_method:   tstr,
+  ? is_bot_authored:     bool,
+  ? bot_signals_detected: [* tstr],
+  ? bot_signal_count:    uint,
+  ? authorship_class:    authorship-class,
+}
+
+authorship-class = "human" / "ai_assisted" / "bot" / "ai+bot"
+
+; ── §5  Provenance ───────────────────────────────────────────────────
+
+provenance = {
+  repository:  tstr / null,        ; credential-stripped URL or null
+  tool:        tool-uri,
+  generator:   tstr,               ; e.g. "aiir.cli", "aiir.action", "aiir.mcp"
+}
+
+; ── §6  Extensions (non-core) ────────────────────────────────────────
+
+extensions = {
+  ? instance_id:  tstr,
+  ? namespace:    tstr,
+  * tstr => any,                   ; open for downstream keys
+}
+
+; ── §7  Derived identifiers ──────────────────────────────────────────
+
+; receipt_id  = "g1-" . hex(SHA-256(canonical_json(core)))[:32]
+receipt-id    = tstr .regexp "^g1-[0-9a-f]{32}$"
+
+; content_hash = "sha256:" . hex(SHA-256(canonical_json(core)))
+content-hash  = tstr .regexp "^sha256:[0-9a-f]{64}$"
+
+; ── §A  CBOR canonical envelope ──────────────────────────────────────
+;
+; The envelope wraps the CORE_KEYS for deterministic CBOR encoding.
+; JSON → CBOR → JSON round-trip MUST preserve identical hashes.
+
+cbor-envelope = {
+  type:           "aiir.canonical_object",
+  schema:         "aiir/canonical_object.v1",
+  kind:           "aiir.commit_receipt.core",
+  object_schema:  "aiir/commit_receipt.v1",
+  core:           commit-receipt-core,
+}
+
+; ── Shared types ─────────────────────────────────────────────────────
+
+semver       = tstr .regexp "^[0-9]+\\.[0-9]+\\.[0-9]+([.+\\-][0-9a-zA-Z.+\\-]*)?$"
+git-sha      = tstr .regexp "^[0-9a-f]{40}$" / tstr .regexp "^[0-9a-f]{64}$"
+sha256-prefixed = tstr .regexp "^sha256:[0-9a-f]{64}$"
+date-time    = tstr .regexp "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+tool-uri     = tstr .regexp "^https://github\\.com/invariant-systems-ai/aiir@v[0-9]+\\.[0-9]+\\.[0-9]+$"

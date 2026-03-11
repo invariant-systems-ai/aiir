@@ -28,7 +28,14 @@ def TestOneInput(data: bytes) -> None:
     if not isinstance(obj, dict):
         return
 
-    verify_receipt(obj)
+    # SystemExit: atheris docs say to catch it explicitly when library code may
+    # call sys.exit() (e.g. via Python package init importing entry-point code).
+    # verify_receipt() is designed to always return a dict — any other exception
+    # is a genuine finding and intentionally NOT caught here.
+    try:
+        verify_receipt(obj)
+    except SystemExit:
+        return
 
     try:
         canon = _canonical_json(obj)

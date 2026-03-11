@@ -665,3 +665,106 @@ class TestVerifyReceiptDirectFields(unittest.TestCase):
         receipt["receipt_id"] = f"g1-{h[:32]}"
         result = verify_receipt(receipt)
         self.assertEqual(result["commit_sha"], "unknown")
+
+    def test_non_dict_input_returns_valid_false(self):
+        """verify_receipt(non-dict) must return valid=False with errors key.
+
+        Kills 7 mutants: key-name mutations ("XXvalidXX","VALID"),
+        True/False swap, "errors"/"ERRORS"/"XXerrorsXX" key-name mutations,
+        and error string mutations on the non-dict guard path.
+        """
+        from aiir._verify import verify_receipt
+
+        for bad_input in (None, "string", 42, []):
+            result = verify_receipt(bad_input)
+            self.assertIn(
+                "valid", result, f"'valid' key missing for input {bad_input!r}"
+            )
+            self.assertIs(
+                result["valid"], False, f"valid should be False for {bad_input!r}"
+            )
+            self.assertIn(
+                "errors", result, f"'errors' key missing for input {bad_input!r}"
+            )
+            self.assertIn(
+                "receipt is not a dict",
+                result["errors"],
+                f"error message wrong for input {bad_input!r}",
+            )
+
+    def test_invalid_type_returns_valid_false_with_error(self):
+        """Wrong receipt type must return valid=False with type error string.
+
+        Kills mutants that change the error message to None or change the
+        valid=True/False on validation errors (mutmut_50).
+        """
+        from aiir._verify import verify_receipt
+
+        receipt = {
+            "type": "not.aiir.receipt",
+            "schema": "aiir/commit_receipt.v1",
+            "version": "1.0.0",
+            "commit": {"sha": "a" * 40},
+            "ai_attestation": {},
+            "provenance": {},
+            "receipt_id": "g1-x",
+            "content_hash": "sha256:x",
+        }
+        result = verify_receipt(receipt)
+        self.assertIs(result["valid"], False)
+        self.assertIn("errors", result)
+        self.assertTrue(
+            any("unknown receipt type" in str(e) for e in result["errors"]),
+            f"Expected 'unknown receipt type' in errors, got: {result['errors']}",
+        )
+
+    def test_invalid_schema_returns_valid_false_with_error(self):
+        """Wrong schema must return valid=False with schema error string.
+
+        Kills mutants that change or→and in schema check, or change default
+        value of schema.get(), or change error message to None.
+        """
+        from aiir._verify import verify_receipt
+
+        receipt = {
+            "type": "aiir.commit_receipt",
+            "schema": "other/schema",  # doesn't start with "aiir/"
+            "version": "1.0.0",
+            "commit": {"sha": "a" * 40},
+            "ai_attestation": {},
+            "provenance": {},
+            "receipt_id": "g1-x",
+            "content_hash": "sha256:x",
+        }
+        result = verify_receipt(receipt)
+        self.assertIs(result["valid"], False)
+        self.assertIn("errors", result)
+        self.assertTrue(
+            any("unknown schema" in str(e) for e in result["errors"]),
+            f"Expected 'unknown schema' in errors, got: {result['errors']}",
+        )
+
+    def test_invalid_version_returns_valid_false_with_error(self):
+        """Non-semver version must return valid=False with version error string.
+
+        Kills mutants that change the regex character class (lowercase only vs
+        uppercase) or change the error message to None.
+        """
+        from aiir._verify import verify_receipt
+
+        receipt = {
+            "type": "aiir.commit_receipt",
+            "schema": "aiir/commit_receipt.v1",
+            "version": "not-a-version",
+            "commit": {"sha": "a" * 40},
+            "ai_attestation": {},
+            "provenance": {},
+            "receipt_id": "g1-x",
+            "content_hash": "sha256:x",
+        }
+        result = verify_receipt(receipt)
+        self.assertIs(result["valid"], False)
+        self.assertTrue(
+            any("invalid version format" in str(e) for e in result["errors"]),
+            f"Expected 'invalid version format' in errors, got: {result['errors']}",
+        )

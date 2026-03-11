@@ -95,7 +95,7 @@ jobs:
           if [[ "$head_repo" != "$REPO" ]]; then
             echo "External PR detected; disabling auto-merge"
             set_status success "AI gate skipped for external PR"
-            gh pr merge "$pr_number" --disable-auto || true
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
             exit 0
           fi
 
@@ -108,12 +108,12 @@ jobs:
             *)
               echo "Author $author_login has permission '$author_perm'; not first-party"
               set_status success "AI gate skipped for non first-party author"
-              gh pr merge "$pr_number" --disable-auto || true
+              gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
               exit 0
               ;;
           esac
 
-          pr_view_json="$(gh pr view "$pr_number" --json mergeStateStatus,statusCheckRollup)"
+          pr_view_json="$(gh pr view "$pr_number" --repo "$REPO" --json mergeStateStatus,statusCheckRollup)"
           merge_state="$(jq -r '.mergeStateStatus' <<<"$pr_view_json")"
 
           checks_state="$(jq -r '
@@ -131,21 +131,21 @@ jobs:
           if [[ "$merge_state" == "BEHIND" ]]; then
             echo "Branch is behind main"
             set_status pending "Branch must be updated before merge"
-            gh pr merge "$pr_number" --disable-auto || true
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
             exit 0
           fi
 
           if [[ "$checks_state" == "failure" ]]; then
             echo "Required composite checks failed"
             set_status failure "Required CI gate is failing"
-            gh pr merge "$pr_number" --disable-auto || true
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
             exit 0
           fi
 
           if [[ "$checks_state" != "success" ]]; then
             echo "Required composite checks are still pending"
             set_status pending "Waiting for required CI gate"
-            gh pr merge "$pr_number" --disable-auto || true
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
             exit 0
           fi
 
@@ -160,10 +160,10 @@ jobs:
           if [[ "$copilot_reviewed" != "true" ]]; then
             echo "Copilot has not reviewed the current head commit yet"
             set_status pending "Waiting for Copilot review on current head"
-            gh pr merge "$pr_number" --disable-auto || true
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
             exit 0
           fi
 
           echo "AI merge gate satisfied for $pr_url"
           set_status success "Copilot reviewed and required CI passed"
-          gh pr merge "$pr_number" --auto --squash
+          gh pr merge "$pr_number" --repo "$REPO" --auto --squash

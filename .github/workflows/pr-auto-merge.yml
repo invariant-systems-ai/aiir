@@ -14,7 +14,7 @@ name: PR Auto-Merge
 
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
     branches: [main]
 
 permissions: read-all
@@ -26,6 +26,7 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-latest
     permissions:
+      contents: write
       pull-requests: write
     steps:
       - name: Enable auto-merge (squash)

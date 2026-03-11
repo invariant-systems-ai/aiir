@@ -650,7 +650,14 @@ class TestVerifyReceiptDirectFields(unittest.TestCase):
         receipt = self._make_valid_receipt()
         receipt["commit"] = None  # not a dict
         # Recompute valid hashes for the modified receipt core
-        core_keys = {"type", "schema", "version", "commit", "ai_attestation", "provenance"}
+        core_keys = {
+            "type",
+            "schema",
+            "version",
+            "commit",
+            "ai_attestation",
+            "provenance",
+        }
         core = {k: v for k, v in receipt.items() if k in core_keys}
         core_json = cli._canonical_json(core)
         h = cli._sha256(core_json)

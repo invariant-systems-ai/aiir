@@ -1,0 +1,60 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.7",
+  "commit": {
+    "sha": "6fd76a436a58e93b8cf66949f67c9a9f7a0533ff",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T12:49:14-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T12:49:23-04:00"
+    },
+    "subject": "v1.0.7: CI OIDC detection, shell injection prevention, template version alignment",
+    "message_hash": "sha256:f1d7d8e3ae6740139b39b2de04f5a9dbb42d46df08c541cbc9dee3e072220b18",
+    "diff_hash": "sha256:828f56020c317fb18cc3ed487da02d9d857c7108eee05dbfc173ca4fbe931174",
+    "files_changed": 15,
+    "files": [
+      ".github/workflows/dogfood.yml",
+      ".pre-commit-hooks.yaml",
+      "CHANGELOG.md",
+      "THREAT_MODEL.md",
+      "action.yml",
+      "aiir/__init__.py",
+      "aiir/_sign.py",
+      "templates/azure-pipelines.yml",
+      "templates/bitbucket-pipelines.yml",
+      "templates/circleci/config.yml",
+      "templates/gitlab-ci.yml",
+      "templates/jenkins/Jenkinsfile",
+      "templates/receipt/README.md",
+      "templates/receipt/template.yml",
+      "tests/test_sign.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": true,
+    "signals_detected": [
+      "message_match:ai-generated"
+    ],
+    "signal_count": 1,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "ai-assisted",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.7",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-ea00d123d6a9dc2037aae6e35fe27a9d",
+  "content_hash": "sha256:ea00d123d6a9dc2037aae6e35fe27a9d33301e01eeef21caea12acc1af83b0f7",
+  "timestamp": "2026-03-08T16:49:45Z",
+  "extensions": {}
+}

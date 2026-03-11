@@ -1,0 +1,45 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.4",
+  "commit": {
+    "sha": "73eed34db38f610c295c785ac3dcdf37f18ed5e9",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:33:14-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:33:14-04:00"
+    },
+    "subject": "fix(ci): merge release+publish into single tag-triggered workflow",
+    "message_hash": "sha256:f74fc9ecdc56517e0de16df692afc7d68930e76141aac661abfa3616c33af6fc",
+    "diff_hash": "sha256:fe25a46fdf9d314777f8c0a0f73a52187c525531cbdce9cbea62e4d16a8d1185",
+    "files_changed": 3,
+    "files": [
+      ".github/workflows/publish.yml",
+      ".github/workflows/release.yml",
+      ".github/workflows/sync.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.4",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-ac5f81ac9d528d53b07112707bcfd490",
+  "content_hash": "sha256:ac5f81ac9d528d53b07112707bcfd490df8b7efdf3d39eee74d5844d749b83fe",
+  "timestamp": "2026-03-08T14:33:29Z",
+  "extensions": {}
+}

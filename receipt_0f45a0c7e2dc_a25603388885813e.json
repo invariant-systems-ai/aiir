@@ -1,0 +1,58 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.4",
+  "commit": {
+    "sha": "0f45a0c7e2dc4ba0f30738ecda30f58abe9f9ffc",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:22:47-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:22:47-04:00"
+    },
+    "subject": "refactor: split test suite into 12 focused modules",
+    "message_hash": "sha256:e6a7ff66c4bef38a157dfb98c3cc7f21933e1d34abb76747be37ef21b1c35d1e",
+    "diff_hash": "sha256:26faa99163bdb1750f6b49e3f4f8def19ee2aac5e5a9b3935d3fcd86dd0e8c6a",
+    "files_changed": 16,
+    "files": [
+      ".github/workflows/ci.yml",
+      ".gitlab-ci.yml",
+      "test_cli.py",
+      "tests/__init__.py",
+      "tests/conftest.py",
+      "tests/test_cli_integration.py",
+      "tests/test_core.py",
+      "tests/test_detect.py",
+      "tests/test_fuzz.py",
+      "tests/test_github.py",
+      "tests/test_ledger.py",
+      "tests/test_mcp.py",
+      "tests/test_receipt.py",
+      "tests/test_redteam.py",
+      "tests/test_sign.py",
+      "tests/test_verify.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.4",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-03388885813e62c6c478c163d23f3b20",
+  "content_hash": "sha256:03388885813e62c6c478c163d23f3b20ff5dba28b3816a90df52436b2eb10edb",
+  "timestamp": "2026-03-08T14:30:11Z",
+  "extensions": {}
+}

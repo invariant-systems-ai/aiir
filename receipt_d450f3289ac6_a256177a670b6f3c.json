@@ -1,0 +1,41 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.4",
+  "commit": {
+    "sha": "d450f3289ac69b9240195730d314239221a9f840",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:34:59-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:34:59-04:00"
+    },
+    "subject": "chore: release v1.0.4",
+    "message_hash": "sha256:b7a79aaaf5d3f150b36b23aaaa1aca59543f6a63a71ec7e63a89f354ccb73bcb",
+    "diff_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "files_changed": 0,
+    "files": []
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.4",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-177a670b6f3c7353d903aec84a77d8e6",
+  "content_hash": "sha256:177a670b6f3c7353d903aec84a77d8e6bc2871b3c4193ce5eff8618c59aba611",
+  "timestamp": "2026-03-08T14:35:08Z",
+  "extensions": {}
+}

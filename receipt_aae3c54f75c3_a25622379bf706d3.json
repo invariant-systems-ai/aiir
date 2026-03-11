@@ -1,0 +1,58 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v1",
+  "version": "1.0.3",
+  "commit": {
+    "sha": "aae3c54f75c3d13ec63025161786ccbc40298f36",
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:06:58-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:09:34-04:00"
+    },
+    "subject": "feat: heuristic_v2 — split AI signals from bot signals",
+    "message_hash": "sha256:96ef94b5518c3fa2f9cd00ac4214d5b1c79d80ba20a3026dbcf3c895013fd429",
+    "diff_hash": "sha256:4f8094b4ca1feb4043b26cc62086e2971b0355a88c59873ff49236c4c0410428",
+    "files_changed": 16,
+    "files": [
+      ".pre-commit-hooks.yaml",
+      "README.md",
+      "SECURITY.md",
+      "aiir/_core.py",
+      "aiir/_detect.py",
+      "aiir/_ledger.py",
+      "aiir/_receipt.py",
+      "aiir/mcp_server.py",
+      "fuzz_cli.py",
+      "templates/azure-pipelines.yml",
+      "templates/bitbucket-pipelines.yml",
+      "templates/circleci/config.yml",
+      "templates/gitlab-ci.yml",
+      "templates/receipt/README.md",
+      "templates/receipt/template.yml",
+      "test_cli.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.0.3",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-22379bf706d3c09ae6d5b45058e9818c",
+  "content_hash": "sha256:22379bf706d3c09ae6d5b45058e9818c602499ab2b82eafd965f5ca13ab73fb3",
+  "timestamp": "2026-03-08T14:09:57Z",
+  "extensions": {}
+}

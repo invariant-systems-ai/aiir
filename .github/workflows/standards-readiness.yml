@@ -1,0 +1,148 @@
+name: Standards-Readiness Weekly Check-In
+
+on:
+  schedule:
+    # Every Monday at 09:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      note:
+        description: 'Optional note to include in the issue body'
+        required: false
+        default: ''
+
+permissions:
+  issues: write
+
+jobs:
+  open-or-update-scorecard-issue:
+    name: Open / update weekly scorecard issue
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Compute week label
+        id: week
+        run: |
+          # ISO week number, e.g. 2026-W12
+          WEEK_LABEL="$(date -u +'%G-W%V')"
+          echo "label=${WEEK_LABEL}" >> "$GITHUB_OUTPUT"
+          echo "date=$(date -u +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Check for existing issue this week
+        id: existing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WEEK_LABEL: ${{ steps.week.outputs.label }}
+        run: |
+          ISSUE_NUMBER=$(gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --label "standards-readiness" \
+            --state open \
+            --json number,title \
+            --jq ".[] | select(.title | contains(\"${WEEK_LABEL}\")) | .number" \
+            | head -1)
+          echo "number=${ISSUE_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      - name: Build issue body
+        id: body
+        env:
+          WEEK_LABEL: ${{ steps.week.outputs.label }}
+          TODAY: ${{ steps.week.outputs.date }}
+          EXTRA_NOTE: ${{ github.event.inputs.note }}
+        run: |
+          NOTE_SECTION=""
+          if [[ -n "${EXTRA_NOTE}" ]]; then
+            NOTE_SECTION="
+          > **Note from maintainer**: ${EXTRA_NOTE}
+          "
+          fi
+
+          cat > /tmp/issue_body.md << 'BODY_EOF'
+          ## 📊 Standards-Readiness Weekly Check-In — WEEK_LABEL
+
+          **Date**: TODAY
+          **Scorecard doc**: [`docs/standards-readiness.md`](https://github.com/invariant-systems-ai/aiir/blob/main/docs/standards-readiness.md)
+          **Public dashboard**: https://invariantsystems.io/#standards-readiness
+
+          EXTRA_NOTE_PLACEHOLDER
+
+          ---
+
+          ### Update table row (copy into `docs/standards-readiness.md`)
+
+          ```
+          | WEEK_LABEL | TODAY | <score> | <what changed this week> |
+          ```
+
+          ---
+
+          ### Dimension scores this week
+
+          Fill in each dimension (0–5). Delete unchanged rows.
+
+          | Dimension | Last week | This week | Delta | Evidence / PR |
+          |---|---|---|---|---|
+          | Technical completeness (w=20) | | | | |
+          | Reference impl quality (w=20) | | | | |
+          | Specification clarity (w=15) | | | | |
+          | Reliability & ecosystem (w=15) | | | | |
+          | Governance neutrality (w=20) | | | | |
+          | Adoption maturity (w=10) | | | | |
+          | **Composite** | | | | |
+
+          ---
+
+          ### Gap tasks completed this week
+
+          - [ ] *(list completed gap tasks with PR/commit links)*
+
+          ### Gap tasks in progress
+
+          - [ ] *(list in-flight work)*
+
+          ### Blockers / decisions needed
+
+          - *(list any blockers)*
+
+          ---
+
+          *Close this issue after updating `docs/standards-readiness.md`. The next issue will open automatically next Monday.*
+          BODY_EOF
+
+          # Substitute the placeholders
+          sed -i "s/WEEK_LABEL/${WEEK_LABEL}/g" /tmp/issue_body.md
+          sed -i "s/TODAY/${TODAY}/g" /tmp/issue_body.md
+          sed -i "s|EXTRA_NOTE_PLACEHOLDER|${NOTE_SECTION}|g" /tmp/issue_body.md
+
+      - name: Create issue label if missing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "standards-readiness" \
+            --repo "$GITHUB_REPOSITORY" \
+            --color "0075ca" \
+            --description "Weekly standards-readiness scorecard tracking" \
+            2>/dev/null || true
+
+      - name: Create new issue (if none exists this week)
+        if: steps.existing.outputs.number == ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WEEK_LABEL: ${{ steps.week.outputs.label }}
+        run: |
+          gh issue create \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "📊 Standards-Readiness Weekly Check-In — ${WEEK_LABEL}" \
+            --body-file /tmp/issue_body.md \
+            --label "standards-readiness"
+
+      - name: Comment on existing issue (if already exists this week)
+        if: steps.existing.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ steps.existing.outputs.number }}
+          TODAY: ${{ steps.week.outputs.date }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" \
+            --repo "$GITHUB_REPOSITORY" \
+            --body "🔄 Automated reminder — ${TODAY}. Issue already open for this week. Update the scorecard table and close when done."

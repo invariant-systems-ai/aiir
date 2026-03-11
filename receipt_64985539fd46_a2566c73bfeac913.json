@@ -1,0 +1,48 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "64985539fd460eb40cb04ce71b4a0b1e467c990e",
+    "tree_sha": "e16ab54803fce1cd498fb21858e7586abf45f48a",
+    "parent_shas": [
+      "a729f3c4074016af93dae629563ce348f3a54736"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T19:24:49-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T23:24:49Z"
+    },
+    "subject": "fix(docs): correct heading level in Quick Start (MD001) (#38)",
+    "message_hash": "sha256:567b594ba2fef294b3fedd61b802757e5daed3159a1bff2ead240a577fa0acf9",
+    "diff_hash": "sha256:1762acf0013c0b4d9a0d01902362ad6fc58a4491d7222e4cf7ac7e97dfcdf072",
+    "files_changed": 1,
+    "files": [
+      "README.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.github"
+  },
+  "receipt_id": "g1-6c73bfeac913b75a42a4e07d810ecbd8",
+  "content_hash": "sha256:6c73bfeac913b75a42a4e07d810ecbd8ad64edefa93560e0d533a8bb3ecab889",
+  "timestamp": "2026-03-11T23:25:06Z",
+  "extensions": {}
+}

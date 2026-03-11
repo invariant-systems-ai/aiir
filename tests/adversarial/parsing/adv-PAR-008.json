@@ -1,0 +1,14 @@
+{
+  "id": "adv-PAR-008",
+  "category": "parsing",
+  "description": "Only type field present, all others missing",
+  "spec_section": "§7",
+  "receipt": {
+    "type": "aiir.commit_receipt"
+  },
+  "expected": {
+    "valid": false,
+    "must_reject": true,
+    "error_pattern": "unknown schema"
+  }
+}

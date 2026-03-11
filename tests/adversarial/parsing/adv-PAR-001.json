@@ -1,0 +1,12 @@
+{
+  "id": "adv-PAR-001",
+  "category": "parsing",
+  "description": "Receipt is a plain string, not a JSON object",
+  "spec_section": "§7",
+  "receipt": "not a receipt",
+  "expected": {
+    "valid": false,
+    "must_reject": true,
+    "error_pattern": "receipt is not a dict"
+  }
+}

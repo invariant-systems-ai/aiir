@@ -689,7 +689,7 @@ class TestRedTeamHardeningR4(unittest.TestCase):
         sys.platform == "win32", "Unix file permissions not applicable on Windows"
     )
     def test_bundle_file_permissions(self):
-        """R4-10: Bundle files should have explicit 0o644 permissions."""
+        """R4-10: Bundle files should have explicit 0o600 permissions."""
         # Save and set a known umask so the test is deterministic
         # regardless of the user's environment (e.g., umask 0027 → 0o640).
         old_umask = os.umask(0o022)
@@ -705,7 +705,7 @@ class TestRedTeamHardeningR4(unittest.TestCase):
 
                 mode = os.stat(bundle_path).st_mode & 0o777
                 self.assertEqual(
-                    mode, 0o644, f"Bundle should be 0o644, got {oct(mode)}"
+                    mode, 0o600, f"Bundle should be 0o600, got {oct(mode)}"
                 )
         finally:
             os.umask(old_umask)

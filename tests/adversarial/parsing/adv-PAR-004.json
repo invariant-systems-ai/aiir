@@ -1,0 +1,12 @@
+{
+  "id": "adv-PAR-004",
+  "category": "parsing",
+  "description": "Receipt is an integer",
+  "spec_section": "§7",
+  "receipt": 42,
+  "expected": {
+    "valid": false,
+    "must_reject": true,
+    "error_pattern": "receipt is not a dict"
+  }
+}

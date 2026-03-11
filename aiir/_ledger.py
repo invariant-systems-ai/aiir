@@ -61,9 +61,9 @@ def _load_config(config_dir: Optional[str] = None) -> Dict[str, Any]:
 def _save_config(cfg_path: Path, config: Dict[str, Any]) -> None:
     """Atomically write the config file."""
     tmp = cfg_path.with_suffix(".tmp")
-    fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+    fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     if _HAS_FCHMOD:
-        os.fchmod(fd, 0o644)
+        os.fchmod(fd, 0o600)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2, ensure_ascii=False)
         f.write("\n")
@@ -95,9 +95,9 @@ def _load_index(index_path: Path) -> Dict[str, Any]:
 def _save_index(index_path: Path, index: Dict[str, Any]) -> None:
     """Atomically write the ledger index."""
     tmp = index_path.with_suffix(".tmp")
-    fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+    fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     if _HAS_FCHMOD:
-        os.fchmod(fd, 0o644)
+        os.fchmod(fd, 0o600)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         json.dump(index, f, indent=2, ensure_ascii=False)
         f.write("\n")
@@ -144,10 +144,10 @@ def append_to_ledger(
     fd = os.open(
         str(ledger_path),
         os.O_WRONLY | os.O_CREAT | os.O_APPEND,
-        0o644,
+        0o600,
     )
     if _HAS_FCHMOD:
-        os.fchmod(fd, 0o644)
+        os.fchmod(fd, 0o600)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         for receipt in receipts:
             sha = receipt.get("commit", {}).get("sha", "")

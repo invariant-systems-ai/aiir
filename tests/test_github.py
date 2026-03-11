@@ -109,3 +109,20 @@ class TestActionYmlSafePath(unittest.TestCase):
         action_path = Path(__file__).parent.parent / "action.yml"
         content = action_path.read_text(encoding="utf-8")
         self.assertIn("-P flag", content)
+
+
+class TestGitHubApiRequestHardening(unittest.TestCase):
+    """Coverage for URL scheme hardening in _github_api_request."""
+
+    def test_rejects_non_http_scheme(self):
+        """file:// endpoints must be rejected before network IO."""
+        from aiir._github import _github_api_request
+
+        with self.assertRaises(RuntimeError) as ctx:
+            _github_api_request(
+                "file:///etc/passwd",
+                {"ok": True},
+                token="ghp_test",
+                method="POST",
+            )
+        self.assertIn("non-HTTP(S)", str(ctx.exception))

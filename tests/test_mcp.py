@@ -83,6 +83,30 @@ class TestMcpSymlinkIntermediate(unittest.TestCase):
             shutil.rmtree(tmpdir, ignore_errors=True)
 
 
+class TestMcpLedgerPathHardening(unittest.TestCase):
+    """Coverage for _safe_ledger_dir containment checks."""
+
+    def test_safe_ledger_dir_rejects_symlink_escape(self):
+        """.aiir symlink escaping cwd must raise ValueError."""
+        import aiir.mcp_server as mcp
+
+        tmpdir = tempfile.mkdtemp()
+        outside = tempfile.mkdtemp()
+        original_cwd = os.getcwd()
+        try:
+            os.symlink(outside, os.path.join(tmpdir, ".aiir"))
+            os.chdir(tmpdir)
+            with self.assertRaises(ValueError) as ctx:
+                mcp._safe_ledger_dir()
+            self.assertIn("outside the working directory", str(ctx.exception))
+        finally:
+            os.chdir(original_cwd)
+            import shutil
+
+            shutil.rmtree(tmpdir, ignore_errors=True)
+            shutil.rmtree(outside, ignore_errors=True)
+
+
 class TestMcpToolDescriptions(unittest.TestCase):
     """R9-SEC-05: MCP tool descriptions include security constraints."""
 

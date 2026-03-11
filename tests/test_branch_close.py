@@ -1175,6 +1175,36 @@ class TestCliBranchGlSastReport(unittest.TestCase):
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
 
+    def test_gl_sast_report_rejects_relative_traversal(self):
+        """Relative traversal path for --gl-sast-report is rejected."""
+        import aiir.cli as cli_mod
+
+        original_cwd = os.getcwd()
+        try:
+            os.chdir(Path(__file__).parent.parent)
+            receipt = {
+                "type": "aiir.commit_receipt",
+                "commit": {"sha": "a" * 40},
+                "ai_attestation": {"is_ai_authored": True},
+            }
+            captured_err = io.StringIO()
+            with (
+                patch("aiir.cli.generate_receipt", return_value=receipt),
+                patch("aiir.cli.append_to_ledger", return_value=(1, 0, "/tmp/r.jsonl")),
+                patch("aiir.cli.write_receipt", return_value="stdout:json"),
+                patch("aiir.cli.set_gitlab_ci_output"),
+                patch("sys.stderr", captured_err),
+                patch("sys.stdout", io.StringIO()),
+                patch.dict(os.environ, {"CI_COMMIT_SHA": "a" * 40}, clear=False),
+            ):
+                code = cli_mod.main(
+                    ["--gitlab-ci", "--gl-sast-report", "../escape/gl-sast.json"]
+                )
+            self.assertEqual(code, 1)
+            self.assertIn("within the project", captured_err.getvalue())
+        finally:
+            os.chdir(original_cwd)
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # mcp_server.py — branches 520→531 and 576→574

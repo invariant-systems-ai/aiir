@@ -20,7 +20,7 @@ from aiir._core import (
     _sha256,
 )
 from aiir._schema import validate_receipt_schema
-from aiir._verify_cbor import verify_cbor_file
+from aiir._verify_cbor import verify_cbor_sidecar
 
 
 def verify_receipt(receipt: Dict[str, Any]) -> Dict[str, Any]:
@@ -160,10 +160,21 @@ def verify_receipt_file(filepath: str) -> Dict[str, Any]:
         return {"valid": all_valid, "receipts": results, "count": len(results)}
     elif isinstance(data, dict):
         result = verify_receipt(data)
-        # Cross-verify CBOR sidecar if it exists alongside the JSON receipt
+        # Cross-verify CBOR sidecar if it exists alongside the JSON receipt.
+        # Read bytes directly from the already-validated Path object (not a
+        # user-controlled string) before passing to the parser, keeping the
+        # file-path taint out of verify_cbor_sidecar (avoids py/path-injection).
         cbor_path = path.with_suffix(".cbor")
         if cbor_path.exists() and not cbor_path.is_symlink():
-            cbor_result = verify_cbor_file(str(cbor_path), json_receipt=data)
+            try:
+                cbor_bytes = cbor_path.read_bytes()
+            except OSError as exc:  # race: file vanished or unreadable
+                cbor_result: dict = {
+                    "valid": False,
+                    "errors": [f"Cannot read CBOR sidecar: {exc}"],
+                }
+            else:
+                cbor_result = verify_cbor_sidecar(cbor_bytes, json_receipt=data)
             result["cbor_sidecar"] = cbor_result
             if not cbor_result["valid"]:
                 result.setdefault("errors", []).append(

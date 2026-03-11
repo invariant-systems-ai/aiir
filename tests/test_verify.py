@@ -840,10 +840,10 @@ class TestVerifyReceiptFileCborSidecar(unittest.TestCase):
             cbor_path.write_bytes(b"dummy")
 
             sidecar_result = {"valid": False, "errors": ["boom"], "sha256": "abc"}
-            with patch("aiir._verify.verify_cbor_file", return_value=sidecar_result) as mock_verify:
+            with patch("aiir._verify.verify_cbor_sidecar", return_value=sidecar_result) as mock_verify:
                 result = verify_receipt_file(str(path))
 
-            mock_verify.assert_called_once_with(str(cbor_path), json_receipt=receipt)
+            mock_verify.assert_called_once_with(b"dummy", json_receipt=receipt)
             self.assertIn("cbor_sidecar", result)
             self.assertEqual(result["cbor_sidecar"], sidecar_result)
             self.assertIn("errors", result)
@@ -852,17 +852,16 @@ class TestVerifyReceiptFileCborSidecar(unittest.TestCase):
             shutil.rmtree(tmpdir, ignore_errors=True)
 
     def test_missing_sidecar_is_ignored(self):
-        """No .cbor sidecar means no sidecar verification attempt and no sidecar field."""
+        """No .cbor sidecar means no sidecar verification and no sidecar field."""
         from aiir._verify import verify_receipt_file
 
         tmpdir = tempfile.mkdtemp()
         try:
             path = Path(tmpdir, "receipt.json")
             self._write_valid_receipt(path)
-
-            with patch("aiir._verify.verify_cbor_file") as mock_verify:
+            # No .cbor file alongside the JSON file
+            with patch("aiir._verify.verify_cbor_sidecar") as mock_verify:
                 result = verify_receipt_file(str(path))
-
             mock_verify.assert_not_called()
             self.assertTrue(result["valid"])
             self.assertNotIn("cbor_sidecar", result)
@@ -882,13 +881,33 @@ class TestVerifyReceiptFileCborSidecar(unittest.TestCase):
             target.write_bytes(b"dummy")
             sidecar_link = path.with_suffix(".cbor")
             sidecar_link.symlink_to(target)
-
-            with patch("aiir._verify.verify_cbor_file") as mock_verify:
+            # Symlink guard: verify_cbor_sidecar must never be called
+            with patch("aiir._verify.verify_cbor_sidecar") as mock_verify:
                 result = verify_receipt_file(str(path))
-
             mock_verify.assert_not_called()
             self.assertTrue(result["valid"])
             self.assertNotIn("cbor_sidecar", result)
             self.assertEqual(result.get("errors"), [])
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_ioerror_reading_sidecar_propagates_error(self):
+        """If read_bytes raises OSError, result must include a sidecar error."""
+        from aiir._verify import verify_receipt_file
+
+        tmpdir = tempfile.mkdtemp()
+        try:
+            path = Path(tmpdir, "receipt.json")
+            self._write_valid_receipt(path)
+            cbor_path = path.with_suffix(".cbor")
+            cbor_path.write_bytes(b"dummy")
+            # Simulate a read failure after the existence check passes
+            with patch.object(Path, "read_bytes", side_effect=OSError("disk error")) as mock_rb:
+                result = verify_receipt_file(str(path))
+            mock_rb.assert_called()
+            self.assertIn("cbor_sidecar", result)
+            self.assertFalse(result["cbor_sidecar"]["valid"])
+            self.assertIn("errors", result)
+            self.assertIn("CBOR sidecar verification failed", result["errors"])
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)

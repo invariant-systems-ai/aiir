@@ -6,7 +6,13 @@ name = "aiir-cbor-verify"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
-description = "Cross-language deterministic CBOR decoder for AIIR canonical objects"
+description = "Cross-language deterministic CBOR decoder and verifier for AIIR commit receipts"
+repository = "https://github.com/invariant-systems-ai/aiir"
+homepage = "https://invariantsystems.io/spec"
+documentation = "https://invariantsystems.io/conformance"
+readme = "README.md"
+keywords = ["aiir", "cbor", "verification", "provenance", "integrity"]
+categories = ["cryptography", "encoding", "development-tools"]
 
 [dependencies]
 sha2 = "0.10"

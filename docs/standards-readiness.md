@@ -19,7 +19,7 @@ Last updated: 2026-03-11
 | 🟡 Reliability | 4.1 | 🟡 yellow | Smoke test now live; adversarial corpus not yet published |
 | 🟡 Interoperability | 3.4 | 🟡 yellow | Conformance manifest published; no second implementation yet |
 | 🔴 Adoption | 1.7 | ❌ red | Dogfooding only; no external pilots on record |
-| 🟡 Consistency | 3.5 | 🟡 yellow | Canonical source defined; "Last verified" dates not yet on all pages |
+| 🟡 Consistency | 3.6 | 🟡 yellow | Canonical source defined; CDDL grammar published |
 | **Open P0s** | 0 | ✅ green | |
 
 > **Green target**: ≥ 3.5/5 on all 5 categories for 4 consecutive weeks.
@@ -33,13 +33,13 @@ Last updated: 2026-03-11 · Cycle: 2026-W11
 
 | Dimension | Weight | Score (0–5) | Weighted | Gap |
 |---|---|---|---|---|
-| Technical completeness | 20 | 4.1 | 16.4 | Formal CDDL grammar; encoder interop suite |
+| Technical completeness | 20 | 4.3 | 17.2 | Encoder interop suite (cross-language vectors) |
 | Reference implementation quality | 20 | 4.2 | 16.8 | Published adversarial corpus; second implementation |
-| Specification clarity | 15 | 4.0 | 12.0 | Normative grammar (ABNF/CDDL); external review |
+| Specification clarity | 15 | 4.2 | 12.6 | External review |
 | Reliability & ecosystem | 15 | 3.9 | 11.7 | Third-party verifier; SDK breadth |
 | Governance neutrality | 20 | 1.8 | 7.2 | Multi-stakeholder body; neutral IP home |
 | Adoption maturity | 10 | 1.7 | 3.4 | Published case studies; integrations in the wild |
-| **Composite** | **100** | | **67.5** | |
+| **Composite** | **100** | | **68.9** | |
 
 *5-category → 6-dimension mapping*: Governance ≈ Governance neutrality. Reliability ≈ Technical completeness + Reference impl quality. Interoperability ≈ Reliability & ecosystem. Adoption ≈ Adoption maturity. Consistency ≈ Specification clarity + metric consistency.
 
@@ -63,13 +63,13 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | Schema versioning, multi-encoder interop defined |
 | 5 | CDDL/ABNF normative grammar; formal conformance suite |
 
-**Current: 4.1** — Schema versioned in `schemas/`; deterministic CBOR + JSON dual encoding; `schemas/conformance-manifest.json` published (2026-03-11). Missing: formal CDDL grammar, cross-language encoder test corpus.
+**Current: 4.3** — Schema versioned in `schemas/`; deterministic CBOR + JSON dual encoding; `schemas/conformance-manifest.json` published (2026-03-11); normative CDDL grammar in `schemas/receipt.cddl` covering JSON + CBOR wire formats (2026-03-11). Missing: cross-language encoder test corpus.
 *Last verified: 2026-03-11*
 
 **Gap tasks:**
 
 - [x] ~~Publish machine-readable conformance manifest~~ → `schemas/conformance-manifest.json` (2026-03-11)
-- [ ] Write CDDL grammar for the receipt schema in `schemas/receipt.cddl`
+- [x] ~~Write CDDL grammar for the receipt schema~~ → `schemas/receipt.cddl` (2026-03-11)
 - [ ] Add encoder interop test vectors (at least: Python, Node, Go) in `schemas/test-vectors/`
 - [ ] Publish test vector registry linked from `SPEC.md`
 
@@ -108,13 +108,13 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | ABNF/CDDL normative grammar; unambiguous field semantics |
 | 5 | Standards-body editorial style; external review completed |
 
-**Current: 4.0** — `SPEC.md` with normative language; `conformance.html` live; receipt field semantics precisely defined; `SPEC_GOVERNANCE.md` published with change control, compat guarantees, extension registry, release cadence (2026-03-11). Missing: formal CDDL grammar; external review.
+**Current: 4.2** — `SPEC.md` with normative language; `conformance.html` live; receipt field semantics precisely defined; `SPEC_GOVERNANCE.md` published with change control, compat guarantees, extension registry, release cadence (2026-03-11); normative CDDL grammar in `schemas/receipt.cddl` referenced from `SPEC.md` section 1.3 (2026-03-11). Missing: external review.
 *Last verified: 2026-03-11*
 
 **Gap tasks:**
 
 - [x] ~~Publish change control + compatibility policy~~ → `SPEC_GOVERNANCE.md` (2026-03-11)
-- [ ] Add `schemas/receipt.cddl` (CDDL grammar; normative)
+- [x] ~~Add `schemas/receipt.cddl` (CDDL grammar; normative)~~ → (2026-03-11)
 - [ ] Solicit one external spec review (security researcher or standards professional)
 - [ ] Add "Conformance Testing" section to `SPEC.md` referencing test vectors
 
@@ -127,11 +127,11 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 0 | No CI |
 | 1 | Single-platform CI |
 | 2 | Multi-platform CI; CI badge visible |
-| 3 | Multi-platform + multi-Python; 34-check pipeline |
+| 3 | Multi-platform + multi-Python; current main push fans out to 38 public checks |
 | 4 | Third-party verifier (non-AIIR) working; 2+ language SDKs |
 | 5 | 3+ independent verifiers; community plugin ecosystem |
 
-**Current: 3.9** — 34-check CI (*last verified: 2026-03-11*); Python 3.9–3.13 × Ubuntu/Windows/macOS; GitHub + GitLab dual-publish; MCP tool; `docs/release-health.md` with P0 RCA policy and smoke test badge published. Missing: any non-Python verifier, community plugins.
+**Current: 3.9** — 38 public check runs on the latest `main` commit, with `ci-ok`, `quality-ok`, and `security-ok` enforced by branch protection (*last verified: 2026-03-11*); Python 3.9–3.13 × Ubuntu/Windows/macOS; GitHub + GitLab dual-publish; MCP tool; `docs/release-health.md` with P0 RCA policy and smoke test badge published. Missing: any non-Python verifier, community plugins.
 *Last verified: 2026-03-11*
 
 **Gap tasks:**
@@ -199,8 +199,8 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 
 | Metric | Canonical source | Last verified |
 |---|---|---|
-| Test count | `pytest --collect-only -q \| tail -1` | 2026-03-11 (1852 tests) |
-| CI check count | `.github/workflows/ci.yml` job matrix | 2026-03-11 (34 checks) |
+| Test count | `pytest --collect-only -q \| tail -1` | 2026-03-11 (1860 tests) |
+| CI check count | GitHub check-runs API on the latest `main` commit | 2026-03-11 (38 public checks; 3 required merge gates) |
 | Coverage | `pytest --cov=aiir --cov-fail-under=100` | 2026-03-11 (100%) |
 | Runtime dependencies | `pip show aiir \| grep Requires` | 2026-03-11 (0) |
 | Conformance vectors | `schemas/conformance-manifest.json` | 2026-03-11 (25 JSON + 24 CBOR) |
@@ -215,13 +215,14 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | Cycle | Date | Score | Key change |
 |---|---|---|---|
 | 2026-W11 | 2026-03-11 | 67.5 | v1.1 scorecard: SPEC_GOVERNANCE.md, release-health.md, smoke tests, conformance-manifest.json, implementers.md, 5-category weekly model |
+| 2026-W11 | 2026-03-11 | 68.9 | +1.4: normative CDDL grammar (`schemas/receipt.cddl`); SPEC.md section 1.3 + conformance-manifest updated |
 
 ---
 
 ## 90-Day Gap-Closure Roadmap
 
 ```text
-Week 1–2 (Mar 2026): Governance mechanics + infrastructure  [IN PROGRESS]
+Week 1–2 (Mar 2026): Governance mechanics + infrastructure [IN PROGRESS]
   ✅ SPEC_GOVERNANCE.md published (change control, compat policy, extension registry)
   ✅ schemas/conformance-manifest.json published (machine-readable implementer registry)
   ✅ docs/release-health.md published (P0 policy, RCA template, smoke test badge)
@@ -231,7 +232,7 @@ Week 1–2 (Mar 2026): Governance mechanics + infrastructure  [IN PROGRESS]
   Next: CDDL grammar, adversarial corpus, external recruits
 
 Month 1 remainder (Mar 2026): Reliability + Consistency
-  ✦ CDDL grammar (schemas/receipt.cddl)
+  ✅ CDDL grammar (schemas/receipt.cddl)
   ✦ Encoder interop test vectors (Node.js + Python reference)
   ✦ Publish adversarial fixture corpus (tests/adversarial/)
   ✦ "Last verified" dates on all website stat blocks

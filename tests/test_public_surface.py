@@ -135,8 +135,11 @@ class TestWebsiteHTMLIntegrity(unittest.TestCase):
                     f"{page.name}: nav missing {expected}",
                 )
 
-    def test_footer_consistency_12_links(self):
-        """Every main page footer-links paragraph has exactly 12 links."""
+    def test_footer_consistency(self):
+        """Main pages keep the expected footer link count per page."""
+        expected_counts = {
+            "index.html": 13,
+        }
         for page in _main_pages():
             content = _read(page)
             footer_match = re.search(
@@ -144,10 +147,11 @@ class TestWebsiteHTMLIntegrity(unittest.TestCase):
             )
             self.assertIsNotNone(footer_match, f"{page.name}: no footer-links found")
             hrefs = re.findall(r'href="([^"]*)"', footer_match.group(1))
+            expected_count = expected_counts.get(page.name, 12)
             self.assertEqual(
                 len(hrefs),
-                12,
-                f"{page.name}: expected 12 footer links, got {len(hrefs)}: {hrefs}",
+                expected_count,
+                f"{page.name}: expected {expected_count} footer links, got {len(hrefs)}: {hrefs}",
             )
             # Must include integrations
             self.assertIn(

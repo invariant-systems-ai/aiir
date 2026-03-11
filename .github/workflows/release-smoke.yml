@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   smoke:
-    name: Smoke test v${{ github.event.release.tag_name || inputs.version || 'latest' }}
+    name: Release smoke
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -32,8 +32,8 @@ jobs:
           if [[ -n "${{ github.event.release.tag_name }}" ]]; then
             VER="${{ github.event.release.tag_name }}"
             VER="${VER#v}"          # strip leading v
-          elif [[ -n "${{ inputs.version }}" ]]; then
-            VER="${{ inputs.version }}"
+          elif [[ -n "${{ github.event.inputs.version }}" ]]; then
+            VER="${{ github.event.inputs.version }}"
             VER="${VER#v}"
           else
             # Fetch latest from PyPI
@@ -158,7 +158,7 @@ jobs:
       - name: Open P0 alert issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ github.event.release.tag_name || inputs.version || 'latest' }}
+          VERSION: ${{ github.event.release.tag_name || github.event.inputs.version || 'latest' }}
         run: |
           gh issue create \
             --repo "$GITHUB_REPOSITORY" \

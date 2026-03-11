@@ -54,7 +54,6 @@ After every release, the [release smoke workflow](../.github/workflows/release-s
 | Receipt generation | `aiir --pretty` produces a valid receipt from a test commit |
 | Ledger verify | `aiir --verify <ledger>` passes on a fresh ledger |
 | CBOR round-trip | Receipt hashes match across JSON ↔ CBOR encoding |
-| GitHub Action | Action YAML lints cleanly on the published tag |
 
 Failure of any smoke check = automatic P0 alert (GitHub issue opened with alert label).
 
@@ -75,7 +74,7 @@ Breaking changes (MAJOR version bump) will never be shipped to `@v1` or `receipt
 
 ## Known Issues
 
-*No active known issues. Last checked: 2026-03-11.*
+No active release incidents are currently tracked. Routine CI and documentation maintenance does not affect the published v1.2.5 release.
 
 Open a [GitHub issue](https://github.com/invariant-systems-ai/aiir/issues/new) to report a problem.
 
@@ -103,4 +102,4 @@ Full history: [CHANGELOG.md](../CHANGELOG.md)
 
 ---
 
-*For security vulnerabilities, see [SECURITY.md](../SECURITY.md). Do not open public issues for security bugs.*
+For security vulnerabilities, see [SECURITY.md](../SECURITY.md). Do not open public issues for security bugs.

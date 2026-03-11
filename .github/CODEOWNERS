@@ -5,24 +5,24 @@
 # Dependabot PRs are auto-approved for minor/patch updates.
 
 # Default: all changes require review from an org owner
-*                           @Boatlover
+*                           @InvariantSystems
 
 # ── Security-critical (extra scrutiny) ──────────────────────────────
 # Cryptographic verification — supply chain integrity core
-aiir/_verify.py             @Boatlover
-aiir/_schema.py             @Boatlover
-aiir/_detect.py             @Boatlover
+aiir/_verify.py             @InvariantSystems
+aiir/_schema.py             @InvariantSystems
+aiir/_detect.py             @InvariantSystems
 
 # Security policy, threat model, and licensing
-SECURITY.md                 @Boatlover
-THREAT_MODEL.md             @Boatlover
-LICENSE                     @Boatlover
+SECURITY.md                 @InvariantSystems
+THREAT_MODEL.md             @InvariantSystems
+LICENSE                     @InvariantSystems
 
 # CI/CD workflows — supply chain attack surface
-.github/workflows/          @Boatlover
-.github/CODEOWNERS          @Boatlover
-.github/dependabot.yml      @Boatlover
+.github/workflows/          @InvariantSystems
+.github/CODEOWNERS          @InvariantSystems
+.github/dependabot.yml      @InvariantSystems
 
 # GitHub Action definition — runs in user CI environments
-action.yml                  @Boatlover
-Dockerfile                  @Boatlover
+action.yml                  @InvariantSystems
+Dockerfile                  @InvariantSystems

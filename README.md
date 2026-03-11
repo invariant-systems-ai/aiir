@@ -989,7 +989,7 @@ Everything below is verifiable. No testimonials-behind-a-login — just public a
 | Proof | What it proves | Verify it |
 |-------|---------------|-----------|
 | **This repo receipts itself** | Dogfood — AIIR generates its own receipts on every push to `main` | `for f in .receipts/*.json; do aiir --verify "$f"; done` |
-| **1600+ tests, 100% coverage** | Every release passes Python 3.9–3.13 × Ubuntu/macOS/Windows | [CI runs](https://github.com/invariant-systems-ai/aiir/actions/workflows/ci.yml) |
+| **1,852 tests, 100% coverage** | Every release passes Python 3.9–3.13 × Ubuntu/macOS/Windows | [CI runs](https://github.com/invariant-systems-ai/aiir/actions/workflows/ci.yml) |
 | **25 conformance test vectors** | Third-party implementors can verify their hashing against ours | [schemas/test_vectors.json](schemas/test_vectors.json) |
 | **Public threat model** | Full STRIDE/DREAD analysis — we show attackers what we defend against | [THREAT_MODEL.md](THREAT_MODEL.md) |
 | **SLSA provenance on every release** | PyPI wheel has a verifiable build attestation | `gh attestation verify aiir-*.whl --repo invariant-systems-ai/aiir` |
@@ -1007,7 +1007,7 @@ on every push to `main` and commits them back to `.receipts/`. Locally, the
 
 ## Security
 
-Extensive [security controls](THREAT_MODEL.md). 1600+ tests. Zero dependencies.
+Extensive [security controls](THREAT_MODEL.md). 1,852 tests. Zero dependencies.
 
 See [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), and
 [Tamper Detection](docs/tamper-detection.md).

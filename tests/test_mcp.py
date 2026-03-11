@@ -13,6 +13,7 @@ from pathlib import Path
 
 # Import the module under test
 import aiir.cli as cli
+import aiir.mcp_server as mcp_server
 
 
 class TestRedTeamMCP(unittest.TestCase):
@@ -46,14 +47,11 @@ class TestMcpSymlinkIntermediate(unittest.TestCase):
             # Create symlink: tmpdir/link -> tmpdir/real
             link = Path(tmpdir, "link")
             link.symlink_to(real_dir)
-            # Import the MCP server module
-            import aiir.mcp_server as mcp
-
             # _safe_verify_path uses Path.cwd(), so chdir
             os.chdir(tmpdir)
             # Access through symlinked directory
             with self.assertRaises(ValueError) as ctx:
-                mcp._safe_verify_path(str(link / "file.json"))
+                mcp_server._safe_verify_path(str(link / "file.json"))
             self.assertIn("symlink", str(ctx.exception).lower())
         finally:
             os.chdir(original_cwd)
@@ -69,10 +67,8 @@ class TestMcpSymlinkIntermediate(unittest.TestCase):
             real_dir = Path(tmpdir, "sub")
             real_dir.mkdir()
             Path(real_dir, "file.json").write_text("{}")
-            import aiir.mcp_server as mcp
-
             os.chdir(tmpdir)
-            result = mcp._safe_verify_path(str(Path(real_dir, "file.json")))
+            result = mcp_server._safe_verify_path(str(Path(real_dir, "file.json")))
             self.assertTrue(result.endswith("file.json"))
         finally:
             os.chdir(original_cwd)

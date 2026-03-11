@@ -128,9 +128,7 @@ def decode_cbor(data: bytes, offset: int = 0, _depth: int = 0) -> Tuple[Any, int
     nesting exceeds _MAX_CBOR_DEPTH to prevent stack-overflow DoS (CWE-400).
     """
     if _depth > _MAX_CBOR_DEPTH:
-        raise CborDecodeError(
-            f"CBOR nesting depth exceeds maximum ({_MAX_CBOR_DEPTH})"
-        )
+        raise CborDecodeError(f"CBOR nesting depth exceeds maximum ({_MAX_CBOR_DEPTH})")
     if offset >= len(data):
         raise CborDecodeError("unexpected end of input")
 

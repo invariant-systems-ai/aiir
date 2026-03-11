@@ -840,7 +840,9 @@ class TestVerifyReceiptFileCborSidecar(unittest.TestCase):
             cbor_path.write_bytes(b"dummy")
 
             sidecar_result = {"valid": False, "errors": ["boom"], "sha256": "abc"}
-            with patch("aiir._verify.verify_cbor_sidecar", return_value=sidecar_result) as mock_verify:
+            with patch(
+                "aiir._verify.verify_cbor_sidecar", return_value=sidecar_result
+            ) as mock_verify:
                 result = verify_receipt_file(str(path))
 
             mock_verify.assert_called_once_with(b"dummy", json_receipt=receipt)
@@ -902,7 +904,9 @@ class TestVerifyReceiptFileCborSidecar(unittest.TestCase):
             cbor_path = path.with_suffix(".cbor")
             cbor_path.write_bytes(b"dummy")
             # Simulate a read failure after the existence check passes
-            with patch.object(Path, "read_bytes", side_effect=OSError("disk error")) as mock_rb:
+            with patch.object(
+                Path, "read_bytes", side_effect=OSError("disk error")
+            ) as mock_rb:
                 result = verify_receipt_file(str(path))
             mock_rb.assert_called()
             self.assertIn("cbor_sidecar", result)

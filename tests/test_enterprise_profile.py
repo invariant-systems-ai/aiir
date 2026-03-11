@@ -192,9 +192,9 @@ class TestDocSchemaParity(unittest.TestCase):
         self.schema = json.loads(
             (SCHEMAS / "enterprise_profile.v1.schema.json").read_text("utf-8")
         )
-        # Only match rule IDs in rule definition headings (### EPB-NNN),
+        # Only match rule IDs in rule definition headings (#### Rule EPB-NNN),
         # not future-work prose references like "EPB-013".
-        self.doc_rules = set(re.findall(r"###\s+(EPB-\d{3})", self.doc_text))
+        self.doc_rules = set(re.findall(r"####\s+Rule\s+(EPB-\d{3})", self.doc_text))
         self.schema_rules = set(
             self.schema["$defs"]["RuleSet"]["required"]
         )

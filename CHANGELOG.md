@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.7] — 2026-03-11
+
+### Added
+
+- **Enterprise Protected Branch Profile v1.0**: 12 deterministic, machine-evaluable
+  rules (EPB-001 through EPB-012) that replace prose-stated enterprise requirements
+  with typed claims consuming commit receipts, review receipts, and release VSAs.
+  See `docs/enterprise-profile-v1.md`.
+- **Decision Receipt schema** (`aiir/decision_receipt.v1`): Per-rule, per-commit,
+  per-gate-invocation receipt — finer grain than commit receipts. Each decision
+  captures `rule_id`, `result` (PASS/FAIL/SKIP), `evaluator`, `evidence`, and the
+  policy digest it was evaluated against.
+- **Profile validator** (`scripts/validate_profile.py`): Standalone, zero-dependency
+  script that validates enterprise profile JSON against the schema and evaluates all
+  12 EPB rules against a receipt ledger. Works as both local preflight and CI step.
+- **Self-healing tests** (`tests/test_enterprise_profile.py`, 47 tests): Schema
+  structural health, doc ↔ schema cross-reference parity, conformance manifest
+  registration, validator schema/rule/CLI tests, full profile evaluation tests.
+- **CI integration**: `profile-validate` job added to `quality.yml`, wired into the
+  `quality-ok` summary gate.
+- **Conformance manifest**: Registered `enterprise_profile.v1.schema.json` and
+  `decision_receipt.v1.schema.json` in `schemas/conformance-manifest.json`.
+
 ## [1.2.6] — 2026-03-11
 
 ### Added

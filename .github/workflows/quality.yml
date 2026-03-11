@@ -151,29 +151,53 @@ jobs:
           fi
           echo "✅ All .py files have SPDX headers"
 
+  # ── Enterprise Profile validation ──────────────────────────────────
+  # Validates schema files parse correctly and the profile validator
+  # runs without error (dogfood: AIIR eating its own output).
+  profile-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+      - name: Validate schemas are well-formed JSON
+        run: |
+          for f in schemas/*.schema.json; do
+            python -c "import json, sys; json.load(open(sys.argv[1]))" "$f"
+            echo "  ✓ $f"
+          done
+      - name: Run enterprise profile tests
+        run: python -m pytest tests/test_enterprise_profile.py -v
+
   # ── Summary gate ───────────────────────────────────────────────────
   quality-ok:
     if: always()
-    needs: [typecheck, markdown-lint, link-check, spelling, hadolint, yaml-lint, spdx-check]
+    needs: [typecheck, markdown-lint, link-check, spelling, hadolint, yaml-lint, spdx-check, profile-validate]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
       - name: Verify all quality jobs passed
         run: |
-          echo "typecheck:     ${{ needs.typecheck.result }}"
-          echo "markdown-lint: ${{ needs.markdown-lint.result }}"
-          echo "link-check:    ${{ needs.link-check.result }}"
-          echo "spelling:      ${{ needs.spelling.result }}"
-          echo "hadolint:      ${{ needs.hadolint.result }}"
-          echo "yaml-lint:     ${{ needs.yaml-lint.result }}"
-          echo "spdx-check:    ${{ needs.spdx-check.result }}"
+          echo "typecheck:         ${{ needs.typecheck.result }}"
+          echo "markdown-lint:     ${{ needs.markdown-lint.result }}"
+          echo "link-check:        ${{ needs.link-check.result }}"
+          echo "spelling:          ${{ needs.spelling.result }}"
+          echo "hadolint:          ${{ needs.hadolint.result }}"
+          echo "yaml-lint:         ${{ needs.yaml-lint.result }}"
+          echo "spdx-check:        ${{ needs.spdx-check.result }}"
+          echo "profile-validate:  ${{ needs.profile-validate.result }}"
           if [[ "${{ needs.typecheck.result }}" != "success" || \
                 "${{ needs.markdown-lint.result }}" != "success" || \
                 "${{ needs.link-check.result }}" != "success" || \
                 "${{ needs.spelling.result }}" != "success" || \
                 "${{ needs.hadolint.result }}" != "success" || \
                 "${{ needs.yaml-lint.result }}" != "success" || \
-                "${{ needs.spdx-check.result }}" != "success" ]]; then
+                "${{ needs.spdx-check.result }}" != "success" || \
+                "${{ needs.profile-validate.result }}" != "success" ]]; then
             echo "::error::Quality gate failed"
             exit 1
           fi

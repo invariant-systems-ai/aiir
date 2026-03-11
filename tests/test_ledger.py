@@ -110,13 +110,13 @@ class TestLedgerAppend(unittest.TestCase):
         sys.platform == "win32", "Unix file permissions not applicable on Windows"
     )
     def test_ledger_file_permissions(self):
-        """Ledger and index should be 0o644."""
+        """Ledger and index should be 0o600 (owner-only)."""
         r = self._make_receipt()
         cli.append_to_ledger([r])
         ledger_mode = oct(os.stat(".aiir/receipts.jsonl").st_mode & 0o777)
         index_mode = oct(os.stat(".aiir/index.json").st_mode & 0o777)
-        self.assertEqual(ledger_mode, "0o644")
-        self.assertEqual(index_mode, "0o644")
+        self.assertEqual(ledger_mode, "0o600")
+        self.assertEqual(index_mode, "0o600")
 
     def test_empty_receipts_list(self):
         """Appending empty list should be a no-op."""

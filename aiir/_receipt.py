@@ -736,10 +736,10 @@ def write_receipt(
             if not cbor_path.exists():
                 _write_bytes_atomic(cbor_path, _canonical_receipt_cbor_bytes(receipt))
             return str(filepath)
-        fd = os.open(str(filepath), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
-        # os.open mode is masked by umask — force 0o644 after creation
+        fd = os.open(str(filepath), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        # os.open mode is masked by umask — force 0o600 after creation
         if _HAS_FCHMOD:
-            os.fchmod(fd, 0o644)
+            os.fchmod(fd, 0o600)
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(receipt_json + "\n")
         _write_bytes_atomic(cbor_path, _canonical_receipt_cbor_bytes(receipt))

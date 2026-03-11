@@ -38,10 +38,14 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Install gitleaks
+        env:
+          GITLEAKS_VERSION: "8.21.2"
+          GITLEAKS_CHECKSUM: "5bc41815076e6ed6ef8fbecc9d9b75bcae31f39029ceb55da08086315316e3ba"
         run: |
-          GITLEAKS_VERSION="8.21.2"
           curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
-            | tar xz -C /usr/local/bin gitleaks
+            -o /tmp/gitleaks.tar.gz
+          echo "${GITLEAKS_CHECKSUM}  /tmp/gitleaks.tar.gz" | sha256sum -c
+          tar xzf /tmp/gitleaks.tar.gz -C /usr/local/bin gitleaks
           gitleaks version
       - name: Scan for secrets
         run: gitleaks detect --source . --verbose --redact --exit-code 1
@@ -58,7 +62,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install SAST tools
-        run: pip install bandit[toml]
+        run: pip install --require-hashes --no-deps -r .github/requirements/bandit.txt
       - name: Run Bandit (security linter)
         run: |
           # -ll = fail on MEDIUM severity and above
@@ -85,7 +89,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install Semgrep
-        run: pip install semgrep
+        run: pip install --require-hashes --no-deps -r .github/requirements/semgrep.txt
       - name: Run Semgrep (security + crypto rules)
         run: |
           # p/python         — Python-specific security rules (2,500+)
@@ -125,7 +129,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install Ruff
-        run: pip install 'ruff==0.14.10'
+        run: pip install --require-hashes --no-deps -r .github/requirements/ruff.txt
       - name: Run Ruff (lint + format check)
         run: |
           ruff check aiir/ tests/ scripts/
@@ -144,7 +148,7 @@ jobs:
           python-version: "3.13"
       - name: Install pip-audit and project extras
         run: |
-          pip install pip-audit
+          pip install --require-hashes --no-deps -r .github/requirements/pip-audit.txt
           pip install ".[dev,sign]"
       - name: Audit dependencies
         run: |
@@ -176,7 +180,7 @@ jobs:
           python-version: "3.13"
       - name: Install license checker
         run: |
-          pip install pip-licenses
+          pip install --require-hashes --no-deps -r .github/requirements/pip-licenses.txt
           pip install ".[dev,sign]"
       - name: Verify license policy
         run: |

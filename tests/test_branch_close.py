@@ -391,6 +391,29 @@ class TestReceiptBranchJsonlMode(unittest.TestCase):
         self.assertEqual(parsed["type"], "test")
 
 
+class TestCanonicalCborHelpers(unittest.TestCase):
+    """Canonical CBOR helpers must be deterministic across key orderings."""
+
+    def test_canonical_object_envelope_is_deterministic(self):
+        from aiir._canonical_cbor import (
+            build_canonical_object_envelope,
+            canonical_cbor_bytes,
+        )
+
+        left = build_canonical_object_envelope(
+            kind="aiir.commit_receipt.core",
+            object_schema="aiir/commit_receipt.v2",
+            core={"b": 2, "a": 1},
+        )
+        right = build_canonical_object_envelope(
+            kind="aiir.commit_receipt.core",
+            object_schema="aiir/commit_receipt.v2",
+            core={"a": 1, "b": 2},
+        )
+
+        self.assertEqual(canonical_cbor_bytes(left), canonical_cbor_bytes(right))
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # _schema.py — branches 157, 160, 214, 222, 249
 # ═══════════════════════════════════════════════════════════════════════

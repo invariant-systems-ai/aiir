@@ -43,7 +43,7 @@ jobs:
           cache: pip
 
       - name: Install test dependencies
-        run: pip install pytest
+        run: pip install --require-hashes --no-deps -r .github/requirements/test.txt
 
       - name: Run unit tests
         run: python -m pytest tests/ -v --tb=short --ignore=tests/test_fuzz.py
@@ -64,7 +64,7 @@ jobs:
           cache: pip
 
       - name: Install test dependencies
-        run: pip install hypothesis pytest
+        run: pip install --require-hashes --no-deps -r .github/requirements/fuzz.txt
 
       - name: Run fuzz tests
         run: python -m pytest tests/test_fuzz.py -v --tb=short
@@ -81,9 +81,14 @@ jobs:
           persist-credentials: false
 
       - name: Install actionlint
+        env:
+          ACTIONLINT_VERSION: "1.7.7"
+          ACTIONLINT_CHECKSUM: "023070a287cd8cccd71515fedc843f1985bf96c436b7effaecce67290e7e0757"
         run: |
-          bash <(curl -sS https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          pwd >> "$GITHUB_PATH"
+          curl -sSfL "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" -o /tmp/actionlint.tar.gz
+          echo "${ACTIONLINT_CHECKSUM}  /tmp/actionlint.tar.gz" | sha256sum -c
+          tar xzf /tmp/actionlint.tar.gz -C /usr/local/bin actionlint
+          actionlint --version
 
       - name: Lint workflows
         # Disable shellcheck integration: it raises false positives on
@@ -106,7 +111,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install pytest coverage
+        run: pip install --require-hashes --no-deps -r .github/requirements/coverage.txt
 
       - name: Run tests with coverage
         run: |

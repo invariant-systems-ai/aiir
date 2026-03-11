@@ -16,6 +16,13 @@ __version__ = "1.2.4"
 # Public API — importable via `from aiir import ...`
 # ---------------------------------------------------------------------------
 
+from aiir._canonical_cbor import (  # noqa: F401
+    CANONICAL_OBJECT_SCHEMA,
+    CANONICAL_OBJECT_TYPE,
+    build_canonical_object_envelope,
+    canonical_cbor_bytes,
+    canonical_cbor_sha256,
+)
 from aiir._core import _canonical_json, _sha256  # noqa: F401
 from aiir._detect import detect_ai_signals  # noqa: F401
 from aiir._explain import explain_verification  # noqa: F401
@@ -37,6 +44,13 @@ from aiir._receipt import (
 from aiir._schema import validate_receipt_schema as validate_receipt  # noqa: F401
 from aiir._stats import check_policy, format_badge, format_stats  # noqa: F401
 from aiir._verify import verify_receipt, verify_receipt_file  # noqa: F401
+from aiir._verify_cbor import (  # noqa: F401
+    CborDecodeError,
+    decode_cbor_full,
+    verify_cbor_envelope,
+    verify_cbor_file,
+    verify_cbor_sidecar,
+)
 from aiir._verify_release import (  # noqa: F401
     verify_release,
     format_release_report,
@@ -73,6 +87,12 @@ __all__ = [
     "verify_receipt",
     "verify_receipt_file",
     "explain_verification",
+    # CBOR verification
+    "CborDecodeError",
+    "decode_cbor_full",
+    "verify_cbor_envelope",
+    "verify_cbor_file",
+    "verify_cbor_sidecar",
     # Release verification
     "verify_release",
     "format_release_report",
@@ -104,6 +124,11 @@ __all__ = [
     "build_receipts_graphql_query",
     "enforce_approval_rules",
     # Low-level (for third-party implementors)
+    "CANONICAL_OBJECT_SCHEMA",
+    "CANONICAL_OBJECT_TYPE",
+    "build_canonical_object_envelope",
+    "canonical_cbor_bytes",
+    "canonical_cbor_sha256",
     "_canonical_json",
     "_sha256",
 ]

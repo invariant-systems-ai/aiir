@@ -1,0 +1,83 @@
+# ClusterFuzzLite — continuous fuzzing via Google's CIFuzz framework.
+#
+# Runs Atheris-based fuzz targets on every PR (quick batch mode) and
+# weekly (longer corpus-building runs).  Detected by OpenSSF Scorecard
+# as a qualifying fuzzing integration.
+#
+# Documentation: https://google.github.io/clusterfuzzlite/
+name: ClusterFuzzLite
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    # Weekly Thursday 03:00 UTC — corpus-building run
+    - cron: '0 3 * * 4'
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  # ── PR fuzzing: quick batch run to catch regressions ───────────────
+  pr-fuzzing:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write  # Upload SARIF
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Build fuzz targets
+        id: build
+        uses: google/clusterfuzzlite/actions/build_fuzzers@82652fb49e77bc29c35da1167bb286e93c6bcc05  # v1
+        with:
+          language: python
+          sanitizer: ${{ matrix.sanitizer }}
+      - name: Run fuzz targets
+        id: run
+        uses: google/clusterfuzzlite/actions/run_fuzzers@82652fb49e77bc29c35da1167bb286e93c6bcc05  # v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fuzz-seconds: 300
+          mode: 'batch'
+          sanitizer: ${{ matrix.sanitizer }}
+
+  # ── Push to main: corpus-building run ──────────────────────────────
+  corpus-build:
+    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Build fuzz targets
+        id: build
+        uses: google/clusterfuzzlite/actions/build_fuzzers@82652fb49e77bc29c35da1167bb286e93c6bcc05  # v1
+        with:
+          language: python
+          sanitizer: ${{ matrix.sanitizer }}
+      - name: Run fuzz targets
+        id: run
+        uses: google/clusterfuzzlite/actions/run_fuzzers@82652fb49e77bc29c35da1167bb286e93c6bcc05  # v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fuzz-seconds: 600
+          mode: 'batch'
+          sanitizer: ${{ matrix.sanitizer }}

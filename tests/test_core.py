@@ -1254,6 +1254,28 @@ class TestCrossPlatformFchmod(unittest.TestCase):
             finally:
                 os.chdir(old_cwd)
 
+    def test_write_receipt_recreates_missing_cbor_sidecar(self):
+        """Existing JSON receipt should regenerate a missing .cbor sidecar."""
+        receipt = _make_test_receipt()
+        old_cwd = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            try:
+                os.chdir(tmpdir)
+                out = os.path.join(tmpdir, "out")
+                os.makedirs(out)
+                path = Path(cli.write_receipt(receipt, output_dir=out))
+                cbor_path = path.with_suffix(".cbor")
+                self.assertTrue(cbor_path.exists())
+                cbor_path.unlink()
+
+                second_path = Path(cli.write_receipt(receipt, output_dir=out))
+
+                self.assertEqual(second_path, path)
+                self.assertTrue(cbor_path.exists())
+                self.assertGreater(cbor_path.stat().st_size, 0)
+            finally:
+                os.chdir(old_cwd)
+
     def test_save_config_without_fchmod(self):
         """_save_config should succeed when os.fchmod is unavailable."""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1662,6 +1684,9 @@ class TestPrettyPlusOutput(unittest.TestCase):
             self.assertGreaterEqual(
                 len(files), 1, "Receipt file must be written when --output is set"
             )
+            cbor_files = list(Path(out_dir).glob("receipt_*.cbor"))
+            self.assertEqual(len(cbor_files), len(files))
+            self.assertGreater(cbor_files[0].stat().st_size, 0)
             # File content should be valid JSON
             content = files[0].read_text()
             receipt = json.loads(content)
@@ -1712,6 +1737,8 @@ class TestPrettyPlusOutput(unittest.TestCase):
             # File should be written
             files = list(Path(out_dir).glob("receipt_*.json"))
             self.assertGreaterEqual(len(files), 1)
+            cbor_files = list(Path(out_dir).glob("receipt_*.cbor"))
+            self.assertEqual(len(cbor_files), len(files))
             # stdout should NOT contain pretty box-drawing
             stdout_text = captured.getvalue()
             self.assertNotIn(

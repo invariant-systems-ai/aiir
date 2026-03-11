@@ -158,6 +158,7 @@ pytest_add_cli_args = [
     "--deselect=tests/test_receipt.py::TestPublicBasic::test_r7_pub_02_py_typed_marker_exists",
     "--deselect=tests/test_verify.py::TestSafeVerifyPathNoDeadCode::test_no_raw_parts_variable",
     "--deselect=tests/test_verify.py::TestIterativeJsonDepthCheck::test_implementation_is_iterative",
+    "--deselect=tests/test_hardening.py::TestConstantTimeComparisonGuard",
 ]
 pytest_add_cli_args_test_selection = [
     "tests/test_verify.py",
@@ -165,8 +166,9 @@ pytest_add_cli_args_test_selection = [
     "tests/test_policy.py",
     "tests/test_detect.py",
     "tests/test_receipt.py",
-    "tests/test_properties.py",
+    "tests/test_cbor_conformance.py",
+    "tests/test_verify_release.py",
     "tests/test_hardening.py",
     "tests/test_branch_close.py",
 ]
-also_copy = ["aiir/py.typed"]
+also_copy = ["aiir/py.typed", "schemas/"]

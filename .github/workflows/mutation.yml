@@ -7,7 +7,8 @@
 #
 # Schedule: weekly (Sunday 04:00 UTC) + manual dispatch + PR.
 # Not included in the ci-ok gate because full mutation runs take ~20 min.
-# The PR path runs only the fast _verify.py mutants (~2 min) as a smoke test.
+# The PR path runs a focused smoke test across the main verification stack,
+# including the CBOR verifier modules.
 name: Mutation Testing
 
 on:
@@ -27,6 +28,8 @@ on:
       - 'aiir/_policy.py'
       - 'aiir/_receipt.py'
       - 'aiir/_schema.py'
+      - 'aiir/_canonical_cbor.py'
+      - 'aiir/_verify_cbor.py'
       - 'tests/**'
 
 concurrency:
@@ -37,10 +40,10 @@ permissions:
   contents: read
 
 jobs:
-  # ── Smoke test: fast mutation run on _verify.py only (~2 min) ──────
+  # ── Smoke test: focused verification mutation run (~5 min) ─────────
   mutation-smoke:
     if: github.event_name == 'pull_request'
-    timeout-minutes: 10
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -52,20 +55,46 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install mutmut pytest hypothesis
+        run: pip install --require-hashes --no-deps -r .github/requirements/mutation.txt
 
-      - name: Run mutation smoke test (_verify.py only)
+      - name: Run mutation smoke test (verify + CBOR verifier)
         run: |
-          # Override mutmut config to test only _verify.py
+          # Expand do_not_mutate to exclude everything except the focused
+          # verification modules that this smoke job is meant to exercise.
+          # (paths_to_mutate must stay ["aiir/"] so the whole package is copied)
           python3 -c "
-          import sys, json
-          import mutmut.__main__
-          sys.argv = ['mutmut', 'run', '--max-children', '4',
-                       '--paths-to-mutate', 'aiir/_verify.py']
+          import re, subprocess, pathlib
+
+          cfg = pathlib.Path('pyproject.toml')
+          original = cfg.read_text()
+
+          # Build do_not_mutate list with all .py files except the targeted modules.
+          exclude = sorted(
+              f'aiir/{f.name}'
+              for f in pathlib.Path('aiir').glob('*.py')
+              if f.name not in {'_verify.py', '_canonical_cbor.py', '_verify_cbor.py'}
+          )
+          new_block = 'do_not_mutate = [\n' + ''.join(
+              f'    \"{e}\",\n' for e in exclude
+          ) + ']'
+
+          # Replace existing do_not_mutate block (multi-line TOML array)
+          patched = re.sub(
+              r'do_not_mutate\s*=\s*\[.*?\]',
+              new_block,
+              original,
+              flags=re.DOTALL,
+              count=1,
+          )
+          cfg.write_text(patched)
+
           try:
-              mutmut.__main__.cli()
-          except SystemExit:
-              pass  # mutmut exits non-zero when survivors exist
+              subprocess.run(
+                  ['mutmut', 'run', '--max-children', '4'],
+                  check=False,
+              )
+          finally:
+              cfg.write_text(original)
           "
 
       - name: Check smoke mutation score
@@ -112,19 +141,11 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install mutmut pytest hypothesis
+        run: pip install --require-hashes --no-deps -r .github/requirements/mutation.txt
 
       - name: Run full mutation test
         run: |
-          python3 -c "
-          import sys
-          import mutmut.__main__
-          sys.argv = ['mutmut', 'run', '--max-children', '4']
-          try:
-              mutmut.__main__.cli()
-          except SystemExit:
-              pass
-          "
+          mutmut run --max-children 4 || true
 
       - name: Check mutation score against threshold
         env:

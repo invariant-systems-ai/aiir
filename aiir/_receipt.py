@@ -26,6 +26,7 @@ from aiir._core import (
     _strip_url_credentials,
     _validate_ref,
 )
+from aiir._canonical_cbor import build_canonical_object_envelope, canonical_cbor_bytes
 from aiir._detect import (
     get_commit_info,
     list_commits_in_range,
@@ -37,6 +38,20 @@ from aiir._detect import (
 # ---------------------------------------------------------------------------
 
 REVIEW_RECEIPT_SCHEMA_VERSION = "aiir/review_receipt.v1"
+AIIR_CORE_KEYS = frozenset(
+    {
+        "type",
+        "schema",
+        "version",
+        "commit",
+        "ai_attestation",
+        "provenance",
+        "reviewed_commit",
+        "reviewer",
+        "review_outcome",
+        "comment",
+    }
+)
 
 
 # ---------------------------------------------------------------------------
@@ -297,6 +312,39 @@ def build_review_receipt(
     }
 
     return receipt
+
+
+def _extract_receipt_core(receipt: Dict[str, Any]) -> Dict[str, Any]:
+    """Extract the stable, identity-bearing core from a receipt."""
+
+    return {k: receipt[k] for k in AIIR_CORE_KEYS if k in receipt}
+
+
+def _canonical_object_kind(receipt: Dict[str, Any]) -> str:
+    rtype = str(receipt.get("type") or "aiir.receipt")
+    return f"{rtype}.core"
+
+
+def _canonical_receipt_cbor_bytes(receipt: Dict[str, Any]) -> bytes:
+    """Build the Layer-0 canonical CBOR envelope for a receipt core."""
+
+    core = _extract_receipt_core(receipt)
+    envelope = build_canonical_object_envelope(
+        kind=_canonical_object_kind(receipt),
+        object_schema=str(receipt.get("schema") or RECEIPT_SCHEMA_VERSION),
+        core=core,
+    )
+    return canonical_cbor_bytes(envelope)
+
+
+def _write_bytes_atomic(path: Path, data: bytes) -> None:
+    """Write bytes atomically with fixed permissions."""
+
+    fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    if _HAS_FCHMOD:
+        os.fchmod(fd, 0o600)
+    with os.fdopen(fd, "wb") as handle:
+        handle.write(data)
 
 
 def generate_receipt(
@@ -659,21 +707,21 @@ def write_receipt(
         cwd_resolved = Path(os.getcwd()).resolve()
         try:
             out_path.relative_to(cwd_resolved)
-        except ValueError:
+        except ValueError as exc:
             raise ValueError(
                 f"output-dir must be within the working directory: {output_dir!r} "
                 f"resolves outside {cwd_resolved}"
-            )
+            ) from exc
         out_path.mkdir(parents=True, exist_ok=True)
         # Re-verify after mkdir to narrow TOCTOU/symlink race window
         real_out = out_path.resolve()
         try:
             real_out.relative_to(cwd_resolved)
-        except ValueError:  # pragma: no cover — TOCTOU race
+        except ValueError as exc:  # pragma: no cover — TOCTOU race
             raise ValueError(
                 "output-dir escaped working directory after creation "
                 "(possible symlink attack)"
-            )
+            ) from exc
         commit_sha = receipt.get("commit", {}).get("sha", "unknown")[:12]
         commit_sha = re.sub(r"[^a-zA-Z0-9_-]", "_", commit_sha)
         # Deterministic filename from content_hash — makes it easy to
@@ -682,8 +730,11 @@ def write_receipt(
         chash_short = re.sub(r"[^a-fA-F0-9]", "", chash)[:16]
         filename = f"receipt_{commit_sha}_{chash_short}.json"
         filepath = out_path / filename
+        cbor_path = filepath.with_suffix(".cbor")
         # If this exact receipt already exists, return existing path
         if filepath.exists():
+            if not cbor_path.exists():
+                _write_bytes_atomic(cbor_path, _canonical_receipt_cbor_bytes(receipt))
             return str(filepath)
         fd = os.open(str(filepath), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
         # os.open mode is masked by umask — force 0o644 after creation
@@ -691,6 +742,7 @@ def write_receipt(
             os.fchmod(fd, 0o644)
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(receipt_json + "\n")
+        _write_bytes_atomic(cbor_path, _canonical_receipt_cbor_bytes(receipt))
         return str(filepath)
     elif jsonl:
         # JSON Lines: one receipt per line, no pretty printing

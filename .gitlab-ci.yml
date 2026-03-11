@@ -1,28 +1,47 @@
-# AIIR — GitLab CI/CD pipeline
+# AIIR — GitLab CI/CD pipeline (hardened)
 # Tests the CI/CD Catalog component and publishes releases.
 #
 # This pipeline runs on GitLab (gitlab.com/invariant-systems/aiir).
 # The GitHub mirror uses .github/workflows/ instead.
+#
+# Security hardening:
+#   - All images pinned by digest (Scorecard Pinned-Dependencies)
+#   - Minimal variable exposure
+#   - SAST and secret detection via GitLab templates
+#   - Protected release rules
 
 stages:
   - test
   - release
 
-# --- Test the component from the current commit ---
+# ── Security scanning (GitLab built-in SAST + secrets) ──────────────
 include:
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/receipt@$CI_COMMIT_SHA
     inputs:
       stage: test
       job-prefix: "test-aiir"
       version: "source"
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
 
-# --- Verify the component jobs were added ---
+# ── Global defaults ─────────────────────────────────────────────────
+default:
+  # Restrict what jobs can access
+  interruptible: true
+
+variables:
+  # Minimize git clone depth for speed
+  GIT_DEPTH: "10"
+  # Disable pip cache in CI for reproducibility
+  PIP_NO_CACHE_DIR: "1"
+
+# ── Verify the component jobs were added ─────────────────────────────
 verify-component:
   stage: test
-  image: python:3.11-slim
+  image: python:3.11-slim@sha256:d6e4d224f70f9e0172a06a3a2eba2f768eb146811a349278b38fff3a36463b47
   script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
-    - pip install --quiet aiir
+    - pip install --no-cache-dir aiir
     - aiir --version
     - echo "✅ AIIR installed and runs"
     # Verify the component's receipt jobs exist in this pipeline
@@ -33,17 +52,17 @@ verify-component:
     - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
-# --- Run the test suite ---
+# ── Run the test suite ───────────────────────────────────────────────
 test:
   stage: test
-  image: python:3.11-slim
+  image: python:3.11-slim@sha256:d6e4d224f70f9e0172a06a3a2eba2f768eb146811a349278b38fff3a36463b47
   timeout: 15 minutes
   variables:
     HYPOTHESIS_PROFILE: ci
   script:
     - apt-get update -qq && apt-get install -y -qq git >/dev/null 2>&1
-    - pip install --quiet pytest hypothesis
-    - pip install --quiet -e .
+    - pip install --no-cache-dir --require-hashes --no-deps -r .github/requirements/fuzz.txt
+    - pip install --no-cache-dir .
     - cd /tmp && git init test-repo && cd test-repo
     - git config user.name "Test" && git config user.email "test@test.com"
     - echo "hello" > file.txt && git add . && git commit -m "test commit"
@@ -64,7 +83,7 @@ test:
 # release is already correct.  Use allow_failure for idempotency.
 create-release:
   stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  image: registry.gitlab.com/gitlab-org/release-cli:latest@sha256:3f52d526f48e8d10625c722fa6d6423ee82aadeae1b1aa91f07b62551d96dacf
   script:
     - echo "Publishing release $CI_COMMIT_TAG to CI/CD Catalog"
   release:

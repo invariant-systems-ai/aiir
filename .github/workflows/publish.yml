@@ -53,7 +53,7 @@ jobs:
             # Dedup by name (keep latest started_at) so cancelled runs from
             # prior pushes don't shadow fresh runs from the tag push.
             CHECKS=$(gh api "repos/${{ github.repository }}/commits/${COMMIT}/check-runs" \
-              --jq '[.check_runs[] | select(.name | test("^test \\(|^ci-ok$|^quality-ok$|^security-ok$"; "i"))] | group_by(.name) | [.[] | sort_by(.started_at) | last] | {total: length, success: [.[] | select(.conclusion == "success")] | length, pending: [.[] | select(.status != "completed")] | length, cancelled: [.[] | select(.conclusion == "cancelled")] | length}' \
+              --jq '[.check_runs[] | select(.name | test("^test \\(|^ci-ok$|^quality-ok$|^security-ok$|^CodeQL$"; "i"))] | group_by(.name) | [.[] | sort_by(.started_at) | last] | {total: length, success: [.[] | select(.conclusion == "success")] | length, pending: [.[] | select(.status != "completed")] | length, cancelled: [.[] | select(.conclusion == "cancelled")] | length}' \
               2>/dev/null || echo '{"total":0,"success":0,"pending":0,"cancelled":0}')
 
             TOTAL=$(echo "$CHECKS" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total',0))")
@@ -214,10 +214,12 @@ jobs:
       - name: Sync version strings
         run: python scripts/sync-version.py --check
       - name: Build
-        run: pip install build && python -m build
+        run: |
+          pip install --require-hashes --no-deps -r .github/requirements/build.txt
+          python -m build
       - name: Generate SBOM (CycloneDX)
         run: |
-          pip install 'cyclonedx-bom>=7,<8'
+          pip install --require-hashes --no-deps -r .github/requirements/cyclonedx.txt
           # Generate SBOM from the built wheel — covers the package + all
           # declared dependencies (which is zero for aiir, but proves it).
           # NOTE: --schema-version was removed in cyclonedx-bom v7; the tool
@@ -288,9 +290,51 @@ jobs:
         with:
           subject-path: 'dist/*.tar.gz'
 
+  # ── Step 3c: Upload provenance to release (Scorecard Signed-Releases) ──
+  upload-provenance:
+    needs: [attest, release]
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write     # Upload release assets
+      id-token: write     # Verify attestations
+      attestations: read  # Read attestation bundles
+    steps:
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3  # v8.0.0
+        with:
+          name: dist
+          path: dist/
+      - name: Download and attach provenance bundles
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p provenance
+          for artifact in dist/*; do
+            FNAME=$(basename "$artifact")
+            DIGEST="sha256:$(sha256sum "$artifact" | cut -d' ' -f1)"
+            echo "📦 Fetching provenance for ${FNAME} (${DIGEST})..."
+
+            # Download attestation bundle from GitHub Attestations API
+            gh api "repos/${{ github.repository }}/attestations/${DIGEST}" \
+              --jq '.attestations[0].bundle' > "provenance/${FNAME}.intoto.jsonl" 2>/dev/null || true
+
+            if [ -s "provenance/${FNAME}.intoto.jsonl" ]; then
+              gh release upload "$GITHUB_REF_NAME" "provenance/${FNAME}.intoto.jsonl" \
+                --clobber --repo "${{ github.repository }}"
+              echo "  ✅ Provenance uploaded for ${FNAME}"
+            else
+              echo "  ⚠️  No attestation bundle found for ${FNAME}"
+              rm -f "provenance/${FNAME}.intoto.jsonl"
+            fi
+          done
+
+          UPLOADED=$(ls -1 provenance/*.intoto.jsonl 2>/dev/null | wc -l)
+          echo ""
+          echo "📊 Provenance upload: ${UPLOADED} bundle(s) attached to release"
+
   # ── Step 4: Verify PyPI ────────────────────────────────────────────
   verify:
-    needs: [publish, attest]
+    needs: [publish, attest, upload-provenance]
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
@@ -300,9 +344,14 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           for i in 1 2 3 4 5 6; do
-            VERSION=$(curl -sf "https://pypi.org/pypi/aiir/json" \
-              | python3 -c "import sys,json; print(json.load(sys.stdin)['info']['version'])" \
-              2>/dev/null || echo "unknown")
+            VERSION=$(python3 -c "
+          import json, urllib.request
+          try:
+              data = json.load(urllib.request.urlopen('https://pypi.org/pypi/aiir/json'))
+              print(data['info']['version'])
+          except Exception:
+              print('unknown')
+          ")
             if [ "$VERSION" = "$TAG" ]; then
               echo "✅ PyPI verified: aiir==$TAG"
               exit 0
@@ -319,10 +368,9 @@ jobs:
           echo "🔍 Checking PEP 740 attestations for aiir==$TAG..."
 
           # Fetch the release file list from PyPI JSON API
-          FILES=$(curl -sf "https://pypi.org/pypi/aiir/${TAG}/json" \
-            | python3 -c "
-          import sys, json
-          data = json.load(sys.stdin)
+          FILES=$(python3 -c "
+          import json, urllib.request
+          data = json.load(urllib.request.urlopen('https://pypi.org/pypi/aiir/${TAG}/json'))
           for url_info in data.get('urls', []):
               print(url_info['filename'])
           ")

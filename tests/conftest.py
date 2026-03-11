@@ -12,13 +12,19 @@ try:
     settings.register_profile(
         "ci",
         max_examples=50,
-        suppress_health_check=[HealthCheck.too_slow],
+        suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors],
         deadline=None,
         database=None,  # no .hypothesis dir in CI
     )
 
     # Full local profile (default) — uses per-test @settings as-is.
-    settings.register_profile("default", database=None)
+    # HealthCheck.differing_executors is suppressed so tools like mutmut that
+    # use a trampolining executor do not produce spurious health-check failures.
+    settings.register_profile(
+        "default",
+        suppress_health_check=[HealthCheck.differing_executors],
+        database=None,
+    )
 
     # Auto-select profile from env
     profile = os.environ.get("HYPOTHESIS_PROFILE", "default")

@@ -14,11 +14,13 @@
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-AIIR-blue?logo=github)](https://github.com/marketplace/actions/aiir-ai-integrity-receipts)
 [![PyPI](https://img.shields.io/pypi/v/aiir?color=blue)](https://pypi.org/project/aiir/)
 [![CI](https://github.com/invariant-systems-ai/aiir/actions/workflows/ci.yml/badge.svg)](https://github.com/invariant-systems-ai/aiir/actions/workflows/ci.yml)
+[![Release Smoke](https://github.com/invariant-systems-ai/aiir/actions/workflows/release-smoke.yml/badge.svg)](https://github.com/invariant-systems-ai/aiir/actions/workflows/release-smoke.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/invariant-systems-ai/aiir)
 [![GitLab CI/CD Catalog](https://img.shields.io/badge/GitLab-CI%2FCD%20Catalog-orange?logo=gitlab)](https://gitlab.com/explore/catalog/invariant-systems/aiir)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/invariant-systems-ai/aiir/badge)](https://scorecard.dev/viewer/?uri=github.com/invariant-systems-ai/aiir)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12134/badge)](https://www.bestpractices.dev/projects/12134)
+[![Standards Readiness](https://img.shields.io/badge/Standards--Readiness-67.5%2F100-orange)](docs/standards-readiness.md)
 [![AIIR Receipted](https://img.shields.io/badge/AIIR-Receipted%20✓-blue)](https://github.com/invariant-systems-ai/aiir)
 
 <p align="center">
@@ -1035,11 +1037,16 @@ AIIR publishes a formal specification and machine-readable schema for third-part
 | Document | Purpose |
 |----------|---------|
 | [SPEC.md](SPEC.md) | Normative specification — canonical JSON, content addressing, verification algorithm (RFC 2119) |
+| [SPEC_GOVERNANCE.md](SPEC_GOVERNANCE.md) | Specification governance — change control, compatibility policy, extension registry, standards-track roadmap |
 | [schemas/commit_receipt.v1.schema.json](schemas/commit_receipt.v1.schema.json) | JSON Schema (draft 2020-12) for `aiir/commit_receipt.v1` |
+| [schemas/conformance-manifest.json](schemas/conformance-manifest.json) | Machine-readable implementer registry, test vector index, and extension registry |
 | [schemas/verification_summary.v1.schema.json](schemas/verification_summary.v1.schema.json) | JSON Schema for the Verification Summary Attestation (VSA) predicate |
 | [schemas/test_vectors.json](schemas/test_vectors.json) | 25 conformance test vectors with precomputed hashes |
 | [THREAT_MODEL.md](THREAT_MODEL.md) | STRIDE/DREAD threat model with comprehensive security controls |
 | [docs/tamper-detection.md](docs/tamper-detection.md) | Walkthrough — what happens when a receipt is modified |
+| [docs/standards-readiness.md](docs/standards-readiness.md) | Weekly standards-readiness scorecard (5-category, updated every Monday) |
+| [docs/release-health.md](docs/release-health.md) | Release health policy — severity definitions, P0 RCA process, smoke test coverage |
+| [docs/implementers.md](docs/implementers.md) | Third-party implementations and pilots registry |
 
 ---
 

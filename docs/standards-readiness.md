@@ -86,8 +86,8 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | Mutation tested; fuzzing in CI; adversarial inputs in suite |
 | 5 | Formal adversarial corpus; independent implementation verified identical output |
 
-**Current: 4.5** — 100% statement + branch coverage (1860 tests, *last verified: 2026-03-11*); mutation testing; Atheris fuzzing in CI; structured adversarial rounds per release; post-release smoke tests automated; **formal adversarial test corpus published** in `tests/adversarial/` — 32 fixtures across 4 categories (injection, tampering, parsing, bypass) with auto-discovery pytest runner (2026-03-11). **JS verifier (`sdks/js/`) passes 8/8 encoder interop vectors and 8/8 full receipt verifications** (2026-03-11); **Rust CBOR verifier (`sdks/rust/`) passes round-trip vectors** (2026-03-11). Missing: external (non-Invariant Systems) implementation.
-*Last verified: 2026-03-11*
+**Current: 4.5** — 100% statement + branch coverage (1893 tests collected, *last verified: 2026-03-12*); mutation testing; Atheris fuzzing in CI; structured adversarial rounds per release; post-release smoke tests automated; **formal adversarial test corpus published** in `tests/adversarial/` — 32 fixtures across 4 categories (injection, tampering, parsing, bypass) with auto-discovery pytest runner (2026-03-11). **JS verifier (`sdks/js/`) passes 8/8 encoder interop vectors and 8/8 full receipt verifications** (2026-03-11); **Rust CBOR verifier (`sdks/rust/`) passes round-trip vectors** (2026-03-11). Missing: external (non-Invariant Systems) implementation.
+*Last verified: 2026-03-12*
 
 **Gap tasks:**
 
@@ -200,7 +200,7 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 
 | Metric | Canonical source | Last verified |
 |---|---|---|
-| Test count | `pytest --collect-only -q \| tail -1` | 2026-03-11 (1860 + 32 adversarial + 32 encoder = 1924 tests) |
+| Test count | `pytest --collect-only -q \| tail -1` | 2026-03-12 (1893 tests collected) |
 | CI check count | GitHub check-runs API on the latest `main` commit | 2026-03-11 (38 public checks; 3 required merge gates) |
 | Coverage | `pytest --cov=aiir --cov-fail-under=100` | 2026-03-11 (100%) |
 | Runtime dependencies | `pip show aiir \| grep Requires` | 2026-03-11 (0) |

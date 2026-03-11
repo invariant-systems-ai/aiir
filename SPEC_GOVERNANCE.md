@@ -47,7 +47,7 @@ AIIR uses [Semantic Versioning 2.0.0](https://semver.org/) for the **specificati
 
 ### Spec version anatomy
 
-```
+```text
 MAJOR.MINOR.PATCH
   │      │     └── Clarifications, editorial fixes, test vector additions (non-breaking)
   │      └── New OPTIONAL fields, new conformance levels, new extension hooks (backward-compatible)
@@ -87,6 +87,7 @@ All changes to the specification go through the following process:
 Open a GitHub issue in `invariant-systems-ai/aiir` with the label `spec-change`.
 
 A proposal MUST include:
+
 - **Problem statement**: what is broken, ambiguous, or missing?
 - **Proposed change**: exact text diff against `SPEC.md` or schema file
 - **Compatibility impact**: breaking / non-breaking, with justification
@@ -98,6 +99,7 @@ A proposal MUST include:
 The proposal is open for public comment on the GitHub issue. **Any** GitHub user may comment.
 
 Review criteria:
+
 1. Is the problem real? (Confirmed by at least one independent use case)
 2. Is the proposed change the minimal solution?
 3. Does it preserve backward compatibility (or is the MAJOR bump justified)?
@@ -106,6 +108,7 @@ Review criteria:
 ### Stage 3 — Acceptance
 
 A proposal is accepted when:
+
 - The review period has elapsed
 - At least one Steering member has approved (`/approve` comment)
 - No unresolved blocking objections remain
@@ -115,6 +118,7 @@ For breaking changes (MAJOR bump): requires explicit approval from the Steering 
 ### Stage 4 — Implementation and merge
 
 The author (or a Steering member) opens a PR implementing:
+
 1. Changes to `SPEC.md`
 2. Schema changes (if any)
 3. New/updated test vectors
@@ -173,6 +177,7 @@ The AIIR receipt format supports optional extensions via the `extensions` field.
 ### Registering an extension
 
 To register an extension in the public registry (§6), open a PR to add an entry to `schemas/conformance-manifest.json` with:
+
 - Extension key (namespaced)
 - Description
 - Link to extension spec document
@@ -219,7 +224,8 @@ The `aiir` Python package releases independently of spec versions. A package rel
 ### Current structure
 
 **Steering group**: Invariant Systems, Inc.
-- Primary contact: noah@invariantsystems.io
+
+- Primary contact: <noah@invariantsystems.io>
 - GitHub: @InvariantSystems
 
 **External participants**: Open. Anyone may comment on spec proposals.
@@ -229,11 +235,13 @@ The `aiir` Python package releases independently of spec versions. A package rel
 We actively seek external maintainers to reduce single-vendor concentration (a key governance gap identified in the [Standards-Readiness Scorecard](docs/standards-readiness.md)).
 
 External editors may be added by:
+
 1. Sustained, high-quality participation in spec reviews (≥ 3 proposals reviewed)
 2. Sponsorship by an existing Steering member
 3. Explicit acceptance of the IP policy (§10)
 
 External editors gain:
+
 - Maintainer status on the GitHub repository
 - Voting rights on MINOR changes (one vote per org, Steering has one vote)
 - Listed authorship in `SPEC.md`
@@ -257,6 +265,7 @@ Explicit vote by Steering members. Simple majority. If there is only one Steerin
 ### Blocking objections
 
 A blocking objection MUST:
+
 1. Identify a specific technical problem (not a preference)
 2. Propose an alternative
 3. Be raised within the review period
@@ -296,4 +305,4 @@ Weekly progress is tracked in the [Standards-Readiness Scorecard](docs/standards
 
 ---
 
-*Invariant Systems, Inc. · Apache-2.0 · noah@invariantsystems.io*
+*Invariant Systems, Inc. · Apache-2.0 · <noah@invariantsystems.io>*

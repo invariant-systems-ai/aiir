@@ -34,6 +34,7 @@ Any P0 issue triggers the following mandatory process:
 4. **T+72h**: Post-mortem issue opened with prevention checklist
 
 The RCA MUST include:
+
 - Timeline of events (UTC)
 - Root cause (technical and process)
 - Impact assessment (who, how many, what data/operations affected)

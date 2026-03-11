@@ -27,7 +27,7 @@
   <img src="docs/demo.svg" alt="AIIR terminal demo — pip install aiir && aiir --pretty" width="720">
 </p>
 
-### Quick Start — 30 seconds
+## Quick Start — 30 seconds
 
 ```bash
 pip install aiir        # zero dependencies, Python 3.9+

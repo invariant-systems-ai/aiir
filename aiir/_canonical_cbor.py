@@ -12,6 +12,7 @@ int, float, bool, and None.
 from __future__ import annotations
 
 import hashlib
+import math
 import struct
 from typing import Any, Dict, Mapping
 
@@ -64,7 +65,7 @@ def _encode_uint(major: int, n: int) -> bytes:
 
 
 def _encode_float_canonical(x: float) -> bytes:
-    if x != x or x in (float("inf"), float("-inf")):
+    if math.isnan(x) or math.isinf(x):
         raise ValueError("non-finite float not allowed in canonical CBOR")
     want = struct.pack(">d", x)
     f16 = _try_f16(x)

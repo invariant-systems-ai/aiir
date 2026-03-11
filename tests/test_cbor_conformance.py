@@ -268,6 +268,11 @@ class TestDecoderStrictness(unittest.TestCase):
         with self.assertRaises(CborDecodeError):
             decode_cbor_full(b"\xf9\x7c\x00")
 
+    def test_reject_unhashable_map_key(self):
+        # Map with an array as key: {[1]: 2} → a1 81 01 02
+        with self.assertRaises(CborDecodeError):
+            decode_cbor_full(b"\xa1\x81\x01\x02")
+
 
 # ── Envelope Validation ────────────────────────────────────────────────
 

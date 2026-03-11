@@ -182,6 +182,8 @@ def decode_cbor(data: bytes, offset: int = 0, _depth: int = 0) -> Tuple[Any, int
                     raise CborDecodeError("map keys not in canonical order")
             prev_key_bytes = key_bytes
             value, off = decode_cbor(data, off, _depth + 1)
+            if not isinstance(key, (str, int, float, bool, bytes)) and key is not None:
+                raise CborDecodeError("unhashable CBOR map key")
             result[key] = value
         return result, off
 

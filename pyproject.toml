@@ -166,11 +166,9 @@ pytest_add_cli_args_test_selection = [
     "tests/test_policy.py",
     "tests/test_detect.py",
     "tests/test_receipt.py",
-    # test_cbor_conformance.py excluded: uses Path(__file__)-relative schemas/
-    # that don't exist in mutmut's mutants/ copy directory; it only exercises
-    # _canonical_cbor.py and _verify_cbor.py, not the mutated _verify.py.
+    "tests/test_cbor_conformance.py",
     "tests/test_verify_release.py",
     "tests/test_hardening.py",
     "tests/test_branch_close.py",
 ]
-also_copy = ["aiir/py.typed"]
+also_copy = ["aiir/py.typed", "schemas/"]

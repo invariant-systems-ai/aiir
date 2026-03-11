@@ -340,9 +340,9 @@ def _canonical_receipt_cbor_bytes(receipt: Dict[str, Any]) -> bytes:
 def _write_bytes_atomic(path: Path, data: bytes) -> None:
     """Write bytes atomically with fixed permissions."""
 
-    fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+    fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     if _HAS_FCHMOD:
-        os.fchmod(fd, 0o644)
+        os.fchmod(fd, 0o600)
     with os.fdopen(fd, "wb") as handle:
         handle.write(data)
 

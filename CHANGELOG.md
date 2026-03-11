@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.6] — 2026-03-11
+
+### Added
+
+- **AI Gate**: `ai-gate` is now a required status check on `main`. The AI Gate
+  workflow emits a commit status after verifying first-party authorship, Copilot
+  review on the current HEAD, and all composite CI checks (`ci-ok`, `quality-ok`,
+  `security-ok`).
+
 ## [1.2.5] — 2026-03-11
 
 ### Changed

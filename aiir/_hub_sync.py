@@ -25,6 +25,7 @@ Config via env:
 Copyright 2025-2026 Invariant Systems, Inc.
 SPDX-License-Identifier: Apache-2.0
 """
+
 from __future__ import annotations
 
 import json
@@ -55,6 +56,7 @@ def _hub_token() -> str:
 # ---------------------------------------------------------------------------
 # Sync state — tracks which receipt_ids have been pushed
 # ---------------------------------------------------------------------------
+
 
 def _sync_state_path() -> Path:
     """Return path to .aiir/hub_sync.jsonl (sibling to the receipt ledger)."""
@@ -88,12 +90,16 @@ def _mark_synced(receipt_ids: list[str]) -> None:
     ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     with open(path, "a", encoding="utf-8") as f:
         for rid in receipt_ids:
-            f.write(json.dumps({"receipt_id": rid, "synced_at": ts}, separators=(",", ":")) + "\n")
+            f.write(
+                json.dumps({"receipt_id": rid, "synced_at": ts}, separators=(",", ":"))
+                + "\n"
+            )
 
 
 # ---------------------------------------------------------------------------
 # HTTP helpers (stdlib only)
 # ---------------------------------------------------------------------------
+
 
 def _api_request(
     method: str,
@@ -106,6 +112,8 @@ def _api_request(
     Returns a dict with 'status', 'body' (parsed JSON or raw str), and 'ok'.
     """
     url = _hub_url() + path
+    if not url.startswith(("https://", "http://")):
+        return {"status": 0, "body": "URL scheme must be https or http", "ok": False}
     token = _hub_token()
 
     headers: dict[str, str] = {"Content-Type": "application/json"}
@@ -116,7 +124,7 @@ def _api_request(
     req = urllib.request.Request(url, data=body, headers=headers, method=method)
 
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310  # nosemgrep
             raw = resp.read().decode("utf-8")
             try:
                 data = json.loads(raw)
@@ -141,6 +149,7 @@ def _api_request(
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def hub_status() -> dict:
     """Check connectivity and auth with Hub.
@@ -174,7 +183,13 @@ def hub_push(receipts: List[Dict[str, Any]]) -> dict:
         dict with 'ok', 'total', 'verified', 'failed', 'results'.
     """
     if not _hub_token():
-        return {"ok": False, "error": "AIIR_HUB_TOKEN not set", "total": 0, "verified": 0, "failed": len(receipts)}
+        return {
+            "ok": False,
+            "error": "AIIR_HUB_TOKEN not set",
+            "total": 0,
+            "verified": 0,
+            "failed": len(receipts),
+        }
 
     all_results: list[dict] = []
     total_verified = 0
@@ -183,7 +198,9 @@ def hub_push(receipts: List[Dict[str, Any]]) -> dict:
     # Push in batches
     for i in range(0, len(receipts), _BATCH_SIZE):
         batch = receipts[i : i + _BATCH_SIZE]
-        body = json.dumps({"receipts": batch}, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
+        body = json.dumps(
+            {"receipts": batch}, separators=(",", ":"), ensure_ascii=True
+        ).encode("utf-8")
         result = _api_request("POST", "/v1/receipts", body=body)
 
         if result["ok"] and isinstance(result["body"], dict):
@@ -194,12 +211,14 @@ def hub_push(receipts: List[Dict[str, Any]]) -> dict:
         else:
             # Entire batch failed
             for r in batch:
-                all_results.append({
-                    "ok": False,
-                    "receipt_id": r.get("receipt_id", ""),
-                    "status": "failed",
-                    "errors": [f"HTTP {result['status']}: {result['body']}"],
-                })
+                all_results.append(
+                    {
+                        "ok": False,
+                        "receipt_id": r.get("receipt_id", ""),
+                        "status": "failed",
+                        "errors": [f"HTTP {result['status']}: {result['body']}"],
+                    }
+                )
                 total_failed += 1
 
     return {
@@ -222,7 +241,13 @@ def hub_push_from_ledger() -> dict:
     """
     ledger_path = Path.cwd() / ".aiir" / "receipts.jsonl"
     if not ledger_path.exists():
-        return {"ok": True, "pushed": 0, "skipped": 0, "errors": [], "detail": "no ledger found"}
+        return {
+            "ok": True,
+            "pushed": 0,
+            "skipped": 0,
+            "errors": [],
+            "detail": "no ledger found",
+        }
 
     # Load all receipts from ledger
     all_receipts: list[dict] = []
@@ -250,9 +275,7 @@ def hub_push_from_ledger() -> dict:
 
     # Record successful syncs
     pushed_ids = [
-        r.get("receipt_id", "")
-        for r in result.get("results", [])
-        if r.get("ok")
+        r.get("receipt_id", "") for r in result.get("results", []) if r.get("ok")
     ]
     if pushed_ids:
         _mark_synced(pushed_ids)
@@ -262,9 +285,7 @@ def hub_push_from_ledger() -> dict:
         "pushed": result.get("verified", 0),
         "skipped": len(synced_ids),
         "errors": [
-            r.get("errors", [])
-            for r in result.get("results", [])
-            if not r.get("ok")
+            r.get("errors", []) for r in result.get("results", []) if not r.get("ok")
         ],
     }
 
@@ -272,6 +293,7 @@ def hub_push_from_ledger() -> dict:
 # ---------------------------------------------------------------------------
 # CLI entry point (called from aiir.cli when `aiir hub ...` is invoked)
 # ---------------------------------------------------------------------------
+
 
 def hub_cli(args: Sequence[str]) -> int:
     """Handle `aiir hub <subcommand>`."""
@@ -346,7 +368,9 @@ def hub_cli(args: Sequence[str]) -> int:
             return 0
 
         result = hub_push(receipts)
-        print(f"total: {result['total']}  verified: {result.get('verified', 0)}  failed: {result.get('failed', 0)}")
+        print(
+            f"total: {result['total']}  verified: {result.get('verified', 0)}  failed: {result.get('failed', 0)}"
+        )
         for r in result.get("results", []):
             status = "ok" if r.get("ok") else "FAIL"
             print(f"  [{status}] {r.get('receipt_id', '?')}")

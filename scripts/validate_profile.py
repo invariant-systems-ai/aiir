@@ -26,6 +26,7 @@ Exit codes:
 Copyright 2025-2026 Invariant Systems, Inc.
 SPDX-License-Identifier: Apache-2.0
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -54,9 +55,7 @@ CORE_KEYS_REVIEW = frozenset(
     }
 )
 MAX_DEPTH = 64
-_VERSION_RE = re.compile(
-    r"^[0-9]+\.[0-9]+\.[0-9]+([.+\-][0-9a-zA-Z.+\-]*)?$"
-)
+_VERSION_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+([.+\-][0-9a-zA-Z.+\-]*)?$")
 
 SCHEMA_DIR = Path(__file__).resolve().parent.parent / "schemas"
 
@@ -141,31 +140,27 @@ def validate_profile_schema(profile: Dict[str, Any]) -> List[str]:
     if "EPB-004" in rules and rules["EPB-004"].get("enabled"):
         tier = rules["EPB-004"].get("min_trust_tier", 2)
         if tier not in (1, 2, 3):
-            errors.append(f"EPB-004: min_trust_tier must be 1, 2, or 3")
+            errors.append("EPB-004: min_trust_tier must be 1, 2, or 3")
 
     if "EPB-006" in rules and rules["EPB-006"].get("enabled"):
         pct = rules["EPB-006"].get("min_coverage_percent", 100)
         if not (0 <= pct <= 100):
-            errors.append(f"EPB-006: min_coverage_percent must be 0–100")
+            errors.append("EPB-006: min_coverage_percent must be 0–100")
 
     if "EPB-007" in rules and rules["EPB-007"].get("enabled"):
         pct = rules["EPB-007"].get("max_ai_percent", 50)
         if not (0 <= pct <= 100):
-            errors.append(f"EPB-007: max_ai_percent must be 0–100")
+            errors.append("EPB-007: max_ai_percent must be 0–100")
 
     if "EPB-011" in rules and rules["EPB-011"].get("enabled"):
         digest = rules["EPB-011"].get("expected_policy_digest")
         if not digest or not re.match(r"^[0-9a-f]{64}$", str(digest)):
-            errors.append(
-                f"EPB-011: expected_policy_digest must be 64 hex chars"
-            )
+            errors.append("EPB-011: expected_policy_digest must be 64 hex chars")
 
     if "EPB-012" in rules and rules["EPB-012"].get("enabled"):
         verifiers = rules["EPB-012"].get("trusted_verifiers")
         if not isinstance(verifiers, list) or len(verifiers) < 1:
-            errors.append(
-                f"EPB-012: trusted_verifiers must be a non-empty array"
-            )
+            errors.append("EPB-012: trusted_verifiers must be a non-empty array")
 
     return errors
 
@@ -252,7 +247,9 @@ def evaluate_epb002(
             return _fail("EPB-002", f"receipt[{i}]: type is not aiir.review_receipt")
         outcome = r.get("review_outcome", "")
         if outcome not in ("approved", "rejected", "commented"):
-            return _fail("EPB-002", f"receipt[{i}]: invalid review_outcome: {outcome!r}")
+            return _fail(
+                "EPB-002", f"receipt[{i}]: invalid review_outcome: {outcome!r}"
+            )
     return _pass("EPB-002", f"{len(review_receipts)} review receipts valid")
 
 
@@ -283,9 +280,7 @@ def evaluate_epb006(
     total = len(commit_shas)
     if total == 0:
         return _pass("EPB-006", "no commits to cover")
-    receipt_shas = {
-        r.get("commit", {}).get("sha", "") for r in commit_receipts
-    }
+    receipt_shas = {r.get("commit", {}).get("sha", "") for r in commit_receipts}
     covered = sum(1 for sha in commit_shas if sha in receipt_shas)
     pct = (covered / total) * 100
     if pct < min_coverage_percent:
@@ -471,9 +466,7 @@ def evaluate_profile(
     # Short-circuit: if schema rules fail, skip everything else
     if r001["result"] == "FAIL" or r002["result"] == "FAIL":
         for rule_id in [f"EPB-{i:03d}" for i in range(3, 13)]:
-            results.append(
-                _fail(rule_id, "skipped: schema validation failed")
-            )
+            results.append(_fail(rule_id, "skipped: schema validation failed"))
         return results
 
     # ── Category B: Integrity ─────────────────────────────────────────
@@ -504,9 +497,7 @@ def evaluate_profile(
 
     if r003["result"] == "FAIL":
         for rule_id in [f"EPB-{i:03d}" for i in range(6, 13)]:
-            results.append(
-                _fail(rule_id, "skipped: integrity validation failed")
-            )
+            results.append(_fail(rule_id, "skipped: integrity validation failed"))
         return results
 
     # ── Category C: Coverage / Accounting ─────────────────────────────
@@ -529,9 +520,7 @@ def evaluate_profile(
     results.append(r008)
 
     # ── Category D: Policy Predicates ─────────────────────────────────
-    r009 = evaluate_epb009(
-        commit_receipts, review_receipts, _enabled("EPB-009")
-    )
+    r009 = evaluate_epb009(commit_receipts, review_receipts, _enabled("EPB-009"))
     results.append(r009)
 
     r010 = evaluate_epb010(commit_receipts, _enabled("EPB-010"))
@@ -578,9 +567,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             return 2
         ledger_path = Path(args[idx + 1])
         if not ledger_path.is_file():
-            print(
-                f"Error: ledger not found: {ledger_path}", file=sys.stderr
-            )
+            print(f"Error: ledger not found: {ledger_path}", file=sys.stderr)
             return 2
 
     # Load and validate profile

@@ -8,9 +8,9 @@ immediately and tells you exactly what to fix.
 Copyright 2025-2026 Invariant Systems, Inc.
 SPDX-License-Identifier: Apache-2.0
 """
+
 from __future__ import annotations
 
-import copy
 import json
 import re
 import unittest
@@ -24,6 +24,7 @@ SCRIPTS = ROOT / "scripts"
 
 # ── Fixtures ──────────────────────────────────────────────────────────
 
+
 def _minimal_profile(*, enabled: bool = True) -> dict:
     """Return a minimal valid profile configuration."""
     rules = {}
@@ -36,9 +37,7 @@ def _minimal_profile(*, enabled: bool = True) -> dict:
     rules["EPB-006"]["min_coverage_percent"] = 100
     rules["EPB-007"]["max_ai_percent"] = 50
     rules["EPB-011"]["expected_policy_digest"] = "a" * 64
-    rules["EPB-012"]["trusted_verifiers"] = [
-        "https://example.com/verifier"
-    ]
+    rules["EPB-012"]["trusted_verifiers"] = ["https://example.com/verifier"]
     return {
         "profile": "aiir/enterprise_protected_branch.v1",
         "version": "1.0.0",
@@ -112,8 +111,14 @@ def _minimal_review_receipt(
         },
     }
     core_keys = {
-        "type", "schema", "version", "reviewed_commit", "reviewer",
-        "review_outcome", "comment", "provenance",
+        "type",
+        "schema",
+        "version",
+        "reviewed_commit",
+        "reviewer",
+        "review_outcome",
+        "comment",
+        "provenance",
     }
     core = {k: v for k, v in receipt.items() if k in core_keys}
     h = hashlib.sha256(_canonical_json(core).encode()).hexdigest()
@@ -127,6 +132,7 @@ def _minimal_review_receipt(
 # ═══════════════════════════════════════════════════════════════════════
 #  1. Schema structural health
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestSchemaFiles(unittest.TestCase):
     """All schema files parse as valid JSON and contain expected fields."""
@@ -184,6 +190,7 @@ class TestSchemaFiles(unittest.TestCase):
 #  2. Doc ↔ Schema cross-reference parity
 # ═══════════════════════════════════════════════════════════════════════
 
+
 class TestDocSchemaParity(unittest.TestCase):
     """Rule IDs in the doc must match the schema, and vice versa."""
 
@@ -195,9 +202,7 @@ class TestDocSchemaParity(unittest.TestCase):
         # Only match rule IDs in rule definition headings (#### Rule EPB-NNN),
         # not future-work prose references like "EPB-013".
         self.doc_rules = set(re.findall(r"####\s+Rule\s+(EPB-\d{3})", self.doc_text))
-        self.schema_rules = set(
-            self.schema["$defs"]["RuleSet"]["required"]
-        )
+        self.schema_rules = set(self.schema["$defs"]["RuleSet"]["required"])
 
     def test_doc_rules_subset_of_schema(self):
         """No rule mentioned in the doc is missing from the schema."""
@@ -221,6 +226,7 @@ class TestDocSchemaParity(unittest.TestCase):
 #  3. Conformance manifest includes new schemas
 # ═══════════════════════════════════════════════════════════════════════
 
+
 class TestConformanceManifest(unittest.TestCase):
     """The conformance manifest must register all published schemas."""
 
@@ -228,9 +234,7 @@ class TestConformanceManifest(unittest.TestCase):
         self.manifest = json.loads(
             (SCHEMAS / "conformance-manifest.json").read_text("utf-8")
         )
-        self.registered_files = {
-            s["file"] for s in self.manifest["schemas"]
-        }
+        self.registered_files = {s["file"] for s in self.manifest["schemas"]}
 
     def test_enterprise_profile_registered(self):
         self.assertIn(
@@ -246,10 +250,7 @@ class TestConformanceManifest(unittest.TestCase):
 
     def test_all_schema_files_on_disk_are_registered(self):
         """Every .schema.json file in schemas/ should appear in the manifest."""
-        on_disk = {
-            f"schemas/{p.name}"
-            for p in SCHEMAS.glob("*.schema.json")
-        }
+        on_disk = {f"schemas/{p.name}" for p in SCHEMAS.glob("*.schema.json")}
         unregistered = on_disk - self.registered_files
         # Exclude receipt.cddl and conformance-manifest.json (they aren't schemas in the manifest sense)
         self.assertFalse(
@@ -261,6 +262,7 @@ class TestConformanceManifest(unittest.TestCase):
 # ═══════════════════════════════════════════════════════════════════════
 #  4. Validator — schema path
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestValidateProfileSchema(unittest.TestCase):
     """Test the lightweight schema validator in validate_profile.py."""
@@ -290,7 +292,9 @@ class TestValidateProfileSchema(unittest.TestCase):
         p = _minimal_profile()
         p["version"] = "abc"
         errors = self.validate(p)
-        self.assertTrue(any("version" in e.lower() or "semver" in e.lower() for e in errors))
+        self.assertTrue(
+            any("version" in e.lower() or "semver" in e.lower() for e in errors)
+        )
 
     def test_missing_rule(self):
         p = _minimal_profile()
@@ -341,6 +345,7 @@ class TestValidateProfileSchema(unittest.TestCase):
 # ═══════════════════════════════════════════════════════════════════════
 #  5. Validator — rule evaluators
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestRuleEvaluators(unittest.TestCase):
     """Test individual EPB rule evaluators."""
@@ -497,6 +502,7 @@ class TestRuleEvaluators(unittest.TestCase):
 #  6. Full profile evaluation
 # ═══════════════════════════════════════════════════════════════════════
 
+
 class TestFullEvaluation(unittest.TestCase):
     """End-to-end profile evaluation with the validator."""
 
@@ -570,6 +576,7 @@ class TestFullEvaluation(unittest.TestCase):
 # ═══════════════════════════════════════════════════════════════════════
 #  7. CLI entry point
 # ═══════════════════════════════════════════════════════════════════════
+
 
 class TestCLI(unittest.TestCase):
     """Test the CLI interface of validate_profile.py."""

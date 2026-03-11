@@ -4,24 +4,46 @@
 > **Automation**: `.github/workflows/standards-readiness.yml` opens/updates a GitHub issue each cycle.
 > **Rationale**: AIIR is a vendor-led open specification on a public standards track.
 > Transparent, weekly readiness scoring signals good-faith governance and tracks gap closure.
+>
+> **Public target**: 4 green categories (score ≥ 3.5/5) + no open P0 for 4 consecutive weeks → louder standards messaging.
 
 ---
 
-## Current Score: 62.6 / 100
+## Weekly Operating Score: 2026-W11
+
+*Last updated: 2026-03-11*
+
+| Category | Score (0–5) | Status | Key gap |
+|---|---|---|---|
+| 🔴 Governance | 1.8 | ❌ red | No neutral IP home, no IETF draft, single-org steering |
+| 🟡 Reliability | 4.1 | 🟡 yellow | Smoke test now live; adversarial corpus not yet published |
+| 🟡 Interoperability | 3.4 | 🟡 yellow | Conformance manifest published; no second implementation yet |
+| 🔴 Adoption | 1.7 | ❌ red | Dogfooding only; no external pilots on record |
+| 🟡 Consistency | 3.5 | 🟡 yellow | Canonical source defined; "Last verified" dates not yet on all pages |
+| **Open P0s** | 0 | ✅ green | |
+
+> **Green target**: ≥ 3.5/5 on all 5 categories for 4 consecutive weeks.
+> Current: 0 green categories out of 5.
+
+---
+
+## Detailed 6-Dimension Score (underlying methodology)
 
 *Last updated: 2026-03-11 · Cycle: 2026-W11*
 
 | Dimension | Weight | Score (0–5) | Weighted | Gap |
 |---|---|---|---|---|
-| Technical completeness | 20 | 4.1 | 16.4 | Schema versioning, encoder interop suite |
-| Reference implementation quality | 20 | 4.2 | 16.8 | Formal adversarial test corpus |
-| Specification clarity | 15 | 4.0 | 12.0 | Normative grammar (ABNF/CDDL) |
-| Reliability & ecosystem | 15 | 3.9 | 11.7 | Third-party verifier, SDK breadth |
-| Governance neutrality | 20 | 1.8 | 7.2 | Multi-stakeholder body, neutral IP home |
-| Adoption maturity | 10 | 1.7 | 3.4 | Published case studies, integrations in the wild |
+| Technical completeness | 20 | 4.1 | 16.4 | Formal CDDL grammar; encoder interop suite |
+| Reference implementation quality | 20 | 4.2 | 16.8 | Published adversarial corpus; second implementation |
+| Specification clarity | 15 | 4.0 | 12.0 | Normative grammar (ABNF/CDDL); external review |
+| Reliability & ecosystem | 15 | 3.9 | 11.7 | Third-party verifier; SDK breadth |
+| Governance neutrality | 20 | 1.8 | 7.2 | Multi-stakeholder body; neutral IP home |
+| Adoption maturity | 10 | 1.7 | 3.4 | Published case studies; integrations in the wild |
 | **Composite** | **100** | | **67.5** | |
 
-*Version of this doc: v1.0.0*
+*5-category → 6-dimension mapping*: Governance ≈ Governance neutrality. Reliability ≈ Technical completeness + Reference impl quality. Interoperability ≈ Reliability & ecosystem. Adoption ≈ Adoption maturity. Consistency ≈ Specification clarity + metric consistency.
+
+*Version of this doc: v1.1.0*
 
 ---
 

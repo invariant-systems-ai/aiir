@@ -160,7 +160,7 @@ jobs:
 
       - name: Verify signatures
         run: |
-          pip install --require-hashes --no-deps -r .github/requirements/sigstore.txt
+          pip install --require-hashes --no-deps -r _action/.github/requirements/sigstore.txt
           cd "$GITHUB_WORKSPACE/.receipts-signed"
           for receipt in *.json; do
             [ "$receipt" = "*.json" ] && continue

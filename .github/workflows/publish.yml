@@ -178,6 +178,31 @@ jobs:
           fi
 
   # ── Step 1b: Attach SBOM to release ────────────────────────────────
+  attach-dist:
+    needs: [release, build]
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Upload wheel + sdist to GitHub Release
+    steps:
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3  # v8.0.0
+        with:
+          name: dist
+          path: dist/
+      - name: Upload wheel and sdist to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          shopt -s nullglob
+          artifacts=(dist/*.whl dist/*.tar.gz)
+          if [ "${#artifacts[@]}" -eq 0 ]; then
+            echo "::error::No built distribution artifacts found in dist/"
+            exit 1
+          fi
+          gh release upload "$GITHUB_REF_NAME" "${artifacts[@]}" \
+            --clobber --repo "${{ github.repository }}"
+          echo "✅ Distribution artifacts attached to release $GITHUB_REF_NAME"
+
   attach-sbom:
     needs: [release, build]
     timeout-minutes: 5
@@ -198,7 +223,8 @@ jobs:
               --clobber --repo "${{ github.repository }}"
             echo "✅ SBOM attached to release $GITHUB_REF_NAME"
           else
-            echo "::warning::SBOM file not found — skipping"
+            echo "::error::SBOM file not found — release is incomplete"
+            exit 1
           fi
 
   # ── Step 2: Build sdist + wheel ────────────────────────────────────
@@ -325,8 +351,8 @@ jobs:
                 --clobber --repo "${{ github.repository }}"
               echo "  ✅ Provenance uploaded for ${FNAME}"
             else
-              echo "  ⚠️  No attestation bundle found for ${FNAME}"
-              rm -f "provenance/${FNAME}.intoto.jsonl"
+              echo "::error::No attestation bundle found for ${FNAME}"
+              exit 1
             fi
           done
 
@@ -336,10 +362,43 @@ jobs:
 
   # ── Step 4: Verify PyPI ────────────────────────────────────────────
   verify:
-    needs: [publish, attest, upload-provenance]
+    needs: [publish, attach-dist, attach-sbom, attest, upload-provenance]
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
+      - name: Verify GitHub release assets are complete
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ASSETS=$(gh release view "$GITHUB_REF_NAME" \
+            --repo "${{ github.repository }}" \
+            --json assets \
+            --jq '.assets[].name')
+
+          echo "📦 Release assets:"
+          printf '  %s\n' $ASSETS
+
+          printf '%s\n' "$ASSETS" | grep -Eq '^aiir-[0-9].*\.whl$' || {
+            echo "::error::Missing wheel asset on GitHub release"
+            exit 1
+          }
+          printf '%s\n' "$ASSETS" | grep -Eq '^aiir-[0-9].*\.tar\.gz$' || {
+            echo "::error::Missing sdist asset on GitHub release"
+            exit 1
+          }
+          printf '%s\n' "$ASSETS" | grep -Fxq 'aiir-sbom.cdx.json' || {
+            echo "::error::Missing SBOM asset on GitHub release"
+            exit 1
+          }
+
+          PROVENANCE_COUNT=$(printf '%s\n' "$ASSETS" | grep -Ec '^aiir-[0-9].*\.(whl|tar\.gz)\.intoto\.jsonl$')
+          if [ "$PROVENANCE_COUNT" -lt 2 ]; then
+            echo "::error::Expected 2 provenance bundles on GitHub release, found $PROVENANCE_COUNT"
+            exit 1
+          fi
+
+          echo "✅ GitHub release assets are complete"
+
       - name: Wait for PyPI index propagation
         run: sleep 30
       - name: Verify package on PyPI

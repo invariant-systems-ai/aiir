@@ -11,7 +11,7 @@
 
 ## Weekly Operating Score: 2026-W11
 
-*Last updated: 2026-03-11*
+Last updated: 2026-03-11
 
 | Category | Score (0–5) | Status | Key gap |
 |---|---|---|---|
@@ -29,7 +29,7 @@
 
 ## Detailed 6-Dimension Score (underlying methodology)
 
-*Last updated: 2026-03-11 · Cycle: 2026-W11*
+Last updated: 2026-03-11 · Cycle: 2026-W11
 
 | Dimension | Weight | Score (0–5) | Weighted | Gap |
 |---|---|---|---|---|
@@ -43,7 +43,7 @@
 
 *5-category → 6-dimension mapping*: Governance ≈ Governance neutrality. Reliability ≈ Technical completeness + Reference impl quality. Interoperability ≈ Reliability & ecosystem. Adoption ≈ Adoption maturity. Consistency ≈ Specification clarity + metric consistency.
 
-*Version of this doc: v1.1.0*
+Version of this doc: v1.1.0
 
 ---
 
@@ -67,6 +67,7 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 *Last verified: 2026-03-11*
 
 **Gap tasks:**
+
 - [x] ~~Publish machine-readable conformance manifest~~ → `schemas/conformance-manifest.json` (2026-03-11)
 - [ ] Write CDDL grammar for the receipt schema in `schemas/receipt.cddl`
 - [ ] Add encoder interop test vectors (at least: Python, Node, Go) in `schemas/test-vectors/`
@@ -85,10 +86,11 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | Mutation tested; fuzzing in CI; adversarial inputs in suite |
 | 5 | Formal adversarial corpus; independent implementation verified identical output |
 
-**Current: 4.2** — 100% statement + branch coverage (1852 tests, *last verified: 2026-03-11*); mutation testing; Atheris fuzzing in CI; structured adversarial rounds per release; post-release smoke tests now automated. Missing: published adversarial corpus; independent second implementation.
+**Current: 4.2** — 100% statement + branch coverage (1860 tests, *last verified: 2026-03-11*); mutation testing; Atheris fuzzing in CI; structured adversarial rounds per release; post-release smoke tests now automated. Missing: published adversarial corpus; independent second implementation.
 *Last verified: 2026-03-11*
 
 **Gap tasks:**
+
 - [x] ~~Post-release smoke test workflow~~ → `.github/workflows/release-smoke.yml` (2026-03-11)
 - [ ] Publish adversarial test fixtures in `tests/adversarial/` and include in release artifacts
 - [ ] Sponsor or document an independent implementation (Go or Rust reference)
@@ -110,6 +112,7 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 *Last verified: 2026-03-11*
 
 **Gap tasks:**
+
 - [x] ~~Publish change control + compatibility policy~~ → `SPEC_GOVERNANCE.md` (2026-03-11)
 - [ ] Add `schemas/receipt.cddl` (CDDL grammar; normative)
 - [ ] Solicit one external spec review (security researcher or standards professional)
@@ -132,6 +135,7 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 *Last verified: 2026-03-11*
 
 **Gap tasks:**
+
 - [x] ~~Release health page + P0 RCA policy~~ → `docs/release-health.md` (2026-03-11)
 - [x] ~~Post-release smoke tests~~ → `.github/workflows/release-smoke.yml` (2026-03-11)
 - [ ] Encourage or write a standalone receipt verifier in a second language (target: JavaScript/Node for browser use)
@@ -155,6 +159,7 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 *Last verified: 2026-03-11*
 
 **Gap tasks (high-leverage, ordered by effort):**
+
 - [x] ~~Publish `SPEC_GOVERNANCE.md` with SIG structure, RFC process, IP policy~~ (2026-03-11)
 - [ ] Draft an IETF Individual Draft (`draft-invariantsystems-aiir-receipt-00.txt`)
 - [ ] Open a CNCF Sandbox proposal (requires 2 additional organizations)
@@ -178,6 +183,7 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 *Last verified: 2026-03-11*
 
 **Gap tasks (highest ROI for standards positioning):**
+
 - [x] ~~Publish implementers/pilots registry~~ → `docs/implementers.md` (2026-03-11)
 - [ ] Publish a first case study (even internal: "AIIR generates receipts for AIIR itself")
 - [ ] Reach out to 3 OSS projects that commit AI-assisted code; offer to help them adopt
@@ -214,7 +220,7 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 
 ## 90-Day Gap-Closure Roadmap
 
-```
+```text
 Week 1–2 (Mar 2026): Governance mechanics + infrastructure  [IN PROGRESS]
   ✅ SPEC_GOVERNANCE.md published (change control, compat policy, extension registry)
   ✅ schemas/conformance-manifest.json published (machine-readable implementer registry)

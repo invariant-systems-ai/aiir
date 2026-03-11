@@ -14,6 +14,7 @@
 ## Implementations
 
 Implementations are listed here when they:
+
 1. Pass all **Level 1** test vectors at minimum (see [conformance guide](https://invariantsystems.io/conformance))
 2. Submit a PR with a link to their conformance test results
 
@@ -45,6 +46,7 @@ Anonymized entries (e.g., "Series A startup, fintech") are welcome and count tow
 ### How to add your organization
 
 Open a PR with a row in the table above. You may:
+
 - Use your real org name and link to a public repo showing aiir in use
 - Use an anonymized description if you prefer not to be named publicly
 - Include a public case study link (even a blog post) if you have one
@@ -73,4 +75,4 @@ Start with the [conformance guide](https://invariantsystems.io/conformance):
 3. Download [`schemas/cbor_test_vectors.json`](../schemas/cbor_test_vectors.json) — 24 CBOR vectors (for Level 3)
 4. Pass all vectors → open a PR to add your implementation to this registry
 
-Questions? Open an issue or email noah@invariantsystems.io.
+Questions? Open an issue or email [noah@invariantsystems.io](mailto:noah@invariantsystems.io).

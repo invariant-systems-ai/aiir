@@ -205,7 +205,7 @@ class TestContentAddressingDeterministic:
     """Same CommitInfo → same receipt_id, always."""
 
     @given(commit=commit_info_st)
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_same_commit_same_receipt_id(self, commit: CommitInfo):
         """Building a receipt twice from identical input produces identical IDs."""
         r1 = _build_receipt(commit)
@@ -214,7 +214,7 @@ class TestContentAddressingDeterministic:
         assert r1["content_hash"] == r2["content_hash"]
 
     @given(commit=commit_info_st, att=agent_attestation_st)
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_extensions_dont_affect_content_hash(self, commit: CommitInfo, att):
         """Extensions (incl. agent_attestation) are NOT in the content hash."""
         r1 = _build_receipt(commit, attestation=None)
@@ -233,7 +233,7 @@ class TestSelfVerification:
     """Every receipt we build must pass our own verifier."""
 
     @given(commit=commit_info_st)
-    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_receipt_round_trip(self, commit: CommitInfo):
         """build_commit_receipt → verify_receipt must return valid=True."""
         receipt = _build_receipt(commit)
@@ -241,7 +241,7 @@ class TestSelfVerification:
         assert result["valid"], f"Self-verification failed: {result.get('errors')}"
 
     @given(commit=commit_info_st)
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_receipt_survives_json_round_trip(self, commit: CommitInfo):
         """Receipt → JSON → parse → verify must still pass."""
         receipt = _build_receipt(commit)
@@ -262,7 +262,7 @@ class TestTamperDetection:
     """Modifying ANY core field must cause verify_receipt to return valid=False."""
 
     @given(commit=commit_info_st, new_subject=safe_text)
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_tamper_commit_subject(self, commit: CommitInfo, new_subject: str):
         """Changing commit.subject after receipt creation must break hash."""
         receipt = _build_receipt(commit)
@@ -273,7 +273,7 @@ class TestTamperDetection:
         assert not result["valid"], "Tampered subject was not detected"
 
     @given(commit=commit_info_st)
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_tamper_ai_flag(self, commit: CommitInfo):
         """Flipping is_ai_authored must break verification."""
         receipt = _build_receipt(commit)
@@ -285,7 +285,7 @@ class TestTamperDetection:
         assert not result["valid"], "Tampered AI flag was not detected"
 
     @given(commit=commit_info_st, fake_sha=sha_hex_40)
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_tamper_commit_sha(self, commit: CommitInfo, fake_sha: str):
         """Replacing commit SHA must break verification."""
         receipt = _build_receipt(commit)
@@ -296,7 +296,7 @@ class TestTamperDetection:
         assert not result["valid"], "Tampered SHA was not detected"
 
     @given(commit=commit_info_st, fake_hash=sha_hex_64)
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_tamper_content_hash(self, commit: CommitInfo, fake_hash: str):
         """Replacing content_hash must break verification."""
         receipt = _build_receipt(commit)
@@ -307,7 +307,7 @@ class TestTamperDetection:
         assert not result["valid"], "Tampered content_hash was not detected"
 
     @given(commit=commit_info_st, extra_signal=safe_text)
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_tamper_inject_signal(self, commit: CommitInfo, extra_signal: str):
         """Injecting an extra AI signal post-creation must break hash."""
         receipt = _build_receipt(commit)
@@ -327,7 +327,7 @@ class TestSchemaOnSelfGenerated:
     """Our own receipts must always pass our own schema validator."""
 
     @given(commit=commit_info_st)
-    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_self_generated_receipts_pass_schema(self, commit: CommitInfo):
         """build_commit_receipt output must pass validate_receipt_schema."""
         receipt = _build_receipt(commit)
@@ -344,7 +344,7 @@ class TestPolicyMonotonicity:
     """strict ⊇ balanced ⊇ permissive — anything strict rejects, so do the others."""
 
     @given(commit=commit_info_st, is_signed=st.booleans())
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_permissive_accepts_superset_of_balanced(
         self, commit: CommitInfo, is_signed: bool
     ):
@@ -362,7 +362,7 @@ class TestPolicyMonotonicity:
             )
 
     @given(commit=commit_info_st, is_signed=st.booleans())
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_balanced_accepts_superset_of_strict(
         self, commit: CommitInfo, is_signed: bool
     ):
@@ -389,7 +389,7 @@ class TestInTotoWrapping:
     """The in-toto envelope must preserve the receipt verbatim."""
 
     @given(commit=commit_info_st)
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_predicate_is_original_receipt(self, commit: CommitInfo):
         """wrap_in_toto_statement(r)['predicate'] == r."""
         receipt = _build_receipt(commit)
@@ -401,7 +401,7 @@ class TestInTotoWrapping:
         assert len(statement["subject"]) == 1
 
     @given(commit=commit_info_st)
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_subject_contains_commit_sha(self, commit: CommitInfo):
         """Subject digest must contain the commit SHA."""
         receipt = _build_receipt(commit)
@@ -419,7 +419,7 @@ class TestCanonicalJson:
     """_canonical_json must produce a stable, unique representation."""
 
     @given(obj=json_objects)
-    @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_idempotent_round_trip(self, obj):
         """canonical_json(parse(canonical_json(x))) == canonical_json(x)."""
         try:
@@ -431,7 +431,7 @@ class TestCanonicalJson:
         assert cj1 == cj2, f"Not idempotent: {cj1!r} != {cj2!r}"
 
     @given(obj=json_objects)
-    @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_deterministic(self, obj):
         """Same object → same canonical JSON, every time."""
         try:
@@ -442,7 +442,7 @@ class TestCanonicalJson:
         assert cj1 == cj2
 
     @given(obj=json_objects)
-    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_no_whitespace(self, obj):
         """Canonical JSON has no unnecessary whitespace."""
         try:
@@ -468,7 +468,7 @@ class TestCanonicalJson:
             max_size=10,
         )
     )
-    @settings(max_examples=200)
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.differing_executors])
     def test_key_order_irrelevant(self, d: dict):
         """Key insertion order must not affect canonical output."""
         import random
@@ -488,7 +488,7 @@ class TestAgentAttestationSanitization:
     """Sanitizing twice must produce the same result as sanitizing once."""
 
     @given(att=agent_attestation_st)
-    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_idempotent(self, att):
         """sanitize(sanitize(x)) == sanitize(x)."""
         s1 = _sanitize_agent_attestation(att)
@@ -496,7 +496,7 @@ class TestAgentAttestationSanitization:
         assert s1 == s2
 
     @given(att=agent_attestation_st)
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_only_allowed_keys(self, att):
         """Output must contain only whitelisted keys."""
         from aiir._receipt import _AGENT_ATTESTATION_KEYS
@@ -513,7 +513,7 @@ class TestAgentAttestationSanitization:
             max_size=20,
         )
     )
-    @settings(max_examples=200)
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.differing_executors])
     def test_unknown_keys_stripped(self, att: dict):
         """Keys not in the allowlist must not appear in output."""
         from aiir._receipt import _AGENT_ATTESTATION_KEYS
@@ -523,7 +523,7 @@ class TestAgentAttestationSanitization:
             assert k in _AGENT_ATTESTATION_KEYS
 
     @given(att=agent_attestation_st)
-    @settings(max_examples=200)
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.differing_executors])
     def test_values_are_strings(self, att):
         """All output values must be strings."""
         result = _sanitize_agent_attestation(att)
@@ -546,7 +546,7 @@ class TestDetectionPurity:
         committer_name=safe_text,
         committer_email=safe_text,
     )
-    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_deterministic(
         self, message, author_name, author_email, committer_name, committer_email
     ):
@@ -570,7 +570,7 @@ class TestDetectionPurity:
             ]
         ),
     )
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.differing_executors])
     def test_known_signals_detected(self, message: str):
         """Known AI messages must produce non-empty ai_signals."""
         ai_signals, _ = detect_ai_signals(message)
@@ -589,7 +589,7 @@ class TestDetectionPurity:
             ]
         ),
     )
-    @settings(max_examples=30)
+    @settings(max_examples=30, suppress_health_check=[HealthCheck.differing_executors])
     def test_bot_signals_detected(self, committer_email: str):
         """Known bot emails must produce bot_signals (not AI signals)."""
         _, bot_signals = detect_ai_signals(
@@ -608,7 +608,7 @@ class TestNormalizationIdempotent:
     """Normalization must converge: repeated application must stabilize."""
 
     @given(text=st.text(min_size=0, max_size=500))
-    @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_convergent(self, text: str):
         """normalize(normalize(normalize(x))) == normalize(normalize(x)).
 
@@ -622,7 +622,7 @@ class TestNormalizationIdempotent:
         assert n2 == n3, f"Not convergent after 2 passes: {n2!r} != {n3!r}"
 
     @given(text=st.text(min_size=0, max_size=200))
-    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_output_is_string(self, text: str):
         """Output must always be a string."""
         result = _normalize_for_detection(text)
@@ -638,13 +638,13 @@ class TestSha256Properties:
     """SHA-256 helper properties."""
 
     @given(data=st.text(min_size=0, max_size=1000))
-    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_deterministic(self, data: str):
         """Same input → same hash."""
         assert _sha256(data) == _sha256(data)
 
     @given(data=st.text(min_size=0, max_size=1000))
-    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_hex_format(self, data: str):
         """Output must be 64 lowercase hex chars."""
         h = _sha256(data)
@@ -652,7 +652,7 @@ class TestSha256Properties:
         assert all(c in "0123456789abcdef" for c in h)
 
     @given(a=st.text(min_size=1, max_size=100), b=st.text(min_size=1, max_size=100))
-    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_collision_resistance(self, a: str, b: str):
         """Different inputs should produce different hashes (probabilistic)."""
         assume(a != b)
@@ -668,7 +668,7 @@ class TestFormattingRobustness:
     """Pretty and detail formatters must never crash on valid receipts."""
 
     @given(commit=commit_info_st)
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_pretty_format_never_crashes(self, commit: CommitInfo):
         """format_receipt_pretty must return a string for any valid receipt."""
         receipt = _build_receipt(commit)
@@ -677,7 +677,7 @@ class TestFormattingRobustness:
         assert len(result) > 0
 
     @given(commit=commit_info_st)
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_detail_format_never_crashes(self, commit: CommitInfo):
         """format_receipt_detail must return a string for any valid receipt."""
         receipt = _build_receipt(commit)
@@ -686,7 +686,7 @@ class TestFormattingRobustness:
         assert len(result) > 0
 
     @given(commit=commit_info_st, signed=safe_text)
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_pretty_with_arbitrary_signed_string(self, commit: CommitInfo, signed: str):
         """Signed status with arbitrary text must not crash."""
         receipt = _build_receipt(commit)
@@ -711,7 +711,7 @@ class TestUrlCredentialStripping:
             st.text(min_size=0, max_size=200),
         )
     )
-    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_never_crashes(self, url: str):
         """Must never raise on any input."""
         result = _strip_url_credentials(url)
@@ -734,7 +734,7 @@ class TestUrlCredentialStripping:
             max_size=10,
         ),
     )
-    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_credentials_actually_removed(self, user: str, password: str, host: str):
         """Embedded user:pass@ must not appear in output."""
         url = f"https://{user}:{password}@{host}.com/repo.git"
@@ -754,7 +754,7 @@ class TestStripEscapesIdempotent:
     """Stripping escapes twice = stripping once."""
 
     @given(text=st.text(min_size=0, max_size=500))
-    @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
+    @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors])
     def test_idempotent(self, text: str):
         """strip(strip(x)) == strip(x)."""
         s1 = _strip_terminal_escapes(text)
@@ -774,7 +774,7 @@ class TestLedgerPolicyProperties:
         ai_pct=st.floats(min_value=0, max_value=100),
         receipt_count=st.integers(min_value=1, max_value=10000),
     )
-    @settings(max_examples=200)
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.differing_executors])
     def test_permissive_never_rejects_on_ai_percent(
         self, ai_pct: float, receipt_count: int
     ):
@@ -795,7 +795,7 @@ class TestLedgerPolicyProperties:
         ai_pct=st.floats(min_value=50.01, max_value=100.0),
         receipt_count=st.integers(min_value=1, max_value=10000),
     )
-    @settings(max_examples=200)
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.differing_executors])
     def test_strict_rejects_over_threshold(self, ai_pct: float, receipt_count: int):
         """Strict (max 50%) must reject > 50%."""
         index = {

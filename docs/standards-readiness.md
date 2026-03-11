@@ -63,9 +63,11 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | Schema versioning, multi-encoder interop defined |
 | 5 | CDDL/ABNF normative grammar; formal conformance suite |
 
-**Current: 4.1** — Schema versioned in `schemas/`; deterministic CBOR + JSON dual encoding; missing: formal CDDL grammar and an independent encoder-level test corpus.
+**Current: 4.1** — Schema versioned in `schemas/`; deterministic CBOR + JSON dual encoding; `schemas/conformance-manifest.json` published (2026-03-11). Missing: formal CDDL grammar, cross-language encoder test corpus.
+*Last verified: 2026-03-11*
 
 **Gap tasks:**
+- [x] ~~Publish machine-readable conformance manifest~~ → `schemas/conformance-manifest.json` (2026-03-11)
 - [ ] Write CDDL grammar for the receipt schema in `schemas/receipt.cddl`
 - [ ] Add encoder interop test vectors (at least: Python, Node, Go) in `schemas/test-vectors/`
 - [ ] Publish test vector registry linked from `SPEC.md`
@@ -83,9 +85,11 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | Mutation tested; fuzzing in CI; adversarial inputs in suite |
 | 5 | Formal adversarial corpus; independent implementation verified identical output |
 
-**Current: 4.2** — 100% statement + branch coverage; mutation testing; fuzzing (Atheris); structured adversarial rounds per release. Missing: a published, versioned adversarial corpus and an independent second implementation.
+**Current: 4.2** — 100% statement + branch coverage (1852 tests, *last verified: 2026-03-11*); mutation testing; Atheris fuzzing in CI; structured adversarial rounds per release; post-release smoke tests now automated. Missing: published adversarial corpus; independent second implementation.
+*Last verified: 2026-03-11*
 
 **Gap tasks:**
+- [x] ~~Post-release smoke test workflow~~ → `.github/workflows/release-smoke.yml` (2026-03-11)
 - [ ] Publish adversarial test fixtures in `tests/adversarial/` and include in release artifacts
 - [ ] Sponsor or document an independent implementation (Go or Rust reference)
 
@@ -102,9 +106,11 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | ABNF/CDDL normative grammar; unambiguous field semantics |
 | 5 | Standards-body editorial style; external review completed |
 
-**Current: 4.0** — `SPEC.md` with normative language; `conformance.html` live; receipt field semantics precisely defined. Missing: formal grammar file and external independent edit review.
+**Current: 4.0** — `SPEC.md` with normative language; `conformance.html` live; receipt field semantics precisely defined; `SPEC_GOVERNANCE.md` published with change control, compat guarantees, extension registry, release cadence (2026-03-11). Missing: formal CDDL grammar; external review.
+*Last verified: 2026-03-11*
 
 **Gap tasks:**
+- [x] ~~Publish change control + compatibility policy~~ → `SPEC_GOVERNANCE.md` (2026-03-11)
 - [ ] Add `schemas/receipt.cddl` (CDDL grammar; normative)
 - [ ] Solicit one external spec review (security researcher or standards professional)
 - [ ] Add "Conformance Testing" section to `SPEC.md` referencing test vectors
@@ -122,9 +128,12 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | Third-party verifier (non-AIIR) working; 2+ language SDKs |
 | 5 | 3+ independent verifiers; community plugin ecosystem |
 
-**Current: 3.9** — 34-check CI; Python 3.9–3.13 × Ubuntu/Windows/macOS; GitHub + GitLab dual-publish; MCP tool; conformance matrix. Missing: any non-Python verifier, community plugins.
+**Current: 3.9** — 34-check CI (*last verified: 2026-03-11*); Python 3.9–3.13 × Ubuntu/Windows/macOS; GitHub + GitLab dual-publish; MCP tool; `docs/release-health.md` with P0 RCA policy and smoke test badge published. Missing: any non-Python verifier, community plugins.
+*Last verified: 2026-03-11*
 
 **Gap tasks:**
+- [x] ~~Release health page + P0 RCA policy~~ → `docs/release-health.md` (2026-03-11)
+- [x] ~~Post-release smoke tests~~ → `.github/workflows/release-smoke.yml` (2026-03-11)
 - [ ] Encourage or write a standalone receipt verifier in a second language (target: JavaScript/Node for browser use)
 - [ ] Document the MCP interface in `mcp-manifest.json` as a first-class integration point
 - [ ] Publish SDK guidance in `docs/sdks.md`
@@ -142,13 +151,15 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | Active multi-org steering committee |
 | 5 | Adopted by a standards body (ISO, IETF, W3C, NIST) |
 
-**Current: 1.8** — Apache 2.0; public repo; public `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md`; basic governance in place. Missing: neutral IP home, RFC submission, multi-org steering.
+**Current: 2.2** — Apache 2.0; public repo; public `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md`; `SPEC_GOVERNANCE.md` published with SIG structure, change control, extension registry, IP policy, and standards-track roadmap (2026-03-11). Missing: neutral IP home, RFC submission, multi-org steering.
+*Last verified: 2026-03-11*
 
 **Gap tasks (high-leverage, ordered by effort):**
+- [x] ~~Publish `SPEC_GOVERNANCE.md` with SIG structure, RFC process, IP policy~~ (2026-03-11)
 - [ ] Draft an IETF Individual Draft (`draft-invariantsystems-aiir-receipt-00.txt`)
 - [ ] Open a CNCF Sandbox proposal (requires 2 additional organizations)
-- [ ] Invite 2–3 external organizations to a working group; document in `GOVERNANCE.md`
-- [ ] Create `GOVERNANCE.md` with SIG structure, voting rules, RFC process
+- [ ] Invite 2–3 external organizations to a working group
+- [ ] Recruit external editor (≥ 1 org)
 
 ---
 
@@ -163,9 +174,11 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 4 | Enterprise reference customer; recorded talk at a conference |
 | 5 | Mentioned in a regulation, standard, or widely-cited OSS project |
 
-**Current: 1.7** — AIIR uses AIIR (dogfooding); PyPI+GitHub Marketplace live; EU AI Act compliance positioning. Missing: public case studies, third-party adopters on record.
+**Current: 1.7** — AIIR uses AIIR (dogfooding, *last verified: 2026-03-11*); PyPI+GitHub Marketplace live; EU AI Act compliance positioning; `docs/implementers.md` registry published (invites external entries). Missing: public case studies, third-party adopters on record.
+*Last verified: 2026-03-11*
 
 **Gap tasks (highest ROI for standards positioning):**
+- [x] ~~Publish implementers/pilots registry~~ → `docs/implementers.md` (2026-03-11)
 - [ ] Publish a first case study (even internal: "AIIR generates receipts for AIIR itself")
 - [ ] Reach out to 3 OSS projects that commit AI-assisted code; offer to help them adopt
 - [ ] Write a blog post / talk abstract: "Verifiable AI provenance in practice"
@@ -173,35 +186,65 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 
 ---
 
+## Canonical Metric Sources
+
+> **Policy**: all comparison numbers in docs and on the website MUST trace to one of these sources.
+> No hand-edited stat may appear without a "Last verified" date.
+
+| Metric | Canonical source | Last verified |
+|---|---|---|
+| Test count | `pytest --collect-only -q \| tail -1` | 2026-03-11 (1852 tests) |
+| CI check count | `.github/workflows/ci.yml` job matrix | 2026-03-11 (34 checks) |
+| Coverage | `pytest --cov=aiir --cov-fail-under=100` | 2026-03-11 (100%) |
+| Runtime dependencies | `pip show aiir \| grep Requires` | 2026-03-11 (0) |
+| Conformance vectors | `schemas/conformance-manifest.json` | 2026-03-11 (25 JSON + 24 CBOR) |
+| Release version | `aiir --version` / PyPI | 2026-03-11 (v1.2.5) |
+| Governance score | This doc, Governance Neutrality section | 2026-03-11 (2.2/5) |
+| Adoption score | `docs/implementers.md` | 2026-03-11 (1.7/5) |
+
+---
+
 ## Weekly Update History
 
 | Cycle | Date | Score | Key change |
 |---|---|---|---|
-| 2026-W11 | 2026-03-11 | 62.6 | Initial scorecard published |
+| 2026-W11 | 2026-03-11 | 67.5 | v1.1 scorecard: SPEC_GOVERNANCE.md, release-health.md, smoke tests, conformance-manifest.json, implementers.md, 5-category weekly model |
 
 ---
 
 ## 90-Day Gap-Closure Roadmap
 
 ```
-Month 1 (Mar 2026): Reliability + Spec clarity
-  ✦ Write CDDL grammar (schemas/receipt.cddl)
-  ✦ Add encoder test vectors (schemas/test-vectors/)
-  ✦ Publish adversarial fixture corpus
-  ✦ Draft JavaScript receipt verifier (browser-native)
-  Target: +6 pts → ~68.6
+Week 1–2 (Mar 2026): Governance mechanics + infrastructure  [IN PROGRESS]
+  ✅ SPEC_GOVERNANCE.md published (change control, compat policy, extension registry)
+  ✅ schemas/conformance-manifest.json published (machine-readable implementer registry)
+  ✅ docs/release-health.md published (P0 policy, RCA template, smoke test badge)
+  ✅ .github/workflows/release-smoke.yml (automated post-release smoke, P0 alert)
+  ✅ docs/implementers.md published (third-party implementations + pilots registry)
+  ✅ Weekly standards-readiness issue workflow
+  Next: CDDL grammar, adversarial corpus, external recruits
 
-Month 2 (Apr 2026): Governance
-  ✦ Create GOVERNANCE.md (SIG structure, RFC process)
-  ✦ Draft IETF Individual Draft (aiir-receipt-00)
-  ✦ Recruit 2 external organization contacts for steering group
-  Target: +8 pts → ~76.6
+Month 1 remainder (Mar 2026): Reliability + Consistency
+  ✦ CDDL grammar (schemas/receipt.cddl)
+  ✦ Encoder interop test vectors (Node.js + Python reference)
+  ✦ Publish adversarial fixture corpus (tests/adversarial/)
+  ✦ "Last verified" dates on all website stat blocks
+  Target: +5 pts → ~72.5
+
+Month 2 (Apr 2026): Governance depth + Interop
+  ✦ Draft IETF Individual Draft (draft-invariantsystems-aiir-receipt-00)
+  ✦ Recruit 2 external organization contacts; first external editor added
+  ✦ Standalone JavaScript receipt verifier (browser-native, Level 1)
+  Target: +8 pts → ~80.5
 
 Month 3 (May 2026): Adoption proof
-  ✦ Publish 2 case studies
-  ✦ Conference abstract submitted
-  ✦ 5 external repos with receipts on record
-  Target: +6 pts → ~82.6
+  ✦ Publish 2 case studies (1 internal, 1 external)
+  ✦ Conference abstract submitted (OpenSSF Day / SOSS)
+  ✦ 3+ external repos with receipts on record in docs/implementers.md
+  Target: +4 pts → ~84.5
+
+Green target: 4 categories ≥ 3.5/5 + 0 open P0s for 4 consecutive weeks
+Estimated achievement: late April 2026 (wk 2026-W17)
 ```
 
 ---

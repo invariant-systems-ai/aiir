@@ -16,3 +16,6 @@ mutants/
 .mutmut-cache/
 .benchmarks/
 sdks/rust/target/
+
+# GitLab CI dotenv artifact (written at runtime by set_gitlab_ci_output)
+aiir.env

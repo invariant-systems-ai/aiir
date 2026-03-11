@@ -1,0 +1,299 @@
+# AIIR Specification Governance
+
+**Document version**: 1.0.0
+**Spec covered**: AIIR Commit Receipt Specification v1.1.x and later
+**Status**: Active
+**Last updated**: 2026-03-11
+**Maintainer**: Invariant Systems, Inc.
+
+> This document defines how the AIIR receipt format specification is maintained, versioned, and extended.
+> It is the binding reference for anyone building a conforming implementation, proposing a change, or registering an extension.
+
+---
+
+## Table of Contents
+
+1. [Scope](#1-scope)
+2. [Versioning policy](#2-versioning-policy)
+3. [Change control process](#3-change-control-process)
+4. [Compatibility guarantees](#4-compatibility-guarantees)
+5. [Extension mechanism](#5-extension-mechanism)
+6. [Extension registry](#6-extension-registry)
+7. [Release cadence](#7-release-cadence)
+8. [Working group structure](#8-working-group-structure)
+9. [Decision-making](#9-decision-making)
+10. [IP policy and licensing](#10-ip-policy-and-licensing)
+11. [Standards-track roadmap](#11-standards-track-roadmap)
+
+---
+
+## 1. Scope
+
+This governance document covers:
+
+- **`SPEC.md`** — the AIIR Commit Receipt Specification
+- **`schemas/commit_receipt.v1.schema.json`** and subsequent schema versions
+- **`schemas/test_vectors.json`** and **`schemas/cbor_test_vectors.json`** — the normative conformance suite
+- **`schemas/conformance-manifest.json`** — the machine-readable implementer registry and test vector index
+- Any future schema versions under `schemas/`
+
+It does **not** cover the internal implementation details of the `aiir` reference implementation (Python package), which are governed by normal open-source maintainer discretion.
+
+---
+
+## 2. Versioning Policy
+
+AIIR uses [Semantic Versioning 2.0.0](https://semver.org/) for the **specification** independently of the Python package version.
+
+### Spec version anatomy
+
+```
+MAJOR.MINOR.PATCH
+  │      │     └── Clarifications, editorial fixes, test vector additions (non-breaking)
+  │      └── New OPTIONAL fields, new conformance levels, new extension hooks (backward-compatible)
+  └── Breaking changes to field semantics, hash algorithm, canonical encoding, or required fields
+```
+
+### What constitutes a BREAKING change (requires MAJOR bump)
+
+- Changing the canonical JSON encoding algorithm
+- Changing the `content_hash` or `receipt_id` computation
+- Removing or renaming a REQUIRED field
+- Changing the semantics of an existing REQUIRED field
+- Removing a conformance level
+- Changing the CBOR encoding such that existing `level_3` receipts hash differently
+
+### What is NOT a breaking change (MINOR/PATCH)
+
+- Adding new OPTIONAL fields
+- Adding new conformance levels
+- Adding new test vectors
+- Clarifying ambiguous normative language without changing behavior
+- Adding new extension hooks
+- Deprecating (but not removing) fields
+
+### Receipt format versioning
+
+The `version` field in a receipt records the **reference implementation version** that generated it, not the spec version. This is intentional: receipts are durable artifacts, and the spec version at generation time can be inferred from the schema identifier.
+
+---
+
+## 3. Change Control Process
+
+All changes to the specification go through the following process:
+
+### Stage 1 — Proposal (anyone may propose)
+
+Open a GitHub issue in `invariant-systems-ai/aiir` with the label `spec-change`.
+
+A proposal MUST include:
+- **Problem statement**: what is broken, ambiguous, or missing?
+- **Proposed change**: exact text diff against `SPEC.md` or schema file
+- **Compatibility impact**: breaking / non-breaking, with justification
+- **Test vector impact**: which vectors need to change or be added?
+- **Reference implementation plan**: sketch of the code change
+
+### Stage 2 — Review (minimum 14 days for non-breaking, 30 days for breaking)
+
+The proposal is open for public comment on the GitHub issue. **Any** GitHub user may comment.
+
+Review criteria:
+1. Is the problem real? (Confirmed by at least one independent use case)
+2. Is the proposed change the minimal solution?
+3. Does it preserve backward compatibility (or is the MAJOR bump justified)?
+4. Are the test vector changes correct and sufficient?
+
+### Stage 3 — Acceptance
+
+A proposal is accepted when:
+- The review period has elapsed
+- At least one Steering member has approved (`/approve` comment)
+- No unresolved blocking objections remain
+
+For breaking changes (MAJOR bump): requires explicit approval from the Steering group (majority vote if multiple members).
+
+### Stage 4 — Implementation and merge
+
+The author (or a Steering member) opens a PR implementing:
+1. Changes to `SPEC.md`
+2. Schema changes (if any)
+3. New/updated test vectors
+4. Reference implementation changes
+5. Updated `schemas/conformance-manifest.json`
+
+The PR must pass the full CI suite (including conformance vector tests) before merge.
+
+---
+
+## 4. Compatibility Guarantees
+
+### Receipt durability
+
+Receipts generated by any version of `aiir ≥ 1.0.0` (spec `1.0.x`) MUST be verifiable by any conforming implementation forever. We do not break receipt verification.
+
+### Forward compatibility
+
+Conforming implementations MUST ignore unknown fields when verifying receipts. A receipt with unknown extension fields is still valid if all REQUIRED fields have correct values.
+
+### @v1 stability
+
+The `@v1` GitHub Action tag and `receipt@1` GitLab CI component tag always point to the latest stable `1.x.y` release. Workflows using `@v1` will receive backward-compatible updates automatically.
+
+### Deprecation policy
+
+Fields may be deprecated (marked `DEPRECATED` in the spec) with a minimum 12-month notice before removal. Removal requires a MAJOR version bump.
+
+---
+
+## 5. Extension Mechanism
+
+The AIIR receipt format supports optional extensions via the `extensions` field.
+
+### Extension field structure
+
+```json
+{
+  "extensions": {
+    "my_org.my_extension": {
+      "version": "1.0.0",
+      "data": { ... }
+    }
+  }
+}
+```
+
+### Extension rules
+
+1. Extension keys MUST be namespaced with a reverse-domain prefix (`com.example.myext`)
+2. Extensions MUST NOT alter the computation of `content_hash` or `receipt_id`
+3. Extensions MUST NOT add required fields to the CORE receipt structure
+4. A conforming verifier MUST NOT fail on unknown extension keys
+5. Extensions MAY define their own internal versioning
+
+### Registering an extension
+
+To register an extension in the public registry (§6), open a PR to add an entry to `schemas/conformance-manifest.json` with:
+- Extension key (namespaced)
+- Description
+- Link to extension spec document
+- Maintainer / organization
+- Status (`experimental` | `stable` | `deprecated`)
+
+Registered extensions are informational — registration does not imply endorsement by Invariant Systems.
+
+---
+
+## 6. Extension Registry
+
+*Current state: no third-party extensions registered. The registry is open.*
+
+| Extension key | Description | Status | Maintainer | Spec |
+|---|---|---|---|---|
+| *(none yet)* | | | | |
+
+To register an extension, see §5 above.
+
+---
+
+## 7. Release Cadence
+
+### Spec releases
+
+- **PATCH** (clarifications, new test vectors): as needed, no fixed cadence
+- **MINOR** (new optional fields, new conformance levels): quarterly or on demonstrated need
+- **MAJOR** (breaking changes): only when strictly necessary; no more than once per calendar year
+
+### Reference implementation releases
+
+The `aiir` Python package releases independently of spec versions. A package release MAY include a spec PATCH or MINOR bump. Spec changes always ship with a package release.
+
+### Advance notice
+
+- MINOR changes: announced via GitHub discussion at least 14 days before merge
+- MAJOR changes: announced at least 60 days before release; migration guide published alongside
+
+---
+
+## 8. Working Group Structure
+
+### Current structure
+
+**Steering group**: Invariant Systems, Inc.
+- Primary contact: noah@invariantsystems.io
+- GitHub: @InvariantSystems
+
+**External participants**: Open. Anyone may comment on spec proposals.
+
+### Adding external maintainers / editors
+
+We actively seek external maintainers to reduce single-vendor concentration (a key governance gap identified in the [Standards-Readiness Scorecard](docs/standards-readiness.md)).
+
+External editors may be added by:
+1. Sustained, high-quality participation in spec reviews (≥ 3 proposals reviewed)
+2. Sponsorship by an existing Steering member
+3. Explicit acceptance of the IP policy (§10)
+
+External editors gain:
+- Maintainer status on the GitHub repository
+- Voting rights on MINOR changes (one vote per org, Steering has one vote)
+- Listed authorship in `SPEC.md`
+
+### Target: multi-org steering by 2026 Q4
+
+The goal is to have at least two organizations represented in the Steering group before submitting for CNCF Sandbox consideration.
+
+---
+
+## 9. Decision-Making
+
+### Normal decisions (PATCH / MINOR)
+
+Lazy consensus: if no blocking objection is raised within the review period and a Steering member approves, the change proceeds.
+
+### Major decisions (MAJOR spec bump, governance changes, standards-body submissions)
+
+Explicit vote by Steering members. Simple majority. If there is only one Steering member (current state), that member decides; this is noted as a governance gap and will be resolved as external editors are added.
+
+### Blocking objections
+
+A blocking objection MUST:
+1. Identify a specific technical problem (not a preference)
+2. Propose an alternative
+3. Be raised within the review period
+
+After resolution discussion (maximum 21 days), the Steering group makes a final binding decision.
+
+---
+
+## 10. IP Policy and Licensing
+
+- All contributions to `SPEC.md`, schemas, and test vectors must be made under the Apache-2.0 license
+- By submitting a PR, contributors certify that they have the right to license their contribution under Apache-2.0 (consistent with the [Developer Certificate of Origin](https://developercertificate.org/))
+- No CLA is required at this time
+- Extension specifications registered in the extension registry may use any license; the registry entry itself (in `conformance-manifest.json`) is Apache-2.0
+- If the spec is submitted to a standards body, the IP will be transferred or dual-licensed as required by that body. This will be announced at least 60 days in advance.
+
+---
+
+## 11. Standards-Track Roadmap
+
+Our current positioning: **vendor-led open specification on a transparent standards track**.
+
+The goal is de facto adoption now, formal standards-track readiness over time.
+
+| Milestone | Target | Status |
+|---|---|---|
+| Normative spec + conformance suite published | 2026 Q1 | ✅ Done |
+| `SPEC_GOVERNANCE.md` published | 2026 Q1 | ✅ Done |
+| CDDL grammar for receipt schema | 2026 Q2 | In planning |
+| External spec review (1+ independent reviewer) | 2026 Q2 | Not started |
+| Third-party implementation (non-Python) | 2026 Q2 | Not started |
+| External editor / co-maintainer (≥ 1 org) | 2026 Q3 | Not started |
+| IETF Individual Draft (`draft-invariantsystems-aiir-receipt-00`) | 2026 Q3 | Not started |
+| CNCF Sandbox proposal (requires ≥ 2 orgs) | 2026 Q4 | Not started |
+
+Weekly progress is tracked in the [Standards-Readiness Scorecard](docs/standards-readiness.md).
+
+---
+
+*Invariant Systems, Inc. · Apache-2.0 · noah@invariantsystems.io*

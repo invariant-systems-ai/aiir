@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://invariantsystems.io/schemas/aiir/conformance-manifest.v1.json",
+  "description": "Machine-readable registry of AIIR spec versions, conformance levels, test vectors, implementations, and extensions. Updated on each spec release.",
+  "last_updated": "2026-03-11",
+  "spec": {
+    "name": "AIIR Commit Receipt Specification",
+    "version": "1.1.0",
+    "schema_id": "aiir/commit_receipt.v1",
+    "status": "Stable",
+    "url": "https://github.com/invariant-systems-ai/aiir/blob/main/SPEC.md",
+    "governance_url": "https://github.com/invariant-systems-ai/aiir/blob/main/SPEC_GOVERNANCE.md",
+    "license": "Apache-2.0",
+    "updated": "2026-03-10"
+  },
+  "conformance_levels": [
+    {
+      "level": 1,
+      "name": "Verify",
+      "description": "Can verify an existing receipt's content_hash and receipt_id against the canonical JSON encoding algorithm.",
+      "required_artifacts": [
+        "schemas/test_vectors.json"
+      ]
+    },
+    {
+      "level": 2,
+      "name": "Generate",
+      "description": "Level 1 + can produce valid receipts with correct canonical JSON encoding. Must pass JSON Schema validation.",
+      "required_artifacts": [
+        "schemas/test_vectors.json",
+        "schemas/commit_receipt.v1.schema.json"
+      ]
+    },
+    {
+      "level": 3,
+      "name": "Full",
+      "description": "Level 2 + CBOR round-trip: JSON → CBOR → JSON produces identical content_hash and receipt_id values.",
+      "required_artifacts": [
+        "schemas/test_vectors.json",
+        "schemas/cbor_test_vectors.json",
+        "schemas/commit_receipt.v1.schema.json"
+      ]
+    }
+  ],
+  "test_vectors": [
+    {
+      "file": "schemas/test_vectors.json",
+      "url": "https://github.com/invariant-systems-ai/aiir/blob/main/schemas/test_vectors.json",
+      "format": "JSON",
+      "count": 25,
+      "spec_version": "1.0.0",
+      "generated_by": "aiir 1.0.15",
+      "generated_at": "2026-03-09T00:00:00Z",
+      "purpose": "Canonical JSON encoding and hash determinism. Conforming implementations must compute identical content_hash and receipt_id for all 25 inputs."
+    },
+    {
+      "file": "schemas/cbor_test_vectors.json",
+      "url": "https://github.com/invariant-systems-ai/aiir/blob/main/schemas/cbor_test_vectors.json",
+      "format": "CBOR",
+      "count": 24,
+      "spec_version": "1.0.0",
+      "generated_by": "aiir 1.0.15",
+      "generated_at": "2026-03-09T00:00:00Z",
+      "purpose": "CBOR encoding round-trip determinism. JSON → CBOR → JSON must preserve identical hashes."
+    }
+  ],
+  "schemas": [
+    {
+      "file": "schemas/commit_receipt.v1.schema.json",
+      "url": "https://github.com/invariant-systems-ai/aiir/blob/main/schemas/commit_receipt.v1.schema.json",
+      "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
+      "description": "JSON Schema for the AIIR commit receipt v1 format",
+      "spec_version": "1.0.x"
+    },
+    {
+      "file": "schemas/commit_receipt.v2.schema.json",
+      "url": "https://github.com/invariant-systems-ai/aiir/blob/main/schemas/commit_receipt.v2.schema.json",
+      "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
+      "description": "JSON Schema for the AIIR commit receipt v2 format (with envelope)",
+      "spec_version": "1.1.x"
+    },
+    {
+      "file": "schemas/review_receipt.v1.schema.json",
+      "url": "https://github.com/invariant-systems-ai/aiir/blob/main/schemas/review_receipt.v1.schema.json",
+      "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
+      "description": "JSON Schema for the AIIR review receipt v1 format",
+      "spec_version": "1.1.x"
+    },
+    {
+      "file": "schemas/verification_summary.v1.schema.json",
+      "url": "https://github.com/invariant-systems-ai/aiir/blob/main/schemas/verification_summary.v1.schema.json",
+      "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
+      "description": "JSON Schema for the AIIR Verification Summary Attestation (VSA) v1 format",
+      "spec_version": "1.1.x"
+    }
+  ],
+  "implementations": [
+    {
+      "id": "aiir-python",
+      "name": "aiir (Python — reference implementation)",
+      "language": "Python",
+      "language_version_min": "3.9",
+      "url": "https://github.com/invariant-systems-ai/aiir",
+      "package_url": "https://pypi.org/project/aiir/",
+      "docker_url": "ghcr.io/invariant-systems-ai/aiir",
+      "conformance_level": 3,
+      "status": "reference",
+      "verified_against": "schemas/test_vectors.json",
+      "verified_at": "2026-03-11",
+      "maintainer": "Invariant Systems, Inc.",
+      "maintainer_url": "https://invariantsystems.io",
+      "notes": "Reference implementation. All other implementations must produce identical content_hash and receipt_id values for the same inputs."
+    }
+  ],
+  "extension_registry": {
+    "process_url": "https://github.com/invariant-systems-ai/aiir/blob/main/SPEC_GOVERNANCE.md#5-extension-mechanism",
+    "extensions": []
+  }
+}

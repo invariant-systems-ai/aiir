@@ -27,6 +27,8 @@ on:
       - 'aiir/_policy.py'
       - 'aiir/_receipt.py'
       - 'aiir/_schema.py'
+      - 'aiir/_canonical_cbor.py'
+      - 'aiir/_verify_cbor.py'
       - 'tests/**'
 
 concurrency:

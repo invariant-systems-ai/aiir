@@ -900,3 +900,122 @@ class TestLedgerPolicyProperties:
         passed, msg, violations = evaluate_ledger_policy(index, strict)
         ai_violations = [v for v in violations if v.rule == "max_ai_percent"]
         assert len(ai_violations) > 0, f"Strict should reject {ai_pct}% AI"
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# PROPERTY 12: Canonical CBOR is idempotent and deterministic
+# ═══════════════════════════════════════════════════════════════════════
+
+from aiir._canonical_cbor import canonical_cbor_bytes  # noqa: E402
+from aiir._verify_cbor import decode_cbor_full  # noqa: E402
+
+# CBOR-serializable primitives (no NaN/Inf — rejected by the encoder)
+cbor_primitives = st.one_of(
+    st.none(),
+    st.booleans(),
+    st.integers(min_value=-(2**53), max_value=2**53),
+    st.floats(
+        allow_nan=False,
+        allow_infinity=False,
+        allow_subnormal=False,
+        min_value=-(3.4e38),
+        max_value=3.4e38,
+    ),
+    st.text(min_size=0, max_size=100),
+    st.binary(min_size=0, max_size=100),
+)
+
+# Shallow CBOR objects (depth 1-2) — uses string keys only (CBOR maps)
+cbor_objects = st.recursive(
+    cbor_primitives,
+    lambda children: st.one_of(
+        st.lists(children, max_size=8),
+        st.dictionaries(st.text(min_size=1, max_size=20), children, max_size=8),
+    ),
+    max_leaves=30,
+)
+
+
+class TestCanonicalCborProperties:
+    """Canonical CBOR encode/decode must be deterministic and idempotent."""
+
+    @given(obj=cbor_objects)
+    @settings(
+        max_examples=500,
+        suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors],
+    )
+    def test_round_trip_identity(self, obj):
+        """decode(encode(x)) re-encodes to the same bytes."""
+        encoded = canonical_cbor_bytes(obj)
+        decoded = decode_cbor_full(encoded)
+        re_encoded = canonical_cbor_bytes(decoded)
+        assert encoded == re_encoded, (
+            f"round-trip mismatch: {len(encoded)} vs {len(re_encoded)} bytes"
+        )
+
+    @given(obj=cbor_objects)
+    @settings(
+        max_examples=500,
+        suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors],
+    )
+    def test_deterministic(self, obj):
+        """Same object → same CBOR bytes, every time."""
+        b1 = canonical_cbor_bytes(obj)
+        b2 = canonical_cbor_bytes(obj)
+        assert b1 == b2
+
+    @given(
+        d=st.dictionaries(
+            st.text(
+                min_size=1,
+                max_size=10,
+                alphabet=st.sampled_from(list(string.ascii_letters)),
+            ),
+            st.integers(min_value=0, max_value=100),
+            min_size=2,
+            max_size=10,
+        )
+    )
+    @settings(max_examples=200, suppress_health_check=[HealthCheck.differing_executors])
+    def test_key_order_irrelevant(self, d: dict):
+        """Key insertion order must not affect canonical CBOR output."""
+        import random
+
+        keys = list(d.keys())
+        random.shuffle(keys)
+        d_shuffled = {k: d[k] for k in keys}
+        assert canonical_cbor_bytes(d) == canonical_cbor_bytes(d_shuffled)
+
+    @given(obj=cbor_objects)
+    @settings(
+        max_examples=300,
+        suppress_health_check=[HealthCheck.too_slow, HealthCheck.differing_executors],
+    )
+    def test_decode_type_preservation(self, obj):
+        """Types survive the encode→decode round-trip."""
+        encoded = canonical_cbor_bytes(obj)
+        decoded = decode_cbor_full(encoded)
+        if isinstance(obj, dict):
+            assert isinstance(decoded, dict)
+            assert set(decoded.keys()) == set(obj.keys())
+        elif isinstance(obj, list):
+            assert isinstance(decoded, list)
+            assert len(decoded) == len(obj)
+        elif isinstance(obj, bytes):
+            assert isinstance(decoded, bytes)
+            assert decoded == obj
+        elif isinstance(obj, str):
+            assert isinstance(decoded, str)
+            assert decoded == obj
+        elif isinstance(obj, bool):
+            assert isinstance(decoded, bool)
+            assert decoded == obj
+        elif isinstance(obj, int) and not isinstance(obj, bool):
+            assert isinstance(decoded, int) and not isinstance(decoded, bool)
+            assert decoded == obj
+        elif isinstance(obj, float):
+            import struct as _struct
+
+            assert _struct.pack(">d", decoded) == _struct.pack(">d", obj)
+        elif obj is None:
+            assert decoded is None

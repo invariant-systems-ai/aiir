@@ -44,6 +44,13 @@ from aiir._receipt import (
 from aiir._schema import validate_receipt_schema as validate_receipt  # noqa: F401
 from aiir._stats import check_policy, format_badge, format_stats  # noqa: F401
 from aiir._verify import verify_receipt, verify_receipt_file  # noqa: F401
+from aiir._verify_cbor import (  # noqa: F401
+    CborDecodeError,
+    decode_cbor_full,
+    verify_cbor_envelope,
+    verify_cbor_file,
+    verify_cbor_sidecar,
+)
 from aiir._verify_release import (  # noqa: F401
     verify_release,
     format_release_report,
@@ -80,6 +87,12 @@ __all__ = [
     "verify_receipt",
     "verify_receipt_file",
     "explain_verification",
+    # CBOR verification
+    "CborDecodeError",
+    "decode_cbor_full",
+    "verify_cbor_envelope",
+    "verify_cbor_file",
+    "verify_cbor_sidecar",
     # Release verification
     "verify_release",
     "format_release_report",

@@ -68,17 +68,29 @@ jobs:
 
           ---
 
-          ### Update table row (copy into `docs/standards-readiness.md`)
+          ### 5-Category Weekly Score
 
-          ```
-          | WEEK_LABEL | TODAY | <score> | <what changed this week> |
-          ```
+          > Green target: ≥ 3.5/5 on all 5 categories + 0 open P0s for 4 consecutive weeks.
+
+          | Category | Score (0–5) | Status | Delta | Evidence |
+          |---|---|---|---|---|
+          | Governance | | 🔴/🟡/✅ | | |
+          | Reliability | | 🔴/🟡/✅ | | |
+          | Interoperability | | 🔴/🟡/✅ | | |
+          | Adoption | | 🔴/🟡/✅ | | |
+          | Consistency | | 🔴/🟡/✅ | | |
+          | Open P0s | 0 | ✅/❌ | | |
+
+          **Green categories this week**: ___ / 5
+          **Consecutive all-green weeks**: ___
 
           ---
 
-          ### Dimension scores this week
+          ### Detailed 6-Dimension Composite (copy row into `docs/standards-readiness.md`)
 
-          Fill in each dimension (0–5). Delete unchanged rows.
+          ```
+          | WEEK_LABEL | TODAY | <composite-score> | <summary of what changed> |
+          ```
 
           | Dimension | Last week | This week | Delta | Evidence / PR |
           |---|---|---|---|---|
@@ -92,6 +104,18 @@ jobs:
 
           ---
 
+          ### Metric verification (canonical sources — update "Last verified" if re-checked)
+
+          | Metric | Expected | Verified this week? | Command |
+          |---|---|---|---|
+          | Test count | ≥ 1852 | [ ] | `pytest --collect-only -q \| tail -1` |
+          | Coverage | 100% | [ ] | `pytest --cov=aiir --cov-fail-under=100` |
+          | CI checks | 34 | [ ] | count jobs in `ci.yml` |
+          | Dependencies | 0 | [ ] | `pip show aiir \| grep Requires` |
+          | Conformance vectors | 25 JSON + 24 CBOR | [ ] | `schemas/conformance-manifest.json` |
+
+          ---
+
           ### Gap tasks completed this week
 
           - [ ] *(list completed gap tasks with PR/commit links)*
@@ -100,9 +124,15 @@ jobs:
 
           - [ ] *(list in-flight work)*
 
-          ### Blockers / decisions needed
+          ### Open risks and owners
 
-          - *(list any blockers)*
+          | Risk | Owner | Status |
+          |---|---|---|
+          | | | |
+
+          ### Next week commitments
+
+          - [ ] *(what will be done by next Monday?)*
 
           ---
 

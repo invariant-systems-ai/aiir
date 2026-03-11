@@ -159,8 +159,6 @@ pytest_add_cli_args = [
     "--deselect=tests/test_verify.py::TestSafeVerifyPathNoDeadCode::test_no_raw_parts_variable",
     "--deselect=tests/test_verify.py::TestIterativeJsonDepthCheck::test_implementation_is_iterative",
     "--deselect=tests/test_hardening.py::TestConstantTimeComparisonGuard",
-    # TestGitEnvHardening uses inspect.getsource, incompatible with trampoline.
-    "--deselect=tests/test_core.py::TestGitEnvHardening",
 ]
 pytest_add_cli_args_test_selection = [
     "tests/test_verify.py",
@@ -168,13 +166,8 @@ pytest_add_cli_args_test_selection = [
     "tests/test_policy.py",
     "tests/test_detect.py",
     "tests/test_receipt.py",
-    "tests/test_properties.py",
+    "tests/test_verify_release.py",
     "tests/test_hardening.py",
     "tests/test_branch_close.py",
-    "tests/test_core.py",
-    "tests/test_github.py",
-    "tests/test_verify_release.py",
-    "tests/test_canonical_cbor.py",
-    "tests/test_ledger.py",
 ]
 also_copy = ["aiir/py.typed"]

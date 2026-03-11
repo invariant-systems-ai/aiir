@@ -518,3 +518,143 @@ class TestVerifyReceiptFileEdgeCases(unittest.TestCase):
             self.assertNotIn("too large", result.get("error", ""))
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+# ---------------------------------------------------------------------------
+# Mutation-killing tests: verify_receipt() result dict fields
+# ---------------------------------------------------------------------------
+# These tests target ungapped fields identified by mutation testing:
+#   - receipt_id_match (not tested by any prior test)
+#   - commit_sha extraction
+#   - expected_content_hash / expected_receipt_id (only on valid receipts)
+#   - error message strings: "content hash mismatch", "receipt_id mismatch"
+#   - valid = hash_ok AND id_ok  (kills AND→OR mutation)
+
+
+class TestVerifyReceiptDirectFields(unittest.TestCase):
+    """Targeted tests for verify_receipt() result dict fields."""
+
+    # Minimal valid receipt core (exact CORE_KEYS from _verify.py)
+    _CORE = {
+        "type": "aiir.commit_receipt",
+        "schema": "aiir/commit_receipt.v1",
+        "version": "1.0.0",
+        "commit": {"sha": "a" * 40, "subject": "test"},
+        "ai_attestation": {},
+        "provenance": {},
+    }
+
+    def _make_valid_receipt(self):
+        """Build a receipt with correct content_hash and receipt_id."""
+        core_json = cli._canonical_json(self._CORE)
+        h = cli._sha256(core_json)
+        return {
+            **self._CORE,
+            "content_hash": f"sha256:{h}",
+            "receipt_id": f"g1-{h[:32]}",
+        }
+
+    def test_valid_receipt_id_match_is_true(self):
+        """receipt_id_match must be True for an untampered receipt."""
+        from aiir._verify import verify_receipt
+
+        result = verify_receipt(self._make_valid_receipt())
+        self.assertTrue(result["valid"])
+        self.assertTrue(result["receipt_id_match"])
+        self.assertEqual(result["errors"], [])
+
+    def test_valid_receipt_commit_sha_extracted(self):
+        """commit_sha must equal the sha value from the commit field."""
+        from aiir._verify import verify_receipt
+
+        result = verify_receipt(self._make_valid_receipt())
+        self.assertEqual(result["commit_sha"], "a" * 40)
+
+    def test_valid_receipt_exposes_expected_hashes(self):
+        """expected_content_hash and expected_receipt_id are present only on valid."""
+        from aiir._verify import verify_receipt
+
+        result = verify_receipt(self._make_valid_receipt())
+        self.assertTrue(result["valid"])
+        self.assertIn("expected_content_hash", result)
+        self.assertIn("expected_receipt_id", result)
+        self.assertTrue(result["expected_content_hash"].startswith("sha256:"))
+        self.assertTrue(result["expected_receipt_id"].startswith("g1-"))
+
+    def test_invalid_receipt_hides_expected_hashes(self):
+        """expected_content_hash and expected_receipt_id absent on invalid receipts."""
+        from aiir._verify import verify_receipt
+
+        receipt = self._make_valid_receipt()
+        receipt["content_hash"] = "sha256:wrong"
+        receipt["receipt_id"] = "g1-wrong"
+        result = verify_receipt(receipt)
+        self.assertFalse(result["valid"])
+        self.assertNotIn("expected_content_hash", result)
+        self.assertNotIn("expected_receipt_id", result)
+
+    def test_content_hash_mismatch_error_string(self):
+        """'content hash mismatch' must appear in errors when hash is wrong."""
+        from aiir._verify import verify_receipt
+
+        receipt = self._make_valid_receipt()
+        receipt["content_hash"] = "sha256:wrong"
+        result = verify_receipt(receipt)
+        self.assertFalse(result["content_hash_match"])
+        self.assertIn("content hash mismatch", result["errors"])
+
+    def test_receipt_id_mismatch_error_string(self):
+        """'receipt_id mismatch' must appear in errors when id is wrong."""
+        from aiir._verify import verify_receipt
+
+        receipt = self._make_valid_receipt()
+        receipt["receipt_id"] = "g1-wrong"
+        result = verify_receipt(receipt)
+        self.assertFalse(result["receipt_id_match"])
+        self.assertIn("receipt_id mismatch", result["errors"])
+
+    def test_valid_requires_hash_ok_and_id_ok(self):
+        """valid = hash_ok AND id_ok: hash matches but id tampered → invalid.
+
+        Kills AND→OR mutation: with OR the result would be True (hash matches).
+        """
+        from aiir._verify import verify_receipt
+
+        receipt = self._make_valid_receipt()
+        receipt["receipt_id"] = "g1-wrong"  # tamper only the id
+        result = verify_receipt(receipt)
+        self.assertFalse(result["valid"])
+        self.assertTrue(result["content_hash_match"])  # hash still matches
+        self.assertFalse(result["receipt_id_match"])  # id doesn't match
+
+    def test_valid_requires_hash_ok_when_only_hash_wrong(self):
+        """valid = hash_ok AND id_ok: hash tampered but id correct → invalid.
+
+        Since receipt_id is derived only from CORE_KEYS (not content_hash),
+        a corrupt content_hash leaves receipt_id intact.
+        Kills AND→OR mutation: with OR the result would be True (id matches).
+        """
+        from aiir._verify import verify_receipt
+
+        receipt = self._make_valid_receipt()
+        receipt["content_hash"] = "sha256:wrong"  # tamper only the hash
+        result = verify_receipt(receipt)
+        self.assertFalse(result["valid"])
+        self.assertFalse(result["content_hash_match"])  # hash doesn't match
+        self.assertTrue(result["receipt_id_match"])  # id still matches
+
+    def test_missing_commit_sha_returns_unknown(self):
+        """commit_sha must be 'unknown' when commit field is not a dict."""
+        from aiir._verify import verify_receipt
+
+        receipt = self._make_valid_receipt()
+        receipt["commit"] = None  # not a dict
+        # Recompute valid hashes for the modified receipt core
+        core_keys = {"type", "schema", "version", "commit", "ai_attestation", "provenance"}
+        core = {k: v for k, v in receipt.items() if k in core_keys}
+        core_json = cli._canonical_json(core)
+        h = cli._sha256(core_json)
+        receipt["content_hash"] = f"sha256:{h}"
+        receipt["receipt_id"] = f"g1-{h[:32]}"
+        result = verify_receipt(receipt)
+        self.assertEqual(result["commit_sha"], "unknown")

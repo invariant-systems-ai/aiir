@@ -199,7 +199,19 @@ jobs:
             echo "::warning::Could not resolve latest aiir version from PyPI"
             exit 0
           fi
-          pip install --no-deps "aiir==$LATEST"
+          python3 - <<PY
+          import json
+          import urllib.request
+
+          version = "$LATEST"
+          data = json.load(urllib.request.urlopen(f"https://pypi.org/pypi/aiir/{version}/json"))
+          hashes = [f"--hash=sha256:{f['digests']['sha256']}" for f in data.get("urls", [])]
+          if not hashes:
+              raise SystemExit("No distribution hashes found on PyPI")
+          with open("/tmp/aiir-install.requirements.txt", "w", encoding="utf-8") as out:
+              out.write(f"aiir=={version} {' '.join(hashes)}\n")
+          PY
+          pip install --require-hashes --no-deps -r /tmp/aiir-install.requirements.txt
           INSTALLED=$(python3 -c "import aiir; print(aiir.__version__)")
           if [ "$INSTALLED" != "$LATEST" ]; then
             echo "::warning::Installed ($INSTALLED) ≠ PyPI latest ($LATEST)"

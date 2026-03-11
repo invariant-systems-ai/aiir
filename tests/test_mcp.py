@@ -82,8 +82,6 @@ class TestMcpLedgerPathHardening(unittest.TestCase):
 
     def test_safe_ledger_dir_rejects_symlink_escape(self):
         """.aiir symlink escaping cwd must raise ValueError."""
-        import aiir.mcp_server as mcp
-
         tmpdir = tempfile.mkdtemp()
         outside = tempfile.mkdtemp()
         original_cwd = os.getcwd()
@@ -91,7 +89,7 @@ class TestMcpLedgerPathHardening(unittest.TestCase):
             os.symlink(outside, os.path.join(tmpdir, ".aiir"))
             os.chdir(tmpdir)
             with self.assertRaises(ValueError) as ctx:
-                mcp._safe_ledger_dir()
+                mcp_server._safe_ledger_dir()
             self.assertIn("outside the working directory", str(ctx.exception))
         finally:
             os.chdir(original_cwd)

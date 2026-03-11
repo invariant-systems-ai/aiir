@@ -94,6 +94,20 @@
       "spec_version": "1.1.x"
     },
     {
+      "file": "schemas/enterprise_profile.v1.schema.json",
+      "url": "https://github.com/invariant-systems-ai/aiir/blob/main/schemas/enterprise_profile.v1.schema.json",
+      "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
+      "description": "JSON Schema for the AIIR Enterprise Protected Branch Profile v1 configuration format",
+      "spec_version": "1.1.x"
+    },
+    {
+      "file": "schemas/decision_receipt.v1.schema.json",
+      "url": "https://github.com/invariant-systems-ai/aiir/blob/main/schemas/decision_receipt.v1.schema.json",
+      "schema_dialect": "https://json-schema.org/draft/2020-12/schema",
+      "description": "JSON Schema for the AIIR decision receipt v1 format (per-rule evaluation receipt)",
+      "spec_version": "1.1.x"
+    },
+    {
       "file": "schemas/receipt.cddl",
       "url": "https://github.com/invariant-systems-ai/aiir/blob/main/schemas/receipt.cddl",
       "schema_dialect": "RFC 8610 (CDDL)",

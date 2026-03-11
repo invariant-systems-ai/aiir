@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://invariantsystems.io/schemas/aiir/enterprise_profile.v1.schema.json",
+  "title": "AIIR Enterprise Protected Branch Profile v1",
+  "description": "Configuration schema for the AIIR Enterprise Protected Branch Profile. Defines 12 deterministic rules that consume commit receipts, review receipts, and release VSAs to enforce branch protection policies without prose interpretation.",
+  "type": "object",
+  "required": ["profile", "version", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "profile": {
+      "const": "aiir/enterprise_protected_branch.v1",
+      "description": "Profile type identifier."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Profile version (SemVer). Must be '1.0.0' for this schema."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Human-readable description of this profile instance."
+    },
+    "rules": {
+      "$ref": "#/$defs/RuleSet",
+      "description": "The twelve EPB rules and their parameters."
+    }
+  },
+  "$defs": {
+    "RuleSet": {
+      "type": "object",
+      "required": [
+        "EPB-001", "EPB-002", "EPB-003", "EPB-004",
+        "EPB-005", "EPB-006", "EPB-007", "EPB-008",
+        "EPB-009", "EPB-010", "EPB-011", "EPB-012"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "EPB-001": { "$ref": "#/$defs/EnableOnly" },
+        "EPB-002": { "$ref": "#/$defs/EnableOnly" },
+        "EPB-003": { "$ref": "#/$defs/EnableOnly" },
+        "EPB-004": { "$ref": "#/$defs/RuleTrustTier" },
+        "EPB-005": { "$ref": "#/$defs/RuleDAGBinding" },
+        "EPB-006": { "$ref": "#/$defs/RuleCoverage" },
+        "EPB-007": { "$ref": "#/$defs/RuleAICap" },
+        "EPB-008": { "$ref": "#/$defs/EnableOnly" },
+        "EPB-009": { "$ref": "#/$defs/EnableOnly" },
+        "EPB-010": { "$ref": "#/$defs/EnableOnly" },
+        "EPB-011": { "$ref": "#/$defs/RulePolicyDigest" },
+        "EPB-012": { "$ref": "#/$defs/RuleVerifierIdentity" }
+      }
+    },
+    "EnableOnly": {
+      "type": "object",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this rule is evaluated. If false, the rule is skipped."
+        }
+      }
+    },
+    "RuleTrustTier": {
+      "type": "object",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "min_trust_tier": {
+          "type": "integer",
+          "enum": [1, 2, 3],
+          "default": 2,
+          "description": "Minimum trust tier required. 1 = unsigned (content hash only), 2 = Sigstore signed, 3 = in-toto enveloped."
+        }
+      }
+    },
+    "RuleDAGBinding": {
+      "type": "object",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "require_dag_binding": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, receipts must use commit_receipt.v2 schema with tree_sha and parent_shas fields matching the git DAG."
+        }
+      }
+    },
+    "RuleCoverage": {
+      "type": "object",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "min_coverage_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 100,
+          "description": "Minimum percentage of commits in the merge range that must have receipts."
+        }
+      }
+    },
+    "RuleAICap": {
+      "type": "object",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_ai_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 50,
+          "description": "Maximum allowed percentage of AI-authored or AI+bot commits across the ledger."
+        }
+      }
+    },
+    "RulePolicyDigest": {
+      "type": "object",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "expected_policy_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 hex digest of the canonical JSON policy that the VSA must have been evaluated against. Prevents policy substitution."
+        }
+      },
+      "if": { "properties": { "enabled": { "const": true } } },
+      "then": { "required": ["enabled", "expected_policy_digest"] }
+    },
+    "RuleVerifierIdentity": {
+      "type": "object",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "trusted_verifiers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "minItems": 1,
+          "default": ["https://invariantsystems.io/verifiers/aiir"],
+          "description": "URIs of verifiers whose VSAs are trusted. The VSA verifier.id must match one of these."
+        }
+      },
+      "if": { "properties": { "enabled": { "const": true } } },
+      "then": { "required": ["enabled", "trusted_verifiers"] }
+    }
+  }
+}

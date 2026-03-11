@@ -39,6 +39,9 @@ _MT_ARRAY = 4
 _MT_MAP = 5
 _MT_SIMPLE = 7
 
+# Maximum nesting depth for arrays/maps (prevents stack-overflow DoS)
+_MAX_CBOR_DEPTH = 64
+
 
 class CborDecodeError(ValueError):
     """Raised when CBOR bytes cannot be decoded or violate determinism rules."""
@@ -113,14 +116,21 @@ def _decode_float(data: bytes, offset: int, additional: int) -> Tuple[float, int
     raise CborDecodeError(f"unsupported float additional info: {additional}")
 
 
-def decode_cbor(data: bytes, offset: int = 0) -> Tuple[Any, int]:
+def decode_cbor(data: bytes, offset: int = 0, _depth: int = 0) -> Tuple[Any, int]:
     """Decode one CBOR data item. Returns (value, new_offset).
 
     Enforces canonical encoding rules:
     - Integers use shortest form.
     - No indefinite-length containers.
     - Map keys sorted by encoded length then lexicographically.
+
+    *_depth* is an internal recursion counter.  Raises CborDecodeError when
+    nesting exceeds _MAX_CBOR_DEPTH to prevent stack-overflow DoS (CWE-400).
     """
+    if _depth > _MAX_CBOR_DEPTH:
+        raise CborDecodeError(
+            f"CBOR nesting depth exceeds maximum ({_MAX_CBOR_DEPTH})"
+        )
     if offset >= len(data):
         raise CborDecodeError("unexpected end of input")
 
@@ -156,7 +166,7 @@ def decode_cbor(data: bytes, offset: int = 0) -> Tuple[Any, int]:
         count, off = _read_uint(data, offset)
         items: List[Any] = []
         for _ in range(count):
-            item, off = decode_cbor(data, off)
+            item, off = decode_cbor(data, off, _depth + 1)
             items.append(item)
         return items, off
 
@@ -166,14 +176,14 @@ def decode_cbor(data: bytes, offset: int = 0) -> Tuple[Any, int]:
         prev_key_bytes: Optional[bytes] = None
         for _ in range(count):
             key_start = off
-            key, off = decode_cbor(data, off)
+            key, off = decode_cbor(data, off, _depth + 1)
             key_bytes = data[key_start:off]
             # Verify canonical key ordering: sort by (length, bytes)
             if prev_key_bytes is not None:
                 if (len(key_bytes), key_bytes) <= (len(prev_key_bytes), prev_key_bytes):
                     raise CborDecodeError("map keys not in canonical order")
             prev_key_bytes = key_bytes
-            value, off = decode_cbor(data, off)
+            value, off = decode_cbor(data, off, _depth + 1)
             result[key] = value
         return result, off
 

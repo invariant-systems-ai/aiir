@@ -18,6 +18,7 @@ import hashlib
 import json
 import struct
 import unittest
+from typing import Any
 from pathlib import Path
 
 from aiir._canonical_cbor import (
@@ -810,6 +811,57 @@ class TestVerifyCborFile(unittest.TestCase):
             result = verify_cbor_file(f_path, json_receipt=receipt)
             self.assertTrue(result["valid"], result.get("errors"))
             self.assertTrue(result["cross_verify_ok"])
+
+
+class TestDecodeDepthLimit(unittest.TestCase):
+    """decode_cbor must reject deeply-nested structures (CWE-400)."""
+
+    def _build_nested_array(self, depth: int) -> bytes:
+        """Return CBOR bytes for an array nested *depth* levels deep."""
+        # Innermost value: uint 0 (0x00)
+        result = bytes([0x00])
+        for _ in range(depth):
+            # CBOR array of 1 item: 0x81 <item>
+            result = bytes([0x81]) + result
+        return result
+
+    def test_within_depth_limit_succeeds(self):
+        """Arrays nested exactly at the limit must decode without error."""
+        from aiir._verify_cbor import _MAX_CBOR_DEPTH, decode_cbor_full
+
+        payload = self._build_nested_array(_MAX_CBOR_DEPTH)
+        # Should not raise
+        value = decode_cbor_full(payload)
+        # Unwrap to check the innermost value
+        inner = value
+        for _ in range(_MAX_CBOR_DEPTH):
+            self.assertIsInstance(inner, list)
+            inner = inner[0]
+        self.assertEqual(inner, 0)
+
+    def test_exceeding_depth_limit_raises(self):
+        """Arrays nested beyond the limit must raise CborDecodeError."""
+        from aiir._verify_cbor import _MAX_CBOR_DEPTH, CborDecodeError, decode_cbor_full
+
+        payload = self._build_nested_array(_MAX_CBOR_DEPTH + 1)
+        with self.assertRaises(CborDecodeError) as ctx:
+            decode_cbor_full(payload)
+        self.assertIn("nesting depth exceeds maximum", str(ctx.exception))
+
+    def test_deeply_nested_map_raises(self):
+        """Maps nested beyond the limit must also raise CborDecodeError."""
+        from aiir._verify_cbor import _MAX_CBOR_DEPTH, CborDecodeError, decode_cbor_full
+        from aiir._canonical_cbor import canonical_cbor_bytes
+
+        # Build nested maps: {"k": {"k": {"k": ... }}} _MAX_CBOR_DEPTH+1 deep
+        # Use canonical_cbor_bytes to produce valid canonical encoding
+        val: Any = 0
+        for _ in range(_MAX_CBOR_DEPTH + 1):
+            val = {"k": val}
+        payload = canonical_cbor_bytes(val)
+        with self.assertRaises(CborDecodeError) as ctx:
+            decode_cbor_full(payload)
+        self.assertIn("nesting depth exceeds maximum", str(ctx.exception))
 
 
 if __name__ == "__main__":  # pragma: no cover

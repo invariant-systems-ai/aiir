@@ -17,6 +17,9 @@
 
 use std::fmt;
 
+/// Maximum nesting depth for CBOR decode (matches Python _verify_cbor.py).
+const MAX_DECODE_DEPTH: usize = 64;
+
 // ── Error type ───────────────────────────────────────────────────────
 
 /// Error returned when CBOR bytes cannot be decoded or violate determinism rules.
@@ -343,6 +346,12 @@ fn decode_float(
                 data[offset + 2],
                 data[offset + 3],
             ]) as f64;
+            // L-1: Reject non-canonical f32 when f16 would suffice.
+            if try_f16(val).is_some() {
+                return Err(CborDecodeError(
+                    "non-canonical float: f32 used but value fits in f16".into(),
+                ));
+            }
             Ok((val, offset + 4))
         }
         27 => {
@@ -361,6 +370,18 @@ fn decode_float(
                 data[offset + 6],
                 data[offset + 7],
             ]);
+            // L-1: Reject non-canonical f64 when a shorter encoding exists.
+            if try_f16(val).is_some() {
+                return Err(CborDecodeError(
+                    "non-canonical float: f64 used but value fits in f16".into(),
+                ));
+            }
+            let f32v = val as f32;
+            if (f32v as f64).to_bits() == val.to_bits() {
+                return Err(CborDecodeError(
+                    "non-canonical float: f64 used but value fits in f32".into(),
+                ));
+            }
             Ok((val, offset + 8))
         }
         _ => Err(CborDecodeError(format!(
@@ -376,6 +397,20 @@ fn decode_float(
 /// Enforces canonical encoding: shortest integers, no indefinite-length,
 /// map keys sorted by `(encoded_length, encoded_bytes)`.
 pub fn decode(data: &[u8], offset: usize) -> Result<(CborValue, usize), CborDecodeError> {
+    decode_inner(data, offset, 0)
+}
+
+fn decode_inner(
+    data: &[u8],
+    offset: usize,
+    depth: usize,
+) -> Result<(CborValue, usize), CborDecodeError> {
+    if depth > MAX_DECODE_DEPTH {
+        return Err(CborDecodeError(format!(
+            "nesting depth exceeds limit of {}",
+            MAX_DECODE_DEPTH
+        )));
+    }
     if offset >= data.len() {
         return Err(CborDecodeError("unexpected end of input".into()));
     }
@@ -393,6 +428,13 @@ pub fn decode(data: &[u8], offset: usize) -> Result<(CborValue, usize), CborDeco
         // Major 1: negative integer
         1 => {
             let (val, off) = read_uint(data, offset)?;
+            // H-4: Guard against wrapping — val > i64::MAX overflows `as i64`.
+            if val > i64::MAX as u64 {
+                return Err(CborDecodeError(format!(
+                    "negative integer raw value {} exceeds i64 range",
+                    val
+                )));
+            }
             Ok((CborValue::NegInt(-1 - (val as i64)), off))
         }
         // Major 2: byte string
@@ -422,9 +464,13 @@ pub fn decode(data: &[u8], offset: usize) -> Result<(CborValue, usize), CborDeco
         // Major 4: array
         4 => {
             let (count, mut off) = read_uint(data, offset)?;
-            let mut items = Vec::with_capacity(count as usize);
+            // H-3: Cap capacity to remaining bytes to prevent OOM from
+            // crafted headers claiming huge counts.
+            let remaining = data.len().saturating_sub(off);
+            let cap = (count as usize).min(remaining);
+            let mut items = Vec::with_capacity(cap);
             for _ in 0..count {
-                let (item, new_off) = decode(data, off)?;
+                let (item, new_off) = decode_inner(data, off, depth + 1)?;
                 items.push(item);
                 off = new_off;
             }
@@ -433,11 +479,14 @@ pub fn decode(data: &[u8], offset: usize) -> Result<(CborValue, usize), CborDeco
         // Major 5: map
         5 => {
             let (count, mut off) = read_uint(data, offset)?;
-            let mut entries = Vec::with_capacity(count as usize);
+            // H-3: Cap capacity to remaining bytes.
+            let remaining = data.len().saturating_sub(off);
+            let cap = (count as usize).min(remaining);
+            let mut entries = Vec::with_capacity(cap);
             let mut prev_key_bytes: Option<Vec<u8>> = None;
             for _ in 0..count {
                 let key_start = off;
-                let (key, new_off) = decode(data, off)?;
+                let (key, new_off) = decode_inner(data, off, depth + 1)?;
                 let key_bytes = data[key_start..new_off].to_vec();
 
                 // Check canonical key ordering
@@ -451,7 +500,7 @@ pub fn decode(data: &[u8], offset: usize) -> Result<(CborValue, usize), CborDeco
                 prev_key_bytes = Some(key_bytes);
                 off = new_off;
 
-                let (value, new_off) = decode(data, off)?;
+                let (value, new_off) = decode_inner(data, off, depth + 1)?;
                 entries.push((key, value));
                 off = new_off;
             }

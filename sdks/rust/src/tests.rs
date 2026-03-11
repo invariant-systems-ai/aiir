@@ -337,3 +337,66 @@ fn map_keys_sorted_canonical() {
         panic!("expected map");
     }
 }
+
+// ── H-2: Recursion depth limit ──────────────────────────────────────
+
+#[test]
+fn decode_rejects_excessive_nesting() {
+    // Build a payload of 100 nested arrays: 0x81 = array(1)
+    let mut payload = vec![0x81u8; 100];
+    payload.push(0x00); // innermost: uint 0
+    let result = decode_full(&payload);
+    assert!(result.is_err(), "should reject nesting > MAX_DECODE_DEPTH");
+    let err = result.unwrap_err().0;
+    assert!(err.contains("nesting depth"), "error: {}", err);
+}
+
+// ── H-3: OOM guard on Vec::with_capacity ─────────────────────────────
+
+#[test]
+fn decode_rejects_huge_array_count() {
+    // Array header claiming 2^32 elements but only 1 byte of data follows
+    let payload = vec![0x9B, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00];
+    let result = decode_full(&payload);
+    assert!(result.is_err(), "should fail on count > remaining bytes");
+}
+
+// ── H-4: NegInt i64 overflow guard ──────────────────────────────────
+
+#[test]
+fn decode_rejects_negint_overflow() {
+    // Major type 1, 8-byte value = u64::MAX (0xFFFFFFFFFFFFFFFF)
+    let payload = vec![0x3B, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF];
+    let result = decode_full(&payload);
+    assert!(result.is_err(), "should reject NegInt exceeding i64 range");
+    let err = result.unwrap_err().0;
+    assert!(err.contains("i64 range"), "error: {}", err);
+}
+
+// ── L-1: Non-canonical float width ──────────────────────────────────
+
+#[test]
+fn decode_rejects_f32_when_f16_suffices() {
+    // 0.0 encoded as f32 (0xFA 0x00000000) instead of f16 (0xF9 0x0000)
+    let payload = vec![0xFA, 0x00, 0x00, 0x00, 0x00];
+    let result = decode_full(&payload);
+    assert!(result.is_err(), "should reject non-canonical f32 for 0.0");
+    let err = result.unwrap_err().0;
+    assert!(err.contains("non-canonical float"), "error: {}", err);
+}
+
+#[test]
+fn decode_rejects_f64_when_f16_suffices() {
+    // 0.0 encoded as f64 (0xFB ...) instead of f16
+    let payload = vec![0xFB, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+    let result = decode_full(&payload);
+    assert!(result.is_err(), "should reject non-canonical f64 for 0.0");
+}
+
+#[test]
+fn decode_rejects_f64_when_f32_suffices() {
+    // 1.5 encoded as f64 (0xFB 3FF8000000000000) instead of f16/f32
+    let payload = vec![0xFB, 0x3F, 0xF8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+    let result = decode_full(&payload);
+    assert!(result.is_err(), "should reject non-canonical f64 for 1.5");
+}

@@ -988,9 +988,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             vsa_path = args.emit_vsa
             from pathlib import Path as _VsaPath
 
-            # Validate path: must resolve within cwd (no symlink escape)
+            # Validate path: must resolve within cwd (no symlink escape).
+            # Use relative_to() — NOT startswith() — to prevent the
+            # prefix-collision bug: /repo vs /repo_evil.
             _vsa_resolved = _VsaPath(vsa_path).resolve()
-            if not str(_vsa_resolved).startswith(str(_VsaPath.cwd().resolve())):
+            try:
+                _vsa_resolved.relative_to(_VsaPath.cwd().resolve())
+            except ValueError:
                 print(
                     f"{_e('error')} VSA path must be relative and within the project.",
                     file=sys.stderr,
@@ -1045,10 +1049,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return 1
         export_path = args.export
         # Validate export path — reject traversal via resolve().
+        # Use relative_to() — NOT startswith() — to prevent the
+        # prefix-collision bug: /repo vs /repo_evil.
         from pathlib import Path
 
         _export_resolved = Path(export_path).resolve()
-        if not str(_export_resolved).startswith(str(Path.cwd().resolve())):
+        try:
+            _export_resolved.relative_to(Path.cwd().resolve())
+        except ValueError:
             print(
                 f"{_e('error')} Export path must be relative and within the project.",
                 file=sys.stderr,
@@ -1642,6 +1650,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # GitLab SAST report (--gl-sast-report)
     if getattr(args, "gl_sast_report", None):
         from pathlib import Path as _Path
+
+        # Block relative paths that escape the working directory via ".."
+        # (absolute paths are an explicit user choice and are allowed).
+        _sast_raw = _Path(args.gl_sast_report)
+        if not _sast_raw.is_absolute():
+            _sast_resolved = _sast_raw.resolve()
+            try:
+                _sast_resolved.relative_to(_Path.cwd().resolve())
+            except ValueError:
+                print(
+                    f"{_e('error')} SAST report path must be relative and within the project.",
+                    file=sys.stderr,
+                )
+                return 1
 
         sast_report = format_gl_sast_report(receipts)
         sast_path = _Path(args.gl_sast_report)

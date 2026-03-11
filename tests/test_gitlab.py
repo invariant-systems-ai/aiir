@@ -897,5 +897,23 @@ class TestQueryGitlabGraphQL(unittest.TestCase):
                 )
 
 
+class TestGitLabApiRequestHardening(unittest.TestCase):
+    """Coverage for URL scheme hardening in _gitlab_api_request."""
+
+    def test_rejects_non_http_scheme(self):
+        """file:// base_url must be rejected before request construction."""
+        from aiir._gitlab import _gitlab_api_request
+
+        with self.assertRaises(RuntimeError) as ctx:
+            _gitlab_api_request(
+                "POST",
+                "/projects/1/notes",
+                body={"body": "x"},
+                api_url="file:///etc",
+                token="glpat_test",
+            )
+        self.assertIn("non-HTTP(S)", str(ctx.exception))
+
+
 if __name__ == "__main__":
     unittest.main()

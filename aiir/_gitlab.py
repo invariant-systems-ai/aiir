@@ -128,6 +128,15 @@ def _gitlab_api_request(
             "(CI_JOB_TOKEN is automatic)."
         )
 
+    # Validate URL scheme to prevent SSRF (e.g. file://, gopher://).
+    from urllib.parse import urlparse as _urlparse
+
+    _parsed = _urlparse(base_url)
+    if _parsed.scheme not in ("https", "http"):
+        raise RuntimeError(
+            f"Refusing API request to non-HTTP(S) URL scheme: {_parsed.scheme!r}"
+        )
+
     url = f"{base_url.rstrip('/')}{endpoint}"
     headers: Dict[str, str] = {"Content-Type": "application/json"}
 
@@ -199,9 +208,12 @@ def post_mr_comment(
             comment.encode("utf-8")[:budget].decode("utf-8", errors="ignore") + suffix
         )
 
+    # URL-encode pid and iid to prevent path traversal on the API.
+    from urllib.parse import quote as _quote
+
     return _gitlab_api_request(
         "POST",
-        f"/projects/{pid}/merge_requests/{iid}/notes",
+        f"/projects/{_quote(str(pid), safe='')}/merge_requests/{_quote(str(iid), safe='')}/notes",
         body={"body": comment},
         api_url=api_url,
         token=token,
@@ -484,9 +496,11 @@ def enforce_approval_rules(
         }
 
     try:
+        from urllib.parse import quote as _quote
+
         result = _gitlab_api_request(
             "POST",
-            f"/projects/{pid}/merge_requests/{iid}/approval_rules",
+            f"/projects/{_quote(str(pid), safe='')}/merge_requests/{_quote(str(iid), safe='')}/approval_rules",
             body={
                 "name": f"AIIR: AI-authored code review ({ai_percent:.0f}% AI)",
                 "approvals_required": required_approvals,

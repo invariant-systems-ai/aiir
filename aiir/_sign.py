@@ -155,14 +155,14 @@ def sign_receipt_file(receipt_path: str) -> str:
     bundle_json = sign_receipt(receipt_bytes)
 
     try:
-        fd = os.open(bundle_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+        fd = os.open(bundle_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     except FileExistsError:
         raise FileExistsError(
             f"Sigstore bundle already exists: {bundle_path} — "
             f"remove it first or use a different receipt path"
         )
     if _HAS_FCHMOD:
-        os.fchmod(fd, 0o644)  # Force permissions regardless of umask
+        os.fchmod(fd, 0o600)  # Force owner-only permissions regardless of umask
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         f.write(bundle_json)
     return bundle_path

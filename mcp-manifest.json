@@ -3,7 +3,7 @@
   "name": "aiir",
   "displayName": "AIIR — AI Integrity Receipts",
   "description": "Tamper-evident receipts for commits with declared AI involvement. Detects AI-involvement signals, produces content-addressed JSON receipts, and provides cryptographic audit trails for compliance.",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "author": {
     "name": "Invariant Systems, Inc.",
     "url": "https://invariantsystems.io",

@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.5] — 2026-03-11
+
+### Changed
+
+- Version bump to `1.2.5` for the next PyPI and npm release.
+- Synchronized all in-repo version references via `scripts/sync-version.py`.
+
+### Fixed
+
+- Added coverage tests for hardened security branches so release CI stays at 100% coverage.
+
 ## [1.2.4] — 2026-03-11
 
 ### Fixed

@@ -12,18 +12,10 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
-
-# Windows compat: TemporaryDirectory cleanup can fail with PermissionError
-# when subprocess file handles are still open.  Python 3.10+ accepts
-# ``ignore_cleanup_errors``; on 3.9 we pass nothing (best-effort).
-_TD_KWARGS: dict = (
-    {"ignore_cleanup_errors": True} if sys.version_info >= (3, 10) else {}
-)
 
 SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
 SCHEMAS_DIR = Path(__file__).resolve().parent.parent / "schemas"

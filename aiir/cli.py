@@ -799,7 +799,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             # Append to ledger
             ledger_dir = args.ledger if args.ledger is not None else _LEDGER_DIR
             try:
-                appended, skipped, ledger_path = append_to_ledger(
+                append_to_ledger(
                     [review_receipt],
                     ledger_dir=ledger_dir,
                 )

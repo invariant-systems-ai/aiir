@@ -1,0 +1,55 @@
+{
+  "id": "adv-INJ-002",
+  "category": "injection",
+  "description": "Null byte in commit subject — hash mismatch after sanitization",
+  "spec_section": "§7",
+  "receipt": {
+    "type": "aiir.commit_receipt",
+    "schema": "aiir/commit_receipt.v1",
+    "version": "1.0.12",
+    "commit": {
+      "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "author": {
+        "name": "Alice",
+        "email": "alice@example.com",
+        "date": "2026-03-09T00:00:00Z"
+      },
+      "committer": {
+        "name": "Alice",
+        "email": "alice@example.com",
+        "date": "2026-03-09T00:00:00Z"
+      },
+      "subject": "feat: normal\u0000; rm -rf /",
+      "message_hash": "sha256:375aca2c5a71c7ffaaa0c3602ed0f82d27986ce0776b5c5c1bc2d2a5638b18bb",
+      "diff_hash": "sha256:a9b7bc7b29f22a8b1ae213c4105d73c39b9e3f218d75bb6a288207c1d86b96fe",
+      "files_changed": 1,
+      "files": [
+        "widget.py"
+      ]
+    },
+    "ai_attestation": {
+      "is_ai_authored": false,
+      "signals_detected": [],
+      "signal_count": 0,
+      "is_bot_authored": false,
+      "bot_signals_detected": [],
+      "bot_signal_count": 0,
+      "authorship_class": "human",
+      "detection_method": "heuristic_v2"
+    },
+    "provenance": {
+      "repository": "https://github.com/example/repo",
+      "tool": "https://github.com/invariant-systems-ai/aiir@1.0.12",
+      "generator": "aiir.cli"
+    },
+    "receipt_id": "g1-beb1b206eb8d05ac2dce8205b4a14e88",
+    "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "timestamp": "2026-03-09T00:00:00Z",
+    "extensions": {}
+  },
+  "expected": {
+    "valid": false,
+    "must_reject": true,
+    "error_pattern": "content hash mismatch"
+  }
+}

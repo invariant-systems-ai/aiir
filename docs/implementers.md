@@ -21,6 +21,8 @@ Implementations are listed here when they:
 | Name | Language | Level | Status | Maintainer | Verified | Notes |
 |---|---|---|---|---|---|---|
 | [aiir](https://github.com/invariant-systems-ai/aiir) | Python 3.9–3.13 | 3 (Full) | Reference | Invariant Systems | 2026-03-11 | Reference implementation. Zero dependencies. Includes CLI, GitHub Action, GitLab CI component, MCP tool. |
+| [@invariantsystems/aiir](https://github.com/invariant-systems-ai/aiir/tree/main/sdks/js) | JavaScript (Node ≥18, browser) | 1 (Verify) | Second impl | Invariant Systems | 2026-03-11 | Zero dependencies. Passes 8/8 encoder interop vectors + 8/8 full receipt verifications. Browser SubtleCrypto + Node crypto. |
+| [aiir-cbor-verify](https://github.com/invariant-systems-ai/aiir/tree/main/sdks/rust) | Rust | 3 (Full) | Second impl | Invariant Systems | 2026-03-11 | Deterministic CBOR decoder. Passes CBOR round-trip vectors. crates.io packaged. |
 
 ### Conformance levels
 
@@ -72,7 +74,8 @@ Start with the [conformance guide](https://invariantsystems.io/conformance):
 
 1. Read [`SPEC.md`](../SPEC.md) — the normative specification
 2. Download [`schemas/test_vectors.json`](../schemas/test_vectors.json) — 25 JSON test vectors
-3. Download [`schemas/cbor_test_vectors.json`](../schemas/cbor_test_vectors.json) — 24 CBOR vectors (for Level 3)
-4. Pass all vectors → open a PR to add your implementation to this registry
+3. Download [`schemas/test-vectors/encoder_interop_vectors.json`](../schemas/test-vectors/encoder_interop_vectors.json) — 8 encoder interop vectors (canonical JSON + hashes)
+4. Download [`schemas/cbor_test_vectors.json`](../schemas/cbor_test_vectors.json) — 24 CBOR vectors (for Level 3)
+5. Pass all vectors → open a PR to add your implementation to this registry
 
 Questions? Open an issue or email [noah@invariantsystems.io](mailto:noah@invariantsystems.io).

@@ -1,0 +1,12 @@
+{
+  "id": "adv-PAR-007",
+  "category": "parsing",
+  "description": "Empty JSON object — no fields at all",
+  "spec_section": "§7",
+  "receipt": {},
+  "expected": {
+    "valid": false,
+    "must_reject": true,
+    "error_pattern": "unknown receipt type"
+  }
+}

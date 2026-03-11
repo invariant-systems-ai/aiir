@@ -159,11 +159,6 @@ pytest_add_cli_args = [
     "--deselect=tests/test_verify.py::TestSafeVerifyPathNoDeadCode::test_no_raw_parts_variable",
     "--deselect=tests/test_verify.py::TestIterativeJsonDepthCheck::test_implementation_is_iterative",
     "--deselect=tests/test_hardening.py::TestConstantTimeComparisonGuard",
-    # test_properties.py uses Hypothesis @given throughout; all @given methods
-    # trigger HealthCheck.differing_executors under mutmut's trampolining
-    # executor (multiple executor contexts per test). Exclude the whole file
-    # rather than enumerate every @given method — _verify.py mutations are
-    # already covered by test_verify.py, test_schema.py, and test_detect.py.
 ]
 pytest_add_cli_args_test_selection = [
     "tests/test_verify.py",
@@ -171,6 +166,7 @@ pytest_add_cli_args_test_selection = [
     "tests/test_policy.py",
     "tests/test_detect.py",
     "tests/test_receipt.py",
+    "tests/test_properties.py",
     "tests/test_hardening.py",
     "tests/test_branch_close.py",
 ]

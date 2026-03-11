@@ -43,7 +43,7 @@ def TestOneInput(data: bytes) -> None:
         return
 
     assert _canonical_json(obj) == canon, "canonical JSON not deterministic"
-    assert _sha256(canon.encode("utf-8")), "sha256 unexpectedly empty"
+    assert _sha256(canon), "sha256 unexpectedly empty"
 
     reparsed = json.loads(canon)
     try:

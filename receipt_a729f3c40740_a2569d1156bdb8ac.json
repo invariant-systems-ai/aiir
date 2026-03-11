@@ -1,0 +1,48 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "a729f3c4074016af93dae629563ce348f3a54736",
+    "tree_sha": "2f7e6961b1e7ee064cd6e0cf8672924b7d290ecb",
+    "parent_shas": [
+      "d367476cc2e207012c26482dd8abed097af21b17"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T19:08:18-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T19:08:18-04:00"
+    },
+    "subject": "docs: add Quick Start fast path above the fold in README (#37)",
+    "message_hash": "sha256:efcbeb4ce5b0585cecae43aecfe3976161268d1f8f39d96aeb7a79fae943cd05",
+    "diff_hash": "sha256:ca88cd851e6a215ce10f4145af8216a7794622543b586a42501227d89c157235",
+    "files_changed": 1,
+    "files": [
+      "README.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.github"
+  },
+  "receipt_id": "g1-9d1156bdb8ac4766dbfff32bbfc1e6ee",
+  "content_hash": "sha256:9d1156bdb8ac4766dbfff32bbfc1e6eec1bae0f64ccb7e4601f223e518cf4b61",
+  "timestamp": "2026-03-11T23:08:36Z",
+  "extensions": {}
+}

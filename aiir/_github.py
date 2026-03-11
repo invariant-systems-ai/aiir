@@ -163,6 +163,15 @@ def _github_api_request(
     if not auth_token:
         raise RuntimeError("No GitHub token available for API request")
 
+    # Validate URL scheme to prevent SSRF (e.g. file://, gopher://).
+    from urllib.parse import urlparse as _urlparse
+
+    _parsed = _urlparse(endpoint)
+    if _parsed.scheme not in ("https", "http"):
+        raise RuntimeError(
+            f"Refusing API request to non-HTTP(S) URL scheme: {_parsed.scheme!r}"
+        )
+
     data = json.dumps(payload).encode("utf-8")
     headers = {
         "Accept": "application/vnd.github+json",

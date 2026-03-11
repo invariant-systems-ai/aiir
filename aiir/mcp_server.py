@@ -96,7 +96,9 @@ def _safe_ledger_dir() -> Path:
     cwd = Path.cwd().resolve()
     ledger_dir = cwd / ".aiir"
     resolved = ledger_dir.resolve()
-    if not str(resolved).startswith(str(cwd)):
+    try:
+        resolved.relative_to(cwd)
+    except ValueError:
         raise ValueError("Ledger directory resolves outside the working directory")
     return ledger_dir
 

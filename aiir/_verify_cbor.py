@@ -365,12 +365,17 @@ def verify_cbor_file(
 ) -> Dict[str, Any]:
     """Load and verify a .cbor sidecar file."""
     path = Path(filepath)
+
+    # Sanitise name for error messages — show only the file name, never the
+    # full user-supplied path (CWE-209).
+    safe_name = path.name or "<unknown>"
+
     if not path.exists():
-        return {"valid": False, "errors": [f"File not found: {filepath}"]}
+        return {"valid": False, "errors": [f"File not found: {safe_name}"]}
     if path.is_symlink():
         return {
             "valid": False,
-            "errors": [f"CBOR file is a symlink (refusing to verify): {filepath}"],
+            "errors": [f"CBOR file is a symlink (refusing to verify): {safe_name}"],
         }
     try:
         file_size = path.stat().st_size
@@ -381,5 +386,8 @@ def verify_cbor_file(
             "valid": False,
             "errors": [f"File too large ({file_size} bytes, max {_MAX_CBOR_SIZE})"],
         }
-    cbor_bytes = path.read_bytes()
+    try:
+        cbor_bytes = path.read_bytes()
+    except OSError as exc:
+        return {"valid": False, "errors": [f"Cannot read file: {exc}"]}
     return verify_cbor_sidecar(cbor_bytes, json_receipt=json_receipt)

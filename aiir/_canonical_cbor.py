@@ -20,6 +20,10 @@ from typing import Any, Dict, Mapping
 CANONICAL_OBJECT_TYPE = "aiir.canonical_object"
 CANONICAL_OBJECT_SCHEMA = "aiir/canonical_object.v1"
 
+# Maximum nesting depth for arrays/maps (prevents stack-overflow DoS).
+# Mirrors the decoder limit in _verify_cbor.py.
+_MAX_CBOR_DEPTH = 64
+
 
 def canonical_cbor_bytes(obj: Any) -> bytes:
     """Encode an object using RFC 8949 deterministic CBOR rules."""
@@ -111,7 +115,7 @@ def _f16_to_f64(bits: int) -> float:
     return sign * (1.0 + frac / 1024.0) * (2.0 ** (exp - 15))
 
 
-def _encode_item(obj: Any) -> bytes:
+def _encode_item(obj: Any, _depth: int = 0) -> bytes:
     if obj is None:
         return b"\xf6"
     if obj is False:
@@ -136,21 +140,25 @@ def _encode_item(obj: Any) -> bytes:
         return _encode_uint(3, len(data)) + data
 
     if isinstance(obj, (list, tuple)):
+        if _depth >= _MAX_CBOR_DEPTH:
+            raise ValueError(f"CBOR nesting depth exceeds maximum ({_MAX_CBOR_DEPTH})")
         out = bytearray(_encode_uint(4, len(obj)))
         for item in obj:
-            out += _encode_item(item)
+            out += _encode_item(item, _depth + 1)
         return bytes(out)
 
     if isinstance(obj, dict):
+        if _depth >= _MAX_CBOR_DEPTH:
+            raise ValueError(f"CBOR nesting depth exceeds maximum ({_MAX_CBOR_DEPTH})")
         out = bytearray(_encode_uint(5, len(obj)))
         encoded_items = []
         for key, value in obj.items():
-            key_bytes = _encode_item(key)
+            key_bytes = _encode_item(key, _depth + 1)
             encoded_items.append((len(key_bytes), key_bytes, value))
         encoded_items.sort(key=lambda item: (item[0], item[1]))
         for _, key_bytes, value in encoded_items:
             out += key_bytes
-            out += _encode_item(value)
+            out += _encode_item(value, _depth + 1)
         return bytes(out)
 
     raise TypeError(f"unsupported_type_for_cbor: {type(obj).__name__}")

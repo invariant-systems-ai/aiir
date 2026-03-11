@@ -781,6 +781,31 @@ class TestVerifyCborFile(unittest.TestCase):
             self.assertFalse(result["valid"])
             self.assertTrue(any("too large" in e.lower() for e in result["errors"]))
 
+    def test_read_bytes_error(self):
+        """TOCTOU: read_bytes failure after stat must be handled gracefully."""
+        import os
+        import tempfile
+        from unittest.mock import MagicMock, patch
+
+        with tempfile.TemporaryDirectory() as tmp:
+            f_path = os.path.join(tmp, "vanish.cbor")
+            with open(f_path, "wb") as f:
+                f.write(b"\xa0")
+            mock_stat = MagicMock()
+            mock_stat.st_size = 2
+            with (
+                patch("aiir._verify_cbor.Path.exists", return_value=True),
+                patch("aiir._verify_cbor.Path.is_symlink", return_value=False),
+                patch("aiir._verify_cbor.Path.stat", return_value=mock_stat),
+                patch(
+                    "aiir._verify_cbor.Path.read_bytes",
+                    side_effect=OSError("mock read error"),
+                ),
+            ):
+                result = verify_cbor_file(f_path)
+            self.assertFalse(result["valid"])
+            self.assertTrue(any("read" in e.lower() for e in result["errors"]))
+
     def test_valid_file(self):
         import os
         import tempfile
@@ -856,16 +881,51 @@ class TestDecodeDepthLimit(unittest.TestCase):
     def test_deeply_nested_map_raises(self):
         """Maps nested beyond the limit must also raise CborDecodeError."""
         from aiir._verify_cbor import _MAX_CBOR_DEPTH, CborDecodeError, decode_cbor_full
-        from aiir._canonical_cbor import canonical_cbor_bytes
 
-        # Build nested maps: {"k": {"k": {"k": ... }}} _MAX_CBOR_DEPTH+1 deep
-        # Use canonical_cbor_bytes to produce valid canonical encoding
+        # Build CBOR bytes for nested maps: {0x61 'k': {0x61 'k': ... : 0x00}}
+        # Hand-craft the bytes so the *encoder* depth limit is not triggered.
+        inner = bytes([0x00])  # uint 0
+        key_bytes = bytes([0x61, 0x6B])  # tstr "k"
+        for _ in range(_MAX_CBOR_DEPTH + 1):
+            inner = bytes([0xA1]) + key_bytes + inner  # map(1)
+        with self.assertRaises(CborDecodeError) as ctx:
+            decode_cbor_full(inner)
+        self.assertIn("nesting depth exceeds maximum", str(ctx.exception))
+
+
+class TestEncodeDepthLimit(unittest.TestCase):
+    """canonical_cbor_bytes must reject deeply-nested structures (CWE-674)."""
+
+    def test_encode_within_depth_limit(self):
+        """Arrays nested exactly at the limit must encode without error."""
+        from aiir._canonical_cbor import _MAX_CBOR_DEPTH, canonical_cbor_bytes
+
+        val: Any = 0
+        for _ in range(_MAX_CBOR_DEPTH):
+            val = [val]
+        # Should not raise
+        canonical_cbor_bytes(val)
+
+    def test_encode_array_exceeds_depth(self):
+        """Arrays nested beyond the limit must raise ValueError."""
+        from aiir._canonical_cbor import _MAX_CBOR_DEPTH, canonical_cbor_bytes
+
+        val: Any = 0
+        for _ in range(_MAX_CBOR_DEPTH + 1):
+            val = [val]
+        with self.assertRaises(ValueError) as ctx:
+            canonical_cbor_bytes(val)
+        self.assertIn("nesting depth exceeds maximum", str(ctx.exception))
+
+    def test_encode_dict_exceeds_depth(self):
+        """Dicts nested beyond the limit must raise ValueError."""
+        from aiir._canonical_cbor import _MAX_CBOR_DEPTH, canonical_cbor_bytes
+
         val: Any = 0
         for _ in range(_MAX_CBOR_DEPTH + 1):
             val = {"k": val}
-        payload = canonical_cbor_bytes(val)
-        with self.assertRaises(CborDecodeError) as ctx:
-            decode_cbor_full(payload)
+        with self.assertRaises(ValueError) as ctx:
+            canonical_cbor_bytes(val)
         self.assertIn("nesting depth exceeds maximum", str(ctx.exception))
 
 

@@ -45,7 +45,7 @@ def fuzz_schema_validation(data: bytes) -> None:
             return
         validate_receipt(payload)
     except (json.JSONDecodeError, TypeError, ValueError, KeyError):
-        pass
+        pass  # Expected for malformed fuzz input; only crashes are interesting.
 
 
 def fuzz_verify_receipt(data: bytes) -> None:
@@ -58,7 +58,7 @@ def fuzz_verify_receipt(data: bytes) -> None:
             return
         verify_receipt(payload)
     except (json.JSONDecodeError, TypeError, ValueError, KeyError):
-        pass
+        pass  # Expected for malformed fuzz input; only crashes are interesting.
 
 
 def fuzz_detect_ai(data: bytes) -> None:
@@ -69,7 +69,7 @@ def fuzz_detect_ai(data: bytes) -> None:
         message = data.decode("utf-8", errors="replace")
         detect_ai_commit(message)
     except (TypeError, ValueError, UnicodeDecodeError):
-        pass
+        pass  # Expected for malformed fuzz input; only crashes are interesting.
 
 
 def fuzz_canonicalize(data: bytes) -> None:
@@ -80,7 +80,7 @@ def fuzz_canonicalize(data: bytes) -> None:
         payload = json.loads(data)
         _canonicalize(payload)
     except (json.JSONDecodeError, TypeError, ValueError):
-        pass
+        pass  # Expected for malformed fuzz input; only crashes are interesting.
 
 
 def main() -> None:

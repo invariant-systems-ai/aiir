@@ -768,3 +768,127 @@ class TestVerifyReceiptDirectFields(unittest.TestCase):
             any("invalid version format" in str(e) for e in result["errors"]),
             f"Expected 'invalid version format' in errors, got: {result['errors']}",
         )
+
+    def test_valid_version_allows_lowercase_prerelease_and_build(self):
+        """Valid semver with lowercase suffixes must still pass validation."""
+        from aiir._verify import verify_receipt
+
+        receipt = self._make_valid_receipt()
+        receipt["version"] = "1.2.3-rc1+build.meta"
+        core_keys = {
+            "type",
+            "schema",
+            "version",
+            "commit",
+            "ai_attestation",
+            "provenance",
+        }
+        core = {k: v for k, v in receipt.items() if k in core_keys}
+        core_json = cli._canonical_json(core)
+        digest = cli._sha256(core_json)
+        receipt["content_hash"] = f"sha256:{digest}"
+        receipt["receipt_id"] = f"g1-{digest[:32]}"
+
+        result = verify_receipt(receipt)
+        self.assertTrue(result["valid"])
+        self.assertEqual(result["errors"], [])
+
+    def test_compare_failure_defaults_matches_false(self):
+        """Encoding/compare failures must not produce a truthy verification result."""
+        from aiir._verify import verify_receipt
+
+        receipt = self._make_valid_receipt()
+        receipt["content_hash"] = 123
+        receipt["receipt_id"] = 456
+
+        result = verify_receipt(receipt)
+        self.assertFalse(result["valid"])
+        self.assertFalse(result["content_hash_match"])
+        self.assertFalse(result["receipt_id_match"])
+        self.assertIn("content hash mismatch", result["errors"])
+        self.assertIn("receipt_id mismatch", result["errors"])
+
+
+class TestVerifyReceiptFileCborSidecar(unittest.TestCase):
+    """Target sidecar discovery and propagation mutants in verify_receipt_file."""
+
+    def _write_valid_receipt(self, path: Path, version: str = "1.0.0") -> dict:
+        receipt = {
+            "type": "aiir.commit_receipt",
+            "schema": "aiir/commit_receipt.v1",
+            "version": version,
+            "commit": {"sha": "a" * 40, "subject": "test"},
+            "ai_attestation": {},
+            "provenance": {},
+        }
+        core_json = cli._canonical_json(receipt)
+        digest = cli._sha256(core_json)
+        receipt["content_hash"] = f"sha256:{digest}"
+        receipt["receipt_id"] = f"g1-{digest[:32]}"
+        path.write_text(json.dumps(receipt), encoding="utf-8")
+        return receipt
+
+    def test_valid_json_with_invalid_sidecar_reports_sidecar_failure(self):
+        """An invalid sidecar must be attached and must add a top-level error."""
+        from aiir._verify import verify_receipt_file
+
+        tmpdir = tempfile.mkdtemp()
+        try:
+            path = Path(tmpdir, "receipt.json")
+            receipt = self._write_valid_receipt(path)
+            cbor_path = path.with_suffix(".cbor")
+            cbor_path.write_bytes(b"dummy")
+
+            sidecar_result = {"valid": False, "errors": ["boom"], "sha256": "abc"}
+            with patch("aiir._verify.verify_cbor_file", return_value=sidecar_result) as mock_verify:
+                result = verify_receipt_file(str(path))
+
+            mock_verify.assert_called_once_with(str(cbor_path), json_receipt=receipt)
+            self.assertIn("cbor_sidecar", result)
+            self.assertEqual(result["cbor_sidecar"], sidecar_result)
+            self.assertIn("errors", result)
+            self.assertIn("CBOR sidecar verification failed", result["errors"])
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_missing_sidecar_is_ignored(self):
+        """No .cbor sidecar means no sidecar verification attempt and no sidecar field."""
+        from aiir._verify import verify_receipt_file
+
+        tmpdir = tempfile.mkdtemp()
+        try:
+            path = Path(tmpdir, "receipt.json")
+            self._write_valid_receipt(path)
+
+            with patch("aiir._verify.verify_cbor_file") as mock_verify:
+                result = verify_receipt_file(str(path))
+
+            mock_verify.assert_not_called()
+            self.assertTrue(result["valid"])
+            self.assertNotIn("cbor_sidecar", result)
+            self.assertEqual(result.get("errors"), [])
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
+    def test_symlink_sidecar_is_ignored(self):
+        """A symlinked sidecar must not be followed or verified."""
+        from aiir._verify import verify_receipt_file
+
+        tmpdir = tempfile.mkdtemp()
+        try:
+            path = Path(tmpdir, "receipt.json")
+            self._write_valid_receipt(path)
+            target = Path(tmpdir, "target.cbor")
+            target.write_bytes(b"dummy")
+            sidecar_link = path.with_suffix(".cbor")
+            sidecar_link.symlink_to(target)
+
+            with patch("aiir._verify.verify_cbor_file") as mock_verify:
+                result = verify_receipt_file(str(path))
+
+            mock_verify.assert_not_called()
+            self.assertTrue(result["valid"])
+            self.assertNotIn("cbor_sidecar", result)
+            self.assertEqual(result.get("errors"), [])
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)

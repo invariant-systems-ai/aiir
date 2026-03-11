@@ -166,6 +166,7 @@ pytest_add_cli_args_test_selection = [
     "tests/test_policy.py",
     "tests/test_detect.py",
     "tests/test_receipt.py",
+    "tests/test_cbor_conformance.py",
     "tests/test_verify_release.py",
     "tests/test_hardening.py",
     "tests/test_branch_close.py",

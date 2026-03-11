@@ -6,9 +6,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to smoke-test (e.g. 1.2.5). Leave blank to use the latest PyPI release.'
-        required: false
-        default: ''
+        description: 'Version to smoke-test (e.g. 1.2.5). Required for workflow_dispatch runs.'
+        required: true
 
 permissions:
   contents: read
@@ -36,8 +35,8 @@ jobs:
             VER="${{ github.event.inputs.version }}"
             VER="${VER#v}"
           else
-            # Fetch latest from PyPI
-            VER=$(curl -fsSL https://pypi.org/pypi/aiir/json | python3 -c "import sys,json; print(json.load(sys.stdin)['info']['version'])")
+            echo "❌ For workflow_dispatch, provide the 'version' input (e.g. 1.2.5)."
+            exit 1
           fi
           echo "version=${VER}" >> "$GITHUB_OUTPUT"
           echo "Smoke-testing aiir==${VER}"
@@ -174,7 +173,7 @@ jobs:
       - name: Open P0 alert issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ github.event.release.tag_name || github.event.inputs.version || 'latest' }}
+          VERSION: ${{ github.event.release.tag_name || github.event.inputs.version }}
         run: |
           gh issue create \
             --repo "$GITHUB_REPOSITORY" \

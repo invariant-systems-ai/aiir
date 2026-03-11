@@ -3,8 +3,42 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PYTHON_BIN="${PYTHON:-python3}"
+
+if [[ -n "${PYTHON:-}" ]]; then
+  PYTHON_BIN="$PYTHON"
+elif [[ -n "${VIRTUAL_ENV:-}" && -x "${VIRTUAL_ENV}/bin/python" ]]; then
+  PYTHON_BIN="${VIRTUAL_ENV}/bin/python"
+elif [[ -x "$ROOT_DIR/.venv/bin/python" ]]; then
+  PYTHON_BIN="$ROOT_DIR/.venv/bin/python"
+else
+  PYTHON_BIN="$(command -v python3)"
+fi
+
+if [[ "$PYTHON_BIN" == */* ]]; then
+  export PATH="$(dirname "$PYTHON_BIN"):$PATH"
+fi
 PROFILE="${1:-required}"
+
+bootstrap_python_env() {
+  local in_venv
+
+  in_venv="$($PYTHON_BIN - <<'PY'
+import sys
+print("1" if sys.prefix != getattr(sys, "base_prefix", sys.prefix) else "0")
+PY
+)"
+
+  if [[ "$in_venv" == "0" ]]; then
+    LOCAL_VENV="$(mktemp -d)"
+    trap 'rm -rf "$LOCAL_VENV"' EXIT
+    "$PYTHON_BIN" -m venv "$LOCAL_VENV"
+    PYTHON_BIN="$LOCAL_VENV/bin/python"
+    export PATH="$(dirname "$PYTHON_BIN"):$PATH"
+    "$PYTHON_BIN" -m pip install --upgrade pip >/dev/null
+  fi
+}
+
+bootstrap_python_env
 
 cd "$ROOT_DIR"
 
@@ -132,6 +166,10 @@ assert score >= 75, f"Mutation score {score:.1f}% is below 75% threshold"'
 }
 
 case "$PROFILE" in
+  preflight)
+    run_required
+    run_quality_security
+    ;;
   required)
     run_required
     ;;
@@ -148,7 +186,7 @@ case "$PROFILE" in
     run_mutation_smoke
     ;;
   *)
-    echo "Usage: scripts/ci-local.sh [required|full|mutation|all]" >&2
+    echo "Usage: scripts/ci-local.sh [preflight|required|full|mutation|all]" >&2
     exit 2
     ;;
 esac

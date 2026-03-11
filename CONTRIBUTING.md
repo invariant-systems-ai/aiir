@@ -28,7 +28,7 @@ python -m pytest tests/ -q  # 1680+ tests, ~4 min
 
 1. Fork the repo and create a feature branch from `main`
 2. Write tests for any new functionality
-3. Run the local preflight: `scripts/ci-local.sh required`
+3. Run the local preflight: `scripts/ci-local.sh preflight`
 4. (Optional) Run the full suite: `scripts/ci-local.sh full`
 5. **Sign off every commit** (see DCO below): `git commit -s`
 6. Open a PR with a clear description of the change
@@ -71,6 +71,7 @@ Run `scripts/ci-local.sh` before pushing to catch CI failures locally:
 
 | Profile | Command | What it runs |
 |---------|---------|-------------|
+| `preflight` | `scripts/ci-local.sh preflight` | Local aggregate gate; same as `full` (runs `required` + quality/security checks) |
 | `required` | `scripts/ci-local.sh required` | pytest, fuzz, 100% coverage, version sync, package smoke |
 | `full` | `scripts/ci-local.sh full` | All of `required` + mypy, ruff, bandit, semgrep, pip-audit, licenses, SPDX |
 | `mutation` | `scripts/ci-local.sh mutation` | Mutation testing gate (mutmut) |

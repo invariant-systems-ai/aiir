@@ -1,0 +1,96 @@
+# Aggregate gate — waits for ci-ok, quality-ok, and security-ok to succeed,
+# then publishes a single required status check for branch protection.
+name: Preflight
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  checks: read
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Wait for ci, quality, and security gates
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+
+          for attempt in $(seq 1 120); do
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/${GITHUB_REPOSITORY}/commits/${COMMIT_SHA}/check-runs?per_page=100" \
+              > /tmp/preflight-check-runs.json
+
+            set +e
+            output=$(python3 -c '
+              import json
+              from pathlib import Path
+
+              targets = ("ci-ok", "quality-ok", "security-ok")
+              terminal_success = {"success", "neutral", "skipped"}
+              terminal_failure = {"failure", "cancelled", "timed_out", "action_required"}
+
+              data = json.loads(Path("/tmp/preflight-check-runs.json").read_text())
+                latest_runs = {}
+                for run in data.get("check_runs", []):
+                  name = run.get("name")
+                  if name not in targets:
+                    continue
+                  started_at = run.get("started_at") or ""
+                  previous = latest_runs.get(name)
+                  previous_started_at = previous.get("started_at") if previous else ""
+                  if previous is None or started_at >= previous_started_at:
+                    latest_runs[name] = {
+                      "started_at": started_at,
+                      "state": run.get("conclusion") or run.get("status") or "unknown",
+                    }
+
+                states = {name: payload["state"] for name, payload in latest_runs.items()}
+              missing = [name for name in targets if name not in states]
+              pending = [name for name, state in states.items() if state not in terminal_success | terminal_failure]
+              failing = [name for name, state in states.items() if state in terminal_failure]
+
+              print(f"observed: {states}")
+              if missing:
+                  print(f"missing: {missing}")
+              if pending:
+                  print(f"pending: {pending}")
+              if failing:
+                  print(f"failing: {failing}")
+
+              raise SystemExit(2 if failing else 1 if missing or pending else 0)
+            ' 2>&1)
+            status=$?
+            set -e
+            echo "$output"
+
+            if [[ "$status" -eq 0 ]]; then
+              echo "✅ Preflight gates passed for ${COMMIT_SHA}"
+              exit 0
+            fi
+
+            if [[ "$status" -eq 2 ]]; then
+              echo "::error::Preflight failed because one or more required gates failed"
+              exit 1
+            fi
+
+            echo "Waiting for ci-ok, quality-ok, and security-ok on ${COMMIT_SHA:0:12} (attempt ${attempt}/120)"
+            sleep 15
+          done
+
+          echo "::error::Preflight timed out waiting for required gates on ${COMMIT_SHA:0:12}"
+          exit 1

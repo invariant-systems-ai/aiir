@@ -1,0 +1,37 @@
+# Auto-merge PRs from the repo owner after Copilot review + CI pass.
+#
+# Policy:
+#   - PRs opened by org members -> enable auto-merge (squash)
+#   - Copilot code review is required (configured in branch ruleset)
+#   - All required status checks must pass (configured in branch ruleset)
+#   - This workflow does not approve. It only queues auto-merge.
+#     Approval comes from the Copilot review gate in the ruleset.
+#
+# Security model:
+#   Uses pull_request (not pull_request_target) and only needs
+#   pull-requests: write to enable auto-merge on the PR itself.
+name: PR Auto-Merge
+
+on:
+  pull_request:
+    types: [opened, reopened]
+    branches: [main]
+
+permissions: read-all
+
+jobs:
+  enable-auto-merge:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Enable auto-merge (squash)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          echo "Queuing auto-merge for $PR_URL"
+          gh pr merge "$PR_URL" --auto --squash

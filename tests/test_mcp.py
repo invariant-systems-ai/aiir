@@ -13,7 +13,7 @@ from pathlib import Path
 
 # Import the module under test
 import aiir.cli as cli
-import aiir.mcp_server as mcp_server
+from aiir.mcp_server import TOOLS, _safe_ledger_dir, _safe_verify_path
 
 
 class TestRedTeamMCP(unittest.TestCase):
@@ -51,7 +51,7 @@ class TestMcpSymlinkIntermediate(unittest.TestCase):
             os.chdir(tmpdir)
             # Access through symlinked directory
             with self.assertRaises(ValueError) as ctx:
-                mcp_server._safe_verify_path(str(link / "file.json"))
+                _safe_verify_path(str(link / "file.json"))
             self.assertIn("symlink", str(ctx.exception).lower())
         finally:
             os.chdir(original_cwd)
@@ -68,7 +68,7 @@ class TestMcpSymlinkIntermediate(unittest.TestCase):
             real_dir.mkdir()
             Path(real_dir, "file.json").write_text("{}")
             os.chdir(tmpdir)
-            result = mcp_server._safe_verify_path(str(Path(real_dir, "file.json")))
+            result = _safe_verify_path(str(Path(real_dir, "file.json")))
             self.assertTrue(result.endswith("file.json"))
         finally:
             os.chdir(original_cwd)
@@ -89,7 +89,7 @@ class TestMcpLedgerPathHardening(unittest.TestCase):
             os.symlink(outside, os.path.join(tmpdir, ".aiir"))
             os.chdir(tmpdir)
             with self.assertRaises(ValueError) as ctx:
-                mcp_server._safe_ledger_dir()
+                _safe_ledger_dir()
             self.assertIn("outside the working directory", str(ctx.exception))
         finally:
             os.chdir(original_cwd)
@@ -104,8 +104,6 @@ class TestMcpToolDescriptions(unittest.TestCase):
 
     def test_aiir_receipt_description_has_constraints(self):
         """aiir_receipt tool description should mention security constraints."""
-        from aiir.mcp_server import TOOLS
-
         receipt_tool = next(t for t in TOOLS if t["name"] == "aiir_receipt")
         desc = receipt_tool["description"]
         self.assertIn("current working directory", desc)
@@ -113,8 +111,6 @@ class TestMcpToolDescriptions(unittest.TestCase):
 
     def test_aiir_verify_description_has_constraints(self):
         """aiir_verify tool description should mention path restrictions."""
-        from aiir.mcp_server import TOOLS
-
         verify_tool = next(t for t in TOOLS if t["name"] == "aiir_verify")
         desc = verify_tool["description"]
         self.assertIn("symlinks", desc.lower())
@@ -122,8 +118,6 @@ class TestMcpToolDescriptions(unittest.TestCase):
 
     def test_aiir_verify_file_schema_has_constraints(self):
         """aiir_verify file parameter should describe path restrictions."""
-        from aiir.mcp_server import TOOLS
-
         verify_tool = next(t for t in TOOLS if t["name"] == "aiir_verify")
         file_desc = verify_tool["inputSchema"]["properties"]["file"]["description"]
         self.assertIn("..", file_desc)
@@ -205,8 +199,6 @@ class TestMcpRedactFiles(unittest.TestCase):
 
     def test_mcp_tool_schema_has_redact_files(self):
         """The aiir_receipt tool schema should include a redact_files parameter."""
-        from aiir.mcp_server import TOOLS
-
         receipt_tool = next(t for t in TOOLS if t["name"] == "aiir_receipt")
         props = receipt_tool["inputSchema"]["properties"]
         self.assertIn("redact_files", props)
@@ -354,15 +346,11 @@ class TestMcpGitLabSummary(unittest.TestCase):
 
     def test_tool_in_tools_list(self):
         """aiir_gitlab_summary is registered in TOOLS."""
-        from aiir.mcp_server import TOOLS
-
         names = [t["name"] for t in TOOLS]
         self.assertIn("aiir_gitlab_summary", names)
 
     def test_tool_schema_has_expected_params(self):
         """Input schema includes range, include_sast, post_to_mr."""
-        from aiir.mcp_server import TOOLS
-
         tool = next(t for t in TOOLS if t["name"] == "aiir_gitlab_summary")
         props = tool["inputSchema"]["properties"]
         self.assertIn("range", props)

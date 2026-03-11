@@ -28,8 +28,8 @@ python -m pytest tests/ -q  # 1680+ tests, ~4 min
 
 1. Fork the repo and create a feature branch from `main`
 2. Write tests for any new functionality
-3. Run the full test suite: `python -m pytest tests/ -q`
-4. Run quality checks: `ruff check . && ruff format --check aiir/ tests/ scripts/`
+3. Run the local preflight: `scripts/ci-local.sh required`
+4. (Optional) Run the full suite: `scripts/ci-local.sh full`
 5. **Sign off every commit** (see DCO below): `git commit -s`
 6. Open a PR with a clear description of the change
 
@@ -64,6 +64,17 @@ Only repository admins can create releases:
 3. Run `python scripts/sync-version.py --fix` to propagate
 4. Commit, tag `vX.Y.Z`, push — the Publish workflow handles the rest
 5. PyPI and npm only publish **after** CI + verification pass
+
+### Local preflight
+
+Run `scripts/ci-local.sh` before pushing to catch CI failures locally:
+
+| Profile | Command | What it runs |
+|---------|---------|-------------|
+| `required` | `scripts/ci-local.sh required` | pytest, fuzz, 100% coverage, version sync, package smoke |
+| `full` | `scripts/ci-local.sh full` | All of `required` + mypy, ruff, bandit, semgrep, pip-audit, licenses, SPDX |
+| `mutation` | `scripts/ci-local.sh mutation` | Mutation testing gate (mutmut) |
+| `all` | `scripts/ci-local.sh all` | All of the above |
 
 ### Developer Certificate of Origin (DCO)
 

@@ -11,7 +11,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 from aiir._core import (
     MAX_RECEIPT_FILE_SIZE,
@@ -94,7 +94,7 @@ def sign_receipt(receipt_json_bytes: bytes) -> str:
                 f"{hint_text}"
             )
         # Local development — fall back to interactive OIDC flow (opens browser)
-        issuer = Issuer.production()  # pragma: no cover
+        issuer = cast(Any, Issuer).production()  # pragma: no cover
         identity_token = issuer.identity_token()  # pragma: no cover
 
     config = ClientTrustConfig.production()
@@ -238,6 +238,7 @@ def verify_receipt_signature(
         bundle = Bundle.from_json(bpath.read_text(encoding="utf-8"))
         verifier = Verifier.production()
 
+        policy: Any
         if expected_identity:
             policy = Identity(
                 identity=expected_identity,

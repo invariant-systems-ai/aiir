@@ -126,7 +126,9 @@ def main() -> int:
 
         url = urllib.parse.urljoin(BASE_URL, path)
         body = _fetch(url)
-        destination = output_dir / _site_path_to_file(path)
+        destination = (output_dir / _site_path_to_file(path)).resolve()
+        if not destination.is_relative_to(output_dir):
+            raise RuntimeError(f"Path traversal detected for {path!r}: {destination}")
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(body)
 

@@ -14,8 +14,6 @@
 name: AI Gate
 
 on:
-  push:
-    branches: [main]
   pull_request_target:
     types: [opened, reopened, synchronize, ready_for_review]
     branches: [main]
@@ -49,216 +47,25 @@ jobs:
 
           run_url="https://github.com/$REPO/actions/runs/$GITHUB_RUN_ID"
 
-          evaluate_pr() {
-            local pr_number="$1"
-            local pr_json
-            local pr_state
-            local pr_draft
-            local base_ref
-            local head_sha
-            local head_repo
-            local author_login
-            local pr_url
-            local author_perm
-            local pr_view_json
-            local merge_state
-            local checks_state
-            local reviews_json
-            local copilot_reviewed
-            local review_threads_json
-            local hard_rule_pattern
-            local unresolved_hard_findings
-            local marker
-            local summary
-            local existing_comment
-
-            set_status() {
-              local state="$1"
-              local description="$2"
-              gh api \
-                --method POST \
-                "repos/$REPO/statuses/$head_sha" \
-                -f state="$state" \
-                -f context="ai-gate" \
-                -f description="$description" \
-                -f target_url="$run_url" \
-                >/dev/null
-            }
-
-            pr_json="$(gh api "repos/$REPO/pulls/$pr_number")"
-            pr_state="$(jq -r '.state' <<<"$pr_json")"
-            pr_draft="$(jq -r '.draft' <<<"$pr_json")"
-            base_ref="$(jq -r '.base.ref' <<<"$pr_json")"
-            head_sha="$(jq -r '.head.sha' <<<"$pr_json")"
-            head_repo="$(jq -r '.head.repo.full_name' <<<"$pr_json")"
-            author_login="$(jq -r '.user.login' <<<"$pr_json")"
-            pr_url="$(jq -r '.html_url' <<<"$pr_json")"
-
-            if [[ "$pr_state" != "open" || "$pr_draft" == "true" || "$base_ref" != "main" ]]; then
-              echo "PR #$pr_number is not eligible for auto-merge"
-              return 0
-            fi
-
-            if [[ "$head_repo" != "$REPO" ]]; then
-              echo "External PR #$pr_number detected; disabling auto-merge"
-              set_status success "AI gate skipped for external PR"
-              gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
-              return 0
-            fi
-
-            # Check author has write (push) access — more reliable than
-            # author_association which GITHUB_TOKEN may report as CONTRIBUTOR
-            # even for org members.
-            author_perm="$(gh api "repos/$REPO/collaborators/$author_login/permission" --jq '.permission' 2>/dev/null || echo "none")"
-            case "$author_perm" in
-              admin|write) ;;
-              *)
-                echo "Author $author_login has permission '$author_perm'; not first-party"
-                set_status success "AI gate skipped for non first-party author"
-                gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
-                return 0
-                ;;
-            esac
-
-            pr_view_json="$(gh pr view "$pr_number" --repo "$REPO" --json mergeStateStatus,statusCheckRollup)"
-            merge_state="$(jq -r '.mergeStateStatus' <<<"$pr_view_json")"
-
-            checks_state="$(jq -r '
-              def finished(name):
-                first(.statusCheckRollup[]? | select(.name == name and .status == "COMPLETED") | .conclusion);
-              def is_success(name): finished(name) == "SUCCESS";
-              def is_failure(name):
-                (finished(name) // "") as $c |
-                ($c != "" and $c != "SUCCESS" and $c != "SKIPPED" and $c != "NEUTRAL");
-              if is_success("ci-ok") and is_success("quality-ok") and is_success("security-ok") then "success"
-              elif is_failure("ci-ok") or is_failure("quality-ok") or is_failure("security-ok") then "failure"
-              else "pending" end
-            ' <<<"$pr_view_json")"
-
-            if [[ "$merge_state" == "BEHIND" ]]; then
-              echo "PR #$pr_number branch is behind main"
-              set_status pending "Branch must be updated before merge"
-              gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
-              return 0
-            fi
-
-            if [[ "$checks_state" == "failure" ]]; then
-              echo "Required composite checks failed for PR #$pr_number"
-              set_status failure "Required CI gate is failing"
-              gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
-              return 0
-            fi
-
-            if [[ "$checks_state" != "success" ]]; then
-              echo "Required composite checks are still pending for PR #$pr_number"
-              set_status pending "Waiting for required CI gate"
-              gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
-              return 0
-            fi
-
-            reviews_json="$(gh api "repos/$REPO/pulls/$pr_number/reviews")"
-            copilot_reviewed="$(jq -r --arg sha "$head_sha" '
-              any(.[];
-                .commit_id == $sha and
-                (.user.login == "copilot-pull-request-reviewer[bot]" or .user.login == "Copilot")
-              )
-            ' <<<"$reviews_json")"
-
-            if [[ "$copilot_reviewed" != "true" ]]; then
-              echo "Copilot has not reviewed the current head commit for PR #$pr_number"
-              set_status pending "Waiting for Copilot review on current head"
-              gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
-              return 0
-            fi
-
-            # ── Review findings tracker ────────────────────────────────
-            # Extract Copilot review comments on the current head and check
-            # for unresolved hard-rule violations.  Hard rules are identified
-            # by keywords from .github/copilot-review-instructions.md:
-            #   - "runtime dependenc"  (rule 1)
-            #   - "hmac.compare_digest" / "constant-time" (rule 2)
-            #   - "hardcoded secret" / "hardcoded token" / "hardcoded key" (rule 3)
-            #   - "pinned" / "40-char" / "full SHA" (rule 4)
-            #   - "SPDX" (rule 5)
-            #   - "sync-version" / "version consistency" (rule 6)
-            # Only unresolved, non-outdated review threads count.
-
-            hard_rule_pattern='runtime dependenc|hmac\.compare_digest|constant.time|hardcoded secret|hardcoded token|hardcoded key|pinned.*sha|40.char|full SHA|SPDX|sync-version|version consistency'
-
-            review_threads_json="$(gh api graphql -f query='query($owner: String!, $name: String!, $number: Int!) {
-              repository(owner: $owner, name: $name) {
-                pullRequest(number: $number) {
-                  reviewThreads(first: 100) {
-                    nodes {
-                      isResolved
-                      isOutdated
-                      comments(first: 20) {
-                        nodes {
-                          author { login }
-                          body
-                          originalCommit { oid }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }' -f owner="${REPO%%/*}" -f name="${REPO##*/}" -F number="$pr_number")"
-
-            unresolved_hard_findings="$(jq -r --arg sha "$head_sha" --arg pat "$hard_rule_pattern" '
-              [.data.repository.pullRequest.reviewThreads.nodes[] |
-                select(
-                  .isResolved == false and
-                  .isOutdated == false and
-                  any(.comments.nodes[]?;
-                    .originalCommit.oid == $sha and
-                    (.author.login == "copilot-pull-request-reviewer" or .author.login == "copilot-pull-request-reviewer[bot]" or .author.login == "Copilot") and
-                    (.body | test($pat; "i"))
-                  )
-                )
-              ] | length
-            ' <<<"$review_threads_json")"
-
-            if [[ "$unresolved_hard_findings" -gt 0 ]]; then
-              echo "Copilot flagged $unresolved_hard_findings unresolved hard-rule violation(s) on PR #$pr_number"
-              set_status failure "Copilot: $unresolved_hard_findings unresolved hard-rule finding(s)"
-              gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
-
-              marker='<!-- aiir-hard-rule-summary -->'
-              summary="${marker}
-            **AI Gate — Hard-Rule Findings**
-
-            Copilot flagged **${unresolved_hard_findings}** unresolved hard-rule violation(s) on the current head (\`${head_sha:0:8}\`).
-
-            These must be fixed before the AI gate will pass. See the inline review comments for details.
-            Hard rules are defined in [\`.github/copilot-review-instructions.md\`](.github/copilot-review-instructions.md)."
-
-              existing_comment="$(gh api "repos/$REPO/issues/$pr_number/comments?per_page=100" \
-                --jq "[.[] | select(.body | contains(\"$marker\"))] | first | .id // empty")"
-
-              if [[ -n "$existing_comment" ]]; then
-                gh api --method PATCH "repos/$REPO/issues/comments/$existing_comment" -f body="$summary" >/dev/null
-              else
-                gh api --method POST "repos/$REPO/issues/$pr_number/comments" -f body="$summary" >/dev/null
-              fi
-
-              return 0
-            fi
-
-            echo "AI merge gate satisfied for $pr_url"
-            set_status success "Copilot reviewed and required CI passed"
-            gh pr merge "$pr_number" --repo "$REPO" --auto --squash
+          set_status() {
+            local state="$1"
+            local description="$2"
+            gh api \
+              --method POST \
+              "repos/$REPO/statuses/$head_sha" \
+              -f state="$state" \
+              -f context="ai-gate" \
+              -f description="$description" \
+              -f target_url="$run_url" \
+              >/dev/null
           }
 
           case "$EVENT_NAME" in
-            push)
-              pr_numbers="$(gh api "repos/$REPO/pulls?state=open&base=main&per_page=100" --jq '.[].number')"
-              ;;
             pull_request_target|pull_request_review)
-              pr_numbers="$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")"
+              pr_number="$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")"
               ;;
             workflow_run)
-              pr_numbers="$(jq -r '.workflow_run.pull_requests[].number // empty' "$GITHUB_EVENT_PATH" | sort -u)"
+              pr_number="$(jq -r '.workflow_run.pull_requests[0].number // empty' "$GITHUB_EVENT_PATH")"
               ;;
             *)
               echo "Unsupported event: $EVENT_NAME"
@@ -266,12 +73,174 @@ jobs:
               ;;
           esac
 
-          if [[ -z "$pr_numbers" ]]; then
-            echo "No pull requests associated with this event"
+          if [[ -z "$pr_number" ]]; then
+            echo "No pull request associated with this event"
             exit 0
           fi
 
-          while IFS= read -r pr_number; do
-            [[ -n "$pr_number" ]] || continue
-            evaluate_pr "$pr_number"
-          done <<<"$pr_numbers"
+          pr_json="$(gh api "repos/$REPO/pulls/$pr_number")"
+          pr_state="$(jq -r '.state' <<<"$pr_json")"
+          pr_draft="$(jq -r '.draft' <<<"$pr_json")"
+          base_ref="$(jq -r '.base.ref' <<<"$pr_json")"
+          head_sha="$(jq -r '.head.sha' <<<"$pr_json")"
+          head_repo="$(jq -r '.head.repo.full_name' <<<"$pr_json")"
+          author_login="$(jq -r '.user.login' <<<"$pr_json")"
+          pr_url="$(jq -r '.html_url' <<<"$pr_json")"
+
+          if [[ "$pr_state" != "open" || "$pr_draft" == "true" || "$base_ref" != "main" ]]; then
+            echo "PR is not eligible for auto-merge"
+            exit 0
+          fi
+
+          if [[ "$head_repo" != "$REPO" ]]; then
+            echo "External PR detected; disabling auto-merge"
+            set_status success "AI gate skipped for external PR"
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
+            exit 0
+          fi
+
+          # Check author has write (push) access — more reliable than
+          # author_association which GITHUB_TOKEN may report as CONTRIBUTOR
+          # even for org members.
+          author_perm="$(gh api "repos/$REPO/collaborators/$author_login/permission" --jq '.permission' 2>/dev/null || echo "none")"
+          case "$author_perm" in
+            admin|write) ;;
+            *)
+              echo "Author $author_login has permission '$author_perm'; not first-party"
+              set_status success "AI gate skipped for non first-party author"
+              gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
+              exit 0
+              ;;
+          esac
+
+          pr_view_json="$(gh pr view "$pr_number" --repo "$REPO" --json mergeStateStatus,statusCheckRollup)"
+          merge_state="$(jq -r '.mergeStateStatus' <<<"$pr_view_json")"
+
+          checks_state="$(jq -r '
+            def finished(name):
+              first(.statusCheckRollup[]? | select(.name == name and .status == "COMPLETED") | .conclusion);
+            def is_success(name): finished(name) == "SUCCESS";
+            def is_failure(name):
+              (finished(name) // "") as $c |
+              ($c != "" and $c != "SUCCESS" and $c != "SKIPPED" and $c != "NEUTRAL");
+            if is_success("ci-ok") and is_success("quality-ok") and is_success("security-ok") then "success"
+            elif is_failure("ci-ok") or is_failure("quality-ok") or is_failure("security-ok") then "failure"
+            else "pending" end
+          ' <<<"$pr_view_json")"
+
+          if [[ "$merge_state" == "BEHIND" ]]; then
+            echo "Branch is behind main"
+            set_status pending "Branch must be updated before merge"
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
+            exit 0
+          fi
+
+          if [[ "$checks_state" == "failure" ]]; then
+            echo "Required composite checks failed"
+            set_status failure "Required CI gate is failing"
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
+            exit 0
+          fi
+
+          if [[ "$checks_state" != "success" ]]; then
+            echo "Required composite checks are still pending"
+            set_status pending "Waiting for required CI gate"
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
+            exit 0
+          fi
+
+          reviews_json="$(gh api "repos/$REPO/pulls/$pr_number/reviews")"
+          copilot_reviewed="$(jq -r --arg sha "$head_sha" '
+            any(.[];
+              .commit_id == $sha and
+              (.user.login == "copilot-pull-request-reviewer[bot]" or .user.login == "Copilot")
+            )
+          ' <<<"$reviews_json")"
+
+          if [[ "$copilot_reviewed" != "true" ]]; then
+            echo "Copilot has not reviewed the current head commit yet"
+            set_status pending "Waiting for Copilot review on current head"
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
+            exit 0
+          fi
+
+          # ── Review findings tracker ────────────────────────────────
+          # Extract Copilot review comments on the current head and check
+          # for unresolved hard-rule violations.  Hard rules are identified
+          # by keywords from .github/copilot-review-instructions.md:
+          #   - "runtime dependenc"  (rule 1)
+          #   - "hmac.compare_digest" / "constant-time" (rule 2)
+          #   - "hardcoded secret" / "hardcoded token" / "hardcoded key" (rule 3)
+          #   - "pinned" / "40-char" / "full SHA" (rule 4)
+          #   - "SPDX" (rule 5)
+          #   - "sync-version" / "version consistency" (rule 6)
+          # Only unresolved (not OUTDATED/DISMISSED) comments count.
+
+          review_comments_json="$(gh api "repos/$REPO/pulls/$pr_number/comments?per_page=100")"
+          if ! review_threads_json="$(gh api graphql \
+            -f query='query($owner:String!, $repo:String!, $number:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$number) { reviewThreads(first:100) { nodes { isResolved isOutdated comments(first:100) { nodes { databaseId } } } } } } }' \
+            -F owner="${REPO%/*}" \
+            -F repo="${REPO#*/}" \
+            -F number="$pr_number")"; then
+            echo "Unable to read review thread resolution state"
+            set_status failure "AI gate could not read review thread state"
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
+            exit 0
+          fi
+
+          hard_rule_pattern='runtime dependenc|hmac\.compare_digest|constant.time|hardcoded secret|hardcoded token|hardcoded key|pinned.*sha|40.char|full SHA|SPDX|sync-version|version consistency'
+          if ! unresolved_review_comment_ids="$(jq -c '
+            [
+              .data.repository.pullRequest.reviewThreads.nodes[]? |
+              select(.isResolved == false and .isOutdated == false) |
+              .comments.nodes[]?.databaseId
+            ]
+          ' <<<"$review_threads_json")"; then
+            echo "Unable to parse review thread resolution state"
+            set_status failure "AI gate could not parse review thread state"
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
+            exit 0
+          fi
+
+          unresolved_hard_findings="$(jq -r --arg sha "$head_sha" --arg pat "$hard_rule_pattern" --argjson unresolved_ids "$unresolved_review_comment_ids" '
+            [.[] |
+              select(
+                .commit_id == $sha and
+                (.user.login == "copilot-pull-request-reviewer[bot]" or .user.login == "Copilot") and
+                (.in_reply_to_id == null or .in_reply_to_id == 0) and
+                (.body | test($pat; "i")) and
+                (.id as $id | ($unresolved_ids | index($id) != null))
+              )
+            ] | length
+          ' <<<"$review_comments_json")"
+
+          if [[ "$unresolved_hard_findings" -gt 0 ]]; then
+            echo "Copilot flagged $unresolved_hard_findings unresolved hard-rule violation(s)"
+            set_status failure "Copilot: $unresolved_hard_findings unresolved hard-rule finding(s)"
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
+
+            # Post a summary comment (idempotent via hidden marker)
+            marker='<!-- aiir-hard-rule-summary -->'
+            summary="${marker}
+          **AI Gate — Hard-Rule Findings**
+
+          Copilot flagged **${unresolved_hard_findings}** unresolved hard-rule violation(s) on the current head (\`${head_sha:0:8}\`).
+
+          These must be fixed before the AI gate will pass. See the inline review comments for details.
+          Hard rules are defined in [\`.github/copilot-review-instructions.md\`](.github/copilot-review-instructions.md)."
+
+            existing_comment="$(gh api "repos/$REPO/issues/$pr_number/comments?per_page=100" \
+              --jq "[.[] | select(.body | contains(\"$marker\"))] | first | .id // empty")"
+
+            if [[ -n "$existing_comment" ]]; then
+              gh api --method PATCH "repos/$REPO/issues/comments/$existing_comment" -f body="$summary" >/dev/null
+            else
+              gh api --method POST "repos/$REPO/issues/$pr_number/comments" -f body="$summary" >/dev/null
+            fi
+
+            exit 0
+          fi
+
+          echo "AI merge gate satisfied for $pr_url"
+          set_status success "Copilot reviewed and required CI passed"
+          gh pr merge "$pr_number" --repo "$REPO" --auto --squash

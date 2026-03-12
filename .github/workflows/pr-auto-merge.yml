@@ -65,7 +65,7 @@ jobs:
             local checks_state
             local reviews_json
             local copilot_reviewed
-            local review_comments_json
+            local review_threads_json
             local hard_rule_pattern
             local unresolved_hard_findings
             local marker
@@ -181,27 +181,43 @@ jobs:
             #   - "pinned" / "40-char" / "full SHA" (rule 4)
             #   - "SPDX" (rule 5)
             #   - "sync-version" / "version consistency" (rule 6)
-            # Only unresolved (not OUTDATED/DISMISSED) comments count.
-
-            review_comments_json="$(gh api "repos/$REPO/pulls/$pr_number/comments?per_page=100")"
+            # Only unresolved, non-outdated review threads count.
 
             hard_rule_pattern='runtime dependenc|hmac\.compare_digest|constant.time|hardcoded secret|hardcoded token|hardcoded key|pinned.*sha|40.char|full SHA|SPDX|sync-version|version consistency'
 
+            review_threads_json="$(gh api graphql -f query='query($owner: String!, $name: String!, $number: Int!) {
+              repository(owner: $owner, name: $name) {
+                pullRequest(number: $number) {
+                  reviewThreads(first: 100) {
+                    nodes {
+                      isResolved
+                      isOutdated
+                      comments(first: 20) {
+                        nodes {
+                          author { login }
+                          body
+                          originalCommit { oid }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f owner="${REPO%%/*}" -f name="${REPO##*/}" -F number="$pr_number")"
+
             unresolved_hard_findings="$(jq -r --arg sha "$head_sha" --arg pat "$hard_rule_pattern" '
-              [.[] |
+              [.data.repository.pullRequest.reviewThreads.nodes[] |
                 select(
-                  .commit_id == $sha and
-                  (.user.login == "copilot-pull-request-reviewer[bot]" or .user.login == "Copilot") and
-                  (.in_reply_to_id == null or .in_reply_to_id == 0) and
-                  (.body | test($pat; "i"))
-                ) |
-                select(
-                  (.resolved // false) == false and
-                  (.state // "active") != "OUTDATED" and
-                  (.state // "active") != "DISMISSED"
+                  .isResolved == false and
+                  .isOutdated == false and
+                  any(.comments.nodes[]?;
+                    .originalCommit.oid == $sha and
+                    (.author.login == "copilot-pull-request-reviewer" or .author.login == "copilot-pull-request-reviewer[bot]" or .author.login == "Copilot") and
+                    (.body | test($pat; "i"))
+                  )
                 )
               ] | length
-            ' <<<"$review_comments_json")"
+            ' <<<"$review_threads_json")"
 
             if [[ "$unresolved_hard_findings" -gt 0 ]]; then
               echo "Copilot flagged $unresolved_hard_findings unresolved hard-rule violation(s) on PR #$pr_number"

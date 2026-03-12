@@ -978,7 +978,7 @@ class TestErrorPage(unittest.TestCase):
 class TestStatsJSON(unittest.TestCase):
     """stats.json claims are plausible and consistent."""
 
-    def _stats(self) -> dict:
+    def _stats_payload(self) -> dict:
         data = json.loads(_read(SITE_DIR / "stats.json"))
         self.assertIsInstance(
             data,
@@ -995,18 +995,15 @@ class TestStatsJSON(unittest.TestCase):
             dict,
             'stats.json "stats" value must be a JSON object',
         )
-        return data["stats"]
+        self.assertIn("version", data)
+        self.assertIn("updated", data)
+        return data
+
+    def _stats(self) -> dict:
+        return self._stats_payload()["stats"]
 
     def test_stats_json_valid(self):
-        data = json.loads(_read(SITE_DIR / "stats.json"))
-        self.assertIsInstance(
-            data,
-            dict,
-            "stats.json top-level value must be a JSON object",
-        )
-        self.assertIn("version", data)
-        self.assertIn("stats", data)
-        self.assertIn("updated", data)
+        self._stats_payload()
 
     def test_zero_dependencies(self):
         stats = self._stats()

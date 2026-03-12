@@ -23,12 +23,12 @@ from pathlib import Path
 BASE_URL = "https://invariantsystems.io"
 HTML_HREF_RE = re.compile(r'href="([^"]+)"', re.IGNORECASE)
 MAX_FETCHED_PATHS = 128
+ALLOWED_FETCH_SUFFIXES = {"", ".html", ".json", ".xml"}
 INITIAL_PATHS = {
     "/",
     "/404.html",
     "/.well-known/mcp.json",
     "/schemas/aiir/commit_receipt.v1.schema.json",
-    "/sitemap.xml",
     "/stats.json",
 }
 
@@ -104,7 +104,12 @@ def _extract_internal_paths(html_text: str) -> set[str]:
             ):
                 continue
         path = parsed.path or "/"
-        if path.startswith("/"):
+        suffix = Path(path).suffix
+        if path.startswith("/") and (
+            suffix in ALLOWED_FETCH_SUFFIXES
+            or path.startswith("/.well-known/")
+            or path.startswith("/schemas/")
+        ):
             paths.add(path)
     return paths
 

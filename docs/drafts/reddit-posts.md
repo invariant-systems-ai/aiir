@@ -10,9 +10,7 @@ Three targeted posts for different subreddits. Each has a distinct angle.
 
 **Body:**
 
-I've been working on [AIIR](https://github.com/invariant-systems-ai/aiir) (AI Integrity Receipts) — a CLI + library that generates content-addressed, optionally Sigstore-signed JSON receipts for every commit in a git repo.
-
-**Quick start:**
+I've been working on [AIIR](https://github.com/invariant-systems-ai/aiir) (AI Integrity Receipts) — a CLI and library that generates content-addressed, optionally Sigstore-signed JSON receipts for every commit in a git repo.
 
 ```bash
 pip install aiir
@@ -20,21 +18,23 @@ cd your-repo
 aiir --pretty
 ```
 
-What it does:
+**How it works under the hood:**
 
-- Scans commits for AI authorship signals (Co-authored-by trailers, commit message patterns, bot accounts)
-- Generates tamper-evident receipts with SHA-256 content hashing
-- Signs with Sigstore keyless (same infra as PyPI, npm, K8s)
-- Evaluates against configurable policy and emits SLSA Verification Summary Attestations
-- Also works as a GitHub Action, GitLab CI/CD Catalog component, and MCP server
+Each receipt is a JSON object containing the commit metadata (SHA, author, date, file list), a diff hash, and an `ai_attestation` block that records detected signals. The core fields are serialized in a canonical order, then SHA-256 hashed to produce a `content_hash`. The `receipt_id` is derived from that hash. Change any field and the hash breaks — that's the tamper-detection guarantee.
 
-**Why zero dependencies matters:** `pip install aiir` pulls exactly one package. No transitive deps, no supply chain risk, no version conflicts. The whole package is ~9k LOC of pure Python.
+Receipts append to `.aiir/receipts.jsonl` — an append-only JSONL ledger with automatic deduplication (same commit = same content hash = no duplicate). An index file (`.aiir/index.json`) maps commit SHAs to their `receipt_id` and ledger line number for effectively O(1) lookup, deduplication, and stats.
 
-It's tested with 1,893 tests including mutation testing, fuzz testing, and adversarial corpus fixtures. Apache 2.0.
+Detection is signal-based, not stylistic: Co-authored-by trailers (Copilot, Claude, etc.), known bot account patterns, commit message markers. The threat model is explicit — AIIR records what's *declared*, not what's *true*. A developer who strips Co-authored-by trailers before committing will produce a receipt that says "no AI detected." The receipt is honest about its inputs; it doesn't claim omniscience. (See THREAT_MODEL.md in the repo.)
 
-The use case: EU AI Act transparency rules are phasing in, and compliance teams are starting to ask "which commits involved AI tools?" This gives them a cryptographic audit trail.
+For signing, `pip install aiir[sign]` adds Sigstore keyless OIDC — same trust infrastructure used by PyPI, npm, and Kubernetes. Signatures go into the Sigstore transparency log, giving you a public, immutable record that a specific CI identity generated a specific receipt at a specific time.
 
-Happy to answer questions about the design or the receipt schema.
+Policy evaluation runs over a set of receipts and emits a PASS/FAIL decision as an in-toto Statement v1 / SLSA Verification Summary Attestation. Three built-in policies (strict/balanced/permissive) cover AI-ratio thresholds; custom policies are JSON.
+
+**Why zero dependencies:** `pip install aiir` pulls exactly one package. No transitive deps, no supply chain risk, no version conflicts. ~9k LOC of pure Python, 1,800+ tests including mutation testing, fuzz testing, and an adversarial corpus of malformed inputs. Apache 2.0.
+
+Also runs as a GitHub Action, GitLab CI/CD Catalog component, and MCP server. Receipt schema has a formal CDDL grammar (RFC 8610).
+
+Happy to answer questions about the design, the trust model, or the receipt schema.
 
 ---
 
@@ -44,7 +44,7 @@ Happy to answer questions about the design or the receipt schema.
 
 **Body:**
 
-If your team uses Copilot/ChatGPT/Claude and you're starting to get questions from compliance about AI usage tracking, here's what we set up:
+If your team uses Copilot/ChatGPT/Claude and you want a machine-readable record of which commits involved AI tools, here's what we set up:
 
 ```yaml
 # .github/workflows/aiir.yml
@@ -70,15 +70,15 @@ jobs:
           sign: "true"
 ```
 
-That's the whole workflow. Every push generates receipts for each commit, recording which ones have AI authorship signals (Co-authored-by trailers, bot patterns, etc.) and signs them with Sigstore.
+That's the whole workflow. Every push generates a receipt per commit — a content-addressed JSON record of the commit metadata plus an `ai_attestation` block listing detected AI signals. Change one byte and the SHA-256 hash breaks; sign with Sigstore and the receipt lands in a public transparency log.
 
-The receipts are content-addressed JSON — change one byte and the hash breaks. They land in `.aiir/receipts.jsonl` as an append-only ledger.
+Receipts accumulate in `.aiir/receipts.jsonl` as an append-only ledger with dedup and indexing. You can verify them offline (`aiir --verify`) or evaluate a release against policy and get a SLSA Verification Summary Attestation (`aiir --verify-release --policy strict --emit-vsa`).
 
-It also works with GitLab CI/CD (there's a Catalog component) and as an MCP server for AI assistants.
+Detection is signal-based: Co-authored-by trailers, bot accounts, commit message patterns. It doesn't try to detect AI by code style — it records what's declared. The threat model is documented: THREAT_MODEL.md.
 
-Tool: [AIIR](https://github.com/invariant-systems-ai/aiir) — open source, Apache 2.0, zero dependencies.
+Also works with GitLab CI/CD (there's a [Catalog component](https://gitlab.com/explore/catalog/invariant-systems/aiir)) and as an MCP server for AI assistants.
 
-The EU AI Act angle is the driver, but even without compliance pressure it's useful to have a machine-readable record of which commits involved AI tools.
+Tool: [AIIR](https://github.com/invariant-systems-ai/aiir) — open source, Apache 2.0, zero runtime dependencies.
 
 ---
 
@@ -88,29 +88,18 @@ The EU AI Act angle is the driver, but even without compliance pressure it's use
 
 **Body:**
 
-Curious what others are doing here. Our compliance team started asking about AI usage tracking after the EU AI Act transparency requirements were announced (general-purpose AI rules from August 2025, high-risk from August 2026).
+Curious what others are doing here. Our compliance team started asking about AI usage tracking after the EU AI Act timeline started materializing — the Act entered into force in August 2024, GPAI transparency obligations applied from August 2025, and the broader transparency and high-risk system rules phase in through 2026–2027.
 
 The ask was basically: "Can you tell us which commits involved AI tools? Can you prove it?"
 
-We ended up building an open-source tool called [AIIR](https://github.com/invariant-systems-ai/aiir) that generates cryptographic receipts per commit. It reads declared signals (Co-authored-by trailers, commit message patterns, bot accounts) — it's not trying to detect AI by code style, just recording what's declared.
+We ended up building an open-source tool called [AIIR](https://github.com/invariant-systems-ai/aiir) that generates cryptographic receipts per commit. It reads declared signals (Co-authored-by trailers, commit message patterns, bot accounts) — it's not trying to detect AI by code style, just recording what's declared. The threat model is explicit about this: if a developer strips the trailers, the receipt honestly says "no AI detected." (THREAT_MODEL.md in the repo.)
 
-The receipts are content-addressed JSON with SHA-256 hashing, optionally signed with Sigstore, and the tool can evaluate them against policy and emit SLSA-compatible attestations.
+The receipts are content-addressed JSON — SHA-256 over canonical fields, append-only JSONL ledger, optional Sigstore signing for non-repudiation. The tool evaluates receipts against policy and emits SLSA-compatible Verification Summary Attestations that downstream systems (CI gates, GRC platforms) can consume without re-evaluating.
 
-We run it as a GitHub Action on every PR. Zero runtime dependencies, so the supply chain surface is minimal.
+We run it as a GitHub Action on every PR. Zero runtime dependencies, so the supply chain surface is minimal. 1,800+ tests, mutation-tested, fuzz-tested. Apache 2.0.
 
 What I'm curious about:
 
 - Is your compliance team asking about AI usage yet?
 - If so, what approach are you taking?
-- Any concerns about the "declared signals" approach vs. AI detection?
-
----
-
-*Posting notes:*
-
-- r/Python: Technical focus, show code, emphasize zero-deps and test coverage
-- r/DevOps: CI/CD workflow copy-paste, emphasize 5-minute setup
-- r/ExperiencedDevs: Discussion-first, don't lead with promotion — ask a genuine question
-- Post at ~10am ET on Tuesday or Wednesday for best visibility
-- Engage with every comment
-- Don't crosspost simultaneously — space them 1-2 days apart
+- Any concerns about the "declared signals" approach vs. stylistic AI detection?

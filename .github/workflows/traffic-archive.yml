@@ -21,12 +21,21 @@ jobs:
   archive:
     runs-on: ubuntu-latest
     if: github.repository == 'invariant-systems-ai/aiir'
+    env:
+      HAS_TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN != '' }}
     steps:
+      - name: Skip when traffic token is unavailable
+        if: ${{ env.HAS_TRAFFIC_TOKEN != 'true' }}
+        run: |
+          echo "TRAFFIC_TOKEN is not configured; skipping traffic archive run." >> "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/checkout@v4
+        if: ${{ env.HAS_TRAFFIC_TOKEN == 'true' }}
         with:
           fetch-depth: 1
 
       - name: Initialise traffic-data branch
+        if: ${{ env.HAS_TRAFFIC_TOKEN == 'true' }}
         run: |
           set -euo pipefail
           git config user.name  "github-actions[bot]"
@@ -44,6 +53,7 @@ jobs:
           fi
 
       - name: Fetch traffic stats
+        if: ${{ env.HAS_TRAFFIC_TOKEN == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
         run: |
@@ -51,24 +61,37 @@ jobs:
           mkdir -p data
           TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
+          fetch_metric() {
+            local label="$1"
+            local path="$2"
+            local payload
+
+            if ! payload=$(gh api "$path"); then
+              echo "Traffic API fetch failed for $label; skipping archive run." >> "$GITHUB_STEP_SUMMARY"
+              return 1
+            fi
+
+            printf '%s' "$payload"
+          }
+
           # Clones
-          CLONES=$(gh api repos/${{ github.repository }}/traffic/clones)
+          CLONES=$(fetch_metric clones repos/${{ github.repository }}/traffic/clones) || exit 0
           echo "$CLONES" | jq -c --arg ts "$TS" '{fetched_at: $ts, metric: "clones"} + .' \
             >> data/clones.jsonl
 
           # Views
-          VIEWS=$(gh api repos/${{ github.repository }}/traffic/views)
+          VIEWS=$(fetch_metric views repos/${{ github.repository }}/traffic/views) || exit 0
           echo "$VIEWS" | jq -c --arg ts "$TS" '{fetched_at: $ts, metric: "views"} + .' \
             >> data/views.jsonl
 
           # Referrers
-          REFS=$(gh api repos/${{ github.repository }}/traffic/popular/referrers)
+          REFS=$(fetch_metric referrers repos/${{ github.repository }}/traffic/popular/referrers) || exit 0
           echo "$REFS" | jq -c --arg ts "$TS" '{fetched_at: $ts, metric: "referrers", data: .}' \
             >> data/referrers.jsonl
 
           # Stars / forks snapshot
-          gh api repos/${{ github.repository }} \
-            --jq "{fetched_at: \"$TS\", stars: .stargazers_count, forks: .forks_count, watchers: .subscribers_count}" \
+          REPO_SNAPSHOT=$(fetch_metric repo repos/${{ github.repository }}) || exit 0
+          echo "$REPO_SNAPSHOT" | jq -c --arg ts "$TS" '{fetched_at: $ts, stars: .stargazers_count, forks: .forks_count, watchers: .subscribers_count}' \
             >> data/engagement.jsonl
 
           echo "### Traffic snapshot $TS" >> "$GITHUB_STEP_SUMMARY"
@@ -76,6 +99,7 @@ jobs:
           echo "Views  (14d): $(echo "$VIEWS"  | jq .count)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Commit & push
+        if: ${{ env.HAS_TRAFFIC_TOKEN == 'true' }}
         run: |
           git add data/
           git diff --cached --quiet && echo "No new data" && exit 0

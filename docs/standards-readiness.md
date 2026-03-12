@@ -128,12 +128,12 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 0 | No CI |
 | 1 | Single-platform CI |
 | 2 | Multi-platform CI; CI badge visible |
-| 3 | Multi-platform + multi-Python; current main push fans out to 38 public checks |
+| 3 | Multi-platform + multi-Python; current main push fans out to 44 public checks |
 | 4 | Third-party verifier (non-AIIR) working; 2+ language SDKs |
 | 5 | 3+ independent verifiers; community plugin ecosystem |
 
-**Current: 4.2** — 38 public check runs on the latest `main` commit, with `ci-ok`, `quality-ok`, and `security-ok` enforced by branch protection (*last verified: 2026-03-11*); Python 3.9–3.13 × Ubuntu/Windows/macOS; GitHub + GitLab dual-publish; MCP tool; `docs/release-health.md` with P0 RCA policy and smoke test badge published; **JS verifier (`sdks/js/`) and Rust CBOR verifier (`sdks/rust/`) published — 2 language SDKs verified against test vectors** (2026-03-11). Missing: community plugins, external verifier.
-*Last verified: 2026-03-11*
+**Current: 4.2** — 44 public check runs on the latest `main` commit, with `ci-ok`, `quality-ok`, and `security-ok` enforced by branch protection (*last verified: 2026-03-12*); Python 3.9–3.13 × Ubuntu/Windows/macOS; GitHub + GitLab dual-publish; MCP tool; `docs/release-health.md` with P0 RCA policy and smoke test badge published; **JS verifier (`sdks/js/`) and Rust CBOR verifier (`sdks/rust/`) published — 2 language SDKs verified against test vectors** (2026-03-11). Missing: community plugins, external verifier.
+*Last verified: 2026-03-12*
 
 **Gap tasks:**
 
@@ -201,7 +201,7 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | Metric | Canonical source | Last verified |
 |---|---|---|
 | Test count | `pytest --collect-only -q \| tail -1` | 2026-03-12 (1893 tests collected) |
-| CI check count | GitHub check-runs API on the latest `main` commit | 2026-03-11 (38 public checks; 3 required merge gates) |
+| CI check count | GitHub check-runs API on the latest `main` commit | 2026-03-12 (44 public checks; 3 required merge gates) |
 | Coverage | `pytest --cov=aiir --cov-fail-under=100` | 2026-03-11 (100%) |
 | Runtime dependencies | `pip show aiir \| grep Requires` | 2026-03-11 (0) |
 | Conformance vectors | `schemas/conformance-manifest.json` | 2026-03-11 (25 JSON + 24 CBOR + 8 encoder interop) |

@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "d742ac7dd2c94a2968410f549dedddfdb9e01e73",
+    "tree_sha": "70f31a413e701b59065b7900b54e29e5d4bd7a7d",
+    "parent_shas": [
+      "50a95590591cfd928f5c0de4431aefb5102940e8"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T18:24:33-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-12T18:24:33-04:00"
+    },
+    "subject": "test: guard public surface metrics against drift (#49)",
+    "message_hash": "sha256:115301fcd44c97dd562684e251b32e976b6671e16da5d9c48a5916d05595700f",
+    "diff_hash": "sha256:6828ac0511a8ea16154b161fa0a6c1489dfc581983be202e07346e7ea0c7f833",
+    "files_changed": 4,
+    "files": [
+      ".github/workflows/ci.yml",
+      "docs/governance-adoption-plan.md",
+      "scripts/fetch_public_site_snapshot.py",
+      "tests/test_public_surface.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.github"
+  },
+  "receipt_id": "g1-920cd95a2219f65f20505b14ed6f14e8",
+  "content_hash": "sha256:920cd95a2219f65f20505b14ed6f14e80606e2a890302bd7b1957695b517deb5",
+  "timestamp": "2026-03-12T22:24:51Z",
+  "extensions": {}
+}

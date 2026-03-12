@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "eeb5d48f8d038a8392644b748b9a54f6b7b12328",
+    "tree_sha": "0b6503e0822cc5b9602d5ffcdf017572a185d25d",
+    "parent_shas": [
+      "bd43b2e216f5a93d1857450d2c61cf1ed65b8810"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T11:19:38-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T11:19:38-04:00"
+    },
+    "subject": "chore: dogfood receipt for public surface metrics guard",
+    "message_hash": "sha256:d44a88e21da4c468b69664999a5510f24a05f6221c537d7d3a9e45ac39bb0929",
+    "diff_hash": "sha256:028fe2f1b63ace46335d6fe69a0350336e8bce183a64148196630f5112b18b34",
+    "files_changed": 4,
+    "files": [
+      ".aiir/index.json",
+      ".aiir/receipts.jsonl",
+      ".aiir/receipts/receipt_bd43b2e216f5_a256a3c619e332be.cbor",
+      ".aiir/receipts/receipt_bd43b2e216f5_a256a3c619e332be.json"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1bec59bc555dddfd546ce196c32680a3",
+  "content_hash": "sha256:1bec59bc555dddfd546ce196c32680a3235773e1f974467f4e1f90f78b3a308b",
+  "timestamp": "2026-03-12T15:19:39Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

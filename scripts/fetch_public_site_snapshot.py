@@ -23,7 +23,18 @@ from pathlib import Path
 BASE_URL = "https://invariantsystems.io"
 HTML_HREF_RE = re.compile(r'href="([^"]+)"', re.IGNORECASE)
 MAX_FETCHED_PATHS = 128
-ALLOWED_FETCH_SUFFIXES = {"", ".html", ".json", ".xml"}
+ALLOWED_FETCH_SUFFIXES = {
+    "",
+    ".css",
+    ".html",
+    ".ico",
+    ".js",
+    ".json",
+    ".png",
+    ".svg",
+    ".webmanifest",
+    ".xml",
+}
 INITIAL_PATHS = {
     "/",
     "/404.html",

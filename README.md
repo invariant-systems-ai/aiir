@@ -585,12 +585,14 @@ Each receipt is a content-addressed JSON document:
 ```json
 {
   "type": "aiir.commit_receipt",
-  "schema": "aiir/commit_receipt.v1",
+  "schema": "aiir/commit_receipt.v2",
   "receipt_id": "g1-a3f8b2c1d4e5f6a7b8c9d0e1f2a3b4",
   "content_hash": "sha256:7f3a...",
   "timestamp": "2026-03-06T09:48:59Z",
   "commit": {
     "sha": "c4dec85630232666aba81b6588894a11d07e5d18",
+    "tree_sha": "9b2e5f8a1c3d7e4b6a0f2d8c5e1b3a7f9d4c6e8a",
+    "parent_shas": ["a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0"],
     "author": { "name": "Jane Dev", "email": "jane@example.com" },
     "subject": "feat: add receipt generation to CI",
     "diff_hash": "sha256:b2c1...",
@@ -980,7 +982,7 @@ aiir --in-toto --output .receipts/
 aiir --sign --in-toto --output .receipts/
 ```
 
-The predicate type is `https://aiir.dev/commit_receipt/v1`. The subject identifies the git commit by repository URL and SHA. This makes AIIR receipts native to:
+The predicate type is `https://invariantsystems.io/predicates/aiir/commit_receipt/v1`. The subject identifies the git commit by repository URL and SHA. This makes AIIR receipts native to:
 
 - **SLSA** verifiers
 - **Sigstore** policy-controller
@@ -1054,7 +1056,8 @@ AIIR publishes a formal specification and machine-readable schema for third-part
 |----------|---------|
 | [SPEC.md](SPEC.md) | Normative specification — canonical JSON, content addressing, verification algorithm (RFC 2119) |
 | [SPEC_GOVERNANCE.md](SPEC_GOVERNANCE.md) | Specification governance — change control, compatibility policy, extension registry, standards-track roadmap |
-| [schemas/commit_receipt.v1.schema.json](schemas/commit_receipt.v1.schema.json) | JSON Schema (draft 2020-12) for `aiir/commit_receipt.v1` |
+| [schemas/commit_receipt.v2.schema.json](schemas/commit_receipt.v2.schema.json) | JSON Schema (draft 2020-12) for `aiir/commit_receipt.v2` (current) |
+| [schemas/commit_receipt.v1.schema.json](schemas/commit_receipt.v1.schema.json) | JSON Schema (draft 2020-12) for `aiir/commit_receipt.v1` (still accepted) |
 | [schemas/receipt.cddl](schemas/receipt.cddl) | CDDL grammar (RFC 8610) — normative for CBOR, informative for JSON |
 | [schemas/conformance-manifest.json](schemas/conformance-manifest.json) | Machine-readable implementer registry, test vector index, and extension registry |
 | [schemas/verification_summary.v1.schema.json](schemas/verification_summary.v1.schema.json) | JSON Schema for the Verification Summary Attestation (VSA) predicate |

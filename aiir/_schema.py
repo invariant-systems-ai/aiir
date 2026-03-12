@@ -1,7 +1,7 @@
 """
 AIIR internal — receipt schema validation.
 
-Validates receipt structure against the aiir/commit_receipt.v1 specification.
+Validates receipt structure against the aiir/commit_receipt.v2 specification.
 Zero external dependencies — uses only Python standard library.
 
 This module is the structural validation layer. It checks types, required
@@ -40,7 +40,7 @@ _MAX_DEPTH = 64
 
 
 def validate_receipt_schema(receipt: Any) -> List[str]:
-    """Validate a receipt dict against the aiir/commit_receipt.v1 schema.
+    """Validate a receipt dict against the aiir/commit_receipt schema.
 
     Returns a list of human-readable error strings.  An empty list means
     the receipt passes structural validation.

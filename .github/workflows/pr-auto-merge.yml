@@ -177,21 +177,39 @@ jobs:
           # Only unresolved (not OUTDATED/DISMISSED) comments count.
 
           review_comments_json="$(gh api "repos/$REPO/pulls/$pr_number/comments?per_page=100")"
+          if ! review_threads_json="$(gh api graphql \
+            -f query='query($owner:String!, $repo:String!, $number:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$number) { reviewThreads(first:100) { nodes { isResolved isOutdated comments(first:100) { nodes { databaseId } } } } } } }' \
+            -F owner="${REPO%/*}" \
+            -F repo="${REPO#*/}" \
+            -F number="$pr_number")"; then
+            echo "Unable to read review thread resolution state"
+            set_status failure "AI gate could not read review thread state"
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
+            exit 0
+          fi
 
           hard_rule_pattern='runtime dependenc|hmac\.compare_digest|constant.time|hardcoded secret|hardcoded token|hardcoded key|pinned.*sha|40.char|full SHA|SPDX|sync-version|version consistency'
+          if ! unresolved_review_comment_ids="$(jq -c '
+            [
+              .data.repository.pullRequest.reviewThreads.nodes[]? |
+              select(.isResolved == false and .isOutdated == false) |
+              .comments.nodes[]?.databaseId
+            ]
+          ' <<<"$review_threads_json")"; then
+            echo "Unable to parse review thread resolution state"
+            set_status failure "AI gate could not parse review thread state"
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
+            exit 0
+          fi
 
-          unresolved_hard_findings="$(jq -r --arg sha "$head_sha" --arg pat "$hard_rule_pattern" '
+          unresolved_hard_findings="$(jq -r --arg sha "$head_sha" --arg pat "$hard_rule_pattern" --argjson unresolved_ids "$unresolved_review_comment_ids" '
             [.[] |
               select(
                 .commit_id == $sha and
                 (.user.login == "copilot-pull-request-reviewer[bot]" or .user.login == "Copilot") and
                 (.in_reply_to_id == null or .in_reply_to_id == 0) and
-                (.body | test($pat; "i"))
-              ) |
-              select(
-                (.resolved // false) == false and
-                (.state // "active") != "OUTDATED" and
-                (.state // "active") != "DISMISSED"
+                (.body | test($pat; "i")) and
+                (.id as $id | ($unresolved_ids | index($id) != null))
               )
             ] | length
           ' <<<"$review_comments_json")"

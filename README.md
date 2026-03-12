@@ -524,7 +524,7 @@ We built this repo almost entirely with Copilot Chat (Claude and ChatGPT models)
 - **`aiir.declare`** — a programmatic API for tools to self-report AI involvement
 - **Convention advocacy** — encouraging `Co-authored-by` and `Generated-by` adoption across tools
 
-The receipt format is tool-agnostic — it records whatever signals exist. As editors and AI tools start self-reporting (trailers, context files, IDE telemetry), AIIR receipts them automatically. The format is ready. The ecosystem needs to declare.
+The receipt format is tool-agnostic — it records whatever signals exist. As editors and AI tools start self-reporting (trailers, context files, IDE telemetry), AIIR can receipt them automatically. The ecosystem needs to declare.
 
 See [THREAT_MODEL.md](THREAT_MODEL.md) for the full STRIDE/DREAD analysis of what AIIR does and doesn't mitigate.
 

@@ -141,6 +141,26 @@ jobs:
             echo "ℹ️  No new receipts to commit"
           fi
 
+      - name: Trigger website receipts index refresh
+        env:
+          GH_TOKEN: ${{ secrets.WEBSITE_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::WEBSITE_DISPATCH_TOKEN not set — website receipts index will refresh on schedule"
+            exit 0
+          fi
+
+          if ! gh api "repos/invariant-systems-ai/invariantsystems.io/dispatches" \
+            -f event_type=receipts-publish \
+            -f "client_payload[source_repo]=${GITHUB_REPOSITORY}" \
+            -f "client_payload[source_branch]=main" \
+            -f "client_payload[source_sha]=${GITHUB_SHA}"; then
+            echo "::warning::Failed to dispatch receipts-publish to invariantsystems.io — website receipts index will refresh on schedule"
+            exit 0
+          fi
+
+          echo "✅ Dispatched receipts-publish to invariantsystems.io"
+
       - name: Upload receipts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:

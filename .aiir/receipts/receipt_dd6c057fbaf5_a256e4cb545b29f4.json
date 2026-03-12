@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "dd6c057fbaf5713372c0f2145babf79f5558ef24",
+    "tree_sha": "9994890eaad505d002a0833f1254616ea1e0c315",
+    "parent_shas": [
+      "f122d59226261abff2bab323311bb4f892e957e0"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:31:33-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:31:33-04:00"
+    },
+    "subject": "ci: fix dep-audit grep pattern + add sigstore-models to license skip list",
+    "message_hash": "sha256:f089cb18b97ca719a917e910194ebf2daa7206f5c3e6969259cc55f2414f49bb",
+    "diff_hash": "sha256:ac8c8e13b7a775632806f4e8cc4dccf0739ffc04a89dce7155134c5e1697acb1",
+    "files_changed": 2,
+    "files": [
+      ".github/workflows/security.yml",
+      "scripts/check_licenses.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-e4cb545b29f48d6f92d9f875d9ae5e44",
+  "content_hash": "sha256:e4cb545b29f48d6f92d9f875d9ae5e44ff23541a0114cbca5fa2852e29da14cd",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

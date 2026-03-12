@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "0d9ae817afdc1a21f570ccda1ede62db8276ba0b",
+    "tree_sha": "1487a72815c187475aa1509c3b87ba7a87ac74f7",
+    "parent_shas": [
+      "c9211897e7e38193be848ffcb2d2089b97289d51"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T21:08:53-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T21:08:53-04:00"
+    },
+    "subject": "feat: add Signed line to pretty-print output (1.0.10)",
+    "message_hash": "sha256:56203731f20f4d216243dc5c058255ab83afb08b59a9c81ce93d5abbd8b704b9",
+    "diff_hash": "sha256:77fba945b3855d81bc418ae2e800619e1734adfb9574438ee23ac512b27e3d93",
+    "files_changed": 4,
+    "files": [
+      "CHANGELOG.md",
+      "aiir/__init__.py",
+      "aiir/_receipt.py",
+      "aiir/cli.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-b6dca0aed6881b57c30648db3c8f07d0",
+  "content_hash": "sha256:b6dca0aed6881b57c30648db3c8f07d07df245f86193a22595afdb07941666e7",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

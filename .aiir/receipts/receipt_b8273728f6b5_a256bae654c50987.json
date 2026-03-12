@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "b8273728f6b5e6d309377a1eec2a2285d9973989",
+    "tree_sha": "a852f1d2a4f51202b1c51bb8e9f3563365670251",
+    "parent_shas": [
+      "45925d29f2121598983288dbb656dbfa5eaa6d73"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T18:04:38-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T18:04:38-04:00"
+    },
+    "subject": "release: v1.2.1 — fix --verify-release crash + signing cleanup",
+    "message_hash": "sha256:3226a12fd7aae33d6f7c47898eeee94c217b12761d79607ac3bf264705c13961",
+    "diff_hash": "sha256:2ed99f8d3973eb5a84116aa3ed07ae61e33ec5c90106fedf997c49e47487666d",
+    "files_changed": 4,
+    "files": [
+      "CHANGELOG.md",
+      "aiir/__init__.py",
+      "docs/api.md",
+      "mcp-manifest.json"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-bae654c50987b55d9db5e7654b7c86e2",
+  "content_hash": "sha256:bae654c50987b55d9db5e7654b7c86e2ac8d5693a63d86f1e4622b7c66f25c17",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

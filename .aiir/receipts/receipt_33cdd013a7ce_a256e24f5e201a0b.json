@@ -1,0 +1,54 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "33cdd013a7ce6776fd23face4fdd09c039017f43",
+    "tree_sha": "54bdd57ed8a0cd40dcf91be197049a4e712df82f",
+    "parent_shas": [
+      "0a192b7e83dd3e7004b597217d88f279fb81a2eb"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T15:26:57-05:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T15:26:57-05:00"
+    },
+    "subject": "legal: add trademark policy, DCO requirement, enterprise reservation",
+    "message_hash": "sha256:90a07d637383359aef9a174900c42ceaaf5cf8a620a3f03ac28d8e0e83da5ce6",
+    "diff_hash": "sha256:79ff28bebdf7a6d88bb6a9984fef0e00b032fb309a3383f73532d48ff9c40f9e",
+    "files_changed": 5,
+    "files": [
+      "CONTRIBUTING.md",
+      "NOTICE",
+      "README.md",
+      "TRADEMARK.md",
+      "pyproject.toml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-e24f5e201a0b6e528f58550f5873c0cf",
+  "content_hash": "sha256:e24f5e201a0b6e528f58550f5873c0cf0c10f560d6e535dc3c52c45ebd60d9b9",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

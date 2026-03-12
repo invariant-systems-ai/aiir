@@ -1,0 +1,54 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "cdc1fcdae8813453f88927066ad33d63c8eff15d",
+    "tree_sha": "02c2c5aa47046d82ab3d1da8c991413a2e5d6880",
+    "parent_shas": [
+      "0d9ae817afdc1a21f570ccda1ede62db8276ba0b"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T21:31:56-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T21:31:56-04:00"
+    },
+    "subject": "feat: add --detail flag for full receipt inspection (1.0.11)",
+    "message_hash": "sha256:86b9f4bae5dd35705e2325dd9cd43507ee09f15553cd10d541c4e5ad3a922328",
+    "diff_hash": "sha256:963a3c6e7129d80feec3c18f585f842fc0a8322664ba3f7b4c431b31bae21c85",
+    "files_changed": 5,
+    "files": [
+      "CHANGELOG.md",
+      "aiir/__init__.py",
+      "aiir/_receipt.py",
+      "aiir/cli.py",
+      "tests/test_cli_integration.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-c52b372352d896778447e4804654553c",
+  "content_hash": "sha256:c52b372352d896778447e4804654553c4e0fc3438d52bfd918c6eef5bfc72ba6",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

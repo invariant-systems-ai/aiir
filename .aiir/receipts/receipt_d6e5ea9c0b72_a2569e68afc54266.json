@@ -1,0 +1,59 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "d6e5ea9c0b7210f1f9dd65da5063273c7975f3e9",
+    "tree_sha": "1c1ca5de545f810f28b247ffe8c80082dbbb5cab",
+    "parent_shas": [
+      "a16759743c179f88ef0598667aaf9cf979c9b588"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:26:46-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:26:54-04:00"
+    },
+    "subject": "feat: GitLab CI/CD Catalog component + multi-platform CI templates + Docker",
+    "message_hash": "sha256:616b1ba91b7b90a71e8ea76341a36591d0dc68ba2d456e5e042a6f8ffa78594d",
+    "diff_hash": "sha256:1d9d32816c549320bd862b5178a50e943cfaa246e75295fd81f005b21961ad36",
+    "files_changed": 10,
+    "files": [
+      ".dockerignore",
+      ".gitlab-ci.yml",
+      "Dockerfile",
+      "README.md",
+      "templates/azure-pipelines.yml",
+      "templates/bitbucket-pipelines.yml",
+      "templates/circleci/config.yml",
+      "templates/jenkins/Jenkinsfile",
+      "templates/receipt/README.md",
+      "templates/receipt/template.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-9e68afc54266ff2df5f39ae654e8de96",
+  "content_hash": "sha256:9e68afc54266ff2df5f39ae654e8de96ae8166624e690e1a5a279f2c2a4d628e",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

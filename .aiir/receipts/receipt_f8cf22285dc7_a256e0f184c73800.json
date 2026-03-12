@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "f8cf22285dc71dd847223f27f000df28815d59cb",
+    "tree_sha": "6ca591b824e61c2ed5aa52e6bb432a331aa4fecf",
+    "parent_shas": [
+      "e45a60a6a68b015d8e060598511519a7e82e0fab"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:38:52-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:38:57-04:00"
+    },
+    "subject": "fix(sync): use semver-only tag lookup, ignore floating v1/v2 tags",
+    "message_hash": "sha256:2ac5f31f2ec75516593fad16f1ee459ac60aae2b79f4a591be1008c5374d7cee",
+    "diff_hash": "sha256:2c2c38165807983bba1635f05fe6016ff97a25b49d6fba0613721cc006fbc70e",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/sync.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-e0f184c73800f99f292c24d7ba66a1d3",
+  "content_hash": "sha256:e0f184c73800f99f292c24d7ba66a1d34189aebbaa220482cae96b14ce3485dd",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

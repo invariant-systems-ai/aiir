@@ -1,0 +1,56 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "5c422b229ac978410382a8dce801270c0db44b03",
+    "tree_sha": "a10d8e62e65b817802c2a014ce2ae81b10631b1c",
+    "parent_shas": [
+      "ccf694fb0d8d6e1cde8d958097927aa21b4d6a0d"
+    ],
+    "author": {
+      "name": "github-actions[bot]",
+      "email": "41898282+github-actions[bot]@users.noreply.github.com",
+      "date": "2026-03-08T16:47:21+00:00"
+    },
+    "committer": {
+      "name": "github-actions[bot]",
+      "email": "41898282+github-actions[bot]@users.noreply.github.com",
+      "date": "2026-03-08T16:47:21+00:00"
+    },
+    "subject": "chore: AIIR receipts for ccf694fb0d8d [skip ci]",
+    "message_hash": "sha256:395e0e15f6586d6baf8b2092b91c855a46dd7f2db44eb88fdcb94bfd28a865d8",
+    "diff_hash": "sha256:412bf48f8ab3b78200c257efa23d09ea3fae9ee083e4e8a6f076009fe4306aaa",
+    "files_changed": 2,
+    "files": [
+      ".receipts/receipt_cf8033cdafb5_a256e4e751c8d511.json",
+      ".receipts/receipt_cf8033cdafb5_a256e4e751c8d511.json.sigstore"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": true,
+    "bot_signals_detected": [
+      "author_name_bot:github-actions",
+      "author_email_bot:github-actions",
+      "committer_name_bot:github-actions",
+      "committer_email_bot:github-actions"
+    ],
+    "bot_signal_count": 4,
+    "authorship_class": "bot",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-206c91e159eb42c27ceac6cdf07b10a0",
+  "content_hash": "sha256:206c91e159eb42c27ceac6cdf07b10a09cc3f531e304d3792ed91aeb637402c6",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

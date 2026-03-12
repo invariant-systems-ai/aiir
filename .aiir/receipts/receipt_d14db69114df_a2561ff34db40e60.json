@@ -1,0 +1,63 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "d14db69114dfc263f193e8c4d49211b2c896c7ab",
+    "tree_sha": "1cbfc4b32c41b297b0a5acd07c93376ab4fa8846",
+    "parent_shas": [
+      "eeba606e433af2b543e33ce9da8d2db6034bae52"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T08:48:19-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T08:48:24-04:00"
+    },
+    "subject": "v1.0.3: module split + review response",
+    "message_hash": "sha256:f4746e6c80eaec1d3f4d1a213b332000bcf0879498565e12df19db24fa2843fa",
+    "diff_hash": "sha256:b9388cda78c219d32f3c565a1bb1b4a81175d588a50023ab8906aeec632edacf",
+    "files_changed": 14,
+    "files": [
+      "CHANGELOG.md",
+      "README.md",
+      "THREAT_MODEL.md",
+      "aiir/__init__.py",
+      "aiir/_core.py",
+      "aiir/_detect.py",
+      "aiir/_github.py",
+      "aiir/_ledger.py",
+      "aiir/_receipt.py",
+      "aiir/_sign.py",
+      "aiir/_stats.py",
+      "aiir/_verify.py",
+      "aiir/cli.py",
+      "test_cli.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1ff34db40e604b636cc745e258bd2f3d",
+  "content_hash": "sha256:1ff34db40e604b636cc745e258bd2f3d792235f9a158fff78d37a49ee148f9d8",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

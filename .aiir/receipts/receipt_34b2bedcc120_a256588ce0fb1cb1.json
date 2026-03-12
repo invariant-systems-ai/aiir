@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "34b2bedcc12032f0fbf5a104df60fc89a69e5676",
+    "tree_sha": "a700f168d5fa767a7bdce661362f5aa2c8dc8d88",
+    "parent_shas": [
+      "626f390ee70e9237d517be1ab4e7eb903483e48b"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T15:55:42-05:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T15:55:42-05:00"
+    },
+    "subject": "launch: animated terminal demo + launch posts (HN/X/LinkedIn/Reddit)",
+    "message_hash": "sha256:09606c7ad16ac554f5dd2ae45a9ec9c501fdd8890b18d420384a71b1b8531ad0",
+    "diff_hash": "sha256:8fabb722cb5893981361ae76dff3956b0f9fb14168a994b3e1db0166166496b8",
+    "files_changed": 2,
+    "files": [
+      "docs/LAUNCH_POSTS.md",
+      "docs/demo.svg"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-588ce0fb1cb19db354d3ddfcc8a1fb89",
+  "content_hash": "sha256:588ce0fb1cb19db354d3ddfcc8a1fb89d85e457dc7b93a51811bf67ac88cc9c2",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

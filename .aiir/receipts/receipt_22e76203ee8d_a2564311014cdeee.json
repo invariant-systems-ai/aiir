@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "22e76203ee8d316f2dc31951e098247ea7b2fecb",
+    "tree_sha": "d6c9e3d2f2beef24b10e62b54f0e550659ff22bc",
+    "parent_shas": [
+      "e3d6e266f4b4c1f790646a208a3e1c6144ec641b"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T11:27:50-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T11:27:50-04:00"
+    },
+    "subject": "sec: move all step outputs from run: blocks to env: blocks",
+    "message_hash": "sha256:642270f731fd3ac4a4da44f18392b2c56b2790a56beefde87a973343554e2e28",
+    "diff_hash": "sha256:afa07f03b45fb3cefc44d59bf705f0802c01073675a5090fdbf15241bc445667",
+    "files_changed": 2,
+    "files": [
+      ".github/workflows/dogfood.yml",
+      ".github/workflows/update-major-tag.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-4311014cdeeed696e8a192a348f12c58",
+  "content_hash": "sha256:4311014cdeeed696e8a192a348f12c58eb8500479d718640d192713626417fc4",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

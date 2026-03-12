@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "d7d67ee8dbc4bac907047f202ed1b3ea9e12c11e",
+    "tree_sha": "8ea1aacca224b2651619b31c1aad3fe75636c791",
+    "parent_shas": [
+      "ad626d19b0f8a690ddf5ac14df46749d54504b7a"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:12:46-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:12:54-04:00"
+    },
+    "subject": "docs: improve README copy and GitLab CI template",
+    "message_hash": "sha256:641f55a2e0f7f2a87eabd9616416db4efbe1ac1a21850fb662a1e025208f588b",
+    "diff_hash": "sha256:d3b043acd462dfad738caf29435f9b4b2286eeda757fedd7de962adccdf77c82",
+    "files_changed": 2,
+    "files": [
+      "README.md",
+      "templates/gitlab-ci.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-0239eeadb40b72b88a40805283b1be90",
+  "content_hash": "sha256:0239eeadb40b72b88a40805283b1be90f542aa574de9f7b9c008fb45640a325f",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "0ddd8ea9de60455ef036884125e0f41fe9a39708",
+    "tree_sha": "995bbd64dcd830048aba86c8e20507ec9f33c429",
+    "parent_shas": [
+      "b2b0d43d50a7e768c166d55ab080150c38488081"
+    ],
+    "author": {
+      "name": "dependabot[bot]",
+      "email": "49699333+dependabot[bot]@users.noreply.github.com",
+      "date": "2026-03-08T15:27:34-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-08T15:27:34-04:00"
+    },
+    "subject": "chore(deps): bump github/codeql-action from 3.28.0 to 4.32.6 (#2)",
+    "message_hash": "sha256:9ffa722d2dacb42ceadc38414081bc7b178eca1c7ad5d260055c6191368617a9",
+    "diff_hash": "sha256:3f646ce1e86033366d5822ca397261a9037c8e1f4a9294f3c1c78857c397af38",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/scorecard.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": true,
+    "bot_signals_detected": [
+      "author_name_bot:dependabot",
+      "author_email_bot:dependabot"
+    ],
+    "bot_signal_count": 2,
+    "authorship_class": "bot",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-6768c11ce7b5885a6972ccfaad99db05",
+  "content_hash": "sha256:6768c11ce7b5885a6972ccfaad99db05f3ba161909a07a8ddfb005edeb880576",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

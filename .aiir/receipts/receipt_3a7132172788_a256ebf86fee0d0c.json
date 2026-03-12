@@ -1,0 +1,54 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "3a71321727881bf08ae1162168f85d2790f104a1",
+    "tree_sha": "45b092959fa8b28c1d64a678ddb8d7d0a7ba2895",
+    "parent_shas": [
+      "4a31bda5dd18911ff83745552da530f442327c5e"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T07:49:40-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T07:49:40-04:00"
+    },
+    "subject": "docs: fix schema version drift — v1 → v2 across README, SPEC, and code",
+    "message_hash": "sha256:37f2ce151c3a76cfaa226c66dc6c0a004dac136decf7e886e12caaf24600aea9",
+    "diff_hash": "sha256:cd55a649339e3519fc855f39c1b582cca45da777ef05f05cd023999f107eb463",
+    "files_changed": 5,
+    "files": [
+      ".pre-commit-config.yaml",
+      "README.md",
+      "SPEC.md",
+      "aiir/_policy.py",
+      "aiir/_schema.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-ebf86fee0d0c222d02f05453cc9739ec",
+  "content_hash": "sha256:ebf86fee0d0c222d02f05453cc9739ec385b939fe8057912abe2434749216943",
+  "timestamp": "2026-03-12T12:13:52Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

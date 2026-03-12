@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "ce1eaa28d7aec54df8737040096f6624ee66ef8f",
+    "tree_sha": "000077a7991a6e71eaa4730a141f1f1630a5504a",
+    "parent_shas": [
+      "b3e4a16a20a7c38a19bd8bee484664b8dc679c7d"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:37:30-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:37:40-04:00"
+    },
+    "subject": "fix(ci): use refs/tags/ for floating tag verification",
+    "message_hash": "sha256:40fcede266dc0e996901a7003ad5c77cb5728ae86fc2339d75975d4ff0f9aac3",
+    "diff_hash": "sha256:771bfc76f307202393fbf1f42046f15ff8274b9c98aae66f660a26bf15a409f7",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/update-major-tag.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-58a13a132429f2be8095c09f4bad2a09",
+  "content_hash": "sha256:58a13a132429f2be8095c09f4bad2a0938802d797a4d6c2fa6f1cb9407c3b3bb",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

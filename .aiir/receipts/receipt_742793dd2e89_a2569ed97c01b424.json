@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "742793dd2e8909b712b7ea5da05d69edf1bf27b3",
+    "tree_sha": "bddf0ee33e2ab37999ea7a5c2612a517e19d4e37",
+    "parent_shas": [
+      "e7e03d436c3b6c9ea8b1a4d5a24afe4e544b0752"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T08:07:05-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T08:07:05-04:00"
+    },
+    "subject": "ci: auto-queue merge for owner PRs (#26)",
+    "message_hash": "sha256:c12eb4f2fcf73d6676fe2d2659968fbf4e9755c3b16501730f73fc535f5e9e9d",
+    "diff_hash": "sha256:2ad95593d57e4eccfa0c81d5c36376612fd3918edba4d1e1df6d685be82394c0",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/pr-auto-merge.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-9ed97c01b42401cc7190816116321f9b",
+  "content_hash": "sha256:9ed97c01b42401cc7190816116321f9be72156115e24036fee6e10bd0f157757",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

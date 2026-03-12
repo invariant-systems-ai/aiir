@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "2be80ed1f6ccf56649498d8e6ac3eee7b6c3787c",
+    "tree_sha": "20ed159c38c1c47403d1d1ea8c9470f58638511c",
+    "parent_shas": [
+      "a99d6636807df62b40e8bcd559988ce441c6691a"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T12:23:03-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T12:23:03-04:00"
+    },
+    "subject": "fix(ci): ruff format + idempotent GitLab release",
+    "message_hash": "sha256:4987a69a07f3292f6065c3730854edd284b6b7ce6bb741cf8bf01f3b37818938",
+    "diff_hash": "sha256:667d191ef563b785916e33915b57c6a09d0ce88a3d7d8cec517ad765effcd22b",
+    "files_changed": 4,
+    "files": [
+      ".gitlab-ci.yml",
+      "aiir/mcp_server.py",
+      "tests/test_gitlab.py",
+      "tests/test_mcp.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-ea1d1eb6d68ab22e89662865f118d1db",
+  "content_hash": "sha256:ea1d1eb6d68ab22e89662865f118d1db11c7ec6b39649c5504a9880e26adb828",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

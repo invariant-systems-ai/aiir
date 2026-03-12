@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "27e857bd02227e6c5710361118453fbfde106db0",
+    "tree_sha": "d2bb5f9c02670c7326f15b0a310759c177d56ee6",
+    "parent_shas": [
+      "d12e2a8e80b81ba75d81a59280b6dabd5919adec"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:56:45-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:56:45-04:00"
+    },
+    "subject": "docs: update standards-readiness scorecard v1.1 (67.5/100)",
+    "message_hash": "sha256:b01ea9ccb3f34772006af1d75280b45863f203db254aa991d4a383f13d791291",
+    "diff_hash": "sha256:85b0198d001e53d3e5262ddf4dc956e5bda25022440b10c8e1775ce7968a6874",
+    "files_changed": 1,
+    "files": [
+      "docs/standards-readiness.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1774089368be74692b5f503f2c9b8c73",
+  "content_hash": "sha256:1774089368be74692b5f503f2c9b8c73b86484b884a556515ca37c0928cefc75",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

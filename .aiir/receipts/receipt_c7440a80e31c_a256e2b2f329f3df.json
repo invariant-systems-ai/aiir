@@ -1,0 +1,55 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "c7440a80e31c55bbf0764ea4d5959bd18b4a2dc3",
+    "tree_sha": "f9c36fdbcaa041aca2d6652453a8f039053db512",
+    "parent_shas": [
+      "125a156db4bfb38c167e66adb4f5e502519dce6e"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T07:08:02-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T07:08:02-04:00"
+    },
+    "subject": "fix(security-hygiene): clear scan notes and sync trust metrics (#22)",
+    "message_hash": "sha256:3a8b7786ae4aafbe21206ba1989635947caf47bb644d895d017abf6f5815b83a",
+    "diff_hash": "sha256:b7c8b11fa51db74f335f2b15718f10449ee48900e270236ddfdc8ae9d22ee8bb",
+    "files_changed": 6,
+    "files": [
+      ".github/workflows/release-smoke.yml",
+      "README.md",
+      "aiir/cli.py",
+      "tests/test_branch_close.py",
+      "tests/test_mcp.py",
+      "tests/test_scripts.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-e2b2f329f3df69e140c899d5efb4a429",
+  "content_hash": "sha256:e2b2f329f3df69e140c899d5efb4a4299308d7f57aa3a28be5639e24d24a9ac6",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

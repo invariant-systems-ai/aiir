@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "6900af207be2f01737ad3148d7316b60824ab4de",
+    "tree_sha": "2a3f50d94988bc1e910b90a142e8b4584fedacda",
+    "parent_shas": [
+      "d57348c150ec889904f3f784109418ffe3aab070"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T15:28:42-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T15:28:42-04:00"
+    },
+    "subject": "ci: add ci-ok gate job + sync on every push to main",
+    "message_hash": "sha256:070f7ae1505865df8cb67d8812f312829a222c5c4a326c7dd5e4bff0161b43c2",
+    "diff_hash": "sha256:f491cd4dd256d76825f823fea55947a35972ff2763ed90d91345e2810cc9f599",
+    "files_changed": 2,
+    "files": [
+      ".github/workflows/ci.yml",
+      ".github/workflows/sync.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-17ceb3d077f4caa8feecfbb846f92c06",
+  "content_hash": "sha256:17ceb3d077f4caa8feecfbb846f92c06d8af1752841a35e49f3a0309e90a173b",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

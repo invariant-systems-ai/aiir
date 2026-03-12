@@ -1,0 +1,56 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "626f390ee70e9237d517be1ab4e7eb903483e48b",
+    "tree_sha": "0ede325c53cdec1f0c82c4a8c8bc3de29a5bada3",
+    "parent_shas": [
+      "eeb462132036456e79729fc18f32c5b51d5213b0"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T15:42:52-05:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T15:43:10-05:00"
+    },
+    "subject": "dogfood: AIIR receipts its own commits",
+    "message_hash": "sha256:5821d5fd0fed494934498fd4512ad1b38b797c209589dc1b12c9629904eceb42",
+    "diff_hash": "sha256:7650d82f78e0ca1e21f8fb5c6ecdfaf7dc6b545f739a7645fef3e9a58864b26e",
+    "files_changed": 7,
+    "files": [
+      ".gitignore",
+      ".pre-commit-config.yaml",
+      ".receipts/receipt_1350e2250449_1772916038_7b3aef04.json",
+      ".receipts/receipt_b4553eda2d64_1772916037_66ca8a63.json",
+      ".receipts/receipt_e854248264f5_1772916037_2f1fee52.json",
+      ".receipts/receipt_f92064cf1f53_1772916037_15784405.json",
+      "README.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-4ae5b91f8430e487b30ea5bc564fb304",
+  "content_hash": "sha256:4ae5b91f8430e487b30ea5bc564fb3040f71035e6c552b8c489b7d5a3dcb8ea9",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

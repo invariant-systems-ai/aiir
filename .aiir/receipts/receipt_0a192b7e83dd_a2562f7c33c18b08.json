@@ -1,0 +1,56 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "0a192b7e83dd3e7004b597217d88f279fb81a2eb",
+    "tree_sha": "7c862c90a00d4c53c69db1009bb7c21c2837060d",
+    "parent_shas": [
+      "bd896194c31c61405531dabd78a795028ac65dff"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T15:15:39-05:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T15:15:39-05:00"
+    },
+    "subject": "Add pre-commit hook, GitLab CI template, fix Windows encoding",
+    "message_hash": "sha256:5c74759eea78383b14f3570866e7508ac06b0358cde5e68765533296fd815740",
+    "diff_hash": "sha256:6c9c2a7cc60a15976d5131c03fb771c26699b227389ccce40a3deeade77bb5c1",
+    "files_changed": 7,
+    "files": [
+      ".github/workflows/ci.yml",
+      ".github/workflows/dogfood.yml",
+      ".pre-commit-hooks.yaml",
+      "README.md",
+      "aiir/cli.py",
+      "aiir/mcp_server.py",
+      "templates/gitlab-ci.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-2f7c33c18b086c3d6238c93b8fa20441",
+  "content_hash": "sha256:2f7c33c18b086c3d6238c93b8fa204418fd7a98fb8e72e441e8204082d8d810e",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

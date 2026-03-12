@@ -1,0 +1,59 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "768505f84cf94d82f627f8a1102dd728052babad",
+    "tree_sha": "317f82d4b466f05dd77a3ad75f19188fcd90c553",
+    "parent_shas": [
+      "0309b332cd25a6d187ab45215a8d38e742c201dd"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T09:36:58-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T09:36:58-04:00"
+    },
+    "subject": "feat: implement P0-P4 roadmap — check runs, review receipts, aiir init, PR comments, commit trailers",
+    "message_hash": "sha256:335db5296769ac1081c3fc13d586a902b71f080efe7c30621ca47fd11e2de636",
+    "diff_hash": "sha256:3a0c984a5a0f1c5081b9a5ddeabe2eabd2f3b7b82682e382ce4ef318e296ada0",
+    "files_changed": 10,
+    "files": [
+      "CHANGELOG.md",
+      "SPEC.md",
+      "action.yml",
+      "aiir/__init__.py",
+      "aiir/_github.py",
+      "aiir/_receipt.py",
+      "aiir/cli.py",
+      "schemas/review_receipt.v1.schema.json",
+      "tests/test_canonicalization.py",
+      "tests/test_roadmap_p0_p4.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-cd2753cfab8a70185c2e43842430a7ee",
+  "content_hash": "sha256:cd2753cfab8a70185c2e43842430a7ee4ca2c9222870d5c24760be872b8d2220",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

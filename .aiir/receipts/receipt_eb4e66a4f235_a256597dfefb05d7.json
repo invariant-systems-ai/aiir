@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "eb4e66a4f2355c3125b04b0f27f66a1e9a88e04d",
+    "tree_sha": "2af3fd4be65c76c9650a42f4a7c564d41ceab629",
+    "parent_shas": [
+      "47d94bb00a6bad827b8a52e443ed812bef71e702"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T12:52:37-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T12:52:37-04:00"
+    },
+    "subject": "fix(gitlab): shorten component spec description to ≤256 chars",
+    "message_hash": "sha256:194a794a9d236a017b12518d4d94bfeabe6a8e8129e2d8e1c03d17d1cb72645f",
+    "diff_hash": "sha256:7e8a27bc447bc2a4d0cb0e4b520828c5ebca435712fcc7a2ff873b4d50bb6a75",
+    "files_changed": 1,
+    "files": [
+      "templates/receipt/template.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-597dfefb05d7c3015787e4504c50e8a2",
+  "content_hash": "sha256:597dfefb05d7c3015787e4504c50e8a28e306783500ce6283e7db14e1312e1bb",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

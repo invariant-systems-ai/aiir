@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "0136dd109a8f0230b7312fc7553a99d668b8860e",
+    "tree_sha": "ae94860f53ae7266b4596b032237c50f78b35e86",
+    "parent_shas": [
+      "d9f5a8942a80f4f4754f65b8ae7bdff7113a8874"
+    ],
+    "author": {
+      "name": "dependabot[bot]",
+      "email": "49699333+dependabot[bot]@users.noreply.github.com",
+      "date": "2026-03-08T19:06:58+00:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-08T19:06:58+00:00"
+    },
+    "subject": "chore(deps): bump ossf/scorecard-action in the actions-minor group (#1)",
+    "message_hash": "sha256:9853db005f865001aa1a308dedd3b9894d01e371804be41b3d97b50d40edb2fd",
+    "diff_hash": "sha256:ee63bc8004fb26a6876ee3943521ede96a08a504bbb2c3926fe184d069fd4066",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/scorecard.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": true,
+    "bot_signals_detected": [
+      "author_name_bot:dependabot",
+      "author_email_bot:dependabot"
+    ],
+    "bot_signal_count": 2,
+    "authorship_class": "bot",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-b217c11cbb49bdb6d2580ac19f3d174b",
+  "content_hash": "sha256:b217c11cbb49bdb6d2580ac19f3d174bdf322f9f14f1f62e806384d0b544f42f",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

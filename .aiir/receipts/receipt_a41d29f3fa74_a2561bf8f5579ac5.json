@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "a41d29f3fa7402dd4436e8cf7bc7b72d6431132f",
+    "tree_sha": "5caa4749995508c763431a7d5a5667e9fc62efcb",
+    "parent_shas": [
+      "31a0b30a888cd75ca5c214842cf4dffd4be62420"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T05:42:42-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T05:42:42-04:00"
+    },
+    "subject": "test: encode reference-guard patterns",
+    "message_hash": "sha256:b27bcda2ab07d3792520faf31d19f4b6ec2af2335a9285477eeaa08e71219498",
+    "diff_hash": "sha256:cdfe76e4a5d5c0b8fa9bfd9f08aa0a480dd42595b62c4efab1cf506824783c5d",
+    "files_changed": 1,
+    "files": [
+      "tests/test_public_surface.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1bf8f5579ac5151069391c12b1d8b9c0",
+  "content_hash": "sha256:1bf8f5579ac5151069391c12b1d8b9c079ec3d12ae0809e818d6744c7089e8ab",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "3500f789d998e74c209a108508dc530bece4764a",
+    "tree_sha": "6702672ec90326fc6f6e9733dee2a018b9d28782",
+    "parent_shas": [
+      "0e6c2e7e7c406e1122dfc24b1e465e041db93108"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:37:03-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:37:03-04:00"
+    },
+    "subject": "chore: bump test count to 1030+ in CONTRIBUTING.md",
+    "message_hash": "sha256:cdcceefdca4b7539cea6aad85acaa7b442b389d0dc10e8708aed7ddfcae18cfe",
+    "diff_hash": "sha256:9bd82cb025fda062a00e4997143cdcbf2fc883f813efceba02eefe83de89bbf6",
+    "files_changed": 1,
+    "files": [
+      "CONTRIBUTING.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-8c8954d6d67212ed9141d54ad217d093",
+  "content_hash": "sha256:8c8954d6d67212ed9141d54ad217d0931a317f57bdb43bd1158fea8d2d198829",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

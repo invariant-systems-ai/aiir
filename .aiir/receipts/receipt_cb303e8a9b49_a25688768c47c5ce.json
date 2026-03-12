@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "cb303e8a9b4938d2d34e790acada281ab16461e7",
+    "tree_sha": "0ceab549aa9afd4ffc5f600318819df8cfd4be67",
+    "parent_shas": [
+      "726d1c1de9f03ac0011df25a4fa76a75217b2b66"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:49:13-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:49:22-04:00"
+    },
+    "subject": "fix(ci): cap Hypothesis examples in CI to prevent timeout",
+    "message_hash": "sha256:d856b0eca1059e3f38c40dfd83b64e234fb705e7ece905859dd6ee1b740f1d11",
+    "diff_hash": "sha256:83a14ae7c2a24b84920ba22a266bf49f99ce2021e61e4580918c1a9dd7952846",
+    "files_changed": 2,
+    "files": [
+      ".gitlab-ci.yml",
+      "tests/conftest.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-88768c47c5ce7ca83645aabd2ac81f32",
+  "content_hash": "sha256:88768c47c5ce7ca83645aabd2ac81f3229de44b7eaaf53aaa7e2c9235106df30",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

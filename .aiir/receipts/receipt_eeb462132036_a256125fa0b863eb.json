@@ -1,0 +1,57 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "eeb462132036456e79729fc18f32c5b51d5213b0",
+    "tree_sha": "eb0bbe6c3bb39682584cf36ac68508fb41c71c42",
+    "parent_shas": [
+      "33cdd013a7ce6776fd23face4fdd09c039017f43"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T15:32:30-05:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T15:32:30-05:00"
+    },
+    "subject": "Hostile review: fix 4 launch blockers + 19 minor findings",
+    "message_hash": "sha256:0b70114d4aeaa4c54dd067d9ff0b5cdbd100c637fa838b9b6be78b4acaae4df6",
+    "diff_hash": "sha256:1a3ca905307c212615fe5740703193a38a52d41edd6422870642c03e5d37f4a9",
+    "files_changed": 8,
+    "files": [
+      ".github/CODEOWNERS",
+      "CHANGELOG.md",
+      "README.md",
+      "SECURITY.md",
+      "action.yml",
+      "aiir/__main__.py",
+      "aiir/cli.py",
+      "test_cli.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-125fa0b863ebd6a54616b626b4870460",
+  "content_hash": "sha256:125fa0b863ebd6a54616b626b4870460ce447032c3f0b8a64edb3a8a52b2cf7d",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

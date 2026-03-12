@@ -1,0 +1,55 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "5739d8a5ee2229b5950da9cdd12577b057d69c3f",
+    "tree_sha": "567402cc30495274b9d7580c27b331780ed14600",
+    "parent_shas": [
+      "cdc1fcdae8813453f88927066ad33d63c8eff15d"
+    ],
+    "author": {
+      "name": "dependabot[bot]",
+      "email": "49699333+dependabot[bot]@users.noreply.github.com",
+      "date": "2026-03-09T03:49:02-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-09T03:49:02-04:00"
+    },
+    "subject": "chore(deps): bump actions/setup-python from 5.3.0 to 6.2.0 (#8)",
+    "message_hash": "sha256:720dbc2890e4b1865da7f77a1611f366c7790aa0112ed1f71c3d20a44880fc4b",
+    "diff_hash": "sha256:9ebc714a1d07fb0e2499aa4d58900cc392391c96b2408e504a8b32bb132fc5da",
+    "files_changed": 3,
+    "files": [
+      ".github/workflows/ci.yml",
+      ".github/workflows/publish.yml",
+      "action.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": true,
+    "bot_signals_detected": [
+      "author_name_bot:dependabot",
+      "author_email_bot:dependabot"
+    ],
+    "bot_signal_count": 2,
+    "authorship_class": "bot",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-204f988fe4d67d1c0eab1c5235b5f4fd",
+  "content_hash": "sha256:204f988fe4d67d1c0eab1c5235b5f4fd1bfdad919d37e634e7f4f51611f61793",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

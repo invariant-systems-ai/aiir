@@ -1,0 +1,55 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "70edcc6b667e7d10c9eaf6de713340138df01846",
+    "tree_sha": "b7fd8d182d78e60fe10952160fc364d98e579248",
+    "parent_shas": [
+      "398ae46cc9158447bb99bca595979f1c481e7f01"
+    ],
+    "author": {
+      "name": "github-actions[bot]",
+      "email": "41898282+github-actions[bot]@users.noreply.github.com",
+      "date": "2026-03-08T11:31:39+00:00"
+    },
+    "committer": {
+      "name": "github-actions[bot]",
+      "email": "41898282+github-actions[bot]@users.noreply.github.com",
+      "date": "2026-03-08T11:31:39+00:00"
+    },
+    "subject": "chore: AIIR receipts for 398ae46cc915 [skip ci]",
+    "message_hash": "sha256:737f33ddd1a664042471a082f47a2552e23f9658bc68fcd27086aa6f7c2984ca",
+    "diff_hash": "sha256:f41482a0b93fa075b42e668b534c8e87c833cb5581b13a5816864da75e0e5e19",
+    "files_changed": 1,
+    "files": [
+      ".receipts/receipt_8bf5636ff81b_a256be55c8c83341.json"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": true,
+    "bot_signals_detected": [
+      "author_name_bot:github-actions",
+      "author_email_bot:github-actions",
+      "committer_name_bot:github-actions",
+      "committer_email_bot:github-actions"
+    ],
+    "bot_signal_count": 4,
+    "authorship_class": "bot",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-faee8c7ba84eb686234c1139d5667009",
+  "content_hash": "sha256:faee8c7ba84eb686234c1139d5667009f766871b9cad05548f86704371292b88",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

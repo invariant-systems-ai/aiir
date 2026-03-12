@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "93d8e6723a96e230c4771e3e22d463ea20e6c7c2",
+    "tree_sha": "75bf258d2f28d411c11eaa3bbe38611b1de4715c",
+    "parent_shas": [
+      "1697abac7a2d1e1121865321b0f34e4f4a1fecdb"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T09:02:26-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T09:02:35-04:00"
+    },
+    "subject": "ci: fully automated release pipeline — GitHub ↔ GitLab ↔ PyPI",
+    "message_hash": "sha256:97d0b22d298efffcaaaa93f052a316849536a5390c28575b3d19218ee6d13910",
+    "diff_hash": "sha256:825311345fd57ed18f529eb3bd110499dbd2e76f41355529e081bfd98708d34d",
+    "files_changed": 4,
+    "files": [
+      ".github/workflows/publish.yml",
+      ".github/workflows/release.yml",
+      ".github/workflows/sync.yml",
+      ".gitlab-ci.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-05c736761d4fa6e21951b3f4d343910f",
+  "content_hash": "sha256:05c736761d4fa6e21951b3f4d343910f0b76f213f80f41c76bcf2b1380d7505d",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

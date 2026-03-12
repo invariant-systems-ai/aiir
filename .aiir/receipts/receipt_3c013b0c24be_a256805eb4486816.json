@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "3c013b0c24beb7c74fd7b90600d219e8c0a6900c",
+    "tree_sha": "a22a81c094304b0156ccf567b7b22826d41453d6",
+    "parent_shas": [
+      "c33c9094753a97a05c52c10066f3bfb694f8cbbf"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T15:34:15-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T15:34:15-04:00"
+    },
+    "subject": "fix: skip readonly-dir test when running as root (GitLab CI)",
+    "message_hash": "sha256:fe47f3ba097e5619d9c1fa0f9c3e29c705a5b497317a9871e69c0fe0ffe0ff86",
+    "diff_hash": "sha256:282b77ff3f3041c5a01e6fb7b16eac4866b9cde3534da8bcdf6a67a64732c920",
+    "files_changed": 1,
+    "files": [
+      "tests/test_virtual_deploy.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-805eb44868163923df5aa57253ccfaca",
+  "content_hash": "sha256:805eb44868163923df5aa57253ccfaca1528d6bea7f09a2cdb27aee26f8c1868",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

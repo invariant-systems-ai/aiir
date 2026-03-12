@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "9d0c31c33c634eb03579bc5841f89821bec5dc27",
+    "tree_sha": "0794fc4edcebfd44e6f7f457d09ca89462aafc9f",
+    "parent_shas": [
+      "bbbc444d14529ffd026b196d7ba34eb290af354c"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T15:12:54-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T15:12:54-04:00"
+    },
+    "subject": "fix(ci): dogfood global credential for separate receipts clone",
+    "message_hash": "sha256:bd34cb52dd00499515b3250f64c868afd00a9b1ac817c17bbbb70490ec40d50f",
+    "diff_hash": "sha256:52ed7db86fcea252bc06ecf4411382525f9e998dbcc4a35c6dce51e1a6999d67",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/dogfood.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-b140f9ce33bdd4bd303c73d913d2357b",
+  "content_hash": "sha256:b140f9ce33bdd4bd303c73d913d2357b36b7a6b3c4aaa98fa3259c7d512a2cbe",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

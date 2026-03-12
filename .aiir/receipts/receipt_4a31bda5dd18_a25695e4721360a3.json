@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "4a31bda5dd18911ff83745552da530f442327c5e",
+    "tree_sha": "5b838ed8cdf3b9a9a2e9e6c07b35d4163579d35e",
+    "parent_shas": [
+      "465ac8b33e96c436bcbdebf41065b51d2ee87246"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T06:39:01-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T06:39:01-04:00"
+    },
+    "subject": "docs(launch): tighten final draft wording",
+    "message_hash": "sha256:37de733f14cb7b9e56605851e8127a627fdb4a6aa27e1fc4ad5cf4821cc46266",
+    "diff_hash": "sha256:30bf07b723b0bc4bc25703b22188fd787bbffa3d81bc218427fb8898a01cb344",
+    "files_changed": 2,
+    "files": [
+      "docs/drafts/reddit-posts.md",
+      "docs/drafts/show-hn.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-95e4721360a3cd2b3b27e4eeb7f247d9",
+  "content_hash": "sha256:95e4721360a3cd2b3b27e4eeb7f247d9ee6e4de200cd952bcb29beb0ba9c5e9f",
+  "timestamp": "2026-03-12T12:13:52Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

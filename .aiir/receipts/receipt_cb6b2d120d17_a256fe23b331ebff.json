@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "cb6b2d120d17273bce587f8ab07921dce6680be5",
+    "tree_sha": "424d6dfc59aecc985affb4ec9eede428a06bd367",
+    "parent_shas": [
+      "70edcc6b667e7d10c9eaf6de713340138df01846"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:44:53-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:45:09-04:00"
+    },
+    "subject": "fix: install git in CI jobs (python:3.11-slim lacks git)",
+    "message_hash": "sha256:e7326cf8c096000e2734b44d06f40fc9eebddffb4b7ef2c9d0cb54eacc9bc26b",
+    "diff_hash": "sha256:35274c3663b7d6ea5d03db2a96453697b31b2fbcd7f93816389cf0d410912b4a",
+    "files_changed": 2,
+    "files": [
+      ".gitlab-ci.yml",
+      "templates/receipt/template.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-fe23b331ebff014fa17235f6027bbdc2",
+  "content_hash": "sha256:fe23b331ebff014fa17235f6027bbdc21092cc2ff3f255b5d5481712159bd3c2",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

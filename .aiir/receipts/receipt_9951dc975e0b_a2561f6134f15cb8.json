@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "9951dc975e0bc5378ada12d2546ed66434e5f487",
+    "tree_sha": "a2d3610bc8997e797557d60cbb83b9dbed79e50f",
+    "parent_shas": [
+      "963150e2d1226dd2022d7f3a191a91675febad47"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T16:38:12-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T16:38:12-04:00"
+    },
+    "subject": "ci: bump coverage gate from 90% to 93%",
+    "message_hash": "sha256:0592ed267c6a6cbaa6c6ebe2f4239757139f8bd63e2dedf0fa078dfc5027ff0f",
+    "diff_hash": "sha256:859f0818194faf1fa7acc8552b239a8d47c4804a1725003b931f16836afc62c8",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/ci.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1f6134f15cb81c77dfe248f4f3ef6488",
+  "content_hash": "sha256:1f6134f15cb81c77dfe248f4f3ef6488633ad5bd28e132d15de5f25fcb37259c",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

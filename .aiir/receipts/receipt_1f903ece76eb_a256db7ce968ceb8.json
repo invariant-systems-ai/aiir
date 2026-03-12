@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "1f903ece76ebd2210c368f50162afe7b0655d169",
+    "tree_sha": "e5ecc7800176b08a3eb2ff445a69513def72c546",
+    "parent_shas": [
+      "b051652db13d034f42a87b8a16cec69d926d9b44"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:22:52-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:22:52-04:00"
+    },
+    "subject": "ci: fix dep-audit + license-check (last 2 failures)",
+    "message_hash": "sha256:456414eb7c3424e939c6df695b489e0fad4529b808394dad81c763ad84ed5c74",
+    "diff_hash": "sha256:50e4b9f426598541b5763d6929d068543d10a9db0dbe4236081dc9f57ee80684",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/security.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-db7ce968ceb87e4f9fe052d32574b7e4",
+  "content_hash": "sha256:db7ce968ceb87e4f9fe052d32574b7e4981bafd3db8dd923043f9990759cfaf9",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

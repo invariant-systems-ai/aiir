@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "f5e007f0358cf397db8782a71f39c7db5ce90c8b",
+    "tree_sha": "1c95a95e4bbcd8bd8adf6bf8b4782c821c3efbf6",
+    "parent_shas": [
+      "c7440a80e31c55bbf0764ea4d5959bd18b4a2dc3"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T07:10:18-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T07:10:18-04:00"
+    },
+    "subject": "fix(ci): use checked-out action sigstore requirements path (#24)",
+    "message_hash": "sha256:80e536f8826a50a1407de226cc584cc8d5921b2c547f63a1403946cad765de2b",
+    "diff_hash": "sha256:99a2594de878eec80baf3ab687fb5a53cadb9db1e61a507603bcda95cbc6cf22",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/action-health.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-ff142ec2d82d3e752aac65e066cd3323",
+  "content_hash": "sha256:ff142ec2d82d3e752aac65e066cd33237fa8bf2278ecd5334d27616fccafd102",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

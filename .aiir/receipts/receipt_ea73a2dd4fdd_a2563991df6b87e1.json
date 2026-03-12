@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "ea73a2dd4fddb732036228a6def42e8c8a2be8ae",
+    "tree_sha": "7afac55b13a0e721d6b3cffd9b7438e7a4416f9d",
+    "parent_shas": [
+      "193626662a246624598fb89191280f83fa29d5d2"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T14:12:35-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T14:12:35-04:00"
+    },
+    "subject": "test: update nav test 7→8 links (Integrations added to nav)",
+    "message_hash": "sha256:1368622fafe57a8f42bebd75f2217fc993301cbb9563fc433b6501fb07186b6b",
+    "diff_hash": "sha256:188c72a323d86bea261c277818f9c17fc7616a793be1b9a3994f04ba5a2ea7db",
+    "files_changed": 1,
+    "files": [
+      "tests/test_public_surface.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-3991df6b87e17ec2ae9d42fdb4f69e2d",
+  "content_hash": "sha256:3991df6b87e17ec2ae9d42fdb4f69e2dd0d89ab124e4b3d3c88a5c30032efdae",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

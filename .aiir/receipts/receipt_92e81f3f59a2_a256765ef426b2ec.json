@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "92e81f3f59a2f10d1a27c194bbe2280defe266fd",
+    "tree_sha": "4421bb34f02a7c8e662beb6ece1b418b755b033c",
+    "parent_shas": [
+      "458d661755bf08fdfd90223fe722768074276c68"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T21:08:07-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T21:08:07-04:00"
+    },
+    "subject": "docs: polish launch-facing copy",
+    "message_hash": "sha256:f717bb6ec0ba25de538fa3a5b5028c55bde699b44864cf8632e7262d0d295fe9",
+    "diff_hash": "sha256:d4f10459022f05dc56ddd40c854092aa5c08b1964aa602da1e91f5bb6c549903",
+    "files_changed": 4,
+    "files": [
+      "README.md",
+      "docs/drafts/reddit-posts.md",
+      "docs/drafts/show-hn.md",
+      "docs/launch/show-hn-draft.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-765ef426b2ec3f7dea12723af96f07bb",
+  "content_hash": "sha256:765ef426b2ec3f7dea12723af96f07bbbcf99adf6584f8e888117cb65cacb91e",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

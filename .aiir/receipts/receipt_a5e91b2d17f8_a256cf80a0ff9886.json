@@ -1,0 +1,58 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "a5e91b2d17f83c0e574fb27e4a0f443ffd62152f",
+    "tree_sha": "1c323ca271c8dde91ac558c7d319268175629336",
+    "parent_shas": [
+      "7f307540e7206bf32b5cab58079acf559c793cc3"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T04:13:07-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T04:13:07-04:00"
+    },
+    "subject": "feat: formal specification, JSON Schema, conformance vectors, schema validator",
+    "message_hash": "sha256:7b55b7062eda646db5774a8d3473a625b2b2e048bfc166572a8024b378f30ea2",
+    "diff_hash": "sha256:8c573e33b0012f9e1a81fdec90be345e0913ddc70f2ceca8bcc9854e66a1e1f7",
+    "files_changed": 9,
+    "files": [
+      "CHANGELOG.md",
+      "README.md",
+      "SPEC.md",
+      "aiir/__init__.py",
+      "aiir/_schema.py",
+      "aiir/_verify.py",
+      "schemas/commit_receipt.v1.schema.json",
+      "schemas/test_vectors.json",
+      "tests/test_schema.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-cf80a0ff988677c2cf32f3ca2839ff8e",
+  "content_hash": "sha256:cf80a0ff988677c2cf32f3ca2839ff8e0655b7d89df07aedc845fa5e07e4eab9",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

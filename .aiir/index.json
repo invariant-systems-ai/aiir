@@ -1,0 +1,1980 @@
+{
+  "version": 1,
+  "receipt_count": 246,
+  "ai_commit_count": 9,
+  "bot_commit_count": 42,
+  "ai_percentage": 3.7,
+  "first_receipt": "2026-03-12T12:13:52Z",
+  "latest_timestamp": "2026-03-12T12:13:54Z",
+  "unique_authors": 3,
+  "commits": {
+    "eb762766586412bb3531241e83b367e7c0393d4b": {
+      "receipt_id": "g1-bdf9e8e36ff640fecba05eb0cc2a8edc",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 1
+    },
+    "4b48a47357176be6553660cc14353c8e50b0edba": {
+      "receipt_id": "g1-e4f2a31365194031cbeac272d9b2de78",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 2
+    },
+    "3a71321727881bf08ae1162168f85d2790f104a1": {
+      "receipt_id": "g1-ebf86fee0d0c222d02f05453cc9739ec",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 3
+    },
+    "4a31bda5dd18911ff83745552da530f442327c5e": {
+      "receipt_id": "g1-95e4721360a3cd2b3b27e4eeb7f247d9",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 4
+    },
+    "465ac8b33e96c436bcbdebf41065b51d2ee87246": {
+      "receipt_id": "g1-735c70b6de58ff6dca25a9b5a3c33d3f",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 5
+    },
+    "97280f6019139fc1e2fb23d3c7705d9ef76b965d": {
+      "receipt_id": "g1-45b0c31bd03a51ac384b1fa40df45ce0",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 6
+    },
+    "4119d6b851c10aaf88f4e272fe9c43831966d36d": {
+      "receipt_id": "g1-5e27db4369b9209205f3db3df24de20c",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 7
+    },
+    "fad6b9df0a03a6f7c5a06e021856038abe4f3b86": {
+      "receipt_id": "g1-0f7b467ed483dbdeaeafe7360d9c474f",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 8
+    },
+    "4fbe765ade8cf5f6273bdd5550df973f5c4d38bb": {
+      "receipt_id": "g1-e315fd6eb134948525534c579a7566f1",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 9
+    },
+    "a7652bd96534313104a7f219c2278bf5c6c21d56": {
+      "receipt_id": "g1-348d73443fe4fc4435cdca739f80069c",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 10
+    },
+    "92e81f3f59a2f10d1a27c194bbe2280defe266fd": {
+      "receipt_id": "g1-765ef426b2ec3f7dea12723af96f07bb",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 11
+    },
+    "458d661755bf08fdfd90223fe722768074276c68": {
+      "receipt_id": "g1-3c979b2b0f86a8b19933eaa68be42f85",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 12
+    },
+    "64985539fd460eb40cb04ce71b4a0b1e467c990e": {
+      "receipt_id": "g1-1a40ef2c8725d6c862bc55bf308628b4",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 13
+    },
+    "a729f3c4074016af93dae629563ce348f3a54736": {
+      "receipt_id": "g1-8489edd612830f3539ce565f6e8a70c0",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 14
+    },
+    "d367476cc2e207012c26482dd8abed097af21b17": {
+      "receipt_id": "g1-066ded6196656d94bd38d51608e85ebd",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 15
+    },
+    "ae10e9d4809f59f0f90e0d6cf30ebb771dbb3070": {
+      "receipt_id": "g1-77fddc1cd19c14c6083e75695d17e343",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 16
+    },
+    "e0fad1d419e2a770b6f10eed64fe266822d8b032": {
+      "receipt_id": "g1-ecc3a56bad633a1fbeea39106c326760",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 17
+    },
+    "be0675ea28e18afb248a487d5f6e16427fdd8e17": {
+      "receipt_id": "g1-1c6f566a115ebdaec157fd466104f9c7",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 18
+    },
+    "b4f456e92c197fb27364c6c646c667dc6324cc70": {
+      "receipt_id": "g1-30f92e70dad6fdea3c44d1192dc56028",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 19
+    },
+    "742793dd2e8909b712b7ea5da05d69edf1bf27b3": {
+      "receipt_id": "g1-9ed97c01b42401cc7190816116321f9b",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 20
+    },
+    "e7e03d436c3b6c9ea8b1a4d5a24afe4e544b0752": {
+      "receipt_id": "g1-2b5b186f732259df8e86f95752f2e7f1",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 21
+    },
+    "13b558e6ebc0f013b4e3565cd3103e54d1454d99": {
+      "receipt_id": "g1-1a252ff970ef6ad4cde210846fee2a82",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 22
+    },
+    "81a9dd7d87ce1856ebfc495d30ab2d073fe04c02": {
+      "receipt_id": "g1-b39ca71fd98941905a287b70e7b1cf38",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 23
+    },
+    "282e82731ff18fd353d0c318d28ddd2669c70617": {
+      "receipt_id": "g1-8d67d456ca413ecdf99c0f45cd8437eb",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 24
+    },
+    "0f8f5a631474213b95e3687cd0ee060f4c0c0ab1": {
+      "receipt_id": "g1-fea8b23cb385a2b5da34a7bcdeed1607",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 25
+    },
+    "f5e007f0358cf397db8782a71f39c7db5ce90c8b": {
+      "receipt_id": "g1-ff142ec2d82d3e752aac65e066cd3323",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 26
+    },
+    "c7440a80e31c55bbf0764ea4d5959bd18b4a2dc3": {
+      "receipt_id": "g1-e2b2f329f3df69e140c899d5efb4a429",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 27
+    },
+    "125a156db4bfb38c167e66adb4f5e502519dce6e": {
+      "receipt_id": "g1-365b5b1c13e583519442f778a1c20de7",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 28
+    },
+    "fec9bba23ce0b7dfa6ae020a82d3d89bc575c5e9": {
+      "receipt_id": "g1-1f7d5768391bc55d90a467a53a5d7e53",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 29
+    },
+    "27e857bd02227e6c5710361118453fbfde106db0": {
+      "receipt_id": "g1-1774089368be74692b5f503f2c9b8c73",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 30
+    },
+    "d12e2a8e80b81ba75d81a59280b6dabd5919adec": {
+      "receipt_id": "g1-a54bc4e4740dd704676210528ec8a8eb",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 31
+    },
+    "3d6a1f1dca1ff9093deeff6c0f854daea3dca54a": {
+      "receipt_id": "g1-77f3e65847d6f4ebdf2cb6c16b80e340",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 32
+    },
+    "d84e5cc637c850b2b015d2dd9cfa57c6f1e54095": {
+      "receipt_id": "g1-ab36da1fd80470ab68c781e0c58d72ff",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 33
+    },
+    "17a9090787a348155ac58e47aae61f46108c2b4b": {
+      "receipt_id": "g1-f5cc89fe5a74882e2035d6e348b9e553",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 34
+    },
+    "6a02cef30699458e53e1137c8f4934cf2d3bbf6b": {
+      "receipt_id": "g1-94e8ab519ce55e668edb87187fb01b6a",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 35
+    },
+    "a54fe440a2be18fe51ad30149f1bbab944d578e5": {
+      "receipt_id": "g1-afb53e12e78510c36acda4eceb1b3447",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 36
+    },
+    "1f40f927f14fc74b1237283c88a758d5e3c8cb48": {
+      "receipt_id": "g1-e490f0085215afdc7986011909d10891",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 37
+    },
+    "5c5d1f1c53169af008c39359293bbdf720c6abaa": {
+      "receipt_id": "g1-385a5e9ed67bf1d691fcfa115392feb7",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 38
+    },
+    "4951f330f59308ff4f8bba41802441a9b66d8c07": {
+      "receipt_id": "g1-05d67feb85dfdf9d088fdb0316aaacd7",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 39
+    },
+    "70ac7919daea3fc105d2028465a727373b270d1c": {
+      "receipt_id": "g1-c2d5731b9d34aac9ccb2df6dcd929840",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 40
+    },
+    "8e7002c2256973a4c34285e22014e292872d70bf": {
+      "receipt_id": "g1-4a9a7dbde7a72f1460cb9f2e0718675b",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 41
+    },
+    "2e3ae6fb1f180ab6ef1ce6dc3d1edb28f0ae2b16": {
+      "receipt_id": "g1-35195a873a2842a93f566325ab979d91",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 42
+    },
+    "3036f3caf52fde18e91e711e8153a27c2438aae9": {
+      "receipt_id": "g1-79d95a2414d257f39c4c48c3a6f1d06a",
+      "ai": true,
+      "bot": false,
+      "authorship_class": "ai_assisted",
+      "author": "noah@invariantsystems.io",
+      "line": 43
+    },
+    "77a1419657202b121df2e37841cd384b8f0e421b": {
+      "receipt_id": "g1-57efbf8d0429552c4dae3bb8e1d382b8",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 44
+    },
+    "5bdea8fd51f66947f089bd0d156dcd23d28f0cb5": {
+      "receipt_id": "g1-79a4d7b30f7ba345d7a2c218d38d415d",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 45
+    },
+    "104b83e30f051498dad8fd39f3a5cfb358d74949": {
+      "receipt_id": "g1-2c98c2e6213413bd4e969acd9c658563",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 46
+    },
+    "22dead0caf315845a12c717813bb673f11e9dca9": {
+      "receipt_id": "g1-befb4b1755fe36ffc5d45538933c53c7",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 47
+    },
+    "b35536fbf80ffe4432a43b3e6fe700338e2722b4": {
+      "receipt_id": "g1-5ef750328ee1448de08869b093e8a827",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 48
+    },
+    "afd8a70ac72459baa7b6d896c73686a49a2a1f13": {
+      "receipt_id": "g1-737070cb5341e6ff8f499a9358343b5c",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 49
+    },
+    "55717acfb232f7f439e462d98cbb560daa987753": {
+      "receipt_id": "g1-b54e57234846a7215d8097c8841775ee",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 50
+    },
+    "dc79eac07005ed2eb0e24d156e8469609f092d68": {
+      "receipt_id": "g1-c0beb6566dd4155fef3a376a945749fa",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 51
+    },
+    "bf012474124ba685f5045da714e537160785f7f4": {
+      "receipt_id": "g1-2167badd83403f520f52aff97f714f4b",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 52
+    },
+    "8813651cf88a039906007edf2aa974df5cd9ac76": {
+      "receipt_id": "g1-f81427ff42e87aa36f921d6d4f662d62",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 53
+    },
+    "7c73c292d5ffc83cfc2e5ddf1e70e0bc08f20bc2": {
+      "receipt_id": "g1-5994267f1a1569704c19216851e882a8",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 54
+    },
+    "5201cd9ac9c9596b77af2ca1fb8f6e3164470ffb": {
+      "receipt_id": "g1-24619069dbca5fcbc897941aeb571083",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 55
+    },
+    "b41ad97d594e5bbcc4523ced621054596784cc6a": {
+      "receipt_id": "g1-5cd951b260f7ff4fef6c6391fdaca181",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 56
+    },
+    "c4b1b4cff6ae5cba3caac32218851b238a98d5b9": {
+      "receipt_id": "g1-f9f3e56f4e8e492954baf374cf373f68",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 57
+    },
+    "6d6f472037e1d4f4bdaa2e83f2f8a11349c3a746": {
+      "receipt_id": "g1-b5609e3d69e6062565f067f65fec1ef9",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 58
+    },
+    "d733faaecf9fa9a2d54bb56d1f67454b47cbfb7f": {
+      "receipt_id": "g1-81da8e6737e363d88a14e2b81f18b927",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 59
+    },
+    "1b44efb9b3f897f89574dbecc3b0d7a3be9593d6": {
+      "receipt_id": "g1-ab7682bc38d606be5a81bd16ce11af63",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 60
+    },
+    "c2722f8464d6d3e0574d99edec8fb9cccea21474": {
+      "receipt_id": "g1-f613d58c1fd9b0cf28c5254c9cd87c14",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 61
+    },
+    "d38257c603840df2162f2fb5ba2872ddfb6abf6f": {
+      "receipt_id": "g1-e1a75df763cceeb904259b2b6891986c",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 62
+    },
+    "768505f84cf94d82f627f8a1102dd728052babad": {
+      "receipt_id": "g1-cd2753cfab8a70185c2e43842430a7ee",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 63
+    },
+    "0309b332cd25a6d187ab45215a8d38e742c201dd": {
+      "receipt_id": "g1-041bdbbf95221fef63b54eb9a742b661",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 64
+    },
+    "e12a8b87c9fd6217407a6ec6529de47e68333f26": {
+      "receipt_id": "g1-856865e0fdd5c980cb08be8edd6c15b5",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 65
+    },
+    "132961eb693edbbd30b609c639b765e57f48066b": {
+      "receipt_id": "g1-db8d7655a3e29c34181aea5b2d504e32",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 66
+    },
+    "6f450eea78b2ece76693267a99eb8835387b6aa0": {
+      "receipt_id": "g1-79eda15dfef57d9e35b395b46e0611aa",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 67
+    },
+    "812dffce901ee6dcc5da414729f1cf101b9b5ffc": {
+      "receipt_id": "g1-8461512c759aee48ae96582236d77727",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 68
+    },
+    "a41d29f3fa7402dd4436e8cf7bc7b72d6431132f": {
+      "receipt_id": "g1-1bf8f5579ac5151069391c12b1d8b9c0",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 69
+    },
+    "31a0b30a888cd75ca5c214842cf4dffd4be62420": {
+      "receipt_id": "g1-32847fba717ff2a1e70e0f6efdd56407",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 70
+    },
+    "98f2f6188f5fa9e9ef933a4ca79efb8b6ea31212": {
+      "receipt_id": "g1-1938d1c3210f9005a65bf39b7ead5584",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 71
+    },
+    "6a1ea97222ce85af477b2ad5e6af82404da08711": {
+      "receipt_id": "g1-6336a914547957f15eebb8ab3fb7a5c6",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 72
+    },
+    "da46dc77a8e27c6c56203ad5c5dd5b71d552dc83": {
+      "receipt_id": "g1-30a559571986e57049018edb129b51e1",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 73
+    },
+    "0c9895bde1edce23645588cffdc5e2d9e1935b5d": {
+      "receipt_id": "g1-52698ea7eab2c384d65868ccc45d2997",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 74
+    },
+    "0b549d46ea605a7cc27ea46ca9d0d36e7d1da476": {
+      "receipt_id": "g1-8e1055f02ba1a67dfda9588fd92c11ee",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 75
+    },
+    "51b2be409b17cdaa346ea57e7283e4fa900f1e54": {
+      "receipt_id": "g1-e7f41327cb0154123dc1b9bef33fa8e3",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 76
+    },
+    "4ca4ad954521013bd6b4db49aa8b4d2881e42bf1": {
+      "receipt_id": "g1-8de0ea3a7a18c6ef2b95bbf2cd2e34f2",
+      "ai": true,
+      "bot": false,
+      "authorship_class": "ai_assisted",
+      "author": "noah@invariantsystems.io",
+      "line": 77
+    },
+    "b8273728f6b5e6d309377a1eec2a2285d9973989": {
+      "receipt_id": "g1-bae654c50987b55d9db5e7654b7c86e2",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 78
+    },
+    "45925d29f2121598983288dbb656dbfa5eaa6d73": {
+      "receipt_id": "g1-a281d4e7f83a47b004a95941cc354239",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 79
+    },
+    "f4eed11f15ce48216bcebd807b695ca71f9ad5e4": {
+      "receipt_id": "g1-90d2419023344d932a18cb425fc7f583",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 80
+    },
+    "c1c84944015e5e3d49a33316e43b83144be045d1": {
+      "receipt_id": "g1-056d00e91112d32e8125b9fde1c152eb",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 81
+    },
+    "33ac6c9d8ce7242fdd7b334fdb28db686d0a4b21": {
+      "receipt_id": "g1-1482f663c0733531db51d8b974f2f573",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 82
+    },
+    "3c013b0c24beb7c74fd7b90600d219e8c0a6900c": {
+      "receipt_id": "g1-805eb44868163923df5aa57253ccfaca",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 83
+    },
+    "c33c9094753a97a05c52c10066f3bfb694f8cbbf": {
+      "receipt_id": "g1-1b0ebf5f3a7e8efbbd1e0aece9419de6",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 84
+    },
+    "a032efdc58e4330bfe14a3d7c2a246adeeea2581": {
+      "receipt_id": "g1-39fb9f30ca787a0916819fd2d444e8e0",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 85
+    },
+    "ea73a2dd4fddb732036228a6def42e8c8a2be8ae": {
+      "receipt_id": "g1-3991df6b87e17ec2ae9d42fdb4f69e2d",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 86
+    },
+    "193626662a246624598fb89191280f83fa29d5d2": {
+      "receipt_id": "g1-3a7c4d314067f52116cf0f9945ddc910",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 87
+    },
+    "7213f14b8556f96b1ac57229d0d99512a7654c23": {
+      "receipt_id": "g1-c2e9ade0ffd84917c729fce79d7f6d99",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 88
+    },
+    "8b8fddd7bca3a9293dd809dc0e884b9fe9998230": {
+      "receipt_id": "g1-49db8148100284e8ae603127eb7d34b0",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 89
+    },
+    "98e1893c5169bd2362cccf55b3c15efadb1ca0db": {
+      "receipt_id": "g1-73400904dd5d75d957f60d1df299bd43",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 90
+    },
+    "2be80ed1f6ccf56649498d8e6ac3eee7b6c3787c": {
+      "receipt_id": "g1-ea1d1eb6d68ab22e89662865f118d1db",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 91
+    },
+    "a99d6636807df62b40e8bcd559988ce441c6691a": {
+      "receipt_id": "g1-8f81832d4a8ea7eb271cb625df52b811",
+      "ai": true,
+      "bot": false,
+      "authorship_class": "ai_assisted",
+      "author": "noah@invariantsystems.io",
+      "line": 92
+    },
+    "e0aa50f795ee4166d181d3a791e0ad2e68827712": {
+      "receipt_id": "g1-a3ed1dbadbc42c598ae402de1eb3c5be",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 93
+    },
+    "26f8162b7990e0c3e93e3db9a938ef77f0972c9d": {
+      "receipt_id": "g1-1643cfbda903f914ec7a8f2814ac1f75",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 94
+    },
+    "2021c1da48f021383927b8857cfe14a4c6faec04": {
+      "receipt_id": "g1-258b3dda8ddda27e4cae2cf82f48e7aa",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 95
+    },
+    "bca85ae7bcd1eef69aac33fc2288234c4557ac84": {
+      "receipt_id": "g1-0aa88fbeddb547a91371a1fa99e75adf",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 96
+    },
+    "6228e4866fbf943d95c02fbef1a98dc5348f1e5a": {
+      "receipt_id": "g1-230acd344fe3dba5416dd991b020b1fa",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 97
+    },
+    "dd6c057fbaf5713372c0f2145babf79f5558ef24": {
+      "receipt_id": "g1-e4cb545b29f48d6f92d9f875d9ae5e44",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 98
+    },
+    "f122d59226261abff2bab323311bb4f892e957e0": {
+      "receipt_id": "g1-cbfac51dff283b5ed7ba93305bb8de9a",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 99
+    },
+    "70106a03ef89dfec18b214c446723c5e5290fc94": {
+      "receipt_id": "g1-4650eba2698c9d6e3843d1c4bd52c22e",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 100
+    },
+    "6ba4b7e4c1209a4040e5c6638f22606969458c09": {
+      "receipt_id": "g1-403806e38545c9cdf47af99d2200ebf4",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 101
+    },
+    "1f903ece76ebd2210c368f50162afe7b0655d169": {
+      "receipt_id": "g1-db7ce968ceb87e4f9fe052d32574b7e4",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 102
+    },
+    "b051652db13d034f42a87b8a16cec69d926d9b44": {
+      "receipt_id": "g1-e99faef6d60c123adffdf69a8d395c62",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 103
+    },
+    "4479267cdf26a9d3c794e595fa31e7ddb0549ed0": {
+      "receipt_id": "g1-14851be9c0aa462b225acf0853b69f18",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 104
+    },
+    "abc43a8b817a2865f46c4d7fd839656036a000c7": {
+      "receipt_id": "g1-18427182fbbc9d128bc7cb593c8fc797",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 105
+    },
+    "f02e1c551d9c6874af809f5751bb45bfdce67b93": {
+      "receipt_id": "g1-be452f90c178e6fc1dba8b00c740fb35",
+      "ai": true,
+      "bot": false,
+      "authorship_class": "ai_assisted",
+      "author": "noah@invariantsystems.io",
+      "line": 106
+    },
+    "3500f789d998e74c209a108508dc530bece4764a": {
+      "receipt_id": "g1-8c8954d6d67212ed9141d54ad217d093",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 107
+    },
+    "0e6c2e7e7c406e1122dfc24b1e465e041db93108": {
+      "receipt_id": "g1-072167b3c5b84299912644d50bb895a6",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 108
+    },
+    "cab48e179671ba45da95a4202e01a9e78b9cc975": {
+      "receipt_id": "g1-01c5e18c7009fae18050098f1d16fb44",
+      "ai": true,
+      "bot": false,
+      "authorship_class": "ai_assisted",
+      "author": "noah@invariantsystems.io",
+      "line": 109
+    },
+    "3ca639c8b29c8515ed57605592ffeec1a618b512": {
+      "receipt_id": "g1-8aa714988d06717de787c2e28ad29630",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 110
+    },
+    "fc4e3cf53aea7c98f761d7800529fc2398ef5508": {
+      "receipt_id": "g1-c87eb603dade65c21c7cd883af2e9eb2",
+      "ai": true,
+      "bot": false,
+      "authorship_class": "ai_assisted",
+      "author": "noah@invariantsystems.io",
+      "line": 111
+    },
+    "12ac356d46a41db4822ed3fbd4c4874076e2fa02": {
+      "receipt_id": "g1-883ddda1d5acf74aa003ae9c98bab297",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 112
+    },
+    "484e3681080a3c0fb5f7d1061817aa9905af2195": {
+      "receipt_id": "g1-02e08ab4a7ca8b45ee4b7ba531565268",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 113
+    },
+    "f47b3a3a8ade2868935d3fd4c1168763af850218": {
+      "receipt_id": "g1-2252817a56af9d7fe7e5faedbd9e6a21",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 114
+    },
+    "00676c36c989b9f469ee9ddfd3ba1c753dcc6c29": {
+      "receipt_id": "g1-1336520376db4a8d434d5ea1c2f57e6c",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 115
+    },
+    "c8c7129e49a7df4c76a09383d44d06ff7dd0d87d": {
+      "receipt_id": "g1-265914297de23aa2964de6c064107502",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 116
+    },
+    "c977b1d628d09e12553d56b62416ac60c6548e7b": {
+      "receipt_id": "g1-1d77732c0fd6be145f94ac2660328a99",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 117
+    },
+    "c425af3b99b5fe96090a442bd6a355ce8d769d1a": {
+      "receipt_id": "g1-1a821276e5812b300dae4e55ffa7b903",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 118
+    },
+    "e33439cc2bfff98d57e338284773a68a0b859fed": {
+      "receipt_id": "g1-68bb7f4c9e03b9176584846a5bd8c5eb",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 119
+    },
+    "58001a3f82b32daa86590771484df5c1fb916e1a": {
+      "receipt_id": "g1-d2831b9b4624d4c501ab36f562c1b20e",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 120
+    },
+    "a9672aea5ee8dcc56e1c0555838e97b883742383": {
+      "receipt_id": "g1-b4ce43da6d2956755372d4946bebdf44",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 121
+    },
+    "e5746daea7ed076e4ce9f67b3bfaae7fa97954fa": {
+      "receipt_id": "g1-c09401df19a6cefa3280669dd7c0386c",
+      "ai": true,
+      "bot": false,
+      "authorship_class": "ai_assisted",
+      "author": "noah@invariantsystems.io",
+      "line": 122
+    },
+    "86482976629b698db3578b08f83a33cc1a097ef8": {
+      "receipt_id": "g1-7339d1586bfda1e6bf21aec219cacd5a",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 123
+    },
+    "a5e91b2d17f83c0e574fb27e4a0f443ffd62152f": {
+      "receipt_id": "g1-cf80a0ff988677c2cf32f3ca2839ff8e",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 124
+    },
+    "7f307540e7206bf32b5cab58079acf559c793cc3": {
+      "receipt_id": "g1-5088229bc8c18ca68c83d77799285231",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 125
+    },
+    "5739d8a5ee2229b5950da9cdd12577b057d69c3f": {
+      "receipt_id": "g1-204f988fe4d67d1c0eab1c5235b5f4fd",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "49699333+dependabot[bot]@users.noreply.github.com",
+      "line": 126
+    },
+    "cdc1fcdae8813453f88927066ad33d63c8eff15d": {
+      "receipt_id": "g1-c52b372352d896778447e4804654553c",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 127
+    },
+    "0d9ae817afdc1a21f570ccda1ede62db8276ba0b": {
+      "receipt_id": "g1-b6dca0aed6881b57c30648db3c8f07d0",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 128
+    },
+    "c9211897e7e38193be848ffcb2d2089b97289d51": {
+      "receipt_id": "g1-4665ee81e74e0d80ecebdd2e89bc4ed1",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 129
+    },
+    "d6ec17a002c3a9455ce34fe8e4c6afe840abd23a": {
+      "receipt_id": "g1-95fbc07f0a9b0568481224cf5a46faa3",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 130
+    },
+    "bb8792ae960e8649c93f198e1fa4464379846af5": {
+      "receipt_id": "g1-2b9c4067df8dfad43e1db772a9ac568a",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 131
+    },
+    "195e3f0afaddf99d3003655e87c83aabb80ebf0d": {
+      "receipt_id": "g1-358a9680f4f4c160168031fdfc015f6f",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 132
+    },
+    "5eaf7ef1dc0cfcfd2a6302f0c8e209790475d996": {
+      "receipt_id": "g1-0d59716402d4a0acab33b1f7d7596967",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 133
+    },
+    "5dbf3bd55b0c0866a83f7564a5cb9bfd0493e509": {
+      "receipt_id": "g1-67e53b453fc93a08acc779e4ff774abf",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 134
+    },
+    "94932172275457bc36fe77771437b5915f30ad2e": {
+      "receipt_id": "g1-74450f44b07d0605a1c687f32df5528d",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 135
+    },
+    "393a13e6307b91d06a8300cf7df5f1779ce85f1e": {
+      "receipt_id": "g1-fd6239c0781f434d2d7152e740de7946",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 136
+    },
+    "eee03100a7229c8ed350f25769b826a92f2b47c8": {
+      "receipt_id": "g1-7d73569b6b8e7791e546ae5acd8e97ea",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 137
+    },
+    "9951dc975e0bc5378ada12d2546ed66434e5f487": {
+      "receipt_id": "g1-1f6134f15cb81c77dfe248f4f3ef6488",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 138
+    },
+    "963150e2d1226dd2022d7f3a191a91675febad47": {
+      "receipt_id": "g1-486d8e79d143d3e16c8be1de6af26927",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 139
+    },
+    "ebf4dc2bfd066dfeadd5fd970800a7e2b43c48ed": {
+      "receipt_id": "g1-30af81f7c49f77706b68650c45cee9cd",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 140
+    },
+    "adb4e086acabc0a29d6eb3d3660e826a19f613a0": {
+      "receipt_id": "g1-461d3b32ce09b09bdabd26256e61f520",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 141
+    },
+    "2b0cc9556b9c27c0fe87d708bdd82a433073bf73": {
+      "receipt_id": "g1-bdfd034bc9c5a36d552ca2d0362059fa",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 142
+    },
+    "2eba4be59d32fdcc97fc4a7737a9301764d06730": {
+      "receipt_id": "g1-d84babdc9772eb271f8d4b4d0c360a7e",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 143
+    },
+    "1858e899c4db58bd9ce03ad928172f7c8f0fb2e9": {
+      "receipt_id": "g1-2d223425164c53da9d61ae0aee012ad2",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 144
+    },
+    "8366748728f9cf8630315d71ea39f50865e442a2": {
+      "receipt_id": "g1-ee6337f1f8cdac3c33cf77fc427f4337",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 145
+    },
+    "6900af207be2f01737ad3148d7316b60824ab4de": {
+      "receipt_id": "g1-17ceb3d077f4caa8feecfbb846f92c06",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 146
+    },
+    "d57348c150ec889904f3f784109418ffe3aab070": {
+      "receipt_id": "g1-6a66187f00c32a69fc5ff865db6eb67a",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "49699333+dependabot[bot]@users.noreply.github.com",
+      "line": 147
+    },
+    "0ddd8ea9de60455ef036884125e0f41fe9a39708": {
+      "receipt_id": "g1-6768c11ce7b5885a6972ccfaad99db05",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "49699333+dependabot[bot]@users.noreply.github.com",
+      "line": 148
+    },
+    "b2b0d43d50a7e768c166d55ab080150c38488081": {
+      "receipt_id": "g1-49a770495c8d9aee6fd0d22e61416546",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "49699333+dependabot[bot]@users.noreply.github.com",
+      "line": 149
+    },
+    "cae4f4b67791f84ccaa36fa80d3217677e845541": {
+      "receipt_id": "g1-254a41496c31cf4ad05b66686135842d",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "49699333+dependabot[bot]@users.noreply.github.com",
+      "line": 150
+    },
+    "d421a4e56913eff7c1c46de5c48559980597fe22": {
+      "receipt_id": "g1-c560ac10eea6a15c282534b92c8cd268",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 151
+    },
+    "9d0c31c33c634eb03579bc5841f89821bec5dc27": {
+      "receipt_id": "g1-b140f9ce33bdd4bd303c73d913d2357b",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 152
+    },
+    "bbbc444d14529ffd026b196d7ba34eb290af354c": {
+      "receipt_id": "g1-061faccad084bf16e4b2341def7bc310",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 153
+    },
+    "c6a53b0cee8f1b9550e035d9ddefee3d956faf22": {
+      "receipt_id": "g1-c32a3d942ad07e90f56ead69b5f233e7",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 154
+    },
+    "0136dd109a8f0230b7312fc7553a99d668b8860e": {
+      "receipt_id": "g1-b217c11cbb49bdb6d2580ac19f3d174b",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "49699333+dependabot[bot]@users.noreply.github.com",
+      "line": 155
+    },
+    "d9f5a8942a80f4f4754f65b8ae7bdff7113a8874": {
+      "receipt_id": "g1-369f2eeb0c16750bd64cdcf79af1888e",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 156
+    },
+    "58da2c916f30e78bcef64e8d6df3e155a0faefd1": {
+      "receipt_id": "g1-89a20a2f2996fc15e3f245e13b54f71a",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 157
+    },
+    "509f5fc9686e0fa73c109c222e49e797be22ac75": {
+      "receipt_id": "g1-b088754177abb5b81068c7bdb7b6d5b6",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 158
+    },
+    "ed639f4a7bf81742b928bb337ac984c7d13f9b0f": {
+      "receipt_id": "g1-bca59e0605d554e97fca5fc1fd39359b",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 159
+    },
+    "add3113b68e9276b35dcda8ca3f680056b709578": {
+      "receipt_id": "g1-e93b82e08cd75b75615b3e0133ce1376",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 160
+    },
+    "e83e2b0778537148a0fa921fca1efdfa3c50ec29": {
+      "receipt_id": "g1-42b19756d0d7e969920a6db057b56326",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 161
+    },
+    "d9daddeb7ff390a55c904f2863ca9927511bb480": {
+      "receipt_id": "g1-cae1e10276d61fc78460b3df58f46134",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 162
+    },
+    "e7eb3dc3fa5fd95f1a1d0f2345a4881db853fe08": {
+      "receipt_id": "g1-eacc3e5ec08b12a5f42641ce225ae9d9",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 163
+    },
+    "d8063f34447d3add80bac979e1c1151d733cfbee": {
+      "receipt_id": "g1-de383d5c4c3e86e8c2dbf72ea54e0c97",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 164
+    },
+    "eb4e66a4f2355c3125b04b0f27f66a1e9a88e04d": {
+      "receipt_id": "g1-597dfefb05d7c3015787e4504c50e8a2",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 165
+    },
+    "47d94bb00a6bad827b8a52e443ed812bef71e702": {
+      "receipt_id": "g1-80ba53b030096bef196875bc873b1bb0",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 166
+    },
+    "d2f008f972a3945afa83de7ecca1773f5350638e": {
+      "receipt_id": "g1-f730dd3425d284dc1ad842333e6a41ae",
+      "ai": true,
+      "bot": false,
+      "authorship_class": "ai_assisted",
+      "author": "noah@invariantsystems.io",
+      "line": 167
+    },
+    "5c422b229ac978410382a8dce801270c0db44b03": {
+      "receipt_id": "g1-206c91e159eb42c27ceac6cdf07b10a0",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 168
+    },
+    "ccf694fb0d8d6e1cde8d958097927aa21b4d6a0d": {
+      "receipt_id": "g1-7868034f50a494547a99baf7ce38f9dd",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 169
+    },
+    "83d6c4dc7f68be0e631e6fe0c4449ef6f9400c5f": {
+      "receipt_id": "g1-cb931160829d871c3bbb3b1f84dc6f1c",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 170
+    },
+    "60fc8815e6cbc630e112d0b70506ffa30b81f1b4": {
+      "receipt_id": "g1-73280459943b6dd4b1bfbfeaf09c809e",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 171
+    },
+    "768304cfa67889de35512e37adc4efd18da56378": {
+      "receipt_id": "g1-0cb20b31f6a45ae8d01bf21b40a7c83c",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 172
+    },
+    "192bbbe9e9e81d22d69beb2e8b0617776016f6f3": {
+      "receipt_id": "g1-4aa78067db9f63683492e370afee5ff2",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 173
+    },
+    "cca4368473eefe787878480da168cdec4110cc2f": {
+      "receipt_id": "g1-2879460a8b083ed0ba4f39c37c64745e",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 174
+    },
+    "b339de5f422da263349b172c180c29fde488a2d8": {
+      "receipt_id": "g1-81863e0978a8be13a614f0f81c1f37ea",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 175
+    },
+    "22e76203ee8d316f2dc31951e098247ea7b2fecb": {
+      "receipt_id": "g1-4311014cdeeed696e8a192a348f12c58",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 176
+    },
+    "e3d6e266f4b4c1f790646a208a3e1c6144ec641b": {
+      "receipt_id": "g1-ac6b8e4056b3838b78a9c832309430fa",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 177
+    },
+    "015b04f5708624c4ae8caf0c1d771da56e7aaa18": {
+      "receipt_id": "g1-946adc738275400c251c7f23d084725d",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 178
+    },
+    "e3f9ee5afc036a499f13bcdd297ea7b3a5767e56": {
+      "receipt_id": "g1-05a0cff99d5bb9e159e18e6872e8c1c4",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 179
+    },
+    "cb303e8a9b4938d2d34e790acada281ab16461e7": {
+      "receipt_id": "g1-88768c47c5ce7ca83645aabd2ac81f32",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 180
+    },
+    "726d1c1de9f03ac0011df25a4fa76a75217b2b66": {
+      "receipt_id": "g1-d69069765607014e26215a5ca02aa30b",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 181
+    },
+    "b340d19b700bb02f196fb252c688efc2b35882c9": {
+      "receipt_id": "g1-821eb92119e30d0f46e65b8caa57222a",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 182
+    },
+    "22af3a126985cbb5eb89232ced20b167098d5538": {
+      "receipt_id": "g1-9785d440e5dde2dce3721753522b88c5",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 183
+    },
+    "f8cf22285dc71dd847223f27f000df28815d59cb": {
+      "receipt_id": "g1-e0f184c73800f99f292c24d7ba66a1d3",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 184
+    },
+    "e45a60a6a68b015d8e060598511519a7e82e0fab": {
+      "receipt_id": "g1-4a810bc3ca95ef79ffb5b7c0caefd311",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 185
+    },
+    "ce1eaa28d7aec54df8737040096f6624ee66ef8f": {
+      "receipt_id": "g1-58a13a132429f2be8095c09f4bad2a09",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 186
+    },
+    "b3e4a16a20a7c38a19bd8bee484664b8dc679c7d": {
+      "receipt_id": "g1-5e31c0f50e11cfb9941d6b2189e9092c",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 187
+    },
+    "06066abc88871ed7ac1b058e8b9f9e9c94020d31": {
+      "receipt_id": "g1-299514d421f14f628a3417c264c26ccc",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 188
+    },
+    "658d78059ee416377b49ba0c722b60b6c7f0e25d": {
+      "receipt_id": "g1-2dcc8a8df0e3f7a66875cb4f0915e4f9",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 189
+    },
+    "91f4ba597da245822f7bc617291756a52f9e1d0a": {
+      "receipt_id": "g1-e2dd31fdd9489de3d0d8391ebaa9e9eb",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 190
+    },
+    "d7550a92b031cb3acd630165de9e6973febd3c47": {
+      "receipt_id": "g1-43acf8191f64cd1f6cf10808fe208046",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 191
+    },
+    "64daf4b80a2712d745a58fc9f8ba24cf9c2d1430": {
+      "receipt_id": "g1-8a6e861a4e7fc45cc0815ede6c2af4f9",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 192
+    },
+    "65738d98caf2b5eca58eac2b527c0445666eaca0": {
+      "receipt_id": "g1-dc6279dafaeb17fd4cc62692b0f01758",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 193
+    },
+    "1fe0d192f17b875c6bfc82c7d512ad7112ddcb56": {
+      "receipt_id": "g1-0d5d43841cf9e6e41d501b7bfbe5a523",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 194
+    },
+    "07ce94dcc47bae3e5035f736b36da7c969416afe": {
+      "receipt_id": "g1-74f2458710a219356a45e36d63474eec",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 195
+    },
+    "d335c6253eb20a6d8f76457f57c387a3201f6dd4": {
+      "receipt_id": "g1-2d6d5d8504956818d29845dbe69887a6",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 196
+    },
+    "e74285339836d9e28541b1bf02536d444e476c3f": {
+      "receipt_id": "g1-0071c140965dab8b8b503c393518da92",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 197
+    },
+    "27a71b53dcb568ac13d559cbbcafce748a23d2b2": {
+      "receipt_id": "g1-b2c8b73500ecdcdf423f710891375f24",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 198
+    },
+    "6ac0dec58298249d89732cc93cd012cb6140cce8": {
+      "receipt_id": "g1-28b3c003f5ed036b32aec4117a7473b6",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 199
+    },
+    "fe9b7ffe64a7480bb53a8fbd675416827a298e46": {
+      "receipt_id": "g1-a79806bb2714d10cc3ccf7aaab5bc63c",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 200
+    },
+    "8d0d2e63a2c378aa37d4920166618e2246819c30": {
+      "receipt_id": "g1-7dc038443e288d435e072e58c1dc3127",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 201
+    },
+    "99c61974a3ecb8a219951b4656101d51756d2add": {
+      "receipt_id": "g1-ddd5a517977fa78d5b56d69f6e132f13",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 202
+    },
+    "93d8e6723a96e230c4771e3e22d463ea20e6c7c2": {
+      "receipt_id": "g1-05c736761d4fa6e21951b3f4d343910f",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 203
+    },
+    "1697abac7a2d1e1121865321b0f34e4f4a1fecdb": {
+      "receipt_id": "g1-129da84a5b0154ef8b8459c914f7a301",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 204
+    },
+    "d14db69114dfc263f193e8c4d49211b2c896c7ab": {
+      "receipt_id": "g1-1ff34db40e604b636cc745e258bd2f3d",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 205
+    },
+    "eeba606e433af2b543e33ce9da8d2db6034bae52": {
+      "receipt_id": "g1-25561f770f2754c2b565953004bb5dac",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 206
+    },
+    "ef80978a08e15e314f396d98607b6b947b1536af": {
+      "receipt_id": "g1-6b85b7443045b4cf2d15e2faa8b54787",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 207
+    },
+    "ac5029012413dc8459badb92cd2a3671c1fbf247": {
+      "receipt_id": "g1-34feb6fde8ef2c9792902e309ed50e05",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 208
+    },
+    "cb6b2d120d17273bce587f8ab07921dce6680be5": {
+      "receipt_id": "g1-fe23b331ebff014fa17235f6027bbdc2",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 209
+    },
+    "70edcc6b667e7d10c9eaf6de713340138df01846": {
+      "receipt_id": "g1-faee8c7ba84eb686234c1139d5667009",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 210
+    },
+    "398ae46cc9158447bb99bca595979f1c481e7f01": {
+      "receipt_id": "g1-4e8bc3d25d168ed564888b883671aad9",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 211
+    },
+    "aef84d8074fd3f7f8495f91add473ade82de44b2": {
+      "receipt_id": "g1-f7a22e2313baefee9716bd82dc05475f",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 212
+    },
+    "d6e5ea9c0b7210f1f9dd65da5063273c7975f3e9": {
+      "receipt_id": "g1-9e68afc54266ff2df5f39ae654e8de96",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 213
+    },
+    "a16759743c179f88ef0598667aaf9cf979c9b588": {
+      "receipt_id": "g1-c59581fd2280f082f71bbd51fca1ae1d",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 214
+    },
+    "300107603fe7008729fb863d05903beff2ae162a": {
+      "receipt_id": "g1-dc58c850201fdc9349b4e4e5de167e07",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 215
+    },
+    "c37928d6c492d6646dde6fa0864704e6e624ee28": {
+      "receipt_id": "g1-fed654bdc82f7d34c4b3bae458a98142",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 216
+    },
+    "d7d67ee8dbc4bac907047f202ed1b3ea9e12c11e": {
+      "receipt_id": "g1-0239eeadb40b72b88a40805283b1be90",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 217
+    },
+    "ad626d19b0f8a690ddf5ac14df46749d54504b7a": {
+      "receipt_id": "g1-4f3f02b15891f7fb5d3ffaf305fe9966",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 218
+    },
+    "5bc572c44932562a870c78f25b5d8a8a45a8739d": {
+      "receipt_id": "g1-d83fcae2624caaa3ac98077de63d5ec4",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 219
+    },
+    "c7c06e00fdf764fec36b52830e9401a5b1829646": {
+      "receipt_id": "g1-f610c4313482b2ddff50d76e65d416b8",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 220
+    },
+    "003458e8f64a624f8ceb2f9541de3be51bd43fc4": {
+      "receipt_id": "g1-9bb075495c69bebb61635fa8b4be1abb",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 221
+    },
+    "6125ad4845c68a5c96ae19d34647b9d0081a56f8": {
+      "receipt_id": "g1-d2c1904b060f5bd42dc444ae5eb3039b",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 222
+    },
+    "d9b43caee0239745dfc36d97fc5c01b15bcb37e4": {
+      "receipt_id": "g1-fd0b7dc2fe392d5a8ca2cf1713d161ce",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 223
+    },
+    "230d0ebe5dc2f7915ed67847ec2abf0384650c60": {
+      "receipt_id": "g1-984b43f2ca4f73352446ea46c7964fae",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 224
+    },
+    "f0421c4db545d21fef60f8c06e76dac94a2a13a0": {
+      "receipt_id": "g1-4294d45c5a7363cb44f6744c1da5412c",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 225
+    },
+    "48808fd1ebee55db39a2973ccd408c1c3ee4b082": {
+      "receipt_id": "g1-b54ff26c6b5e4ef106b57a0cb1e12ac8",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 226
+    },
+    "0c6cc98c6ebd101cf50f94072391767ecc4c3fc0": {
+      "receipt_id": "g1-9fd63509c650274e26aa76a707449388",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 227
+    },
+    "471e6bc37084f0f6c639ca0450a1bc1fcd98addf": {
+      "receipt_id": "g1-460f831982bd1eb61176b9271e8c60fd",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 228
+    },
+    "6af97600d800cf6ba9d39fdcdafa2a3efd21638f": {
+      "receipt_id": "g1-6a51ba5447404ef239aa70247010cc25",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 229
+    },
+    "29dc05d0ad7b8e2bf3189731fbae9a3b04055cd3": {
+      "receipt_id": "g1-b2b5267314907b7d84caa509b6baf1b8",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 230
+    },
+    "6d8e4cc5ac1e6078cc245ead292d48b07822b499": {
+      "receipt_id": "g1-862c22a5325e21078f55fa00009ea545",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 231
+    },
+    "2bd12960cb908e5ad6dd6e4cd0610699f04a1a53": {
+      "receipt_id": "g1-bc55f746fdcdb3a5c45572c18d1840b1",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 232
+    },
+    "57a1c6f2a461f3f54350b8e4db35f978f1e48869": {
+      "receipt_id": "g1-af472f73c8ed9e8ac40e820e371c73c9",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 233
+    },
+    "cba5b7a8490d4a2179c2233f71b5e86ecab4aa69": {
+      "receipt_id": "g1-c624c20d9908175868ee2e4a9e7ed282",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 234
+    },
+    "e8a4ba1ddc1711063f8d6d420b0826da3783bacc": {
+      "receipt_id": "g1-e5557a7bd98741e626ce4ead4e4afc5b",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 235
+    },
+    "0612b6166fe56886783415fd756cfd2d3453f176": {
+      "receipt_id": "g1-cbde2ce0a184d13cf8dccfec137e33b7",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 236
+    },
+    "ff27ea471e3493ab7f8f3d397212aef57446325a": {
+      "receipt_id": "g1-6a6afb366b0506c1e9dc20c61a5c8118",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 237
+    },
+    "8522514ca797663362847780e1edbb0989f64cad": {
+      "receipt_id": "g1-2f52dcf27f56f8ab5e48cb69b69e9f48",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 238
+    },
+    "f521cbeb7e3368cc8253bc758df2800c14f4094e": {
+      "receipt_id": "g1-9eb53ec34356f611029667ffe28ad924",
+      "ai": false,
+      "bot": true,
+      "authorship_class": "bot",
+      "author": "41898282+github-actions[bot]@users.noreply.github.com",
+      "line": 239
+    },
+    "cc6f2929f72e9fc8bd274c59ea1996253ed28cd0": {
+      "receipt_id": "g1-1a29972541e14285734b2bbf092c1be5",
+      "ai": true,
+      "bot": false,
+      "authorship_class": "ai_assisted",
+      "author": "noah@invariantsystems.io",
+      "line": 240
+    },
+    "c5e9516626c7e0e7af33b6a5635a50421c37b2a6": {
+      "receipt_id": "g1-f98b88586ea75a86a18631c91dd4958d",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 241
+    },
+    "34b2bedcc12032f0fbf5a104df60fc89a69e5676": {
+      "receipt_id": "g1-588ce0fb1cb19db354d3ddfcc8a1fb89",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 242
+    },
+    "626f390ee70e9237d517be1ab4e7eb903483e48b": {
+      "receipt_id": "g1-4ae5b91f8430e487b30ea5bc564fb304",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 243
+    },
+    "eeb462132036456e79729fc18f32c5b51d5213b0": {
+      "receipt_id": "g1-125fa0b863ebd6a54616b626b4870460",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 244
+    },
+    "33cdd013a7ce6776fd23face4fdd09c039017f43": {
+      "receipt_id": "g1-e24f5e201a0b6e528f58550f5873c0cf",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 245
+    },
+    "0a192b7e83dd3e7004b597217d88f279fb81a2eb": {
+      "receipt_id": "g1-2f7c33c18b086c3d6238c93b8fa20441",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 246
+    }
+  }
+}

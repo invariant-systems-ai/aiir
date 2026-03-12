@@ -1,0 +1,54 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "81a9dd7d87ce1856ebfc495d30ab2d073fe04c02",
+    "tree_sha": "4c4ddde4caf8b83c02e7ef80ad115006f6b7b537",
+    "parent_shas": [
+      "282e82731ff18fd353d0c318d28ddd2669c70617"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T07:26:23-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T07:26:23-04:00"
+    },
+    "subject": "hardening: hash-pin PyPI smoke installs and pin fuzz base image (#29)",
+    "message_hash": "sha256:dfe8dd16b8328dc6ef905ec2d7b9c851d16d1347c1166f3d159653e2395904db",
+    "diff_hash": "sha256:6407b9476d59d2e6a13715b4fb77ba1c54be3fc7dd68b792ac537d4f7709de11",
+    "files_changed": 5,
+    "files": [
+      ".clusterfuzzlite/Dockerfile",
+      ".clusterfuzzlite/build.sh",
+      ".github/workflows/action-health.yml",
+      ".github/workflows/release-smoke.yml",
+      "tests/test_mcp.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-b39ca71fd98941905a287b70e7b1cf38",
+  "content_hash": "sha256:b39ca71fd98941905a287b70e7b1cf38c674d2e0b900f0f4145f027c1227678d",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

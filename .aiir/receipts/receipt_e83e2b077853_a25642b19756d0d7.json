@@ -1,0 +1,65 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "e83e2b0778537148a0fa921fca1efdfa3c50ec29",
+    "tree_sha": "0af1a65bd1348f1adbd13b88dccf8e571691bdc3",
+    "parent_shas": [
+      "d9daddeb7ff390a55c904f2863ca9927511bb480"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T13:22:44-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T13:22:53-04:00"
+    },
+    "subject": "v1.0.8: autonomous hardening — Dependabot, action-health smoke tests, OSSF Scorecard, drift auto-issues, input validation",
+    "message_hash": "sha256:eaf564df5a738c2acc7e7643f4a23e5aea85ad6125ce8b05fe6091d91da64f88",
+    "diff_hash": "sha256:083d4e94b403178912605258e07a257d11c3b092b47deeb85b64dd84ea05c7e2",
+    "files_changed": 16,
+    "files": [
+      ".github/dependabot.yml",
+      ".github/workflows/action-health.yml",
+      ".github/workflows/scorecard.yml",
+      ".github/workflows/sync.yml",
+      ".pre-commit-hooks.yaml",
+      "CHANGELOG.md",
+      "README.md",
+      "THREAT_MODEL.md",
+      "action.yml",
+      "aiir/__init__.py",
+      "templates/azure-pipelines.yml",
+      "templates/bitbucket-pipelines.yml",
+      "templates/circleci/config.yml",
+      "templates/gitlab-ci.yml",
+      "templates/jenkins/Jenkinsfile",
+      "templates/receipt/template.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-42b19756d0d7e969920a6db057b56326",
+  "content_hash": "sha256:42b19756d0d7e969920a6db057b5632638279f069a5089659187ee270f59b24d",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

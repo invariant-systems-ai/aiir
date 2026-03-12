@@ -1,0 +1,62 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "f02e1c551d9c6874af809f5751bb45bfdce67b93",
+    "tree_sha": "89d9c4a263112dba6527cc3475cd80bc91075cd5",
+    "parent_shas": [
+      "3500f789d998e74c209a108508dc530bece4764a"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:54:06-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:54:06-04:00"
+    },
+    "subject": "release: v1.1.0 — GitLab native integration, NIST SSDF/SLSA hardening",
+    "message_hash": "sha256:1acd9deae9258f5727ce0e34beb6e11d407eb86f05d3c584ea577557cac3e388",
+    "diff_hash": "sha256:1f1072fcfde48f22934c2af10901e44d0cb582b4b6dfeb5594787e7363499e19",
+    "files_changed": 11,
+    "files": [
+      ".pre-commit-hooks.yaml",
+      "ARCHITECTURE.md",
+      "CHANGELOG.md",
+      "README.md",
+      "THREAT_MODEL.md",
+      "aiir/__init__.py",
+      "docs/api.md",
+      "mcp-manifest.json",
+      "templates/gitlab-ci.yml",
+      "tests/test_intoto.py",
+      "tests/test_virtual_deploy.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": true,
+    "signals_detected": [
+      "message_match:gitlab duo"
+    ],
+    "signal_count": 1,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "ai_assisted",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-be452f90c178e6fc1dba8b00c740fb35",
+  "content_hash": "sha256:be452f90c178e6fc1dba8b00c740fb3595e5e7b5512831ca9107a67e584235a9",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

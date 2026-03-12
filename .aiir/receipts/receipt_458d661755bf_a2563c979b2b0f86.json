@@ -1,0 +1,66 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "458d661755bf08fdfd90223fe722768074276c68",
+    "tree_sha": "78fc6a41be7e9963d4df58f901883003ee9091fc",
+    "parent_shas": [
+      "64985539fd460eb40cb04ce71b4a0b1e467c990e"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T20:56:03-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-12T00:56:03+00:00"
+    },
+    "subject": "fix(credibility): correct test count (1,893), add encoder interop vectors to conformance manifest, citation + launch prep (#39)",
+    "message_hash": "sha256:59b485d29ad22e3428b25b46717b824cb2ee2eb98873993c91e29d420b6ba75b",
+    "diff_hash": "sha256:872c5c77a961abce750e0880f57d90517bc83529b40bbaa2c2b97cb24f530fd4",
+    "files_changed": 17,
+    "files": [
+      ".github/workflows/standards-readiness.yml",
+      ".github/workflows/traffic-archive.yml",
+      ".receipts/receipt_07b8b3bad2bf_a2561e00e5f68947.cbor",
+      ".receipts/receipt_07b8b3bad2bf_a2561e00e5f68947.json",
+      ".receipts/receipt_1f4600a1f36a_a256f12c455563ff.cbor",
+      ".receipts/receipt_1f4600a1f36a_a256f12c455563ff.json",
+      ".receipts/receipt_e4c8b46742c6_a25686ee4a082a66.cbor",
+      ".receipts/receipt_e4c8b46742c6_a25686ee4a082a66.json",
+      "CITATION.cff",
+      "README.md",
+      "aiir/cli.py",
+      "docs/drafts/reddit-posts.md",
+      "docs/drafts/show-hn.md",
+      "docs/standards-readiness.md",
+      "pyproject.toml",
+      "schemas/conformance-manifest.json",
+      "tests/test_cli_integration.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-3c979b2b0f86a8b19933eaa68be42f85",
+  "content_hash": "sha256:3c979b2b0f86a8b19933eaa68be42f85dfbf6bb47e9438579f9e3735291bd5aa",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "ed639f4a7bf81742b928bb337ac984c7d13f9b0f",
+    "tree_sha": "9e2bfb5b00ab6cfb23db49ff7d55aec242c26bd4",
+    "parent_shas": [
+      "add3113b68e9276b35dcda8ca3f680056b709578"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T14:42:14-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T14:42:23-04:00"
+    },
+    "subject": "ci: add Dependabot auto-merge workflow",
+    "message_hash": "sha256:f04a0d285783d7d112de010a57cc82328953592b76761852b240182b1e745259",
+    "diff_hash": "sha256:7791020ac5b6fd2a43618efd57ccebd126851bd207e31d09d08d6a199cb69234",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/dependabot-auto-merge.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-bca59e0605d554e97fca5fc1fd39359b",
+  "content_hash": "sha256:bca59e0605d554e97fca5fc1fd39359b28a8e37fef766f6039c48c2981e0559f",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "98e1893c5169bd2362cccf55b3c15efadb1ca0db",
+    "tree_sha": "da6620e48ded7bff4d50c7ec919fdab754e29454",
+    "parent_shas": [
+      "2be80ed1f6ccf56649498d8e6ac3eee7b6c3787c"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T12:32:17-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T12:32:17-04:00"
+    },
+    "subject": "fix(ci): use release-cli for idempotent GitLab releases",
+    "message_hash": "sha256:e615dcf866bd5f360f6fe221904f147377b3749113053d5afc8462d65df82707",
+    "diff_hash": "sha256:2535a6f20e0a96d6843bef1bcb61ba5a87603536dab048bc699cf2bd23f9d728",
+    "files_changed": 1,
+    "files": [
+      ".gitlab-ci.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-73400904dd5d75d957f60d1df299bd43",
+  "content_hash": "sha256:73400904dd5d75d957f60d1df299bd43786ce1be775b796eb8af190c6d4bcc1a",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

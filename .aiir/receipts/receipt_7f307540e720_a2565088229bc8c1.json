@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "7f307540e7206bf32b5cab58079acf559c793cc3",
+    "tree_sha": "33c4fe9f645f2b4902fe0a824d88eb838645663f",
+    "parent_shas": [
+      "5739d8a5ee2229b5950da9cdd12577b057d69c3f"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T03:58:34-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T03:58:34-04:00"
+    },
+    "subject": "docs: document intentional CLI vs MCP verify path boundary",
+    "message_hash": "sha256:283b38c113896283d675ffafce34387ae88f463106c7398458d8c561f085e7bb",
+    "diff_hash": "sha256:5f174feb56813de4d4407872c68b3018cda558d43830e831b1f2af91ff01c470",
+    "files_changed": 2,
+    "files": [
+      "aiir/_verify.py",
+      "tests/test_cli_integration.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-5088229bc8c18ca68c83d77799285231",
+  "content_hash": "sha256:5088229bc8c18ca68c83d77799285231cbcd132c7c51c9717148b607521608dc",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

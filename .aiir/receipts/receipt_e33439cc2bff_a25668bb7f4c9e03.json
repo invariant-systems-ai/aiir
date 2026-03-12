@@ -1,0 +1,56 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "e33439cc2bfff98d57e338284773a68a0b859fed",
+    "tree_sha": "03102874d9dde48644ad24a7014495619db3d54f",
+    "parent_shas": [
+      "58001a3f82b32daa86590771484df5c1fb916e1a"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T07:58:45-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T07:58:45-04:00"
+    },
+    "subject": "test: virtual deployment layer — 969 tests, 99% coverage",
+    "message_hash": "sha256:0a67ea967a4cc58c6214deed2352a04cdde2588700756a34c11539fc33f0bddc",
+    "diff_hash": "sha256:b896366bceb413846e9e4b012b849afbe7a0a29c3e7e66f1bd57b5f7181f58ad",
+    "files_changed": 7,
+    "files": [
+      "aiir/_sign.py",
+      "aiir/cli.py",
+      "aiir/mcp_server.py",
+      "tests/test_mcp.py",
+      "tests/test_schema.py",
+      "tests/test_sign.py",
+      "tests/test_virtual_deploy.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-68bb7f4c9e03b9176584846a5bd8c5eb",
+  "content_hash": "sha256:68bb7f4c9e03b9176584846a5bd8c5ebc6675797bba4723ee6a42591d3147a78",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

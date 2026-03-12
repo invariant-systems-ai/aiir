@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "465ac8b33e96c436bcbdebf41065b51d2ee87246",
+    "tree_sha": "6afdcd5afa545320a7a886bd972f501c7a9c3700",
+    "parent_shas": [
+      "97280f6019139fc1e2fb23d3c7705d9ef76b965d",
+      "4fbe765ade8cf5f6273bdd5550df973f5c4d38bb"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T06:14:42-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T06:14:42-04:00"
+    },
+    "subject": "merge: reconcile launch-polish into stale-scores branch",
+    "message_hash": "sha256:8f9739bab6f384bf627346a44c1296d8949cb474b987539311e220d3a9b20fb5",
+    "diff_hash": "sha256:fcafeb01d71b3abd07b55187a426fa4903ebc3892ffbe6994a4dfde36f4e5dd6",
+    "files_changed": 1,
+    "files": [
+      "docs/drafts/show-hn.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-735c70b6de58ff6dca25a9b5a3c33d3f",
+  "content_hash": "sha256:735c70b6de58ff6dca25a9b5a3c33d3f6155d774079dd4cdb1e5b756eef20118",
+  "timestamp": "2026-03-12T12:13:52Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

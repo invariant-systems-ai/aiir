@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "282e82731ff18fd353d0c318d28ddd2669c70617",
+    "tree_sha": "13169771287d1430960bf0f1cf910d52d26fc874",
+    "parent_shas": [
+      "0f8f5a631474213b95e3687cd0ee060f4c0c0ab1"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T07:19:13-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T07:19:13-04:00"
+    },
+    "subject": "hardening: pin smoke installs and tighten fuzz build path (#27)",
+    "message_hash": "sha256:65ecb3807f0e19946f0247292fbf19e4572a83c9acb8a1d7131bc325f8bf3be9",
+    "diff_hash": "sha256:821aea8400d5c945f64c8c16e33b23781ac2a4548e7d6f71e2ea174b6fceba21",
+    "files_changed": 4,
+    "files": [
+      ".clusterfuzzlite/build.sh",
+      ".github/workflows/action-health.yml",
+      ".github/workflows/release-smoke.yml",
+      "tests/test_mcp.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-8d67d456ca413ecdf99c0f45cd8437eb",
+  "content_hash": "sha256:8d67d456ca413ecdf99c0f45cd8437eb11963c7e714af126ac02b5bdfd259caf",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

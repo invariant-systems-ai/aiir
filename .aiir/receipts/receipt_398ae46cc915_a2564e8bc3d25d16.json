@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "398ae46cc9158447bb99bca595979f1c481e7f01",
+    "tree_sha": "3fcf9150a24a8d6fd509e36f7b6ef7da0390aeab",
+    "parent_shas": [
+      "aef84d8074fd3f7f8495f91add473ade82de44b2"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:29:33-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T07:31:31-04:00"
+    },
+    "subject": "docs: add CHANGELOG entries for v1.0.1 and v1.0.2",
+    "message_hash": "sha256:f3229cb98058911bda5dec1a1e7a5b8443e9482941fa8978371fcb89deca2ce9",
+    "diff_hash": "sha256:52652026a39c202363b35867c19776e877da6f13bddebf0980bec92cf61fa04d",
+    "files_changed": 1,
+    "files": [
+      "CHANGELOG.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-4e8bc3d25d168ed564888b883671aad9",
+  "content_hash": "sha256:4e8bc3d25d168ed564888b883671aad90686685ba92a00fc19966732e817d85c",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

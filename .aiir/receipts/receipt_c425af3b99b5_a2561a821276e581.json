@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "c425af3b99b5fe96090a442bd6a355ce8d769d1a",
+    "tree_sha": "91d22b25f19ebc9457e18c6d023668ec1b3eabe0",
+    "parent_shas": [
+      "e33439cc2bfff98d57e338284773a68a0b859fed"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T08:31:09-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T08:31:09-04:00"
+    },
+    "subject": "fix(ci): run CI on version tags, harden publish ci-gate",
+    "message_hash": "sha256:f23695f01ccd139b35c363675da1d619a2e7a063b2894b9fce9235f05f39177c",
+    "diff_hash": "sha256:8a427e529c3339ae1f335cfda29c760923bfc6d0a0e71b9921badd4c68e00586",
+    "files_changed": 3,
+    "files": [
+      ".github/workflows/ci.yml",
+      ".github/workflows/publish.yml",
+      "CHANGELOG.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1a821276e5812b300dae4e55ffa7b903",
+  "content_hash": "sha256:1a821276e5812b300dae4e55ffa7b903281cc9f292ae5f939220a2c7462c43ab",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

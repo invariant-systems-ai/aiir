@@ -1,0 +1,59 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "cae4f4b67791f84ccaa36fa80d3217677e845541",
+    "tree_sha": "c4d054eda25f36e18dc4c4434cb0b0e23da690fc",
+    "parent_shas": [
+      "d421a4e56913eff7c1c46de5c48559980597fe22"
+    ],
+    "author": {
+      "name": "dependabot[bot]",
+      "email": "49699333+dependabot[bot]@users.noreply.github.com",
+      "date": "2026-03-08T15:24:10-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-08T15:24:10-04:00"
+    },
+    "subject": "chore(deps): bump actions/checkout from 4.2.2 to 6.0.2 (#4)",
+    "message_hash": "sha256:2f7e83dd7efe8d81433a31a5a75970c9f435f74b5533126b1f8689454f13bc6f",
+    "diff_hash": "sha256:0985e5dbb16fcecd83d254907d5841219e23a782139c21225c8805adbe49bfcf",
+    "files_changed": 7,
+    "files": [
+      ".github/workflows/action-health.yml",
+      ".github/workflows/ci.yml",
+      ".github/workflows/dogfood.yml",
+      ".github/workflows/publish.yml",
+      ".github/workflows/scorecard.yml",
+      ".github/workflows/sync.yml",
+      ".github/workflows/update-major-tag.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": true,
+    "bot_signals_detected": [
+      "author_name_bot:dependabot",
+      "author_email_bot:dependabot"
+    ],
+    "bot_signal_count": 2,
+    "authorship_class": "bot",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-254a41496c31cf4ad05b66686135842d",
+  "content_hash": "sha256:254a41496c31cf4ad05b66686135842dbc7ab12557be0776060a6ec41676c23c",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

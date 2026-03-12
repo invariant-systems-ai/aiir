@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "5bdea8fd51f66947f089bd0d156dcd23d28f0cb5",
+    "tree_sha": "df1699aecdf0619f929d7b8feba2d2454cb8b171",
+    "parent_shas": [
+      "104b83e30f051498dad8fd39f3a5cfb358d74949"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T16:16:01-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T16:16:01-04:00"
+    },
+    "subject": "fix(docker): quote pip version specifiers to fix SC2261 shell redirect",
+    "message_hash": "sha256:0337622cb9eebbd5ac8a7f4e845f1ba9938a8e6506451b2487b97556a7b5e457",
+    "diff_hash": "sha256:b5fca9a87cd85301ba4aca0c73da3de8f4aa2b09792d8f569ffbf92cb737b0a6",
+    "files_changed": 1,
+    "files": [
+      "Dockerfile"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-79a4d7b30f7ba345d7a2c218d38d415d",
+  "content_hash": "sha256:79a4d7b30f7ba345d7a2c218d38d415d86fc115b2e83bec5c0f1277a41917522",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

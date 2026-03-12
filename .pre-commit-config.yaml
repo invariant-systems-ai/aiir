@@ -1,8 +1,9 @@
-# AIIR pre-commit hooks — security scanning + dogfood receipting.
-# Install:  pre-commit install && pre-commit install --hook-type post-commit
+# AIIR pre-commit hooks — security scanning + preflight + dogfood receipting.
+# Install:  pre-commit install && pre-commit install --hook-type post-commit --hook-type pre-push
 #
-# Hooks run in two phases:
+# Hooks run in three phases:
 #   pre-commit:  gitleaks (secret scan) + ruff (lint/format) + bandit (SAST)
+#   pre-push:    pytest + version-sync + package-smoke (ci-local.sh required)
 #   post-commit: AIIR receipt generation (dogfood)
 repos:
   # ── Secret scanning ──────────────────────────────────────────────
@@ -43,12 +44,23 @@ repos:
         stages: [pre-commit]
         pass_filenames: false
 
+  # ── Pre-push preflight ───────────────────────────────────────────
+  - repo: local
+    hooks:
+      - id: ci-preflight
+        name: ci-preflight — local CI gate
+        entry: scripts/ci-local.sh required
+        language: script
+        always_run: true
+        stages: [pre-push]
+        pass_filenames: false
+
   # ── AIIR dogfood ─────────────────────────────────────────────────
   - repo: local
     hooks:
       - id: aiir
         name: AIIR — AI Integrity Receipts
-        entry: python -m aiir --output .receipts/
+        entry: python -m aiir --ledger .aiir/ --output .aiir/receipts/ --quiet
         language: python
         always_run: true
         stages: [post-commit]

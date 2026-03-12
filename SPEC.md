@@ -1,9 +1,9 @@
 # AIIR Commit Receipt Specification
 
-**Specification version**: 1.1.0
-**Schema identifier**: `aiir/commit_receipt.v1`
+**Specification version**: 2.0.0
+**Schema identifier**: `aiir/commit_receipt.v2`
 **Status**: Stable
-**Date**: 2026-03-10
+**Date**: 2026-03-12
 **Author**: Invariant Systems, Inc.
 **License**: Apache-2.0
 
@@ -12,7 +12,7 @@
 ## 1. Introduction
 
 This document is the **normative specification** for the AIIR commit receipt
-format (`aiir/commit_receipt.v1`). It defines the receipt structure, field
+format (`aiir/commit_receipt.v2`). It defines the receipt structure, field
 semantics, canonical JSON encoding, content-addressing algorithm, verification
 procedure, and extension mechanism.
 
@@ -38,7 +38,8 @@ The reference implementation is the `aiir` Python package:
 
 A JSON Schema (draft 2020-12) is provided at:
 
-- [`schemas/commit_receipt.v1.schema.json`](schemas/commit_receipt.v1.schema.json)
+- [`schemas/commit_receipt.v2.schema.json`](schemas/commit_receipt.v2.schema.json) (current)
+- [`schemas/commit_receipt.v1.schema.json`](schemas/commit_receipt.v1.schema.json) (still accepted)
 
 A CDDL grammar ([RFC 8610](https://www.rfc-editor.org/rfc/rfc8610)) covering
 both the JSON and CBOR wire formats is provided at:
@@ -57,7 +58,7 @@ A receipt is a JSON object with the following top-level fields:
 | Field | Type | In CORE | Description |
 |-------|------|---------|-------------|
 | `type` | string (const) | ✅ | `"aiir.commit_receipt"` |
-| `schema` | string (const) | ✅ | `"aiir/commit_receipt.v1"` |
+| `schema` | string (const) | ✅ | `"aiir/commit_receipt.v2"` |
 | `version` | string | ✅ | SemVer version of the generating tool |
 | `commit` | object | ✅ | Git commit metadata (§3) |
 | `ai_attestation` | object | ✅ | AI authorship detection results (§4) |
@@ -82,7 +83,7 @@ These six keys — and ONLY these six — form the hash input. All other fields
 
 > **Forward-compatibility**: New top-level fields added in future schema
 > versions MUST NOT be included in CORE_KEYS unless the schema identifier
-> changes (e.g., `aiir/commit_receipt.v2`). The CORE_KEYS set is an explicit
+> changes (e.g., `aiir/commit_receipt.v3`). The CORE_KEYS set is an explicit
 > allowlist, not a denylist.
 
 ---
@@ -94,6 +95,8 @@ The `commit` field is a JSON object with the following structure:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `sha` | string | ✅ | Full hex SHA of the git commit (40 or 64 chars) |
+| `tree_sha` | string | ✅ | Full hex SHA of the commit's tree object (40 or 64 chars). Binds the receipt to the directory state. |
+| `parent_shas` | string[] | ✅ | Ordered parent commit SHAs. Empty for root commits. Binds the receipt to the DAG position. |
 | `author` | GitIdentity | ✅ | Author identity |
 | `committer` | GitIdentity | ✅ | Committer identity |
 | `subject` | string | ✅ | First line of commit message |
@@ -245,7 +248,7 @@ Canonical output:
 
 ### 6.5 Normative Canonicalization Contract
 
-The canonical JSON encoding for `aiir/commit_receipt.v1` is **fully defined**
+The canonical JSON encoding for `aiir/commit_receipt.v2` is **fully defined**
 by the following parameters:
 
 | Parameter | Value | Effect |
@@ -520,11 +523,11 @@ The following media type registration is prepared per
 | **Type name** | `application` |
 | **Subtype name** | `vnd.aiir.commit-receipt+json` |
 | **Required parameters** | None |
-| **Optional parameters** | `schema` — the receipt schema identifier (e.g., `aiir/commit_receipt.v1`). When absent, consumers SHOULD inspect the `schema` field in the JSON body. |
+| **Optional parameters** | `schema` — the receipt schema identifier (e.g., `aiir/commit_receipt.v2`). When absent, consumers SHOULD inspect the `schema` field in the JSON body. |
 | **Encoding considerations** | 8bit. The content is UTF-8 encoded JSON per [RFC 8259](https://www.rfc-editor.org/rfc/rfc8259). |
 | **Security considerations** | See §12 and [THREAT_MODEL.md](THREAT_MODEL.md). Receipts contain git commit metadata including author names, email addresses, and commit subjects. Consumers MUST validate receipts using the verification algorithm (§9) before trusting content. Receipt fields may contain user-controlled text — display layers MUST sanitize to prevent injection (XSS, terminal escape, log injection). The `content_hash` field MUST be verified via constant-time comparison (§9.2) to prevent timing side-channel attacks. |
 | **Interoperability considerations** | All conforming implementations MUST produce identical `content_hash` and `receipt_id` values for the same input data (§7.3). Interoperability is verified via published test vectors (§13). Two independent implementations (Python, TypeScript) currently pass all vectors. |
-| **Published specification** | This document ([SPEC.md](https://github.com/invariant-systems-ai/aiir/blob/main/SPEC.md)). Machine-readable schema: [`commit_receipt.v1.schema.json`](https://invariantsystems.io/schemas/aiir/commit_receipt.v1.schema.json). |
+| **Published specification** | This document ([SPEC.md](https://github.com/invariant-systems-ai/aiir/blob/main/SPEC.md)). Machine-readable schema: [`commit_receipt.v2.schema.json`](https://invariantsystems.io/schemas/aiir/commit_receipt.v2.schema.json). |
 | **Applications which use this media type** | AIIR CLI, AIIR GitHub Action, AIIR MCP Server, CI/CD pipelines, compliance audit systems, supply-chain attestation frameworks (via in-toto envelope). |
 | **Fragment identifier considerations** | None. |
 | **Restrictions on usage** | None. |
@@ -551,11 +554,11 @@ with links to the specification and schema.
 The JSON Schema `$id` URI is:
 
 ```text
-https://invariantsystems.io/schemas/aiir/commit_receipt.v1.schema.json
+https://invariantsystems.io/schemas/aiir/commit_receipt.v2.schema.json
 ```
 
 This URI resolves to the machine-readable JSON Schema (draft 2020-12)
-for the `aiir/commit_receipt.v1` receipt format.
+for the `aiir/commit_receipt.v2` receipt format.
 
 ---
 
@@ -578,7 +581,7 @@ The specification uses **Semantic Versioning** (SemVer):
   remain valid. Existing implementations remain conformant for the fields
   they support.
 - **Major** (x.0.0): Breaking changes — new CORE_KEYS, changed canonical
-  JSON rules, new schema identifier (e.g., `aiir/commit_receipt.v2`).
+  JSON rules, new schema identifier (e.g., `aiir/commit_receipt.v3`).
   Existing implementations MUST update to remain conformant. The previous
   schema version will be documented as deprecated but MUST continue to
   verify correctly for receipts generated under that version.
@@ -598,8 +601,8 @@ The specification uses **Semantic Versioning** (SemVer):
 
 ### 15.4 Backward Compatibility Guarantees
 
-- A receipt generated by `aiir/commit_receipt.v1` MUST verify correctly
-  against any future 1.x implementation.
+- A receipt generated by `aiir/commit_receipt.v1` or `aiir/commit_receipt.v2`
+  MUST verify correctly against any future implementation of the same major version.
 - The CORE_KEYS set (`type`, `schema`, `version`, `commit`,
   `ai_attestation`, `provenance`) MUST NOT change within a major version.
 - The canonical JSON algorithm MUST NOT change within a major version.

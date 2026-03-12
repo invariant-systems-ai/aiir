@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "bf012474124ba685f5045da714e537160785f7f4",
+    "tree_sha": "fe9d63b6b18b4b2f733627faed065923278f549c",
+    "parent_shas": [
+      "8813651cf88a039906007edf2aa974df5cd9ac76"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T12:49:46-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T12:49:46-04:00"
+    },
+    "subject": "ci: update trivy-action to v0.35.0 (stale SHA for v0.28.0)",
+    "message_hash": "sha256:0a7bbf531f35e334e40d57316d5d8754308130cb1ac280cb19eab42000cd7ddb",
+    "diff_hash": "sha256:9d14e999406085b23eb994ed60dabcfea43b10e65d141fd749704a8fdaa12342",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/publish.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-2167badd83403f520f52aff97f714f4b",
+  "content_hash": "sha256:2167badd83403f520f52aff97f714f4bd6398b39be9ec44a7441042fad314761",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

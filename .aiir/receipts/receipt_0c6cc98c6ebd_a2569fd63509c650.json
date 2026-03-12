@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "0c6cc98c6ebd101cf50f94072391767ecc4c3fc0",
+    "tree_sha": "1901c4017f0256843e766b145b00494229daaf07",
+    "parent_shas": [
+      "471e6bc37084f0f6c639ca0450a1bc1fcd98addf"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T06:16:53-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T06:17:02-04:00"
+    },
+    "subject": "ci: add Windows/macOS to test matrix, portable smoke test, OS classifier",
+    "message_hash": "sha256:2265e82cb72bd8d706fc72960f0991462286bff76c57d2522a4cad5692072e78",
+    "diff_hash": "sha256:ae99a94861ece08900fe72e256967ec01d718887712ba93030cd55ece64e5790",
+    "files_changed": 2,
+    "files": [
+      ".github/workflows/ci.yml",
+      "pyproject.toml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-9fd63509c650274e26aa76a707449388",
+  "content_hash": "sha256:9fd63509c650274e26aa76a70744938868bf730bb3afb638b3a56bad8105b4e1",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "fc4e3cf53aea7c98f761d7800529fc2398ef5508",
+    "tree_sha": "3f170c01869aede2c18bcfbd13eadd9ce5b68148",
+    "parent_shas": [
+      "12ac356d46a41db4822ed3fbd4c4874076e2fa02"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:27:16-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:27:16-04:00"
+    },
+    "subject": "feat: GitLab native integration — module, tests, docs, templates",
+    "message_hash": "sha256:c73361b4d57041ec836f3b523335b267ce0c0bc5ebb3fce1c58652abc16d38ad",
+    "diff_hash": "sha256:0f90489f98b34f61d246d6459c0eb8535ad9b4e38b776fbce4ba5fc7b52ce673",
+    "files_changed": 13,
+    "files": [
+      "aiir/__init__.py",
+      "aiir/_detect.py",
+      "aiir/_gitlab.py",
+      "aiir/_receipt.py",
+      "aiir/cli.py",
+      "docs/gitlab-compliance-framework.md",
+      "docs/gitlab-pages-dashboard.md",
+      "docs/gitlab-webhooks.md",
+      "templates/gitlab-ci.yml",
+      "templates/gitlab-pages-dashboard.yml",
+      "templates/gitlab-publish-pypi.yml",
+      "templates/receipt/template.yml",
+      "tests/test_gitlab.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": true,
+    "signals_detected": [
+      "message_match:gitlab duo"
+    ],
+    "signal_count": 1,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "ai_assisted",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-c87eb603dade65c21c7cd883af2e9eb2",
+  "content_hash": "sha256:c87eb603dade65c21c7cd883af2e9eb2c7c8da9bee039cd5cba1181a4210b2e2",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "0e6c2e7e7c406e1122dfc24b1e465e041db93108",
+    "tree_sha": "32c9a17f4962f04006129087d2bbb1da8e26e05f",
+    "parent_shas": [
+      "cab48e179671ba45da95a4202e01a9e78b9cc975"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:36:06-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:36:06-04:00"
+    },
+    "subject": "docs: update stale counts — 1075+ tests, 25 conformance vectors",
+    "message_hash": "sha256:0879a5d3110b328ad2d4ff3a6dccaff4d13233dc1cfd0265f6274660d63a5a7e",
+    "diff_hash": "sha256:ba136ffca7c339b8cd29684f6ce03e5c31293adfdd2133468b7ecd06b98c6e29",
+    "files_changed": 2,
+    "files": [
+      "README.md",
+      "tests/test_cli_integration.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-072167b3c5b84299912644d50bb895a6",
+  "content_hash": "sha256:072167b3c5b84299912644d50bb895a6b3171adaa2116ebcc872a7f2c81248b4",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

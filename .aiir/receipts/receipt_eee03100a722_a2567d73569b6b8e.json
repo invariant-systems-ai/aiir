@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "eee03100a7229c8ed350f25769b826a92f2b47c8",
+    "tree_sha": "9ecbb01a1cd1194a492c494bdc09042d064c4213",
+    "parent_shas": [
+      "9951dc975e0bc5378ada12d2546ed66434e5f487"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T16:38:52-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T16:38:52-04:00"
+    },
+    "subject": "test: regression tests for --ledger pass-through and MCP argument validation",
+    "message_hash": "sha256:102d707c8eade303315194fded12b4e4e254b23ac6b6348dc189d4e72e9c1ac4",
+    "diff_hash": "sha256:b3c18a0b0108056ae12ff34dac0ef801e289a2a3025edcfb543a4f928dbbb15c",
+    "files_changed": 3,
+    "files": [
+      "tests/test_e2e_ux.py",
+      "tests/test_mcp_protocol.py",
+      "tests/test_sign.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-7d73569b6b8e7791e546ae5acd8e97ea",
+  "content_hash": "sha256:7d73569b6b8e7791e546ae5acd8e97ea15f9f83d3a1cabe28e3c3a0895744675",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

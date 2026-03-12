@@ -1,0 +1,61 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "86482976629b698db3578b08f83a33cc1a097ef8",
+    "tree_sha": "fd44ff850c68168fcf38be8f0526ad96be73378a",
+    "parent_shas": [
+      "a5e91b2d17f83c0e574fb27e4a0f443ffd62152f"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T04:32:57-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T04:32:57-04:00"
+    },
+    "subject": "v1.0.13: explainable verification, policy engine, agent attestation",
+    "message_hash": "sha256:335d430cec878f4d6061afaa724101646393ac1799b4d61f30c51b1e7f3d4c33",
+    "diff_hash": "sha256:1e19a25ee518b9d1f6b79bf018a23cbaabed5c77385cee8c845a2c2a304d5bb7",
+    "files_changed": 12,
+    "files": [
+      "ARCHITECTURE.md",
+      "CHANGELOG.md",
+      "CONTRIBUTING.md",
+      "README.md",
+      "aiir/__init__.py",
+      "aiir/_explain.py",
+      "aiir/_policy.py",
+      "aiir/_receipt.py",
+      "aiir/cli.py",
+      "tests/test_cli_integration.py",
+      "tests/test_explain.py",
+      "tests/test_policy.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-7339d1586bfda1e6bf21aec219cacd5a",
+  "content_hash": "sha256:7339d1586bfda1e6bf21aec219cacd5acb92236b2be7091431bb30d5da96c98c",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

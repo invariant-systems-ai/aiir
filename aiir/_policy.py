@@ -242,7 +242,7 @@ def evaluate_receipt_policy(
                 rule="require_schema_valid",
                 message=f"Receipt has {len(schema_errors)} schema validation error(s).",
                 severity="error" if enforcement == "hard-fail" else "warning",
-                remediation="Fix the receipt to conform to schemas/commit_receipt.v1.schema.json.",
+                remediation="Fix the receipt to conform to the commit_receipt schema (v1 or v2).",
             )
         )
 

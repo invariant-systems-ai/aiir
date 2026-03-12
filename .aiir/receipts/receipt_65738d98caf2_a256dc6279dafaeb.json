@@ -1,0 +1,56 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "65738d98caf2b5eca58eac2b527c0445666eaca0",
+    "tree_sha": "979d0bd91dcebd37f664241febb9d91abc199a47",
+    "parent_shas": [
+      "1fe0d192f17b875c6bfc82c7d512ad7112ddcb56"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:29:25-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:29:25-04:00"
+    },
+    "subject": "v1.0.4: heuristic_v2 schema, test suite split, review response",
+    "message_hash": "sha256:7b62534f84f4f0465a3478aa311e668fd85613db01544cec6b6b5689b6f0ca90",
+    "diff_hash": "sha256:6b1a2cbdf0f04a73902dfd6966306d0004c1fb6fdeea4970033185fcc538c7c8",
+    "files_changed": 7,
+    "files": [
+      "CHANGELOG.md",
+      "aiir/__init__.py",
+      "aiir/_github.py",
+      "templates/receipt/template.yml",
+      "tests/test_core.py",
+      "tests/test_ledger.py",
+      "tests/test_redteam.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-dc6279dafaeb17fd4cc62692b0f01758",
+  "content_hash": "sha256:dc6279dafaeb17fd4cc62692b0f01758c51132220e8bcbd349c3cc1580f4dd08",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

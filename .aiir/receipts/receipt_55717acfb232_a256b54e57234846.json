@@ -1,0 +1,65 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "55717acfb232f7f439e462d98cbb560daa987753",
+    "tree_sha": "06fb1317518ee8e53ee8a905210c8a1c5b1843c8",
+    "parent_shas": [
+      "dc79eac07005ed2eb0e24d156e8469609f092d68"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T15:35:17-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T15:35:17-04:00"
+    },
+    "subject": "fix: close all CI failures — ruff, markdownlint, coverage 100%",
+    "message_hash": "sha256:aca79263844deb8dc450156cc4b43e0d969081416efcfe1725b1e78bb5331f45",
+    "diff_hash": "sha256:0296120a95d79492b4412522785e0352bb210111dbe504e5f5d10b36c6e447ff",
+    "files_changed": 16,
+    "files": [
+      ".github/SECURITY.md",
+      ".markdownlint-cli2.yaml",
+      ".markdownlint.yaml",
+      "CODE_OF_CONDUCT.md",
+      "CONTRIBUTING.md",
+      "README.md",
+      "SECURITY.md",
+      "SPEC.md",
+      "THREAT_MODEL.md",
+      "TRADEMARK.md",
+      "aiir/cli.py",
+      "contrib/launch-post-devto.md",
+      "docs/gitlab-compliance-framework.md",
+      "examples/github-actions/README.md",
+      "tests/test_coverage_gaps.py",
+      "tests/test_transport_attestation.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-b54e57234846a7215d8097c8841775ee",
+  "content_hash": "sha256:b54e57234846a7215d8097c8841775eea2544395dcc4d07a355519cf11e42031",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

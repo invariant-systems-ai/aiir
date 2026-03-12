@@ -1,0 +1,56 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "a99d6636807df62b40e8bcd559988ce441c6691a",
+    "tree_sha": "5c53405c0b9e9ca76b50538f4d258d5da2fed58b",
+    "parent_shas": [
+      "e0aa50f795ee4166d181d3a791e0ad2e68827712"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T12:07:50-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T12:07:50-04:00"
+    },
+    "subject": "feat(mcp): add aiir_gitlab_summary tool for Duo Chat integration",
+    "message_hash": "sha256:9ea7d252651591a3989f7b4a6a517f07543109291d63cf28679b474c63aef51a",
+    "diff_hash": "sha256:e4802b94cd5bfcdbaabbc27479e8f928b2bae57846a8bfd15647ff1e4eae0327",
+    "files_changed": 4,
+    "files": [
+      "README.md",
+      "aiir/mcp_server.py",
+      "tests/test_mcp.py",
+      "tests/test_mcp_protocol.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": true,
+    "signals_detected": [
+      "message_match:gitlab duo",
+      "message_match:duo chat"
+    ],
+    "signal_count": 2,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "ai_assisted",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-8f81832d4a8ea7eb271cb625df52b811",
+  "content_hash": "sha256:8f81832d4a8ea7eb271cb625df52b811253073cc035a9d3eefb107bb788ab319",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

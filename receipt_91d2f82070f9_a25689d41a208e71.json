@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "91d2f82070f97d2aed960463ebbd75d9e5eb9d0b",
+    "tree_sha": "f77603633da2f0252d192fadef24cc077d791961",
+    "parent_shas": [
+      "d742ac7dd2c94a2968410f549dedddfdb9e01e73"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T18:31:49-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-12T18:31:49-04:00"
+    },
+    "subject": "docs: track GitHub main ruleset in repo (#53)",
+    "message_hash": "sha256:2e3de9e9ebecac825f6b5342edbcf7c9b990a1bf5146df77ddb4b2fee2a9b5dc",
+    "diff_hash": "sha256:a22007d499909a9ed335338b694df6aae097195c6c74d20773b64424c408426e",
+    "files_changed": 5,
+    "files": [
+      ".github/CODEOWNERS",
+      ".github/rulesets/main-production-gate.json",
+      "AGENTS.md",
+      "README.md",
+      "scripts/sync-github-ruleset.sh"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.github"
+  },
+  "receipt_id": "g1-89d41a208e71953ae21492e9262bec4f",
+  "content_hash": "sha256:89d41a208e71953ae21492e9262bec4fc0f082eea1580bcd71666d5d12bff53a",
+  "timestamp": "2026-03-12T22:32:05Z",
+  "extensions": {}
+}

@@ -108,7 +108,7 @@ jobs:
 
           | Metric | Expected | Verified this week? | Command |
           |---|---|---|---|
-          | Test count | ≥ 1860 | [ ] | `pytest --collect-only -q \| tail -1` |
+          | Test count | ≥ 1893 | [ ] | `pytest --collect-only -q \| tail -1` |
           | Coverage | 100% | [ ] | `pytest --cov=aiir --cov-fail-under=100` |
           | CI checks | 38 public / 3 required | [ ] | GitHub check-runs API on latest `main` commit |
           | Dependencies | 0 | [ ] | `pip show aiir \| grep Requires` |

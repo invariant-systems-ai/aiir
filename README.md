@@ -22,6 +22,10 @@
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12134/badge)](https://www.bestpractices.dev/projects/12134)
 [![Standards Readiness](https://img.shields.io/badge/Standards--Readiness-68.9%2F100-orange)](docs/standards-readiness.md)
 [![AIIR Receipted](https://img.shields.io/badge/AIIR-Receipted%20✓-blue)](https://github.com/invariant-systems-ai/aiir)
+[![GitHub stars](https://img.shields.io/github/stars/invariant-systems-ai/aiir?style=social)](https://github.com/invariant-systems-ai/aiir/stargazers)
+
+> **Using AIIR?** Please [★ star this repo](https://github.com/invariant-systems-ai/aiir/stargazers) — it helps others discover the project and signals community support.
+> Citing in research or policy? See the [**Cite this repository**](https://github.com/invariant-systems-ai/aiir) button on GitHub (powered by `CITATION.cff`).
 
 <p align="center">
   <img src="docs/demo.svg" alt="AIIR terminal demo — pip install aiir && aiir --pretty" width="720">
@@ -1003,7 +1007,7 @@ Everything below is verifiable. No testimonials-behind-a-login — just public a
 | Proof | What it proves | Verify it |
 |-------|---------------|-----------|
 | **This repo receipts itself** | Dogfood — AIIR generates its own receipts on every push to `main` | `for f in .receipts/*.json; do aiir --verify "$f"; done` |
-| **1,860 tests, 100% coverage** | Every release passes Python 3.9–3.13 × Ubuntu/macOS/Windows | [CI runs](https://github.com/invariant-systems-ai/aiir/actions/workflows/ci.yml) |
+| **1,893 tests collected, 100% coverage** | Every release passes Python 3.9–3.13 × Ubuntu/macOS/Windows | [CI runs](https://github.com/invariant-systems-ai/aiir/actions/workflows/ci.yml) |
 | **25 conformance test vectors** | Third-party implementors can verify their hashing against ours | [schemas/test_vectors.json](schemas/test_vectors.json) |
 | **Public threat model** | Full STRIDE/DREAD analysis — we show attackers what we defend against | [THREAT_MODEL.md](THREAT_MODEL.md) |
 | **SLSA provenance on every release** | PyPI wheel has a verifiable build attestation | `gh attestation verify aiir-*.whl --repo invariant-systems-ai/aiir` |
@@ -1021,7 +1025,7 @@ on every push to `main` and commits them back to `.receipts/`. Locally, the
 
 ## Security
 
-Extensive [security controls](THREAT_MODEL.md). 1,860 tests. Zero dependencies.
+Extensive [security controls](THREAT_MODEL.md). 1,893 tests collected. Zero dependencies.
 
 See [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), and
 [Tamper Detection](docs/tamper-detection.md).
@@ -1067,7 +1071,13 @@ AIIR publishes a formal specification and machine-readable schema for third-part
 
 Built by [Invariant Systems, Inc.](https://invariantsystems.io)
 
-**License**: Apache-2.0 — See [LICENSE](LICENSE)
+**License**: Apache-2.0 — See [LICENSE](LICENSE).
+If you redistribute AIIR or derivative works, please include a copy of the
+[LICENSE](LICENSE), preserve the [NOTICE](NOTICE) file, and retain attribution
+to Invariant Systems, as required by the Apache-2.0 license.
+
+**Citing AIIR**: Use the **Cite this repository** button on GitHub or see
+[CITATION.cff](CITATION.cff).
 
 **Trademarks**: "AIIR", "AI Integrity Receipts", and "Invariant Systems"
 are trademarks of Invariant Systems, Inc. See [TRADEMARK.md](TRADEMARK.md).

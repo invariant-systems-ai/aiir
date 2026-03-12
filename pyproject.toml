@@ -55,6 +55,7 @@ Documentation = "https://github.com/invariant-systems-ai/aiir/blob/main/docs/api
 Repository = "https://github.com/invariant-systems-ai/aiir"
 Issues = "https://github.com/invariant-systems-ai/aiir/issues"
 Changelog = "https://github.com/invariant-systems-ai/aiir/blob/main/CHANGELOG.md"
+"Cite Us" = "https://github.com/invariant-systems-ai/aiir/blob/main/CITATION.cff"
 
 [project.scripts]
 aiir = "aiir.cli:main"

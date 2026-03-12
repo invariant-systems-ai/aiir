@@ -1685,6 +1685,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         trailer_text = format_commit_trailer(receipts, ledger_dir=ledger_dir)
         print(trailer_text, end="")
 
+    # Attribution — only when stderr is an interactive terminal.
+    if (  # pragma: no cover — interactive-only UI
+        not args.quiet
+        and not args.github_action
+        and not args.gitlab_ci
+        and getattr(sys.stderr, "isatty", lambda: False)()
+    ):
+        print(
+            f"\n   {_e('hint')} Like AIIR? ★ https://github.com/invariant-systems-ai/aiir",
+            file=sys.stderr,
+        )
+
     return 0
 
 

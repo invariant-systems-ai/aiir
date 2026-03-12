@@ -999,6 +999,11 @@ class TestStatsJSON(unittest.TestCase):
 
     def test_stats_json_valid(self):
         stats = json.loads(_read(SITE_DIR / "stats.json"))
+        self.assertIsInstance(
+            stats,
+            dict,
+            "stats.json top-level value must be a JSON object",
+        )
         self.assertIn("version", stats)
         self.assertIn("stats", stats)
         self.assertIn("updated", stats)

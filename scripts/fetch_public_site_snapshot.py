@@ -20,6 +20,7 @@ from pathlib import Path
 
 BASE_URL = "https://invariantsystems.io"
 HTML_HREF_RE = re.compile(r'href="([^"]+)"', re.IGNORECASE)
+MAX_FETCHED_PATHS = 128
 INITIAL_PATHS = {
     "/",
     "/404.html",
@@ -114,6 +115,10 @@ def main() -> int:
     seen: set[str] = set()
 
     while queued:
+        if len(seen) >= MAX_FETCHED_PATHS:
+            raise RuntimeError(
+                f"Refusing to fetch more than {MAX_FETCHED_PATHS} site paths"
+            )
         path = queued.popleft()
         if path in seen:
             continue

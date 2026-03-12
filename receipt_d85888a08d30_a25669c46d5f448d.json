@@ -1,0 +1,48 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "d85888a08d301f1f21a7b728a59b0938d46118e1",
+    "tree_sha": "de1d971d5a11538adc92ac31a982069ea45e8b46",
+    "parent_shas": [
+      "59ef0c21121972a65f19096511d05457ca64c692"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T14:28:34-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-12T18:28:34Z"
+    },
+    "subject": "ci: trigger public receipts index refresh (#50)",
+    "message_hash": "sha256:9e59b26faed796820504ec57135ac65b2d760e622ccd148a7eb1337f84bd333b",
+    "diff_hash": "sha256:ffaf39962d4460e361ebccbb747941c5f6d8c77bcf79eb6b026383536127e091",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/dogfood.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.github"
+  },
+  "receipt_id": "g1-69c46d5f448da85d9e7dc9050cc92e11",
+  "content_hash": "sha256:69c46d5f448da85d9e7dc9050cc92e1196c0acd5a3289437a7985d05031eb998",
+  "timestamp": "2026-03-12T18:28:53Z",
+  "extensions": {}
+}

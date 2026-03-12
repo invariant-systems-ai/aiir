@@ -28,9 +28,9 @@ What it does:
 - Evaluates against configurable policy and emits SLSA Verification Summary Attestations
 - Also works as a GitHub Action, GitLab CI/CD Catalog component, and MCP server
 
-**Why zero dependencies matters:** `pip install aiir` pulls exactly one package. No transitive deps, no supply chain risk, no version conflicts. The whole package is ~9k LOC of pure Python.
+**Why zero dependencies matters:** `pip install aiir` pulls exactly one package. No transitive runtime deps, fewer supply-chain moving parts, and no dependency version conflicts. The whole package is ~9k LOC of pure Python.
 
-It's tested with 1,893 tests including mutation testing, fuzz testing, and adversarial corpus fixtures. Apache 2.0.
+It's tested with 1,893 collected tests, 100% coverage, mutation testing, fuzz testing, and adversarial corpus fixtures. Apache 2.0.
 
 The use case: EU AI Act transparency rules are phasing in, and compliance teams are starting to ask "which commits involved AI tools?" This gives them a cryptographic audit trail.
 

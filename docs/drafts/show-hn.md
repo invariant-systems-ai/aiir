@@ -4,7 +4,7 @@
 
 ---
 
-**Title:** Show HN: AIIR – Cryptographic receipts for AI-assisted git commits (zero deps, Apache 2.0)
+**Title:** Show HN: AIIR – Tamper-evident receipts for AI-assisted git commits (zero deps)
 
 **URL:** <https://github.com/invariant-systems-ai/aiir>
 
@@ -20,7 +20,7 @@ pip install aiir && cd your-repo && aiir --pretty
 
 That's it. Zero dependencies. Python 3.9+. Your last commit now has a tamper-evident receipt in `.aiir/receipts.jsonl`.
 
-**Why this exists:** AI writes 30-50% of new code at many companies now, but `git log` doesn't distinguish Copilot output from human work. The EU AI Act transparency rules phase in August 2025, and SOC 2 / ISO 27001 auditors are starting to ask "which commits involved AI?"
+**Why this exists:** AI writes a large share of new code now, but `git log` doesn't distinguish declared AI assistance from human-only work. The EU AI Act transparency rules phase in August 2025, and SOC 2 / ISO 27001 auditors are starting to ask "which commits involved AI?"
 
 **What it does:**
 
@@ -34,7 +34,7 @@ That's it. Zero dependencies. Python 3.9+. Your last commit now has a tamper-evi
 
 **Technical details:**
 
-- ~9k LOC Python, 1,893 tests, mutation-tested
+- ~9k LOC Python, 1,893 tests collected, 100% coverage, mutation-tested
 - Content hashing uses SHA-256 over canonical JSON
 - Receipt format is a documented open schema (AIIR Spec v1)
 - Receipts are append-only JSONL with automatic dedup and indexing

@@ -10,14 +10,14 @@
 ## Title
 
 ```text
-Show HN: AIIR – prove which git commits used AI (open source, offline, no signup)
+Show HN: AIIR – tamper-evident receipts for AI-assisted git commits
 ```
 
 Alternative titles (pick what feels right on the day):
 
 ```text
-Show HN: AIIR – tamper-evident receipts for AI-assisted git commits
-Show HN: AIIR – track which commits used Copilot/Claude/ChatGPT, cryptographically
+Show HN: AIIR – show which commits declared AI assistance
+Show HN: AIIR – track AI-assisted git commits with cryptographic receipts
 ```
 
 ---
@@ -56,10 +56,11 @@ August 2025. Your auditors, insurance underwriters, and compliance teams will
 eventually ask: "which code was AI-generated?" Right now most companies can't
 answer that question.
 
-**Trust posture**: 1,170+ tests across Python 3.9–3.13 on three OSes. Zero
-runtime dependencies. Public STRIDE/DREAD threat model. SLSA provenance on
-every PyPI release. CycloneDX SBOM on every GitHub release. OpenSSF
-Scorecard. We receipt our own repo — every commit to main gets a receipt
+**Trust posture**: 1,893 tests collected with 100% coverage across Python
+3.9–3.13 on three OSes. Zero runtime dependencies. Public STRIDE/DREAD
+threat model. SLSA provenance on every PyPI release. CycloneDX SBOM on every
+GitHub release. OpenSSF Scorecard. We receipt our own repo — every commit to
+main gets a receipt
 committed back automatically, and you can verify them:
 
 ```bash
@@ -80,8 +81,8 @@ verification runs entirely client-side. No upload, no server processing.
 
 Repo: <https://github.com/invariant-systems-ai/aiir>
 Docs: <https://invariantsystems.io/docs>
-Spec: <https://invariantsystems.io/spec> (formal specification with 25
-conformance test vectors)
+Spec: <https://invariantsystems.io/spec> (formal specification with conformance
+vectors and CDDL grammar)
 
 Happy to answer questions about the design, the detection heuristics, why
 zero dependencies matters, or the Sigstore integration.
@@ -94,7 +95,7 @@ zero dependencies matters, or the Sigstore integration.
 - Title must start with "Show HN:" — no editorializing
 - Don't ask for upvotes anywhere
 - Reply to every comment in the first 2 hours
-- Be transparent about limitations (detection is heuristic, 0 stars, solo founder)
+- Be transparent about limitations (declared-signal detection, solo founder)
 - If someone asks about commercial plans, be honest: AIIR is free forever,
   Hub/Fortress are planned paid tiers for teams
 - Link to THREAT_MODEL.md proactively when someone raises a limitation —

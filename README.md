@@ -20,7 +20,7 @@
 [![GitLab CI/CD Catalog](https://img.shields.io/badge/GitLab-CI%2FCD%20Catalog-orange?logo=gitlab)](https://gitlab.com/explore/catalog/invariant-systems/aiir)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/invariant-systems-ai/aiir/badge)](https://scorecard.dev/viewer/?uri=github.com/invariant-systems-ai/aiir)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12134/badge)](https://www.bestpractices.dev/projects/12134)
-[![Standards Readiness](https://img.shields.io/badge/Standards--Readiness-68.9%2F100-orange)](docs/standards-readiness.md)
+[![Standards Readiness](https://img.shields.io/badge/Standards--Readiness-72.2%2F100-orange)](docs/standards-readiness.md)
 [![AIIR Receipted](https://img.shields.io/badge/AIIR-Receipted%20✓-blue)](https://github.com/invariant-systems-ai/aiir)
 [![GitHub stars](https://img.shields.io/github/stars/invariant-systems-ai/aiir?style=social)](https://github.com/invariant-systems-ai/aiir/stargazers)
 

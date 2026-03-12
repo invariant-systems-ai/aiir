@@ -37,12 +37,6 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-        with:
-          repository: invariant-systems-ai/invariantsystems.io
-          ref: main
-          path: invariantsystems.io
-          persist-credentials: false
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
@@ -51,9 +45,12 @@ jobs:
       - name: Install test dependencies
         run: pip install --require-hashes --no-deps -r .github/requirements/test.txt
 
+      - name: Fetch public site snapshot
+        run: python scripts/fetch_public_site_snapshot.py "${{ runner.temp }}/invariantsystems.io"
+
       - name: Run unit tests
         env:
-          AIIR_SITE_DIR: ${{ github.workspace }}/invariantsystems.io
+          AIIR_SITE_DIR: ${{ runner.temp }}/invariantsystems.io
         run: python -m pytest tests/ -v --tb=short --ignore=tests/test_fuzz.py
 
   # Property-based fuzz tests (Hypothesis).  Pure-Python logic with zero
@@ -65,12 +62,6 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
-          persist-credentials: false
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-        with:
-          repository: invariant-systems-ai/invariantsystems.io
-          ref: main
-          path: invariantsystems.io
           persist-credentials: false
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
@@ -119,12 +110,6 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           persist-credentials: false
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-        with:
-          repository: invariant-systems-ai/invariantsystems.io
-          ref: main
-          path: invariantsystems.io
-          persist-credentials: false
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
           python-version: "3.12"
@@ -133,9 +118,12 @@ jobs:
       - name: Install dependencies
         run: pip install --require-hashes --no-deps -r .github/requirements/coverage.txt
 
+      - name: Fetch public site snapshot
+        run: python scripts/fetch_public_site_snapshot.py "${{ runner.temp }}/invariantsystems.io"
+
       - name: Run tests with coverage
         env:
-          AIIR_SITE_DIR: ${{ github.workspace }}/invariantsystems.io
+          AIIR_SITE_DIR: ${{ runner.temp }}/invariantsystems.io
         run: |
           coverage run --source=aiir -m pytest tests/ --ignore=tests/test_fuzz.py -q --tb=short
           coverage report --show-missing

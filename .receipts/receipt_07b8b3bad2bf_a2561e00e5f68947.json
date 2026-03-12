@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "07b8b3bad2bf3f6ddd6c71913700feaa33247a22",
+    "tree_sha": "ffec3c129df5768b18f48ba8edbbe956268fb996",
+    "parent_shas": [
+      "64985539fd460eb40cb04ce71b4a0b1e467c990e"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T19:30:21-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T19:30:21-04:00"
+    },
+    "subject": "docs: refresh stale test-count claims",
+    "message_hash": "sha256:1476eaf062e323a52aae19b5e79781ce0b2163524c740f354038c5eafebf371b",
+    "diff_hash": "sha256:4f34bc59a718548db174955550b1b8aa8bb96e751c8f879ffb6bed0bfaf69b1d",
+    "files_changed": 3,
+    "files": [
+      ".github/workflows/standards-readiness.yml",
+      "README.md",
+      "docs/standards-readiness.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1e00e5f68947d937d4e93362f6e11b57",
+  "content_hash": "sha256:1e00e5f68947d937d4e93362f6e11b57d9e4b164b6d7bce35e4d565cd2133101",
+  "timestamp": "2026-03-11T23:30:21Z",
+  "extensions": {}
+}

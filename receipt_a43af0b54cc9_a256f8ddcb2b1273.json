@@ -1,0 +1,54 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "a43af0b54cc957bba6ad242160b862486842aad3",
+    "tree_sha": "5b838ed8cdf3b9a9a2e9e6c07b35d4163579d35e",
+    "parent_shas": [
+      "458d661755bf08fdfd90223fe722768074276c68"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T08:50:26-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-12T08:50:26-04:00"
+    },
+    "subject": "fix(launch): reconcile launch polish with stale-score updates (#46)",
+    "message_hash": "sha256:449500a04669e2fcf15d214cc44c818bd8b702b1481c03487cf5dd19fe41fa02",
+    "diff_hash": "sha256:bf4d6e3557ff2dccb0a1407003b0186530422c3de4cd182ecd46f6bb254051b3",
+    "files_changed": 7,
+    "files": [
+      ".github/workflows/traffic-archive.yml",
+      "README.md",
+      "THREAT_MODEL.md",
+      "docs/drafts/reddit-posts.md",
+      "docs/drafts/show-hn.md",
+      "docs/launch/show-hn-draft.md",
+      "docs/standards-readiness.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.github"
+  },
+  "receipt_id": "g1-f8ddcb2b1273abfb5ae257a001422994",
+  "content_hash": "sha256:f8ddcb2b1273abfb5ae257a001422994c43b76e9f3be412c9d6310887249d4c2",
+  "timestamp": "2026-03-12T12:50:46Z",
+  "extensions": {}
+}

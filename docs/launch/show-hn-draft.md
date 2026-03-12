@@ -51,13 +51,15 @@ don't leave a trailer. Detection is heuristic, not magic. The [threat model](htt
 is public and covers exactly what's in scope and what isn't.
 
 **Why**: Stack Overflow's 2025 survey says 84% of developers use or plan to
-use AI coding tools. EU AI Act transparency obligations start phasing in
-August 2025. Your auditors, insurance underwriters, and compliance teams will
+use AI coding tools. EU AI Act obligations are phasing in now, with
+general-purpose AI obligations already applying and broader transparency /
+high-risk requirements phasing in across 2026 and 2027. Your auditors,
+insurance underwriters, and compliance teams will
 eventually ask: "which code was AI-generated?" Right now most companies can't
 answer that question.
 
-**Trust posture**: 1,893 tests collected with 100% coverage across Python
-3.9–3.13 on three OSes. Zero runtime dependencies. Public STRIDE/DREAD
+**Trust posture**: 1,800+ tests, 100% coverage, and dozens of CI checks across
+Python 3.9–3.13 on three OSes. Zero runtime dependencies. Public STRIDE/DREAD
 threat model. SLSA provenance on every PyPI release. CycloneDX SBOM on every
 GitHub release. OpenSSF Scorecard. We receipt our own repo — every commit to
 main gets a receipt
@@ -89,7 +91,7 @@ zero dependencies matters, or the Sigstore integration.
 
 ---
 
-## Posting notes
+## Internal Notes — Do Not Paste
 
 - Post on a weekday, ideally Tuesday–Thursday 8–10am ET (HN peak)
 - Title must start with "Show HN:" — no editorializing

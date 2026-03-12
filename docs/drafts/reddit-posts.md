@@ -30,7 +30,7 @@ What it does:
 
 **Why zero dependencies matters:** `pip install aiir` pulls exactly one package. No transitive runtime deps, fewer supply-chain moving parts, and no dependency version conflicts. The whole package is ~9k LOC of pure Python.
 
-It's tested with 1,893 collected tests, 100% coverage, mutation testing, fuzz testing, and adversarial corpus fixtures. Apache 2.0.
+It's tested with 1,800+ tests, 100% coverage, mutation testing, fuzz testing, and adversarial corpus fixtures. Apache 2.0.
 
 The use case: EU AI Act transparency rules are phasing in, and compliance teams are starting to ask "which commits involved AI tools?" This gives them a cryptographic audit trail.
 
@@ -88,7 +88,7 @@ The EU AI Act angle is the driver, but even without compliance pressure it's use
 
 **Body:**
 
-Curious what others are doing here. Our compliance team started asking about AI usage tracking after the EU AI Act transparency requirements were announced (general-purpose AI rules from August 2025, high-risk from August 2026).
+Curious what others are doing here. Our compliance team started asking about AI usage tracking as EU AI Act obligations started phasing in and it became obvious that normal git history does not preserve a machine-readable record of declared AI assistance.
 
 The ask was basically: "Can you tell us which commits involved AI tools? Can you prove it?"
 

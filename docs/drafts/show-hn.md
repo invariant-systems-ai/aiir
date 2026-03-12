@@ -20,7 +20,7 @@ pip install aiir && cd your-repo && aiir --pretty
 
 That's it. Zero dependencies. Python 3.9+. Your last commit now has a tamper-evident receipt in `.aiir/receipts.jsonl`.
 
-**Why this exists:** AI writes a large share of new code now, but `git log` doesn't distinguish declared AI assistance from human-only work. The EU AI Act transparency rules phase in August 2025, and SOC 2 / ISO 27001 auditors are starting to ask "which commits involved AI?"
+**Why this exists:** AI writes a large share of new code now, but `git log` doesn't distinguish declared AI assistance from human-only work. EU AI Act obligations are phasing in now, and SOC 2 / ISO 27001 auditors are starting to ask "which commits involved AI?"
 
 **What it does:**
 
@@ -34,7 +34,7 @@ That's it. Zero dependencies. Python 3.9+. Your last commit now has a tamper-evi
 
 **Technical details:**
 
-- ~9k LOC Python, 1,893 tests collected, 100% coverage, mutation-tested
+- ~9k LOC Python, 1,800+ tests, 100% coverage, mutation-tested
 - Content hashing uses SHA-256 over canonical JSON
 - Receipt format is a documented open schema (AIIR Spec v1)
 - Receipts are append-only JSONL with automatic dedup and indexing

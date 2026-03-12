@@ -9,13 +9,15 @@ git clone https://github.com/invariant-systems-ai/aiir.git
 cd aiir
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"    # installs pytest + hypothesis
+pre-commit install && pre-commit install --hook-type post-commit --hook-type pre-push
 python -m pytest tests/ -q  # 1680+ tests, ~4 min
 ```
 
 > **Note**: `pip install -e ".[dev]"` installs `hypothesis` (property-based fuzz
-> testing) and `pytest`. If you install only `pytest`, fuzz tests in
-> `tests/test_fuzz.py` will be skipped gracefully — all other tests pass
-> without `hypothesis`. CI always installs both.
+> testing) and `pytest`. The pre-commit hooks enforce secret scanning, linting,
+> and a local CI preflight on every push. If you install only `pytest`, fuzz
+> tests in `tests/test_fuzz.py` will be skipped gracefully — all other tests
+> pass without `hypothesis`. CI always installs both.
 
 ## Ways to contribute
 

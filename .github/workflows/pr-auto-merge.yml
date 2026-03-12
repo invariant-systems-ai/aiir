@@ -164,6 +164,65 @@ jobs:
             exit 0
           fi
 
+          # ── Review findings tracker ────────────────────────────────
+          # Extract Copilot review comments on the current head and check
+          # for unresolved hard-rule violations.  Hard rules are identified
+          # by keywords from .github/copilot-review-instructions.md:
+          #   - "runtime dependenc"  (rule 1)
+          #   - "hmac.compare_digest" / "constant-time" (rule 2)
+          #   - "hardcoded secret" / "hardcoded token" / "hardcoded key" (rule 3)
+          #   - "pinned" / "40-char" / "full SHA" (rule 4)
+          #   - "SPDX" (rule 5)
+          #   - "sync-version" / "version consistency" (rule 6)
+          # Only unresolved (not OUTDATED/DISMISSED) comments count.
+
+          review_comments_json="$(gh api "repos/$REPO/pulls/$pr_number/comments?per_page=100")"
+
+          hard_rule_pattern='runtime dependenc|hmac\.compare_digest|constant.time|hardcoded secret|hardcoded token|hardcoded key|pinned.*sha|40.char|full SHA|SPDX|sync-version|version consistency'
+
+          unresolved_hard_findings="$(jq -r --arg sha "$head_sha" --arg pat "$hard_rule_pattern" '
+            [.[] |
+              select(
+                .commit_id == $sha and
+                (.user.login == "copilot-pull-request-reviewer[bot]" or .user.login == "Copilot") and
+                (.in_reply_to_id == null or .in_reply_to_id == 0) and
+                (.body | test($pat; "i"))
+              ) |
+              select(
+                (.resolved // false) == false and
+                (.state // "active") != "OUTDATED" and
+                (.state // "active") != "DISMISSED"
+              )
+            ] | length
+          ' <<<"$review_comments_json")"
+
+          if [[ "$unresolved_hard_findings" -gt 0 ]]; then
+            echo "Copilot flagged $unresolved_hard_findings unresolved hard-rule violation(s)"
+            set_status failure "Copilot: $unresolved_hard_findings unresolved hard-rule finding(s)"
+            gh pr merge "$pr_number" --repo "$REPO" --disable-auto || true
+
+            # Post a summary comment (idempotent via hidden marker)
+            marker='<!-- aiir-hard-rule-summary -->'
+            summary="${marker}
+          **AI Gate — Hard-Rule Findings**
+
+          Copilot flagged **${unresolved_hard_findings}** unresolved hard-rule violation(s) on the current head (\`${head_sha:0:8}\`).
+
+          These must be fixed before the AI gate will pass. See the inline review comments for details.
+          Hard rules are defined in [\`.github/copilot-review-instructions.md\`](.github/copilot-review-instructions.md)."
+
+            existing_comment="$(gh api "repos/$REPO/issues/$pr_number/comments?per_page=100" \
+              --jq "[.[] | select(.body | contains(\"$marker\"))] | first | .id // empty")"
+
+            if [[ -n "$existing_comment" ]]; then
+              gh api --method PATCH "repos/$REPO/issues/comments/$existing_comment" -f body="$summary" >/dev/null
+            else
+              gh api --method POST "repos/$REPO/issues/$pr_number/comments" -f body="$summary" >/dev/null
+            fi
+
+            exit 0
+          fi
+
           echo "AI merge gate satisfied for $pr_url"
           set_status success "Copilot reviewed and required CI passed"
           gh pr merge "$pr_number" --repo "$REPO" --auto --squash

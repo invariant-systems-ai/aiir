@@ -133,7 +133,7 @@ A score of 5 means "demonstrably complete — a standards body could adopt this 
 | 5 | 3+ independent verifiers; community plugin ecosystem |
 
 **Current: 4.2** — 44 public check runs on the latest `main` commit, with `ci-ok`, `quality-ok`, and `security-ok` enforced by branch protection (*last verified: 2026-03-12*); Python 3.9–3.13 × Ubuntu/Windows/macOS; GitHub + GitLab dual-publish; MCP tool; `docs/release-health.md` with P0 RCA policy and smoke test badge published; **JS verifier (`sdks/js/`) and Rust CBOR verifier (`sdks/rust/`) published — 2 language SDKs verified against test vectors** (2026-03-11). Missing: community plugins, external verifier.
-*Last verified: 2026-03-11*
+*Last verified: 2026-03-12*
 
 **Gap tasks:**
 

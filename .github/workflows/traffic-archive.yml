@@ -21,12 +21,21 @@ jobs:
   archive:
     runs-on: ubuntu-latest
     if: github.repository == 'invariant-systems-ai/aiir'
+    env:
+      TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
     steps:
+      - name: Skip when traffic token is unavailable
+        if: env.TRAFFIC_TOKEN == ''
+        run: |
+          echo "TRAFFIC_TOKEN is not configured; skipping traffic archive run." >> "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/checkout@v4
+        if: env.TRAFFIC_TOKEN != ''
         with:
           fetch-depth: 1
 
       - name: Initialise traffic-data branch
+        if: env.TRAFFIC_TOKEN != ''
         run: |
           set -euo pipefail
           git config user.name  "github-actions[bot]"
@@ -44,8 +53,9 @@ jobs:
           fi
 
       - name: Fetch traffic stats
+        if: env.TRAFFIC_TOKEN != ''
         env:
-          GH_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+          GH_TOKEN: ${{ env.TRAFFIC_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p data
@@ -76,6 +86,7 @@ jobs:
           echo "Views  (14d): $(echo "$VIEWS"  | jq .count)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Commit & push
+        if: env.TRAFFIC_TOKEN != ''
         run: |
           git add data/
           git diff --cached --quiet && echo "No new data" && exit 0

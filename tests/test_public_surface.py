@@ -104,7 +104,7 @@ class TestWebsiteHTMLIntegrity(unittest.TestCase):
         }
         self.assertEqual(pages, expected, f"Missing pages: {expected - pages}")
 
-    def test_nav_consistency_8_links(self):
+    def test_nav_consistency_9_links(self):
         """Every main page header <nav> has exactly 9 links."""
         expected_hrefs = {
             "/docs",
@@ -979,7 +979,18 @@ class TestStatsJSON(unittest.TestCase):
     """stats.json claims are plausible and consistent."""
 
     def _stats(self) -> dict:
-        return json.loads(_read(SITE_DIR / "stats.json"))["stats"]
+        data = json.loads(_read(SITE_DIR / "stats.json"))
+        self.assertIsInstance(
+            data,
+            dict,
+            "stats.json top-level value must be a JSON object",
+        )
+        self.assertIn(
+            "stats",
+            data,
+            'stats.json missing top-level "stats" key',
+        )
+        return data["stats"]
 
     def test_stats_json_valid(self):
         stats = json.loads(_read(SITE_DIR / "stats.json"))

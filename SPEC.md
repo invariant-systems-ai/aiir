@@ -162,6 +162,16 @@ implementation uses `"heuristic_v2"`, which performs:
 Third-party implementations MAY use different detection methods and SHOULD
 identify them with a distinct `detection_method` value.
 
+> **Non-normative.** Heuristic detection relies on declared markers
+> (`Co-authored-by` trailers, bot author patterns, commit-message keywords).
+> Agent-mode tools — Copilot Chat, Claude Code, ChatGPT Canvas, Cursor
+> Agent — do not currently emit these markers, so commits produced in
+> agent sessions will classify as `human`. This is a known limitation of
+> any metadata-heuristic approach. See
+> [README § Detection scope](README.md#detection-scope-and-limitations)
+> and [THREAT_MODEL.md § 9.2](THREAT_MODEL.md#92-future-hardening) for
+> discussion.
+
 ### 4.2 Authorship Classification
 
 | Class | Criteria |

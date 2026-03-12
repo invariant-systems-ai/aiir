@@ -990,6 +990,11 @@ class TestStatsJSON(unittest.TestCase):
             data,
             'stats.json missing top-level "stats" key',
         )
+        self.assertIsInstance(
+            data["stats"],
+            dict,
+            'stats.json "stats" value must be a JSON object',
+        )
         return data["stats"]
 
     def test_stats_json_valid(self):

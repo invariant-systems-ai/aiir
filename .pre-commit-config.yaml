@@ -60,7 +60,7 @@ repos:
     hooks:
       - id: aiir
         name: AIIR — AI Integrity Receipts
-        entry: python -m aiir --output .receipts/
+        entry: python -m aiir --ledger .aiir/ --output .aiir/receipts/ --quiet
         language: python
         always_run: true
         stages: [post-commit]

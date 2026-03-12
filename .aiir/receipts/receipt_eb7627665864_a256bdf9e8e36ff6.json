@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "eb762766586412bb3531241e83b367e7c0393d4b",
+    "tree_sha": "21a08d5cc5f13b620983b4dba2ed4cf8f564c137",
+    "parent_shas": [
+      "4b48a47357176be6553660cc14353c8e50b0edba"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T07:56:21-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T07:56:21-04:00"
+    },
+    "subject": "docs: update stale test count 1680 → 1893 in CONTRIBUTING.md",
+    "message_hash": "sha256:6a2de5c8fe7edad7e86c019b3f4ae0df18e7970f0829c5378ad2314edaccd46b",
+    "diff_hash": "sha256:420c31fafd40cff6195e79d06a2822cdfa833a0472ccee247aab34c1cf69961e",
+    "files_changed": 1,
+    "files": [
+      "CONTRIBUTING.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-bdf9e8e36ff640fecba05eb0cc2a8edc",
+  "content_hash": "sha256:bdf9e8e36ff640fecba05eb0cc2a8edc7bcae5be51d28f327a3970c1bb5d07ff",
+  "timestamp": "2026-03-12T12:13:52Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

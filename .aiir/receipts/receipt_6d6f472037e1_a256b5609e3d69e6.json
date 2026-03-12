@@ -1,0 +1,48 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "6d6f472037e1d4f4bdaa2e83f2f8a11349c3a746",
+    "tree_sha": "f73624f83b3d0761e220afca7c6de7cf7abea45a",
+    "parent_shas": [
+      "d733faaecf9fa9a2d54bb56d1f67454b47cbfb7f"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T11:40:21-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T11:40:21-04:00"
+    },
+    "subject": "ci: trigger workflows for d733faa fixes",
+    "message_hash": "sha256:757c812a8ae5cc6f60ead38217bbbc35a3c27c58eef79ea1cc68f82e1b476afc",
+    "diff_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "files_changed": 0,
+    "files": []
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-b5609e3d69e6062565f067f65fec1ef9",
+  "content_hash": "sha256:b5609e3d69e6062565f067f65fec1ef9845c6b98dee5b7cd4c704228c29007bf",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

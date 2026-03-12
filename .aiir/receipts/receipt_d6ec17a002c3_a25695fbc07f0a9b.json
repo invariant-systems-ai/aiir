@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "d6ec17a002c3a9455ce34fe8e4c6afe840abd23a",
+    "tree_sha": "b2af6c79cd7f5396028b3e9fa6e17094a9c2fce2",
+    "parent_shas": [
+      "bb8792ae960e8649c93f198e1fa4464379846af5"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T18:09:58-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T18:09:58-04:00"
+    },
+    "subject": "fix(ci): smoke-test range, publish resilience, local-only Docker",
+    "message_hash": "sha256:1fb01408b115080a0dd8e6f95ba3d2dfd6e82a2c5d28738354031f5ec036eb3d",
+    "diff_hash": "sha256:6b391d8b32ee5d941327b684a6aa361611098acc9338af1372bd5228490355c4",
+    "files_changed": 3,
+    "files": [
+      ".github/workflows/action-health.yml",
+      ".github/workflows/publish.yml",
+      "Dockerfile"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-95fbc07f0a9b0568481224cf5a46faa3",
+  "content_hash": "sha256:95fbc07f0a9b0568481224cf5a46faa3e431a9725fe74885c5162e3c869f6043",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "cab48e179671ba45da95a4202e01a9e78b9cc975",
+    "tree_sha": "6ad193f2c7f6b39472d26450af023b9c5297da85",
+    "parent_shas": [
+      "3ca639c8b29c8515ed57605592ffeec1a618b512"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:31:10-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:31:10-04:00"
+    },
+    "subject": "test: Claude Code hooks smoke tests — validate doc JSON configs",
+    "message_hash": "sha256:89cf9e13e6f921a5a21a4d6df5bff743b8a1d96812fd6b74d587e65fb9bf3626",
+    "diff_hash": "sha256:4c41a9e91c4556488ce91189f6ba65ce022639e1e88ecdfebb5c882fb3ca9be5",
+    "files_changed": 1,
+    "files": [
+      "tests/test_claude_hooks.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": true,
+    "signals_detected": [
+      "message_match:claude code"
+    ],
+    "signal_count": 1,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "ai_assisted",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-01c5e18c7009fae18050098f1d16fb44",
+  "content_hash": "sha256:01c5e18c7009fae18050098f1d16fb448c52b5b7fb198b28521ad852234ee02d",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

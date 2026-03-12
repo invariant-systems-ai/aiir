@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "393a13e6307b91d06a8300cf7df5f1779ce85f1e",
+    "tree_sha": "533d27a5387e0210dc7770fc649a806100391a43",
+    "parent_shas": [
+      "eee03100a7229c8ed350f25769b826a92f2b47c8"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T17:07:38-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T17:07:38-04:00"
+    },
+    "subject": "ci: set coverage gate to 92% (CI rounding boundary)",
+    "message_hash": "sha256:5f0e20ce94571fd0a5d9ca02e9c88d31ffb1830b45e412cbdf4137c3db37be61",
+    "diff_hash": "sha256:9b73a07236699da1c988175bfd3ecd7644c7c535fb10bf9e5cf5ad69c73cb78d",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/ci.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-fd6239c0781f434d2d7152e740de7946",
+  "content_hash": "sha256:fd6239c0781f434d2d7152e740de7946e9f5a6735aaab0156bd54bd00cd24ed1",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

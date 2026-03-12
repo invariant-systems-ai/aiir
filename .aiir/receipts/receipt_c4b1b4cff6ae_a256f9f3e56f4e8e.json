@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "c4b1b4cff6ae5cba3caac32218851b238a98d5b9",
+    "tree_sha": "9ab31ec638ce96db538ec68a6c6e60eee60f2659",
+    "parent_shas": [
+      "6d6f472037e1d4f4bdaa2e83f2f8a11349c3a746"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T11:41:24-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T11:41:24-04:00"
+    },
+    "subject": "ci: add workflow_dispatch trigger to all CI workflows",
+    "message_hash": "sha256:641adf4ef8cb2bf2d716b6bfdaea809f1ea7f4bd44875a1beebfc2826a48142c",
+    "diff_hash": "sha256:9cee63e0ea42c27e2438e3a5a475d1bb9b2bdc3eeb7db7f3b07c7a2a468d47b0",
+    "files_changed": 3,
+    "files": [
+      ".github/workflows/ci.yml",
+      ".github/workflows/quality.yml",
+      ".github/workflows/security.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-f9f3e56f4e8e492954baf374cf373f68",
+  "content_hash": "sha256:f9f3e56f4e8e492954baf374cf373f6877b53513a18783b4336280e4b2284fb3",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

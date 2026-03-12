@@ -1,0 +1,56 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "ae10e9d4809f59f0f90e0d6cf30ebb771dbb3070",
+    "tree_sha": "6e08763222b089f2c7c7f8079d01055a03492911",
+    "parent_shas": [
+      "e0fad1d419e2a770b6f10eed64fe266822d8b032"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T18:56:33-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T18:56:33-04:00"
+    },
+    "subject": "harden: close high-severity overly-permissive file findings (#32)",
+    "message_hash": "sha256:41c7afd59a603f1176cd4584f565723c9247762ede8c30e99901bf524da27448",
+    "diff_hash": "sha256:df05cef188ddb697232b494a810904aaecf806b318c5e68a3582419892f02b1b",
+    "files_changed": 7,
+    "files": [
+      "aiir/_ledger.py",
+      "aiir/_receipt.py",
+      "aiir/_sign.py",
+      "tests/test_ledger.py",
+      "tests/test_mcp.py",
+      "tests/test_redteam.py",
+      "tests/test_virtual_deploy.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-77fddc1cd19c14c6083e75695d17e343",
+  "content_hash": "sha256:77fddc1cd19c14c6083e75695d17e3437c2b2c39bc92165f203c865e99dd917c",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

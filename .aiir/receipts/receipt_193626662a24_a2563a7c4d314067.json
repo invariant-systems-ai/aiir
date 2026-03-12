@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "193626662a246624598fb89191280f83fa29d5d2",
+    "tree_sha": "1c2a8a482df7e684dae48c35fe24567c61951dee",
+    "parent_shas": [
+      "7213f14b8556f96b1ac57229d0d99512a7654c23"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T14:02:27-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T14:02:27-04:00"
+    },
+    "subject": "test: add public surface QA suite — 60 deterministic UX tests",
+    "message_hash": "sha256:6ea622b5f2d9ceb013d9ac74e95f59ce640f471dbb9ba0a887952bb5e0798440",
+    "diff_hash": "sha256:5631015b85bc7adb907bc5331eb4b6e804faa2115380354e2bf4a179121fb28a",
+    "files_changed": 1,
+    "files": [
+      "tests/test_public_surface.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-3a7c4d314067f52116cf0f9945ddc910",
+  "content_hash": "sha256:3a7c4d314067f52116cf0f9945ddc9101ee2657d171566f0d46b1670f6a0d178",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "b339de5f422da263349b172c180c29fde488a2d8",
+    "tree_sha": "3249b2305834fec47f9e70092b9779663240f336",
+    "parent_shas": [
+      "22e76203ee8d316f2dc31951e098247ea7b2fecb"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T12:14:29-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T12:14:29-04:00"
+    },
+    "subject": "brand: add logo to README + refine project descriptions",
+    "message_hash": "sha256:4689bc523c58d578a21337d267251cfacbcc9ea7f50adea96952398277b2ea65",
+    "diff_hash": "sha256:373379d4df4ea481de8ad0d54004e401c49b76069a2691e7effdfb4b6b6fa642",
+    "files_changed": 6,
+    "files": [
+      "README.md",
+      "THREAT_MODEL.md",
+      "action.yml",
+      "aiir/__init__.py",
+      "docs/logo.svg",
+      "pyproject.toml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-81863e0978a8be13a614f0f81c1f37ea",
+  "content_hash": "sha256:81863e0978a8be13a614f0f81c1f37ea8450a7a9f0cc826b161156da7d256fac",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

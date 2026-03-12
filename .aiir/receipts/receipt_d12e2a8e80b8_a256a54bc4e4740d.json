@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "d12e2a8e80b81ba75d81a59280b6dabd5919adec",
+    "tree_sha": "87749e4c31134840694e1e3d5d6b2a9a07e0d82f",
+    "parent_shas": [
+      "3d6a1f1dca1ff9093deeff6c0f854daea3dca54a"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:56:36-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:56:36-04:00"
+    },
+    "subject": "ci(publish): enforce complete release assets",
+    "message_hash": "sha256:f3095803796c1544614e8e5217d68eddad26669b4adcf2d7bb11b348e6d74a62",
+    "diff_hash": "sha256:b39fcbe714a58a05c486c77f83a9f04751296ccc8c36096563dd111708fc46b0",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/publish.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-a54bc4e4740dd704676210528ec8a8eb",
+  "content_hash": "sha256:a54bc4e4740dd704676210528ec8a8eb76ca4216d30c9bb95d0fdcc7a9b16774",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

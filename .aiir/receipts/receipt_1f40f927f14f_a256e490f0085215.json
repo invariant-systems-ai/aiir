@@ -1,0 +1,62 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "1f40f927f14fc74b1237283c88a758d5e3c8cb48",
+    "tree_sha": "facfcd4ebb09f677848cbdd1b53a42ce3a79f281",
+    "parent_shas": [
+      "5c5d1f1c53169af008c39359293bbdf720c6abaa"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:18:59-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T06:18:59-04:00"
+    },
+    "subject": "fix: security hardening from hostile review (#18)",
+    "message_hash": "sha256:69a703f38b98631392b1ad7ddeccd81005738b9151d2f9156dadae13c9ec05d6",
+    "diff_hash": "sha256:1bf74645230254c5489e8e48bf8515a580650a4a1d187a19fc6b056410c227e2",
+    "files_changed": 13,
+    "files": [
+      ".gitignore",
+      "aiir.env",
+      "aiir/_github.py",
+      "aiir/_gitlab.py",
+      "aiir/cli.py",
+      "aiir/mcp_server.py",
+      "sdks/rust/src/lib.rs",
+      "sdks/rust/src/tests.rs",
+      "tests/test_branch_close.py",
+      "tests/test_github.py",
+      "tests/test_gitlab.py",
+      "tests/test_mcp.py",
+      "tests/test_public_surface.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-e490f0085215afdc7986011909d10891",
+  "content_hash": "sha256:e490f0085215afdc7986011909d1089126adf728dc3997866279984375a3a010",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

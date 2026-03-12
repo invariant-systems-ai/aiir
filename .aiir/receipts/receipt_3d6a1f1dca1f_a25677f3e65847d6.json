@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "3d6a1f1dca1ff9093deeff6c0f854daea3dca54a",
+    "tree_sha": "cefdc8b0c7b1938f402de528e938213d5e34a75a",
+    "parent_shas": [
+      "d84e5cc637c850b2b015d2dd9cfa57c6f1e54095"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:56:06-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:56:06-04:00"
+    },
+    "subject": "docs: update standards-readiness scorecard, add implementers registry",
+    "message_hash": "sha256:c3edd49fb16a36e1092396352a6f3e33e2bee0d88f4f22362a7653c81a4cda5a",
+    "diff_hash": "sha256:6303e4f81b85e3dd696abb41a0a27a4fe25915bfbfdc1898be40a2c2d20c42b8",
+    "files_changed": 2,
+    "files": [
+      "docs/implementers.md",
+      "docs/standards-readiness.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-77f3e65847d6f4ebdf2cb6c16b80e340",
+  "content_hash": "sha256:77f3e65847d6f4ebdf2cb6c16b80e340ebc5aea81a76c4c3c54f3735877e05c1",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

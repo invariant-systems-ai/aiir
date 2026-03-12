@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "8e7002c2256973a4c34285e22014e292872d70bf",
+    "tree_sha": "490370c9efe7e2e8bf7e8e6a681d08f219a1b755",
+    "parent_shas": [
+      "2e3ae6fb1f180ab6ef1ce6dc3d1edb28f0ae2b16"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T04:19:26-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T04:19:26-04:00"
+    },
+    "subject": "chore(sdks/rust): add crate metadata + README for crates.io publishing (#15)",
+    "message_hash": "sha256:8843879a76493ffcfa4374c48963765584214a2c02e337d3ded1fd311afd2c63",
+    "diff_hash": "sha256:83d9428a088671a5c2b606682288e3e25b186345c725b3e17d01f7bef83f39e6",
+    "files_changed": 2,
+    "files": [
+      "sdks/rust/Cargo.toml",
+      "sdks/rust/README.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-4a9a7dbde7a72f1460cb9f2e0718675b",
+  "content_hash": "sha256:4a9a7dbde7a72f1460cb9f2e0718675b48c55eb92e9f60d38fd9dd223c87ada7",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "70ac7919daea3fc105d2028465a727373b270d1c",
+    "tree_sha": "daefed593358b4be0362a88d11770ac207698f91",
+    "parent_shas": [
+      "8e7002c2256973a4c34285e22014e292872d70bf"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T04:57:56-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T04:57:56-04:00"
+    },
+    "subject": "chore: update CODEOWNERS reviewer to @InvariantSystems (#16)",
+    "message_hash": "sha256:5feffa5e4a5d3c65bde579123589726329e909f6961e9f54ce61e2a5c149b90a",
+    "diff_hash": "sha256:0a19f888d6ac7ef6c77d74c68c1e2e298151daa162c1307451d2c74509a3dbb4",
+    "files_changed": 2,
+    "files": [
+      ".github/CODEOWNERS",
+      ".github/workflows/quality.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-c2d5731b9d34aac9ccb2df6dcd929840",
+  "content_hash": "sha256:c2d5731b9d34aac9ccb2df6dcd92984036a1583db89e6c721481f67173cbdeeb",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

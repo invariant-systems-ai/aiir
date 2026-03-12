@@ -1,0 +1,62 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "e5746daea7ed076e4ce9f67b3bfaae7fa97954fa",
+    "tree_sha": "e802c448481bfb9db4e9a0398a6aad47d416c8ca",
+    "parent_shas": [
+      "86482976629b698db3578b08f83a33cc1a097ef8"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T04:45:22-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T04:52:29-04:00"
+    },
+    "subject": "v1.0.14: in-toto predicate wrapper, integration recipes",
+    "message_hash": "sha256:2b12a3184d323522b6b6a0b049920a69bd91474a4033852bc3a1761f6ad7ce68",
+    "diff_hash": "sha256:a646eb2a47173020a710c24c0cbf5752e476a6772aa2af6d735953bcd452a77e",
+    "files_changed": 9,
+    "files": [
+      "ARCHITECTURE.md",
+      "CHANGELOG.md",
+      "README.md",
+      "aiir/__init__.py",
+      "aiir/_receipt.py",
+      "aiir/cli.py",
+      "docs/claude-code-hooks.md",
+      "docs/gitlab-duo-recipe.md",
+      "tests/test_intoto.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": true,
+    "signals_detected": [
+      "message_match:claude code",
+      "message_match:windsurf",
+      "message_match:gitlab duo"
+    ],
+    "signal_count": 3,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "ai_assisted",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-c09401df19a6cefa3280669dd7c0386c",
+  "content_hash": "sha256:c09401df19a6cefa3280669dd7c0386caf618e613c1e603ad4ce5b53d215109b",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

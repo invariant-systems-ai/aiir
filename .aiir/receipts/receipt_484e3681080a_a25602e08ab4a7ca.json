@@ -1,0 +1,61 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "484e3681080a3c0fb5f7d1061817aa9905af2195",
+    "tree_sha": "07c440b4f8ea9584c23531b112cfb37a9ce0eb5f",
+    "parent_shas": [
+      "f47b3a3a8ade2868935d3fd4c1168763af850218"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:21:27-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:21:27-04:00"
+    },
+    "subject": "moat: close remaining 8 gaps + NIST SSDF/SLSA hardening",
+    "message_hash": "sha256:6bc45578c83743a482ec3030ff3d63f04b85dea21d8a696162fb03b15e4f5286",
+    "diff_hash": "sha256:84136fc927927694b972e63666f90cb88eefe05ea06ce001ff04e8c40b731c78",
+    "files_changed": 12,
+    "files": [
+      ".github/workflows/publish.yml",
+      ".github/workflows/verify-receipts.yml",
+      ".pre-commit-config.yaml",
+      "README.md",
+      "extensions/vscode/package.json",
+      "extensions/vscode/src/extension.ts",
+      "extensions/vscode/tsconfig.json",
+      "schemas/test_vectors.json",
+      "scripts/conformance.py",
+      "sdks/js/aiir-verify.d.ts",
+      "sdks/js/aiir-verify.js",
+      "sdks/js/package.json"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-02e08ab4a7ca8b45ee4b7ba531565268",
+  "content_hash": "sha256:02e08ab4a7ca8b45ee4b7ba5315652685b5cb0c8860658ac440c2089fb2b46bd",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "6d8e4cc5ac1e6078cc245ead292d48b07822b499",
+    "tree_sha": "0ec55a5d913f25f9920eabc2d72388d72565dd7c",
+    "parent_shas": [
+      "2bd12960cb908e5ad6dd6e4cd0610699f04a1a53"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T21:30:57-05:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T21:31:11-05:00"
+    },
+    "subject": "feat: add badge, stats, and check commands",
+    "message_hash": "sha256:2237b04ca5bc24700ec3501974823a7de69e996b54f4827075a39adfefbe0b5c",
+    "diff_hash": "sha256:52dc68d9775050e0ead76195bf7e3567d3159f8586cb6cdd9390a607090444b1",
+    "files_changed": 4,
+    "files": [
+      ".aiir/index.json",
+      ".aiir/receipts.jsonl",
+      "aiir/cli.py",
+      "test_cli.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-862c22a5325e21078f55fa00009ea545",
+  "content_hash": "sha256:862c22a5325e21078f55fa00009ea5453ff7314185fb73e7c58cd0a95b877425",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

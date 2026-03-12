@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "bca85ae7bcd1eef69aac33fc2288234c4557ac84",
+    "tree_sha": "a8ffd9d753b045d6023b93389516f528fe895876",
+    "parent_shas": [
+      "6228e4866fbf943d95c02fbef1a98dc5348f1e5a"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:47:04-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:47:04-04:00"
+    },
+    "subject": "ci: fix publish — move SBOM out of dist/, fix attach-sbom repo context",
+    "message_hash": "sha256:aad18c76d941d39c475d099102404207a4eb80342ea3e69bc09733d5a01cd48c",
+    "diff_hash": "sha256:499f4ecc89aeeac75aa9d2c6ad3dbc8ee4897ed65d9e16f8c433c249af85e164",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/publish.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-0aa88fbeddb547a91371a1fa99e75adf",
+  "content_hash": "sha256:0aa88fbeddb547a91371a1fa99e75adf72bcb295c184259b95022f30de4c2013",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

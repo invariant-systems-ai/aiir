@@ -1,0 +1,90 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "abc43a8b817a2865f46c4d7fd839656036a000c7",
+    "tree_sha": "b750afa3751b058e1c9b69167fa1c5dc031e9e1b",
+    "parent_shas": [
+      "f02e1c551d9c6874af809f5751bb45bfdce67b93"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:08:14-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:08:14-04:00"
+    },
+    "subject": "ci: fix all 6 Security workflow failures",
+    "message_hash": "sha256:0d568314fabf472ea480cb5983c6ddd54eee8566614e42007f9de451d2e4f350",
+    "diff_hash": "sha256:21be5585a9e2f438b56124d6fa9f0c80400733c2e23814e6e1d8eca71a9527e6",
+    "files_changed": 41,
+    "files": [
+      ".github/workflows/security.yml",
+      ".gitleaksignore",
+      "aiir/__main__.py",
+      "aiir/_core.py",
+      "aiir/_detect.py",
+      "aiir/_explain.py",
+      "aiir/_github.py",
+      "aiir/_gitlab.py",
+      "aiir/_ledger.py",
+      "aiir/_policy.py",
+      "aiir/_receipt.py",
+      "aiir/_schema.py",
+      "aiir/_sign.py",
+      "aiir/_verify.py",
+      "aiir/cli.py",
+      "aiir/mcp_server.py",
+      "pyproject.toml",
+      "scripts/conformance.py",
+      "scripts/gen_confusables.py",
+      "tests/conftest.py",
+      "tests/test_claude_hooks.py",
+      "tests/test_cli_integration.py",
+      "tests/test_core.py",
+      "tests/test_detect.py",
+      "tests/test_e2e_ux.py",
+      "tests/test_explain.py",
+      "tests/test_fuzz.py",
+      "tests/test_github.py",
+      "tests/test_gitlab.py",
+      "tests/test_intoto.py",
+      "tests/test_ledger.py",
+      "tests/test_mcp.py",
+      "tests/test_mcp_protocol.py",
+      "tests/test_policy.py",
+      "tests/test_receipt.py",
+      "tests/test_redteam.py",
+      "tests/test_redteam_hostile.py",
+      "tests/test_schema.py",
+      "tests/test_sign.py",
+      "tests/test_verify.py",
+      "tests/test_virtual_deploy.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-18427182fbbc9d128bc7cb593c8fc797",
+  "content_hash": "sha256:18427182fbbc9d128bc7cb593c8fc7974d509548e659a48fdb5b584bc2222557",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

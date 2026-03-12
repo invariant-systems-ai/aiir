@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "94932172275457bc36fe77771437b5915f30ad2e",
+    "tree_sha": "21e1b95ea06fc1ce7da6cf800bab1ca7d9f1f809",
+    "parent_shas": [
+      "393a13e6307b91d06a8300cf7df5f1779ce85f1e"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T17:11:10-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T17:11:10-04:00"
+    },
+    "subject": "fix(ci): restore coverage to 94% — pragma no cover on defensive OS branches, test export error paths",
+    "message_hash": "sha256:a5cfafaf13db2c4e9229262e613705df9e94881a93c8bdfe5e0682e852754010",
+    "diff_hash": "sha256:8d83851ad3d5d42180bf87288a82771ca03db70b3733a2a67cd9732f2fd1cb9b",
+    "files_changed": 2,
+    "files": [
+      "aiir/cli.py",
+      "tests/test_ledger.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-74450f44b07d0605a1c687f32df5528d",
+  "content_hash": "sha256:74450f44b07d0605a1c687f32df5528d2dcd73923d6be73eb1ebf25a42b805a6",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

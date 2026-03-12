@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "e3d6e266f4b4c1f790646a208a3e1c6144ec641b",
+    "tree_sha": "0678e4f51cfe04a05ddbac4807b1ad62b0b9d634",
+    "parent_shas": [
+      "015b04f5708624c4ae8caf0c1d771da56e7aaa18"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T11:09:50-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T11:09:50-04:00"
+    },
+    "subject": "sec: fix shell injection in update-major-tag workflow",
+    "message_hash": "sha256:85bfba039ce4fb9418cc530cea3b4b78ed5da22e9e13d699243996cfb5c9199a",
+    "diff_hash": "sha256:7bc65e7abf62b94fd65f38783f4452991a4a6bb6438ad354177beb78b8e70dd9",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/update-major-tag.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-ac6b8e4056b3838b78a9c832309430fa",
+  "content_hash": "sha256:ac6b8e4056b3838b78a9c832309430fae44e5eb48caad410a139fb62351540af",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

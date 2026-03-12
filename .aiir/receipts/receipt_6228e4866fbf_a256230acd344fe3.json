@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "6228e4866fbf943d95c02fbef1a98dc5348f1e5a",
+    "tree_sha": "38fb234ade9d8945bda4e1ee0af964093082f8c5",
+    "parent_shas": [
+      "dd6c057fbaf5713372c0f2145babf79f5558ef24"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:42:13-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:42:13-04:00"
+    },
+    "subject": "ci: fix SBOM generation — remove --schema-version flag dropped in cyclonedx-bom v7",
+    "message_hash": "sha256:21e58ba0af99bd90499365e1bb512fac48d0734593877140f4bb722d2a456713",
+    "diff_hash": "sha256:5007a64abd3ec9034e2582debe7319d3bcaa1d1586f1bd19079e0211a32b19a6",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/publish.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-230acd344fe3dba5416dd991b020b1fa",
+  "content_hash": "sha256:230acd344fe3dba5416dd991b020b1faa30103c8cd7ebb4cc9b91c3c83fc3a75",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

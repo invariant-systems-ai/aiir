@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "a032efdc58e4330bfe14a3d7c2a246adeeea2581",
+    "tree_sha": "3849ac07d9240874822ab2d5f2d3b8f77727a991",
+    "parent_shas": [
+      "ea73a2dd4fddb732036228a6def42e8c8a2be8ae"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T14:54:22-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T14:54:22-04:00"
+    },
+    "subject": "docs: update SECURITY.md supported versions table for 1.2.x",
+    "message_hash": "sha256:0175ba9133edb543d3fcc4a718627c3073e4a7d0ac50ee93e71d4579a73bac56",
+    "diff_hash": "sha256:4c4409c08857e1e48f56b1883b6a147ebf1ad1ee380ac74229cd608319d0005a",
+    "files_changed": 1,
+    "files": [
+      "SECURITY.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-39fb9f30ca787a0916819fd2d444e8e0",
+  "content_hash": "sha256:39fb9f30ca787a0916819fd2d444e8e0f8651ad7ff16bff502a541db05091fd3",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

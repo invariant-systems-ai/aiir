@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "8d0d2e63a2c378aa37d4920166618e2246819c30",
+    "tree_sha": "625d16dd1fd3a4ec2789c4e4bdad94442de42fc4",
+    "parent_shas": [
+      "99c61974a3ecb8a219951b4656101d51756d2add"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T09:04:36-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T09:04:42-04:00"
+    },
+    "subject": "fix(sync): escape single-quote in version regex to avoid Python SyntaxError",
+    "message_hash": "sha256:49d755a035ca79aba717c49bf28dbfa3932284e3869d899f538e6e4afeebd066",
+    "diff_hash": "sha256:8034ae3389f208a1d44900ac796df45bcb7834f530311cbad4f23d6c10b837ba",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/sync.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-7dc038443e288d435e072e58c1dc3127",
+  "content_hash": "sha256:7dc038443e288d435e072e58c1dc3127d303a38fbb6d3c30f9e4f738ac757339",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

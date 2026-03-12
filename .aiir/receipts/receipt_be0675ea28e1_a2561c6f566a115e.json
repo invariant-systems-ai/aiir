@@ -1,0 +1,54 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "be0675ea28e18afb248a487d5f6e16427fdd8e17",
+    "tree_sha": "4d9bd2d88f919a2110cfc2be83da2ea0f8943c24",
+    "parent_shas": [
+      "b4f456e92c197fb27364c6c646c667dc6324cc70"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T08:41:37-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T08:41:37-04:00"
+    },
+    "subject": "feat: add normative CDDL grammar for AIIR commit receipt (RFC 8610) (#28)",
+    "message_hash": "sha256:7d65137d67a3b3bd0999ae1bc1adc141e6317ebf221757b4fc5feb02519f06e4",
+    "diff_hash": "sha256:bbd86d9261feace1a12202804c112ca8ce6cb523f0ebc2b6c76b04daa0ed5152",
+    "files_changed": 5,
+    "files": [
+      "README.md",
+      "SPEC.md",
+      "docs/standards-readiness.md",
+      "schemas/conformance-manifest.json",
+      "schemas/receipt.cddl"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1c6f566a115ebdaec157fd466104f9c7",
+  "content_hash": "sha256:1c6f566a115ebdaec157fd466104f9c7f77c9fd984a2a94d39a8d548e55caa99",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

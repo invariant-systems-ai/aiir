@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "6f450eea78b2ece76693267a99eb8835387b6aa0",
+    "tree_sha": "e5c68a2290637264d52893cb5d78889f397237ec",
+    "parent_shas": [
+      "812dffce901ee6dcc5da414729f1cf101b9b5ffc"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T06:54:51-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T06:54:51-04:00"
+    },
+    "subject": "test: close 38/40 partial branches + mutation killers (tier 1+2)",
+    "message_hash": "sha256:05e41ea7699be3d96b2e7f6da169f6272e62e8e210d59d72c448ce23e783e3e8",
+    "diff_hash": "sha256:fca32bcc4a8413aedd30cb5c13984eeb0c3de0a5b5250e285df8e294fa739a8d",
+    "files_changed": 2,
+    "files": [
+      "pyproject.toml",
+      "tests/test_branch_close.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-79eda15dfef57d9e35b395b46e0611aa",
+  "content_hash": "sha256:79eda15dfef57d9e35b395b46e0611aae38938003fa20b10f71102682787ef31",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

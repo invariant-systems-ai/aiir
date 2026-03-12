@@ -1,0 +1,93 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "dc79eac07005ed2eb0e24d156e8469609f092d68",
+    "tree_sha": "31e8db1165f48c554c36652672ed31d1d536d730",
+    "parent_shas": [
+      "bf012474124ba685f5045da714e537160785f7f4"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T13:56:28-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T13:56:28-04:00"
+    },
+    "subject": "v1.2.3: visibility fixes, transport attestation, markdown lint enforcement",
+    "message_hash": "sha256:c7404c60ec18463861d5a09fc820e7303f99a368369521ae4685ee06281d993d",
+    "diff_hash": "sha256:c86ef653d71096bc5cad92e96e9b39021abe0a998b2214e736923f87c42aa888",
+    "files_changed": 44,
+    "files": [
+      ".github/ISSUE_TEMPLATE/config.yml",
+      ".github/PULL_REQUEST_TEMPLATE.md",
+      ".github/SECURITY.md",
+      ".markdownlint.yaml",
+      "ARCHITECTURE.md",
+      "CHANGELOG.md",
+      "CONTRIBUTING.md",
+      "README.md",
+      "SPEC.md",
+      "THREAT_MODEL.md",
+      "TRADEMARK.md",
+      "aiir.env",
+      "aiir/__init__.py",
+      "aiir/_core.py",
+      "aiir/_detect.py",
+      "aiir/_receipt.py",
+      "aiir/_schema.py",
+      "aiir/cli.py",
+      "aiir/mcp_server.py",
+      "contrib/launch-post-devto.md",
+      "contrib/launch-post-show-hn.md",
+      "docs/api.md",
+      "docs/claude-code-hooks.md",
+      "docs/gitlab-compliance-framework.md",
+      "docs/gitlab-webhooks.md",
+      "docs/launch/show-hn-draft.md",
+      "docs/tamper-detection.md",
+      "examples/README.md",
+      "examples/gitlab-demo/.gitlab-ci.yml",
+      "examples/gitlab-demo/README.md",
+      "mcp-manifest.json",
+      "schemas/commit_receipt.v2.schema.json",
+      "sdks/js/package.json",
+      "templates/gitlab-ci.yml",
+      "templates/receipt/template.yml",
+      "tests/STRIDE_TRACEABILITY.md",
+      "tests/test_cli_integration.py",
+      "tests/test_core.py",
+      "tests/test_e2e_ux.py",
+      "tests/test_mcp.py",
+      "tests/test_public_surface.py",
+      "tests/test_receipt.py",
+      "tests/test_redteam.py",
+      "tests/test_transport_attestation.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-c0beb6566dd4155fef3a376a945749fa",
+  "content_hash": "sha256:c0beb6566dd4155fef3a376a945749facf5cd9b346a2752f9fe0b0a9bbfa4c2e",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

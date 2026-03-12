@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "132961eb693edbbd30b609c639b765e57f48066b",
+    "tree_sha": "e67582dcc0f5dc14683be0725d7333daeb90f6cb",
+    "parent_shas": [
+      "6f450eea78b2ece76693267a99eb8835387b6aa0"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T07:06:52-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T07:06:52-04:00"
+    },
+    "subject": "refactor: close final 2 partial branches → 100% branch coverage",
+    "message_hash": "sha256:c19e20b503483b19b6366b5cca87b2284f4a3d01523ffec1befc4bb03ce33616",
+    "diff_hash": "sha256:c6640c70b01c70349321ac2b073359f9964cbf49c23f8ce260f0e33016dfaca1",
+    "files_changed": 2,
+    "files": [
+      "aiir/_explain.py",
+      "tests/test_branch_close.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-db8d7655a3e29c34181aea5b2d504e32",
+  "content_hash": "sha256:db8d7655a3e29c34181aea5b2d504e32f1e4983fd954df7142f3b714e28cb21c",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

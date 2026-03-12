@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "6a02cef30699458e53e1137c8f4934cf2d3bbf6b",
+    "tree_sha": "18a274b616b47762957cb153893b6fb7213400ef",
+    "parent_shas": [
+      "a54fe440a2be18fe51ad30149f1bbab944d578e5"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:42:51-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:42:51-04:00"
+    },
+    "subject": "ci(publish): grant attach-sbom release upload permission",
+    "message_hash": "sha256:b45c626761a427b76df9b58c87cded4cb078730a08bddd78d4a7a9590dcbeb46",
+    "diff_hash": "sha256:e7063f0c79bcd5688bb9450dc8fc3bc8a57620624f5cfec6d598b5f1c0c08d86",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/publish.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-94e8ab519ce55e668edb87187fb01b6a",
+  "content_hash": "sha256:94e8ab519ce55e668edb87187fb01b6a600c278ae265d75eb3122c9524b047d9",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

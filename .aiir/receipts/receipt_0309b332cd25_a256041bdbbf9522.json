@@ -1,0 +1,63 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "0309b332cd25a6d187ab45215a8d38e742c201dd",
+    "tree_sha": "43b11a9630788c18f678e3a0ef1539b544fa1d90",
+    "parent_shas": [
+      "e12a8b87c9fd6217407a6ec6529de47e68333f26"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T08:15:27-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T08:15:27-04:00"
+    },
+    "subject": "fix: resolve all hostile security audit findings (CRITICAL→LOW)",
+    "message_hash": "sha256:aa40de8f1961bf6e0b3f1f265c46d811dba9d2a67858283b1073187a3c73b951",
+    "diff_hash": "sha256:8d697c07b02934588701b48820fce9bc935ae689dd758aba857c062f70e88346",
+    "files_changed": 14,
+    "files": [
+      ".github/workflows/dogfood.yml",
+      ".github/workflows/publish.yml",
+      "CHANGELOG.md",
+      "Dockerfile",
+      "SECURITY.md",
+      "THREAT_MODEL.md",
+      "aiir/_core.py",
+      "aiir/_gitlab.py",
+      "aiir/cli.py",
+      "aiir/mcp_server.py",
+      "pyproject.toml",
+      "scripts/verify-pypi-provenance.py",
+      "tests/test_gitlab.py",
+      "tests/test_redteam.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-041bdbbf95221fef63b54eb9a742b661",
+  "content_hash": "sha256:041bdbbf95221fef63b54eb9a742b6618f33e4139d6ed4f90de4be97a3897c71",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

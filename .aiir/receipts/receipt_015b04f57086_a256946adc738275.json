@@ -1,0 +1,59 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "015b04f5708624c4ae8caf0c1d771da56e7aaa18",
+    "tree_sha": "7194ee8db31088621191b01b6d529d0bdfa6b522",
+    "parent_shas": [
+      "e3f9ee5afc036a499f13bcdd297ea7b3a5767e56"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T11:05:05-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T11:05:26-04:00"
+    },
+    "subject": "v1.0.5: authorship_class taxonomy, signing default, surface sync",
+    "message_hash": "sha256:f6d580aa8f0902c050a56cd3bb65a29ea507d748856de1b741cee4a38e68fe6f",
+    "diff_hash": "sha256:d8ec8705a50a8af640653da6821eeb4e35d2083d659ee51b1e0def5343ae68be",
+    "files_changed": 10,
+    "files": [
+      "CHANGELOG.md",
+      "README.md",
+      "action.yml",
+      "aiir/__init__.py",
+      "aiir/_core.py",
+      "aiir/_detect.py",
+      "aiir/_ledger.py",
+      "aiir/_receipt.py",
+      "aiir/cli.py",
+      "templates/receipt/template.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-946adc738275400c251c7f23d084725d",
+  "content_hash": "sha256:946adc738275400c251c7f23d084725d6af366864b8f0a87b3d38cb276f58848",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

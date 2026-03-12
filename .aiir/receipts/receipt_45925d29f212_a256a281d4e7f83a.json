@@ -1,0 +1,68 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "45925d29f2121598983288dbb656dbfa5eaa6d73",
+    "tree_sha": "bdb0212d8966f630f7c8d23536d56f43b9213217",
+    "parent_shas": [
+      "f4eed11f15ce48216bcebd807b695ca71f9ad5e4"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T17:52:11-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T17:52:11-04:00"
+    },
+    "subject": "fix: verify_release crash + signing footgun + positioning audit",
+    "message_hash": "sha256:3005e909b6621d96741850648191c3b2a823a837878b8452160e41049843581f",
+    "diff_hash": "sha256:5049a0fdf9713f2eaa1019913a673ee4014af4352801908fa1e447158dc12bf3",
+    "files_changed": 19,
+    "files": [
+      ".github/release.yml",
+      ".github/workflows/dogfood.yml",
+      ".github/workflows/publish.yml",
+      ".github/workflows/sync.yml",
+      "CODE_OF_CONDUCT.md",
+      "README.md",
+      "action.yml",
+      "aiir/_verify_release.py",
+      "aiir/cli.py",
+      "contrib/launch-post-devto.md",
+      "contrib/launch-post-show-hn.md",
+      "docs/launch/launch-checklist.md",
+      "docs/launch/show-hn-draft.md",
+      "examples/github-actions/README.md",
+      "mcp-manifest.json",
+      "sdks/js/README.md",
+      "sdks/js/package.json",
+      "tests/test_cli_integration.py",
+      "tests/test_verify_release.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-a281d4e7f83a47b004a95941cc354239",
+  "content_hash": "sha256:a281d4e7f83a47b004a95941cc354239af49ceb0ff3655d6f6b2751315a5ec80",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

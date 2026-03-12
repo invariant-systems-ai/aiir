@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "97280f6019139fc1e2fb23d3c7705d9ef76b965d",
+    "tree_sha": "0ea99aa719927b11313119abbc7c092428cfb29c",
+    "parent_shas": [
+      "4119d6b851c10aaf88f4e272fe9c43831966d36d"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T05:49:29-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T05:49:29-04:00"
+    },
+    "subject": "ci(traffic): satisfy workflow lint and fail open on API auth issues",
+    "message_hash": "sha256:9b073588c2e8af9bbd0c282d9fe1fc0af4792d3d1a5d4259fe9c0cdacb47634e",
+    "diff_hash": "sha256:b153641b6eb59c7b9f7e817eded198bcdef06954294ee7679941ce5daa3289d7",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/traffic-archive.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-45b0c31bd03a51ac384b1fa40df45ce0",
+  "content_hash": "sha256:45b0c31bd03a51ac384b1fa40df45ce04493b536fc7ac01cd4bc0ffe91f37544",
+  "timestamp": "2026-03-12T12:13:52Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "e74285339836d9e28541b1bf02536d444e476c3f",
+    "tree_sha": "1a74cd0c4450dc076507a610996ebcad88304315",
+    "parent_shas": [
+      "27a71b53dcb568ac13d559cbbcafce748a23d2b2"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:06:58-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:09:34-04:00"
+    },
+    "subject": "feat: heuristic_v2 — split AI signals from bot signals",
+    "message_hash": "sha256:96ef94b5518c3fa2f9cd00ac4214d5b1c79d80ba20a3026dbcf3c895013fd429",
+    "diff_hash": "sha256:4f8094b4ca1feb4043b26cc62086e2971b0355a88c59873ff49236c4c0410428",
+    "files_changed": 16,
+    "files": [
+      ".pre-commit-hooks.yaml",
+      "README.md",
+      "SECURITY.md",
+      "aiir/_core.py",
+      "aiir/_detect.py",
+      "aiir/_ledger.py",
+      "aiir/_receipt.py",
+      "aiir/mcp_server.py",
+      "fuzz_cli.py",
+      "templates/azure-pipelines.yml",
+      "templates/bitbucket-pipelines.yml",
+      "templates/circleci/config.yml",
+      "templates/gitlab-ci.yml",
+      "templates/receipt/README.md",
+      "templates/receipt/template.yml",
+      "test_cli.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-0071c140965dab8b8b503c393518da92",
+  "content_hash": "sha256:0071c140965dab8b8b503c393518da924c3494049a7753c8625bc991e315360c",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

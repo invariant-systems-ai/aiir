@@ -1,0 +1,55 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "13b558e6ebc0f013b4e3565cd3103e54d1454d99",
+    "tree_sha": "db14573ed810d35dfed743b90e5635569e09a8fb",
+    "parent_shas": [
+      "81a9dd7d87ce1856ebfc495d30ab2d073fe04c02"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T07:44:16-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T07:44:16-04:00"
+    },
+    "subject": "fix(docs): reconcile public release metrics (#30)",
+    "message_hash": "sha256:fe78dfe433b538b64a1e59207f0606f5b00ebac8236dfd462353d9083bc2c74f",
+    "diff_hash": "sha256:272ed6d9f73e503ea506bec66ae1418b4909dfd167e5e1401349e5083a6c8956",
+    "files_changed": 6,
+    "files": [
+      ".github/workflows/release-smoke.yml",
+      ".github/workflows/standards-readiness.yml",
+      "docs/release-health.md",
+      "docs/standards-readiness.md",
+      "tests/test_cli_integration.py",
+      "tests/test_public_surface.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1a252ff970ef6ad4cde210846fee2a82",
+  "content_hash": "sha256:1a252ff970ef6ad4cde210846fee2a82e049fcb056fadb7b65c8b15ca2988d37",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

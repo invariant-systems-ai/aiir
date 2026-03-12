@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "4119d6b851c10aaf88f4e272fe9c43831966d36d",
+    "tree_sha": "dfcdd06d7c34a602cad020455309f5a41121d24d",
+    "parent_shas": [
+      "fad6b9df0a03a6f7c5a06e021856038abe4f3b86"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T05:45:08-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T05:45:08-04:00"
+    },
+    "subject": "ci(traffic): degrade gracefully when archive fetch fails",
+    "message_hash": "sha256:abf3dec9f557ba29bac1059917fcd508b2e9e99c88cc20c0779d7ddcef1358e0",
+    "diff_hash": "sha256:7e3eee54aa0701fe57550a1508eccc9bdeb5196b9534d6782576fe69efa66560",
+    "files_changed": 2,
+    "files": [
+      ".github/workflows/traffic-archive.yml",
+      "docs/drafts/show-hn.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-5e27db4369b9209205f3db3df24de20c",
+  "content_hash": "sha256:5e27db4369b9209205f3db3df24de20cc1542bb9d19335a2552124b1bcf2ae10",
+  "timestamp": "2026-03-12T12:13:52Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

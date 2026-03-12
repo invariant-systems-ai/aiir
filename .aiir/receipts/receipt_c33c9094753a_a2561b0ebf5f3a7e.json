@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "c33c9094753a97a05c52c10066f3bfb694f8cbbf",
+    "tree_sha": "36c60ffb26d09f0021160a951c6f27794123a346",
+    "parent_shas": [
+      "a032efdc58e4330bfe14a3d7c2a246adeeea2581"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T15:19:27-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T15:19:27-04:00"
+    },
+    "subject": "chore: add .local/ to .gitignore for workstation-only files",
+    "message_hash": "sha256:100fe072e71c47a70cce78f6576b3b416da535c0033b1b684c95a5857f4594ad",
+    "diff_hash": "sha256:240f04e67946cebcc0b1c4eea8d46edd355d85e2e15c4bcc8c91aa14d2fc8b9c",
+    "files_changed": 1,
+    "files": [
+      ".gitignore"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1b0ebf5f3a7e8efbbd1e0aece9419de6",
+  "content_hash": "sha256:1b0ebf5f3a7e8efbbd1e0aece9419de61dd1a5f8dca7f475b0b32628a4ac308c",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

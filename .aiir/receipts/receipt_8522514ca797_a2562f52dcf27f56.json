@@ -1,0 +1,56 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "8522514ca797663362847780e1edbb0989f64cad",
+    "tree_sha": "29735bd1d020483d7321efbe69adfd6d46c43dfa",
+    "parent_shas": [
+      "f521cbeb7e3368cc8253bc758df2800c14f4094e"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T17:37:24-05:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T17:37:37-05:00"
+    },
+    "subject": "revert to v1.0.0: all work is pre-release polish, not a version bump",
+    "message_hash": "sha256:301c04a7d09e54771edc1edf2bb05b21e13bedf48714fbed0f636c94d8fb0603",
+    "diff_hash": "sha256:32627154129288f54a8e599d1aa707481fa0c80e7b73fd2cb7fcdd178f512c5a",
+    "files_changed": 7,
+    "files": [
+      ".github/workflows/publish.yml",
+      ".pre-commit-hooks.yaml",
+      "CHANGELOG.md",
+      "README.md",
+      "THREAT_MODEL.md",
+      "aiir/__init__.py",
+      "templates/gitlab-ci.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-2f52dcf27f56f8ab5e48cb69b69e9f48",
+  "content_hash": "sha256:2f52dcf27f56f8ab5e48cb69b69e9f48fea7826b020aa3bcd6445da115b23107",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "33ac6c9d8ce7242fdd7b334fdb28db686d0a4b21",
+    "tree_sha": "1a6120d0c67487924a2f3a47cb089b14d022da22",
+    "parent_shas": [
+      "3c013b0c24beb7c74fd7b90600d219e8c0a6900c"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T15:42:17-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T15:42:17-04:00"
+    },
+    "subject": "fix: use getattr for os.getuid to avoid AttributeError on Windows",
+    "message_hash": "sha256:d41666874d4901682260181251883ada112d3130a2708b3a1e75676e9738ec30",
+    "diff_hash": "sha256:fad9001cd61fc4d980b462363b79e09ede801f9c4b91135e3acbefe5da441fe6",
+    "files_changed": 1,
+    "files": [
+      "tests/test_virtual_deploy.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1482f663c0733531db51d8b974f2f573",
+  "content_hash": "sha256:1482f663c0733531db51d8b974f2f573cf5c05db947033afe0619776fe51fb3f",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

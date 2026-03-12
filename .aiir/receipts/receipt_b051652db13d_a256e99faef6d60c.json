@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "b051652db13d034f42a87b8a16cec69d926d9b44",
+    "tree_sha": "94587e6e6977f588aa44cb6ee665978f61946ecb",
+    "parent_shas": [
+      "4479267cdf26a9d3c794e595fa31e7ddb0549ed0"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:19:12-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:19:12-04:00"
+    },
+    "subject": "ci: fix remaining Security workflow failures",
+    "message_hash": "sha256:d1e98745dda0b952ee786b0f884db1d8852ff509787cc6f5f814e41df7035d64",
+    "diff_hash": "sha256:033c04437a1e2f834f33bec71bc8948faed53acf3826bab555d4163b2ecf975a",
+    "files_changed": 2,
+    "files": [
+      ".github/workflows/security.yml",
+      "aiir/_gitlab.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-e99faef6d60c123adffdf69a8d395c62",
+  "content_hash": "sha256:e99faef6d60c123adffdf69a8d395c62f213c9b3b24a8ccb3cb8ea9868e22f04",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "5201cd9ac9c9596b77af2ca1fb8f6e3164470ffb",
+    "tree_sha": "4fe55087f00343500c135334fcac490c4232ffb8",
+    "parent_shas": [
+      "b41ad97d594e5bbcc4523ced621054596784cc6a"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T12:10:45-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T12:10:45-04:00"
+    },
+    "subject": "fix(test): correct _STAT_GUARD_CALLS threshold to Python 3.11+",
+    "message_hash": "sha256:8373a7a1db408fdd8df41995722b685d1fa5463625a998b8c491272d311ea0e2",
+    "diff_hash": "sha256:362a4562e8c5e55eee3f9966592bff7c225f7e6a0b409898051d63c828114b7a",
+    "files_changed": 2,
+    "files": [
+      "tests/test_coverage_close.py",
+      "tests/test_verify.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-24619069dbca5fcbc897941aeb571083",
+  "content_hash": "sha256:24619069dbca5fcbc897941aeb57108393316d701470ddc0cc9dfd50c97cd62b",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

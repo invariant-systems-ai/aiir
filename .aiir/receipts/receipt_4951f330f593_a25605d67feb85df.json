@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "4951f330f59308ff4f8bba41802441a9b66d8c07",
+    "tree_sha": "5733181fe99cb7b8b95fb7186e156b20fd043c92",
+    "parent_shas": [
+      "70ac7919daea3fc105d2028465a727373b270d1c"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T05:04:37-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T05:04:37-04:00"
+    },
+    "subject": "fix: reconcile README test count to 1,852 (#17)",
+    "message_hash": "sha256:7988984f644ae81254726c8838c2fb7f4f6e2f43006f17242f821abddbc93993",
+    "diff_hash": "sha256:f9fc529ae4fb84249668e9ba8b1a9aed15914961b94ed71f39d36d471877002f",
+    "files_changed": 2,
+    "files": [
+      "README.md",
+      "tests/test_cli_integration.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-05d67feb85dfdf9d088fdb0316aaacd7",
+  "content_hash": "sha256:05d67feb85dfdf9d088fdb0316aaacd70a56b53382657b2ce9950a75d0ee87eb",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

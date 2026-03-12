@@ -1,0 +1,65 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "1fe0d192f17b875c6bfc82c7d512ad7112ddcb56",
+    "tree_sha": "eae7ea0833a9bc6ff0c2adea6d389a2d8052661d",
+    "parent_shas": [
+      "07ce94dcc47bae3e5035f736b36da7c969416afe"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:22:47-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:22:47-04:00"
+    },
+    "subject": "refactor: split test suite into 12 focused modules",
+    "message_hash": "sha256:e6a7ff66c4bef38a157dfb98c3cc7f21933e1d34abb76747be37ef21b1c35d1e",
+    "diff_hash": "sha256:26faa99163bdb1750f6b49e3f4f8def19ee2aac5e5a9b3935d3fcd86dd0e8c6a",
+    "files_changed": 16,
+    "files": [
+      ".github/workflows/ci.yml",
+      ".gitlab-ci.yml",
+      "test_cli.py",
+      "tests/__init__.py",
+      "tests/conftest.py",
+      "tests/test_cli_integration.py",
+      "tests/test_core.py",
+      "tests/test_detect.py",
+      "tests/test_fuzz.py",
+      "tests/test_github.py",
+      "tests/test_ledger.py",
+      "tests/test_mcp.py",
+      "tests/test_receipt.py",
+      "tests/test_redteam.py",
+      "tests/test_sign.py",
+      "tests/test_verify.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-0d5d43841cf9e6e41d501b7bfbe5a523",
+  "content_hash": "sha256:0d5d43841cf9e6e41d501b7bfbe5a523e6c3b11a50d83d6b866f18742ade35f7",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

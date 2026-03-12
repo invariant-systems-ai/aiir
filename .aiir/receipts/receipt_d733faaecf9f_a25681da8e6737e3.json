@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "d733faaecf9fa9a2d54bb56d1f67454b47cbfb7f",
+    "tree_sha": "f73624f83b3d0761e220afca7c6de7cf7abea45a",
+    "parent_shas": [
+      "1b44efb9b3f897f89574dbecc3b0d7a3be9593d6"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T11:38:27-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T11:38:27-04:00"
+    },
+    "subject": "fix(ci): resolve remaining quality and test collection failures",
+    "message_hash": "sha256:3907af1fbef5532491d46c8df4585c2e0f1bfce41564555a477be84bcfe899eb",
+    "diff_hash": "sha256:23e07120a6b63d1dc4277b486806c67ee4c87ef16b93ec951cdaf815f1160aab",
+    "files_changed": 3,
+    "files": [
+      ".github/PULL_REQUEST_TEMPLATE.md",
+      ".github/workflows/quality.yml",
+      "tests/test_canonicalization.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-81da8e6737e363d88a14e2b81f18b927",
+  "content_hash": "sha256:81da8e6737e363d88a14e2b81f18b9270c69a37261b4ac0cbcbe5a3d3a4c9d37",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

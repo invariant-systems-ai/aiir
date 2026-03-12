@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "b340d19b700bb02f196fb252c688efc2b35882c9",
+    "tree_sha": "89633a671f6ce12e4b8d1a4aa9f2bc5b1dc494c5",
+    "parent_shas": [
+      "22af3a126985cbb5eb89232ced20b167098d5538"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:41:07-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:41:16-04:00"
+    },
+    "subject": "fix(ci): Windows compat + sync drift detection",
+    "message_hash": "sha256:5281972e6c3a584cd1558cb305f8615d01183a9d9c24195e574d12e1ad43302a",
+    "diff_hash": "sha256:0da2a0d3bba606fafded689a6d33bbe5978f3ba299cb5882a4595aaa8ba747fa",
+    "files_changed": 2,
+    "files": [
+      ".github/workflows/sync.yml",
+      "tests/test_fuzz.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-821eb92119e30d0f46e65b8caa57222a",
+  "content_hash": "sha256:821eb92119e30d0f46e65b8caa57222a17652ae16ee16c5a260f54004ba5906c",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

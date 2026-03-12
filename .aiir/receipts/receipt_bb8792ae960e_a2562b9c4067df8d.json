@@ -1,0 +1,54 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "bb8792ae960e8649c93f198e1fa4464379846af5",
+    "tree_sha": "92c374e9f1663e9c20e257518f0d811f53ebeee8",
+    "parent_shas": [
+      "195e3f0afaddf99d3003655e87c83aabb80ebf0d"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T18:00:54-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T18:00:54-04:00"
+    },
+    "subject": "fix(ci): fix Action Health smoke test + GitLab tag pipeline failures",
+    "message_hash": "sha256:0216ed85541fca89e5c1d16b4561ec9f95f4a6d6400f11edbf1a2f75956b51fe",
+    "diff_hash": "sha256:71e4f733a9a2ccbd1181bc8c3a16b29b6d9d01e8872868d9269a4ea0238756dc",
+    "files_changed": 5,
+    "files": [
+      ".github/workflows/action-health.yml",
+      ".github/workflows/publish.yml",
+      ".gitlab-ci.yml",
+      "Dockerfile",
+      "templates/receipt/template.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-2b9c4067df8dfad43e1db772a9ac568a",
+  "content_hash": "sha256:2b9c4067df8dfad43e1db772a9ac568aa9ad6c1399ac9b757d694af2d136dfe8",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "00676c36c989b9f469ee9ddfd3ba1c753dcc6c29",
+    "tree_sha": "c40f668677576a44295e8fc4433fad582f1170bc",
+    "parent_shas": [
+      "c8c7129e49a7df4c76a09383d44d06ff7dd0d87d"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:09:16-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:09:16-04:00"
+    },
+    "subject": "feat: close 4 ecosystem gaps — TS verifier, URI resolution, IANA registration, MCP manifest",
+    "message_hash": "sha256:221f5206584afc0a3967992f8fd2763be0a188f99a791df7729c5d398fca925c",
+    "diff_hash": "sha256:7bd97f2e365216ed7d6f1774d34a78a312827f01372ead13898c489859cd8962",
+    "files_changed": 10,
+    "files": [
+      "ARCHITECTURE.md",
+      "SPEC.md",
+      "contrib/ts-verifier/.gitignore",
+      "contrib/ts-verifier/README.md",
+      "contrib/ts-verifier/package-lock.json",
+      "contrib/ts-verifier/package.json",
+      "contrib/ts-verifier/src/verify.ts",
+      "contrib/ts-verifier/test/run-vectors.ts",
+      "contrib/ts-verifier/tsconfig.json",
+      "mcp-manifest.json"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1336520376db4a8d434d5ea1c2f57e6c",
+  "content_hash": "sha256:1336520376db4a8d434d5ea1c2f57e6c63f4cdd318baa79648c295382c1c528c",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

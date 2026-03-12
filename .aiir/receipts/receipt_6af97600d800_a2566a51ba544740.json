@@ -1,0 +1,58 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "6af97600d800cf6ba9d39fdcdafa2a3efd21638f",
+    "tree_sha": "8a16128255f4009b9a4baaa3c36a1537ec526b62",
+    "parent_shas": [
+      "29dc05d0ad7b8e2bf3189731fbae9a3b04055cd3"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T21:41:49-05:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-07T21:41:55-05:00"
+    },
+    "subject": "chore: CI ledger checks, publish workflow fix, changelog/README updates, export guard, combo tests",
+    "message_hash": "sha256:44db1479b1a0416b25e88f32c2380822054e8d6bbfb89712d3aae07e7d507920",
+    "diff_hash": "sha256:232747bff9d979c4c0fb0f5eabe8f4fc6eed0173533873a496162d778ce82aaf",
+    "files_changed": 9,
+    "files": [
+      ".github/workflows/ci.yml",
+      ".github/workflows/publish.yml",
+      ".gitignore",
+      ".pre-commit-hooks.yaml",
+      "CHANGELOG.md",
+      "README.md",
+      "action.yml",
+      "aiir/cli.py",
+      "test_cli.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-6a51ba5447404ef239aa70247010cc25",
+  "content_hash": "sha256:6a51ba5447404ef239aa70247010cc259eb54736bd6f9985121e65df2174d119",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

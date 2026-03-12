@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "7213f14b8556f96b1ac57229d0d99512a7654c23",
+    "tree_sha": "483c7023bb41a49ad04918c1d3daa999a75ce371",
+    "parent_shas": [
+      "8b8fddd7bca3a9293dd809dc0e884b9fe9998230"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T13:25:51-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T13:25:51-04:00"
+    },
+    "subject": "chore: update mcp-manifest.json to v1.2.0, add missing tools, fix api.md version",
+    "message_hash": "sha256:28a5ded6a7dd74f31670ca147408736f6f4b1a93861aad0526017f3f6ab9ac3c",
+    "diff_hash": "sha256:632e4e9b1b315a551286d1a96d0d9e0d720c763761ef405e30d1679763f199af",
+    "files_changed": 2,
+    "files": [
+      "docs/api.md",
+      "mcp-manifest.json"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-c2e9ade0ffd84917c729fce79d7f6d99",
+  "content_hash": "sha256:c2e9ade0ffd84917c729fce79d7f6d998bbb613d12d6e24dc7a939e9f0f9c321",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "f122d59226261abff2bab323311bb4f892e957e0",
+    "tree_sha": "2e293c1c51a71ca61a842920c0fe1c8bf89b8cc2",
+    "parent_shas": [
+      "70106a03ef89dfec18b214c446723c5e5290fc94"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:28:28-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:28:28-04:00"
+    },
+    "subject": "ci: fix dep-audit by auditing requirements file (exclude aiir from PyPI lookup)",
+    "message_hash": "sha256:4bd1ca5faac7651d55babd66f88c1474f507be4759c00f1a4887ec794df80740",
+    "diff_hash": "sha256:740286c9d1d2bb0d7f3f093c3d81b1a9bdb0570b5934df6f8a8b1df25a67f7cf",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/security.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-cbfac51dff283b5ed7ba93305bb8de9a",
+  "content_hash": "sha256:cbfac51dff283b5ed7ba93305bb8de9a21f9c7e5eec2ae62433d9d9cf4323a58",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

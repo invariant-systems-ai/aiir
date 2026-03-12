@@ -1,0 +1,58 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "c6a53b0cee8f1b9550e035d9ddefee3d956faf22",
+    "tree_sha": "7649bb37d8790afb039985583ee9fdc7abfcef64",
+    "parent_shas": [
+      "0136dd109a8f0230b7312fc7553a99d668b8860e"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T15:07:14-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T15:07:22-04:00"
+    },
+    "subject": "harden: hostile review of publication pipeline (8 fixes)",
+    "message_hash": "sha256:56b4aa403f6a8cb9f497bf507913a8fb1fae96d45d825f43839f6c551abba72c",
+    "diff_hash": "sha256:cec6cbfd63a0cc5b68c70aca2475d6055cea358414026c4ee9427cfabf22f71e",
+    "files_changed": 9,
+    "files": [
+      ".github/workflows/action-health.yml",
+      ".github/workflows/ci.yml",
+      ".github/workflows/dependabot-auto-merge.yml",
+      ".github/workflows/dogfood.yml",
+      ".github/workflows/publish.yml",
+      ".github/workflows/scorecard.yml",
+      ".github/workflows/sync.yml",
+      ".github/workflows/update-major-tag.yml",
+      "action.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-c32a3d942ad07e90f56ead69b5f233e7",
+  "content_hash": "sha256:c32a3d942ad07e90f56ead69b5f233e75098997c72991aa60b172049dd44ce5d",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

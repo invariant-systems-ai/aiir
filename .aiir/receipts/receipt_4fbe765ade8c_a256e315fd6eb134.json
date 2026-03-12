@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "4fbe765ade8cf5f6273bdd5550df973f5c4d38bb",
+    "tree_sha": "7c5d4923ac8491537baebc42dd13c4eb70b0c733",
+    "parent_shas": [
+      "92e81f3f59a2f10d1a27c194bbe2280defe266fd"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T05:34:26-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T05:34:26-04:00"
+    },
+    "subject": "docs: tighten launch messaging",
+    "message_hash": "sha256:1d951af717f52789f8abc22370a98424dedcf17498c117c9f653eedf6b147570",
+    "diff_hash": "sha256:5b6fc28cf82e6f458feafa3ea40638cde2a0e212384c88e9145d8133f8120aca",
+    "files_changed": 4,
+    "files": [
+      "THREAT_MODEL.md",
+      "docs/drafts/reddit-posts.md",
+      "docs/drafts/show-hn.md",
+      "docs/launch/show-hn-draft.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-e315fd6eb134948525534c579a7566f1",
+  "content_hash": "sha256:e315fd6eb134948525534c579a7566f1fc61c66e26363076212f2245338ad7bd",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

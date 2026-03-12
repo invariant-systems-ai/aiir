@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "adb4e086acabc0a29d6eb3d3660e826a19f613a0",
+    "tree_sha": "93434d476dc8d74078ea529bfd4fd0124acf45c4",
+    "parent_shas": [
+      "2b0cc9556b9c27c0fe87d708bdd82a433073bf73"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T16:12:15-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T16:12:15-04:00"
+    },
+    "subject": "fix(ci): disable shellcheck in actionlint — false positives on ${{ }}",
+    "message_hash": "sha256:c0ae662c55bd4000650de0081c896c781e66ed99d5d49b028ecc5e435b3d2995",
+    "diff_hash": "sha256:48c7cd787a9cb6c7b010b5a5bf4b289058ce43b282f5bc651833f28df1ce6337",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/ci.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-461d3b32ce09b09bdabd26256e61f520",
+  "content_hash": "sha256:461d3b32ce09b09bdabd26256e61f52060980e9d9b430c6a6551721eaa95d735",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

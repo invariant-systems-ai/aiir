@@ -1,0 +1,54 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "5dbf3bd55b0c0866a83f7564a5cb9bfd0493e509",
+    "tree_sha": "9d6032b775ad460bf0bc475695860d7a1ed5ae0c",
+    "parent_shas": [
+      "94932172275457bc36fe77771437b5915f30ad2e"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T17:38:16-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T17:38:16-04:00"
+    },
+    "subject": "docs: document receipt identity provenance dependency, clarify CLI help text",
+    "message_hash": "sha256:50ab28e5c3e9bb23929461f502c7d015819e0ac5cd14b47e1303133eeca51af0",
+    "diff_hash": "sha256:e86bd7f0328239ca2e6a78836c00d9ddb5644b6342fe4647b83fec02847d5294",
+    "files_changed": 5,
+    "files": [
+      "CHANGELOG.md",
+      "README.md",
+      "aiir/__init__.py",
+      "aiir/cli.py",
+      "tests/test_cli_integration.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-67e53b453fc93a08acc779e4ff774abf",
+  "content_hash": "sha256:67e53b453fc93a08acc779e4ff774abf64a4a69dc2b6f0053c53a208b7da8b5d",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

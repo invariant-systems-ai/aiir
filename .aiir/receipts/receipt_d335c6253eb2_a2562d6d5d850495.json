@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "d335c6253eb20a6d8f76457f57c387a3201f6dd4",
+    "tree_sha": "1b1b8ebc2df7c223d97ec1184c7b505978c57d5b",
+    "parent_shas": [
+      "e74285339836d9e28541b1bf02536d444e476c3f"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:09:18-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T10:09:34-04:00"
+    },
+    "subject": "chore: bump version to 1.0.4, update changelog",
+    "message_hash": "sha256:88f37770f8643938a20641f9d7366f6939fe144ccc06906e8266a819c6c81886",
+    "diff_hash": "sha256:3fde9bd73b13a81024470c2e08de6e608ddea8cd79a88266028bcfc8c6a1bf61",
+    "files_changed": 1,
+    "files": [
+      "CHANGELOG.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-2d6d5d8504956818d29845dbe69887a6",
+  "content_hash": "sha256:2d6d5d8504956818d29845dbe69887a6f569f778311202b89029f6a16afc92e1",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

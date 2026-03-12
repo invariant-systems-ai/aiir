@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "afd8a70ac72459baa7b6d896c73686a49a2a1f13",
+    "tree_sha": "65e0beacf4663219a81ffe0c68a211948be4034a",
+    "parent_shas": [
+      "55717acfb232f7f439e462d98cbb560daa987753"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T15:37:28-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T15:37:28-04:00"
+    },
+    "subject": "style: ruff format test_coverage_gaps.py, test_transport_attestation.py",
+    "message_hash": "sha256:a65ee70bc4fb91c308eec887a7ba560bb19b3bcb4bf2df1d8a2d6851a35c720b",
+    "diff_hash": "sha256:d4abd5024221fb6b86dcb35c506ff1110a1f1283020253d9504a4913421ea09a",
+    "files_changed": 3,
+    "files": [
+      "aiir.env",
+      "tests/test_coverage_gaps.py",
+      "tests/test_transport_attestation.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-737070cb5341e6ff8f499a9358343b5c",
+  "content_hash": "sha256:737070cb5341e6ff8f499a9358343b5c7db1c32c3c4eb643f391af8d15175729",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

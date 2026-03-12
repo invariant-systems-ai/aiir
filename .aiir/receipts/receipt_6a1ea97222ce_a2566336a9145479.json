@@ -1,0 +1,56 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "6a1ea97222ce85af477b2ad5e6af82404da08711",
+    "tree_sha": "730592fddd5c00f78853575cdf73c378b2fcc897",
+    "parent_shas": [
+      "da46dc77a8e27c6c56203ad5c5dd5b71d552dc83"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T21:10:44-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T21:10:44-04:00"
+    },
+    "subject": "tests: add property-based + mutation testing infrastructure",
+    "message_hash": "sha256:7840a6e50b83418e177f4e0c70a3b989079ae9fae4d58dd1c8e13d1615432448",
+    "diff_hash": "sha256:e649ce48e1e725f8219269858571c0e992fc50fd5fe72d593d8b312094857870",
+    "files_changed": 7,
+    "files": [
+      "pyproject.toml",
+      "scripts/mutation-test.sh",
+      "tests/test_coverage_close.py",
+      "tests/test_detect.py",
+      "tests/test_policy.py",
+      "tests/test_properties.py",
+      "tests/test_verify.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-6336a914547957f15eebb8ab3fb7a5c6",
+  "content_hash": "sha256:6336a914547957f15eebb8ab3fb7a5c6b02928e6b807193c604e10d3787639bd",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

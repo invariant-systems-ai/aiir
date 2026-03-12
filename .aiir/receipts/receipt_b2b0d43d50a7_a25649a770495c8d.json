@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "b2b0d43d50a7e768c166d55ab080150c38488081",
+    "tree_sha": "45929b44cd1d1658be95a5e289f60b0e7067fc24",
+    "parent_shas": [
+      "cae4f4b67791f84ccaa36fa80d3217677e845541"
+    ],
+    "author": {
+      "name": "dependabot[bot]",
+      "email": "49699333+dependabot[bot]@users.noreply.github.com",
+      "date": "2026-03-08T15:27:26-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-08T15:27:26-04:00"
+    },
+    "subject": "chore(deps): bump actions/download-artifact from 4.3.0 to 8.0.0 (#5)",
+    "message_hash": "sha256:f462d9283a8fdbb1adc6cbb6bab1a41ff9a396250a29c8a64f5103c039cfa010",
+    "diff_hash": "sha256:beed853248781ca747ecd8bae424ca26ad33a1d286f4306486f64e972a5dc9a0",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/publish.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": true,
+    "bot_signals_detected": [
+      "author_name_bot:dependabot",
+      "author_email_bot:dependabot"
+    ],
+    "bot_signal_count": 2,
+    "authorship_class": "bot",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-49a770495c8d9aee6fd0d22e61416546",
+  "content_hash": "sha256:49a770495c8d9aee6fd0d22e614165469a6bec87652f54867baae91fce00f0e4",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

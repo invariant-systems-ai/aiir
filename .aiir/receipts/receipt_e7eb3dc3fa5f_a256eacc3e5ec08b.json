@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "e7eb3dc3fa5fd95f1a1d0f2345a4881db853fe08",
+    "tree_sha": "fda47168082075116743fc9bf327904b566c1128",
+    "parent_shas": [
+      "d8063f34447d3add80bac979e1c1151d733cfbee"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T13:15:52-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T13:15:57-04:00"
+    },
+    "subject": "fix: unify all contact emails to noah@invariantsystems.io",
+    "message_hash": "sha256:46863b0bd44d3b61293bf75152e52a399d919b2c24d1b00d081e8d4a8e15ff81",
+    "diff_hash": "sha256:e514b064f01a10702c0403a6dfaf991c4fcc8376fc128f2a06337f34c35f6d60",
+    "files_changed": 2,
+    "files": [
+      "SECURITY.md",
+      "pyproject.toml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-eacc3e5ec08b12a5f42641ce225ae9d9",
+  "content_hash": "sha256:eacc3e5ec08b12a5f42641ce225ae9d9b1ea0a25dfb11cf32a139d2947477e78",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "4b48a47357176be6553660cc14353c8e50b0edba",
+    "tree_sha": "10f98075245cb3ac940e3b90349c8be0d60c1d5c",
+    "parent_shas": [
+      "3a71321727881bf08ae1162168f85d2790f104a1"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T07:49:52-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T07:49:52-04:00"
+    },
+    "subject": "ci: add pre-push hook, AGENTS.md, and review-findings tracker",
+    "message_hash": "sha256:b4d4e3b61e12ec755035b5f7e9befb4ec6c8018c4899e9af91a4416bcec1a63e",
+    "diff_hash": "sha256:81ff72c15817ad3949db6f7557b1453688fb8fc60787b5374b7ad7e9382ec4cf",
+    "files_changed": 3,
+    "files": [
+      ".github/workflows/pr-auto-merge.yml",
+      "AGENTS.md",
+      "CONTRIBUTING.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-e4f2a31365194031cbeac272d9b2de78",
+  "content_hash": "sha256:e4f2a31365194031cbeac272d9b2de78e33398224147c5442e52616f64414728",
+  "timestamp": "2026-03-12T12:13:52Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

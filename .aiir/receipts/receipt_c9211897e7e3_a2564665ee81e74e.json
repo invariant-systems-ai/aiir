@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "c9211897e7e38193be848ffcb2d2089b97289d51",
+    "tree_sha": "25080737df43a39ce034d73f574d966c0f963d42",
+    "parent_shas": [
+      "d6ec17a002c3a9455ce34fe8e4c6afe840abd23a"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T18:15:14-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T18:15:14-04:00"
+    },
+    "subject": "fix(publish): promote pre-existing releases to latest for Marketplace eligibility",
+    "message_hash": "sha256:04b0082f7f8e98fa3cdc3022172d489cb35d408940b6d533129f1c3711433b11",
+    "diff_hash": "sha256:69327b6c7c03b5fe24a8de445304b6faad9c47b1d6eb07029c488fc96d5c315f",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/publish.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-4665ee81e74e0d80ecebdd2e89bc4ed1",
+  "content_hash": "sha256:4665ee81e74e0d80ecebdd2e89bc4ed192530e51a4a7cf9f8a55266be0be0a58",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

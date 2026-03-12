@@ -1,0 +1,54 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "fad6b9df0a03a6f7c5a06e021856038abe4f3b86",
+    "tree_sha": "4a30411fabaaf254e176725375449533f8ccec78",
+    "parent_shas": [
+      "a7652bd96534313104a7f219c2278bf5c6c21d56"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T05:42:41-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T05:42:41-04:00"
+    },
+    "subject": "docs(launch): fold launch polish into pre-launch cleanup",
+    "message_hash": "sha256:848dccf867515ba7f6df1b2e03b2e701fdb5e7344da3b6840242f9c4a2a15aa7",
+    "diff_hash": "sha256:5137693253a607b89ef545784beb96a68e05cc0d8bb471d464d4c9ff05317ce6",
+    "files_changed": 5,
+    "files": [
+      "THREAT_MODEL.md",
+      "docs/drafts/reddit-posts.md",
+      "docs/drafts/show-hn.md",
+      "docs/launch/show-hn-draft.md",
+      "docs/standards-readiness.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-0f7b467ed483dbdeaeafe7360d9c474f",
+  "content_hash": "sha256:0f7b467ed483dbdeaeafe7360d9c474f3b703125c1cf651f10050c234c82a343",
+  "timestamp": "2026-03-12T12:13:52Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

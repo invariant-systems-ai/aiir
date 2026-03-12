@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "104b83e30f051498dad8fd39f3a5cfb358d74949",
+    "tree_sha": "68c7328bf12a27af7f4e06d0752048e323e05800",
+    "parent_shas": [
+      "22dead0caf315845a12c717813bb673f11e9dca9"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T16:14:31-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T16:14:31-04:00"
+    },
+    "subject": "fix(docker): add hadolint ignore for DL3013 on setuptools+wheel upgrade",
+    "message_hash": "sha256:17a051315ab26a709ae99eab15d5d33155bdc01afc954fb11ebcb5d7e5529346",
+    "diff_hash": "sha256:15fe7854f9095aa1e42e70539cf5c3a8a8ab947c4219d734e6648289c95d7ea3",
+    "files_changed": 1,
+    "files": [
+      "Dockerfile"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-2c98c2e6213413bd4e969acd9c658563",
+  "content_hash": "sha256:2c98c2e6213413bd4e969acd9c6585632fcc0fcf8f8a85ce15624cc7ff0a5a98",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "f4eed11f15ce48216bcebd807b695ca71f9ad5e4",
+    "tree_sha": "d17d81fccc8216d9a35b3b2f27b2aac019aee684",
+    "parent_shas": [
+      "c1c84944015e5e3d49a33316e43b83144be045d1"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T15:48:24-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T15:48:24-04:00"
+    },
+    "subject": "style: apply ruff format to test_virtual_deploy.py",
+    "message_hash": "sha256:fe71391273ba5ff733890927feb6301ddb18c8170c9c305f642448dd8ed252b7",
+    "diff_hash": "sha256:11e9acab4c625db7d2fcb30865a4d84e7c30caf3ed22de29eac419c2b3c75a94",
+    "files_changed": 1,
+    "files": [
+      "tests/test_virtual_deploy.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-90d2419023344d932a18cb425fc7f583",
+  "content_hash": "sha256:90d2419023344d932a18cb425fc7f58342d2d5990f9f97e036ac10cff20992be",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

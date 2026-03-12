@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "f0421c4db545d21fef60f8c06e76dac94a2a13a0",
+    "tree_sha": "350fd6fb13c6003ea99a716d4cd5bc94909aefb3",
+    "parent_shas": [
+      "48808fd1ebee55db39a2973ccd408c1c3ee4b082"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T06:24:28-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T06:24:39-04:00"
+    },
+    "subject": "test: add 16 cross-platform tests (fchmod, paths, encoding, atomic writes)",
+    "message_hash": "sha256:c0485dbef8ac56d0a55130e28aebd5150f3cfcc8646eebef8ccb8ce187e8b4fd",
+    "diff_hash": "sha256:f78afa85b99894875b2f99fd617d8f963b6d94a182a757f92bc0fc528070d864",
+    "files_changed": 3,
+    "files": [
+      "CHANGELOG.md",
+      "README.md",
+      "test_cli.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-4294d45c5a7363cb44f6744c1da5412c",
+  "content_hash": "sha256:4294d45c5a7363cb44f6744c1da5412cafdc570f22545fb339d301299f8fbeb8",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

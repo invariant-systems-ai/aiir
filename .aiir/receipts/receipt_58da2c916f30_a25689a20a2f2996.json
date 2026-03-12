@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "58da2c916f30e78bcef64e8d6df3e155a0faefd1",
+    "tree_sha": "bd5692174df2740649eebbdee9f960c1d558ffd3",
+    "parent_shas": [
+      "509f5fc9686e0fa73c109c222e49e797be22ac75"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T14:53:03-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T14:53:03-04:00"
+    },
+    "subject": "fix(ci): resolve all failing workflows",
+    "message_hash": "sha256:c5dadf7fc74a5036c244046e366241cd5f98be0be46e38197b4de5abc7800472",
+    "diff_hash": "sha256:5f5cdbd537ff925e33daab4e0c56c7c065eb339973493f2490b168ad8dcef509",
+    "files_changed": 3,
+    "files": [
+      ".github/workflows/action-health.yml",
+      ".github/workflows/dogfood.yml",
+      ".github/workflows/publish.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-89a20a2f2996fc15e3f245e13b54f71a",
+  "content_hash": "sha256:89a20a2f2996fc15e3f245e13b54f71ad974d245aa48d74fd7d7bc39a9011654",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

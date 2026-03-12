@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "2b0cc9556b9c27c0fe87d708bdd82a433073bf73",
+    "tree_sha": "d701953507829e625916db4410f9da6118460ce1",
+    "parent_shas": [
+      "2eba4be59d32fdcc97fc4a7737a9301764d06730"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T16:10:54-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T16:10:54-04:00"
+    },
+    "subject": "ci(publish): propagate version to website after PyPI verify",
+    "message_hash": "sha256:103e4f1ca8e3f710b9e66822d0779a81b804d24e30d3f26e563e36b9c6ec25f8",
+    "diff_hash": "sha256:969e03ce22b488d67c43c9deac3e370e4c6d29f314bc2ca3df82a6d39eccab9e",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/publish.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-bdfd034bc9c5a36d552ca2d0362059fa",
+  "content_hash": "sha256:bdfd034bc9c5a36d552ca2d0362059fa0c0ab29a18ef1ad3e5bd010eb94b1d9f",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

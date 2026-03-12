@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "d9f5a8942a80f4f4754f65b8ae7bdff7113a8874",
+    "tree_sha": "eb6d6acab90735f8f497705efd704af537ce7346",
+    "parent_shas": [
+      "58da2c916f30e78bcef64e8d6df3e155a0faefd1"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T14:56:48-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T14:56:48-04:00"
+    },
+    "subject": "fix(ci): dogfood uses separate clone for receipts push",
+    "message_hash": "sha256:912def9e167e6602155ab2de01d6093777fdd7e65b1355bfd3fa4c6daa30c863",
+    "diff_hash": "sha256:7cde3644727acd09ec7f961d079888265eef7dacfdb37b5644808e245e9118a4",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/dogfood.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-369f2eeb0c16750bd64cdcf79af1888e",
+  "content_hash": "sha256:369f2eeb0c16750bd64cdcf79af1888e16bc277ee92e7a7994b519923edec540",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

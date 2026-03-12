@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "f47b3a3a8ade2868935d3fd4c1168763af850218",
+    "tree_sha": "fc8200c09fbcfa8868342f0ff8464991ff4cde99",
+    "parent_shas": [
+      "00676c36c989b9f469ee9ddfd3ba1c753dcc6c29"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:16:42-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T09:16:42-04:00"
+    },
+    "subject": "ci: add Semgrep taint-tracking SAST to security workflow",
+    "message_hash": "sha256:243c088445b2c287a5b5a66e1806be37c888ed724e1c171a7891e0f87a7707ac",
+    "diff_hash": "sha256:dbbfb292ec2406c149577b2a2e2a48521d8acf637004253e6aa3ccd9967aba1a",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/security.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-2252817a56af9d7fe7e5faedbd9e6a21",
+  "content_hash": "sha256:2252817a56af9d7fe7e5faedbd9e6a215add64a7fbecd3378265812bf9273636",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

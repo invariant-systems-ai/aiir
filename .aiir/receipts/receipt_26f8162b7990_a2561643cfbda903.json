@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "26f8162b7990e0c3e93e3db9a938ef77f0972c9d",
+    "tree_sha": "7e7a804baa8b7c67a5f50b07ea501e5d0b86e949",
+    "parent_shas": [
+      "2021c1da48f021383927b8857cfe14a4c6faec04"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T11:44:21-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T11:44:21-04:00"
+    },
+    "subject": "chore: bump to v1.2.0, update CHANGELOG and MCP tool table",
+    "message_hash": "sha256:626aa23b7725cc79f747d5b809554edc01dc5f338cb0c5850f416e7b94bb4802",
+    "diff_hash": "sha256:6dec3cec1fba0be36b8ffca19aa5b2d5ca1b1471fc89dd44a6b2d97355bb85a7",
+    "files_changed": 3,
+    "files": [
+      "CHANGELOG.md",
+      "README.md",
+      "aiir/__init__.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1643cfbda903f914ec7a8f2814ac1f75",
+  "content_hash": "sha256:1643cfbda903f914ec7a8f2814ac1f75c9b21429b779d72d6a01089176d97168",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

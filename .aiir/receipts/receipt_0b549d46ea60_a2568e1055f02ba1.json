@@ -1,0 +1,53 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "0b549d46ea605a7cc27ea46ca9d0d36e7d1da476",
+    "tree_sha": "6f366bdec4261c717e35ad085446bab89982d6d5",
+    "parent_shas": [
+      "51b2be409b17cdaa346ea57e7283e4fa900f1e54"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T18:48:09-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T18:48:09-04:00"
+    },
+    "subject": "feat: self-healing version drift prevention",
+    "message_hash": "sha256:60b97231966f684bdc540873e57d6b2d4041315a874698390e7479c88b4b9a05",
+    "diff_hash": "sha256:d43ac97c8ff85c503e946b5fa5830d9a5f397fcc32100a6edc63a52b2d53c42b",
+    "files_changed": 4,
+    "files": [
+      ".github/workflows/ci.yml",
+      ".github/workflows/publish.yml",
+      ".pre-commit-config.yaml",
+      "scripts/sync-version.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-8e1055f02ba1a67dfda9588fd92c11ee",
+  "content_hash": "sha256:8e1055f02ba1a67dfda9588fd92c11eece88dce587b325ea10e64c1f71373145",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

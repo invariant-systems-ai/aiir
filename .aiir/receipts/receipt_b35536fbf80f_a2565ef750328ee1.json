@@ -1,0 +1,60 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "b35536fbf80ffe4432a43b3e6fe700338e2722b4",
+    "tree_sha": "015ba36633e78f02b5142fcfe9ddc3e3193c4503",
+    "parent_shas": [
+      "afd8a70ac72459baa7b6d896c73686a49a2a1f13"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T16:00:39-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T16:00:39-04:00"
+    },
+    "subject": "chore: bump version to 1.2.4",
+    "message_hash": "sha256:10b61772f0da3b34bfac66cdb69bd929d1c1e79d75593f790f9b1f65fee43cd4",
+    "diff_hash": "sha256:ee3429b630dd3c0654d3bdbfed02e82d4a254bd02b77e20e993072f9addc8fb8",
+    "files_changed": 11,
+    "files": [
+      "CHANGELOG.md",
+      "README.md",
+      "aiir/__init__.py",
+      "contrib/launch-post-devto.md",
+      "docs/api.md",
+      "examples/gitlab-demo/.gitlab-ci.yml",
+      "examples/gitlab-demo/README.md",
+      "mcp-manifest.json",
+      "sdks/js/package.json",
+      "templates/gitlab-ci.yml",
+      "templates/receipt/template.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-5ef750328ee1448de08869b093e8a827",
+  "content_hash": "sha256:5ef750328ee1448de08869b093e8a827c4a1fc52f3f9f6782b9e338a83a23f24",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

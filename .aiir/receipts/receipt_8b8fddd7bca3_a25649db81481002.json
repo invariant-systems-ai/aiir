@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "8b8fddd7bca3a9293dd809dc0e884b9fe9998230",
+    "tree_sha": "83fbd3555922e7f5302b64c8b0830053b981aa44",
+    "parent_shas": [
+      "98e1893c5169bd2362cccf55b3c15efadb1ca0db"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T12:42:10-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T12:42:10-04:00"
+    },
+    "subject": "fix(ci): fix YAML syntax in gitlab-pages-dashboard template",
+    "message_hash": "sha256:0ff841ef9e03f67849602a1760fa1782217fecc5ea7f888be76b2eab3e494b3e",
+    "diff_hash": "sha256:c2ec9982f22fdecde2c0b7943369d1ff532644ea627d1c8aaddd13769490dbce",
+    "files_changed": 2,
+    "files": [
+      ".gitlab-ci.yml",
+      "templates/gitlab-pages-dashboard.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-49db8148100284e8ae603127eb7d34b0",
+  "content_hash": "sha256:49db8148100284e8ae603127eb7d34b0670dc868d07e136b4bf97d763f21cfc6",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

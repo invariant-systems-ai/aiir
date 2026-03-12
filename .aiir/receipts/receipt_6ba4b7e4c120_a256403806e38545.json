@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "6ba4b7e4c1209a4040e5c6638f22606969458c09",
+    "tree_sha": "5113323cd8c5fa8865dab8373432f1d1f79e1625",
+    "parent_shas": [
+      "1f903ece76ebd2210c368f50162afe7b0655d169"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:26:56-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:26:56-04:00"
+    },
+    "subject": "ci: fix dep-audit editable install + replace fragile license allow-list",
+    "message_hash": "sha256:72b3668ecf3b6bd466b6a2bbc644278f2915b05d9bc588c0d77313ce3d4c487c",
+    "diff_hash": "sha256:4ba7614ce0e0ea1ca8668fab530adf5d56b941bf52af871842fdbff10897837e",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/security.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-403806e38545c9cdf47af99d2200ebf4",
+  "content_hash": "sha256:403806e38545c9cdf47af99d2200ebf4c6a93db5fd64a60a31f394ff0bfb456f",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

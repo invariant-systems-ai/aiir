@@ -1,0 +1,55 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "4ca4ad954521013bd6b4db49aa8b4d2881e42bf1",
+    "tree_sha": "7b58d851059062e9ac4553f2af3fe6dc57d02b93",
+    "parent_shas": [
+      "b8273728f6b5e6d309377a1eec2a2285d9973989"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T18:08:14-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T18:08:14-04:00"
+    },
+    "subject": "feat: GitLab-first partner demo + template version bump",
+    "message_hash": "sha256:4a24d476b027ab7f43b460832aecfc8cf56c24edcc8557fb373c43964e205e49",
+    "diff_hash": "sha256:40799c762f1586a476426fa3f689e8e0c028efa5ed3eb63cf417f496ff411d2d",
+    "files_changed": 4,
+    "files": [
+      "examples/gitlab-demo/.gitlab-ci.yml",
+      "examples/gitlab-demo/README.md",
+      "templates/gitlab-ci.yml",
+      "templates/receipt/template.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": true,
+    "signals_detected": [
+      "message_match:duo chat"
+    ],
+    "signal_count": 1,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "ai_assisted",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-8de0ea3a7a18c6ef2b95bbf2cd2e34f2",
+  "content_hash": "sha256:8de0ea3a7a18c6ef2b95bbf2cd2e34f20aa9416b2bcff37662e6ae43fa6a674b",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

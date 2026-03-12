@@ -1,0 +1,90 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "e12a8b87c9fd6217407a6ec6529de47e68333f26",
+    "tree_sha": "fed6cf27588082e0fdf6c5ca40265bcf57d868f5",
+    "parent_shas": [
+      "132961eb693edbbd30b609c639b765e57f48066b"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T07:48:22-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-10T07:48:22-04:00"
+    },
+    "subject": "ci: add 16 industry-standard quality gates",
+    "message_hash": "sha256:6ddd635b54e2704b29df7ff0d6c2ca953d747d3c1b9e165384c3a70692abec63",
+    "diff_hash": "sha256:c587db0fa316bfce6d38f75caf755c8391babce95aa5cb319f158a493adf564c",
+    "files_changed": 41,
+    "files": [
+      ".github/workflows/codeql.yml",
+      ".github/workflows/publish.yml",
+      ".github/workflows/quality.yml",
+      ".markdownlint.yaml",
+      ".typos.toml",
+      "aiir/__main__.py",
+      "noxfile.py",
+      "pyproject.toml",
+      "scripts/conformance.py",
+      "scripts/sync-version.py",
+      "tests/conftest.py",
+      "tests/test_action_shell.py",
+      "tests/test_benchmark.py",
+      "tests/test_branch_close.py",
+      "tests/test_claude_hooks.py",
+      "tests/test_cli_integration.py",
+      "tests/test_core.py",
+      "tests/test_coverage_close.py",
+      "tests/test_detect.py",
+      "tests/test_e2e_ux.py",
+      "tests/test_explain.py",
+      "tests/test_fuzz.py",
+      "tests/test_github.py",
+      "tests/test_gitlab.py",
+      "tests/test_hardening.py",
+      "tests/test_intoto.py",
+      "tests/test_ledger.py",
+      "tests/test_mcp.py",
+      "tests/test_mcp_protocol.py",
+      "tests/test_policy.py",
+      "tests/test_properties.py",
+      "tests/test_public_surface.py",
+      "tests/test_receipt.py",
+      "tests/test_redteam.py",
+      "tests/test_redteam_hostile.py",
+      "tests/test_schema.py",
+      "tests/test_scripts.py",
+      "tests/test_sign.py",
+      "tests/test_verify.py",
+      "tests/test_verify_release.py",
+      "tests/test_virtual_deploy.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-856865e0fdd5c980cb08be8edd6c15b5",
+  "content_hash": "sha256:856865e0fdd5c980cb08be8edd6c15b56d3a4151676b9238deffac8b314a1840",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

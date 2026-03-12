@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "fec9bba23ce0b7dfa6ae020a82d3d89bc575c5e9",
+    "tree_sha": "dce246331b27a12be12f9c12deaf93b5b7d9a6ba",
+    "parent_shas": [
+      "27e857bd02227e6c5710361118453fbfde106db0"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:57:04-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:57:04-04:00"
+    },
+    "subject": "ci: enhance standards-readiness issue template with 5-category weekly model",
+    "message_hash": "sha256:f8fb63e6674e3907adfe2717587c0cbc0b8d50dd0ae807f05a5c8c66763cdd4d",
+    "diff_hash": "sha256:88b2a8a7cad0245be638e067a8c31f8f0c3d68bed8f565e13f49e304b53ca7c9",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/standards-readiness.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-1f7d5768391bc55d90a467a53a5d7e53",
+  "content_hash": "sha256:1f7d5768391bc55d90a467a53a5d7e53952a9b87e2f1a6a584c692b982d3cb49",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

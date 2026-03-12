@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "6ac0dec58298249d89732cc93cd012cb6140cce8",
+    "tree_sha": "c9f691abe82a9bfae8534dbd1481a8918dc73bce",
+    "parent_shas": [
+      "fe9b7ffe64a7480bb53a8fbd675416827a298e46"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T09:24:17-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T09:24:27-04:00"
+    },
+    "subject": "fix: update template version to 1.0.3, add test timeout",
+    "message_hash": "sha256:512943d5a6db967c03698f7fcb437e4f56134328fd3a30dc7fc03189bdf9c050",
+    "diff_hash": "sha256:8922a25883005143a1b78b4f929d3940ce5bebcc769c5611f5b20dd5eaab7748",
+    "files_changed": 2,
+    "files": [
+      ".gitlab-ci.yml",
+      "templates/receipt/template.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-28b3c003f5ed036b32aec4117a7473b6",
+  "content_hash": "sha256:28b3c003f5ed036b32aec4117a7473b6ebeecfd49ee3082794b6ee090a2c6f0a",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

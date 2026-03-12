@@ -1,0 +1,50 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "bbbc444d14529ffd026b196d7ba34eb290af354c",
+    "tree_sha": "000ead9496babd266c6e15dbc16243d23f3a8319",
+    "parent_shas": [
+      "c6a53b0cee8f1b9550e035d9ddefee3d956faf22"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T15:10:50-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T15:10:50-04:00"
+    },
+    "subject": "fix(ci): dogfood persist-credentials for receipts push",
+    "message_hash": "sha256:31de876f1f82b8c4c9f942792e5c9c7c7cbeee878c2d94e4127701c8ccd7e9d4",
+    "diff_hash": "sha256:4c1d7cf692f0f1890137024a10402e76bfb5dac227a847c189415189c9a7a6d0",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/dogfood.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-061faccad084bf16e4b2341def7bc310",
+  "content_hash": "sha256:061faccad084bf16e4b2341def7bc3107ab2c2aa9300efb64841739e575ab4f7",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

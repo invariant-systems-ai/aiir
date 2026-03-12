@@ -1,0 +1,51 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "4479267cdf26a9d3c794e595fa31e7ddb0549ed0",
+    "tree_sha": "6428387340c23562fb221cb9161d289d1cb790f5",
+    "parent_shas": [
+      "abc43a8b817a2865f46c4d7fd839656036a000c7"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:13:53-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-09T10:13:53-04:00"
+    },
+    "subject": "fix: correct gitleaksignore fingerprint + add BSD-3-Clause to license allow-list",
+    "message_hash": "sha256:3b1933181f0b83aacacc5123fde12cdfddd0d6f7b1b86c8fd9aa2b184a30e4f5",
+    "diff_hash": "sha256:66f3af4287b091f25c1e28dd4a4e31ad8f099975899e21b582c2b4fc5f122d65",
+    "files_changed": 2,
+    "files": [
+      ".github/workflows/security.yml",
+      ".gitleaksignore"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-14851be9c0aa462b225acf0853b69f18",
+  "content_hash": "sha256:14851be9c0aa462b225acf0853b69f189047cfbbbf2d6a68deab48e928ce41de",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

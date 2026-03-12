@@ -1,0 +1,60 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "5eaf7ef1dc0cfcfd2a6302f0c8e209790475d996",
+    "tree_sha": "a2fc75efc947f164c5e4907f198277390271b184",
+    "parent_shas": [
+      "5dbf3bd55b0c0866a83f7564a5cb9bfd0493e509"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T17:43:57-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-08T17:43:57-04:00"
+    },
+    "subject": "v1.0.9: version sync across all surfaces + CHANGELOG",
+    "message_hash": "sha256:2ce53f350c5e6fcebd6bdfbc66c0ac45cd8cb4853b55e56869cd384be440daa6",
+    "diff_hash": "sha256:154d3f00a17a84a757d1e7a7ebf7735a1d05438a502478b74b1cecbb75f15ad9",
+    "files_changed": 11,
+    "files": [
+      ".pre-commit-hooks.yaml",
+      "CHANGELOG.md",
+      "README.md",
+      "THREAT_MODEL.md",
+      "templates/azure-pipelines.yml",
+      "templates/bitbucket-pipelines.yml",
+      "templates/circleci/config.yml",
+      "templates/gitlab-ci.yml",
+      "templates/jenkins/Jenkinsfile",
+      "templates/receipt/README.md",
+      "templates/receipt/template.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-0d59716402d4a0acab33b1f7d7596967",
+  "content_hash": "sha256:0d59716402d4a0acab33b1f7d7596967ed4092866f4fa25d7a0e51abe57a41da",
+  "timestamp": "2026-03-12T12:13:54Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

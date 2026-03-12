@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "5c5d1f1c53169af008c39359293bbdf720c6abaa",
+    "tree_sha": "7cb9abcd5b0fb79e7d401290d1c4b3624abd13bf",
+    "parent_shas": [
+      "4951f330f59308ff4f8bba41802441a9b66d8c07"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T05:15:01-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-11T09:15:01+00:00"
+    },
+    "subject": "feat(dogfood): commit CBOR sidecars + explain cross-verification (#14)",
+    "message_hash": "sha256:2bdd21c2b43b1f1538e017d07e13c84971a68d9f0db92cb0123542d41431b7b4",
+    "diff_hash": "sha256:18c0a7ce0bee75999ee2ea190b2227e768e68954d64c558dc461f90d9884e49c",
+    "files_changed": 3,
+    "files": [
+      ".github/workflows/dogfood.yml",
+      "aiir/_explain.py",
+      "tests/test_explain.py"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-385a5e9ed67bf1d691fcfa115392feb7",
+  "content_hash": "sha256:385a5e9ed67bf1d691fcfa115392feb74831c4e1c70a29a92b40b2a16847f88e",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

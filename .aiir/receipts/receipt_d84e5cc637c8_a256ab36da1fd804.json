@@ -1,0 +1,54 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "d84e5cc637c850b2b015d2dd9cfa57c6f1e54095",
+    "tree_sha": "e8487cda739d3fe7c0bc67478f8e60b9bf5b7c77",
+    "parent_shas": [
+      "17a9090787a348155ac58e47aae61f46108c2b4b"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:54:43-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-11T06:54:43-04:00"
+    },
+    "subject": "feat: add spec governance, release-health docs, conformance schema & smoke workflow",
+    "message_hash": "sha256:b62209f19c916b52a985abb436e33f719a56029935c3032351eafc9b49dad782",
+    "diff_hash": "sha256:b22b228ee08bcc232cd8d0f814de9a920d059cdc3243208db0c5ca7a2e6df4ff",
+    "files_changed": 5,
+    "files": [
+      ".github/workflows/release-smoke.yml",
+      ".gitignore",
+      "SPEC_GOVERNANCE.md",
+      "docs/release-health.md",
+      "schemas/conformance-manifest.json"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-ab36da1fd80470ab68c781e0c58d72ff",
+  "content_hash": "sha256:ab36da1fd80470ab68c781e0c58d72ff7bc7f966fc2e1fd204a866e85759f5d5",
+  "timestamp": "2026-03-12T12:13:53Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

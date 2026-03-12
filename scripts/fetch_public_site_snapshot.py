@@ -10,8 +10,10 @@ from __future__ import annotations
 
 import argparse
 import re
+import time
 import sys
 import urllib.parse
+import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from collections import deque
@@ -36,8 +38,16 @@ def _fetch(url: str) -> bytes:
         url,
         headers={"User-Agent": "aiir-public-surface-ci/1.0"},
     )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        return response.read()
+    attempts = 3
+    for attempt in range(1, attempts + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return response.read()
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as exc:
+            if attempt == attempts:
+                raise RuntimeError(f"Failed to fetch {url}: {exc}") from exc
+            time.sleep(attempt)
+    raise RuntimeError(f"Failed to fetch {url}: exhausted retries")
 
 
 def _site_path_to_file(path: str) -> Path:
@@ -45,6 +55,10 @@ def _site_path_to_file(path: str) -> Path:
         return Path("index.html")
 
     trimmed = path.lstrip("/")
+    parts = Path(trimmed).parts
+    if any(part == ".." for part in parts):
+        raise RuntimeError(f"Path traversal detected for {path!r}")
+
     if path.endswith("/"):
         return Path(trimmed) / "index.html"
 
@@ -126,13 +140,16 @@ def main() -> int:
 
         url = urllib.parse.urljoin(BASE_URL, path)
         body = _fetch(url)
-        destination = (output_dir / _site_path_to_file(path)).resolve()
-        if not destination.is_relative_to(output_dir):
-            raise RuntimeError(f"Path traversal detected for {path!r}: {destination}")
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_bytes(body)
+        destination = output_dir / _site_path_to_file(path)
+        destination_resolved = destination.resolve()
+        if not destination_resolved.is_relative_to(output_dir):
+            raise RuntimeError(
+                f"Path traversal detected for {path!r}: {destination_resolved}"
+            )
+        destination_resolved.parent.mkdir(parents=True, exist_ok=True)
+        destination_resolved.write_bytes(body)
 
-        if destination.suffix == ".html":
+        if destination_resolved.suffix == ".html":
             html_text = body.decode("utf-8")
             for linked_path in sorted(_extract_internal_paths(html_text)):
                 if linked_path not in seen:

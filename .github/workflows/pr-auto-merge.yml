@@ -158,7 +158,7 @@ jobs:
 
             reviews_json="$(gh api "repos/$REPO/pulls/$pr_number/reviews")"
             copilot_reviewed="$(jq -r --arg sha "$head_sha" '
-              any(.[ ];
+              any(.[];
                 .commit_id == $sha and
                 (.user.login == "copilot-pull-request-reviewer[bot]" or .user.login == "Copilot")
               )
@@ -188,7 +188,7 @@ jobs:
             hard_rule_pattern='runtime dependenc|hmac\.compare_digest|constant.time|hardcoded secret|hardcoded token|hardcoded key|pinned.*sha|40.char|full SHA|SPDX|sync-version|version consistency'
 
             unresolved_hard_findings="$(jq -r --arg sha "$head_sha" --arg pat "$hard_rule_pattern" '
-              [.[ ] |
+              [.[] |
                 select(
                   .commit_id == $sha and
                   (.user.login == "copilot-pull-request-reviewer[bot]" or .user.login == "Copilot") and
@@ -218,7 +218,7 @@ jobs:
             Hard rules are defined in [\`.github/copilot-review-instructions.md\`](.github/copilot-review-instructions.md)."
 
               existing_comment="$(gh api "repos/$REPO/issues/$pr_number/comments?per_page=100" \
-                --jq "[.[ ] | select(.body | contains(\"$marker\"))] | first | .id // empty")"
+                --jq "[.[] | select(.body | contains(\"$marker\"))] | first | .id // empty")"
 
               if [[ -n "$existing_comment" ]]; then
                 gh api --method PATCH "repos/$REPO/issues/comments/$existing_comment" -f body="$summary" >/dev/null

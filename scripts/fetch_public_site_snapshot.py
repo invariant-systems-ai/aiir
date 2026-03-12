@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""
+fetch_public_site_snapshot.py — Fetch a filesystem snapshot of public site assets for CI tests.
+
+Copyright 2025-2026 Invariant Systems, Inc.
+SPDX-License-Identifier: Apache-2.0
+"""
+
 from __future__ import annotations
 
 import argparse

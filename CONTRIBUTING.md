@@ -10,7 +10,7 @@ cd aiir
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"    # installs pytest + hypothesis
 pre-commit install && pre-commit install --hook-type post-commit --hook-type pre-push
-python -m pytest tests/ -q  # 1680+ tests, ~4 min
+python -m pytest tests/ -q  # 1893 tests, ~4 min
 ```
 
 > **Note**: `pip install -e ".[dev]"` installs `hypothesis` (property-based fuzz
@@ -105,7 +105,7 @@ Use clear, descriptive commit messages. Examples:
 ## Code standards
 
 - **Zero runtime dependencies.** This is a hard rule. AIIR ships with nothing but the Python standard library.
-- **Test everything.** We maintain 1680+ tests across unit, integration, security, and fuzz suites. 100% coverage enforced.
+- **Test everything.** We maintain 1,893 tests across unit, integration, security, and fuzz suites. 100% coverage enforced.
 - **Security-first.** All inputs are validated. All outputs are deterministic. See the [Threat Model](THREAT_MODEL.md).
 
 ## Development setup

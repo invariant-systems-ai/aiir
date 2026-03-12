@@ -1044,6 +1044,11 @@ class TestStatsJSON(unittest.TestCase):
     def test_site_metric_copy_uses_dynamic_bindings(self):
         index = _read(SITE_DIR / "index.html")
         self.assertIn(
+            'data-stat-inline="tests" data-stat-suffix=" tests"',
+            index,
+            "index.html standards copy must bind test count to stats.json",
+        )
+        self.assertIn(
             'data-stat-inline="ci_jobs"',
             index,
             "index.html proof copy must bind CI count to stats.json",
@@ -1065,6 +1070,17 @@ class TestStatsJSON(unittest.TestCase):
             security,
             "security.html CI copy must bind required gate count to stats.json",
         )
+
+    def test_no_stale_test_counts_on_public_site(self):
+        stale_counts = ("1,856 tests", "1856 tests", "1856 TESTS PASSING")
+        for page_name in ("index.html", "about.html", "security.html"):
+            content = _read(SITE_DIR / page_name)
+            for stale in stale_counts:
+                self.assertNotIn(
+                    stale,
+                    content,
+                    f"{page_name} still contains stale public test count: {stale}",
+                )
 
 
 if __name__ == "__main__":

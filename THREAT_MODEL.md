@@ -497,6 +497,7 @@ inputs per test run**.
 | ✅ Done | SLSA provenance attestation for both wheel and sdist | Supply chain |
 | ✅ Done | Transport-level agent attestation: 3-tier confidence model (declared / transport / environment) across MCP, CLI, GitHub Action, GitLab CI | R23-AI-01–04 |
 | P1 | Add `--strict-ai-detection` mode with configurable signal list | S-02 (homoglyphs), R-01 |
+| P1 | Reduce false-negative rate for agent-mode tools (Copilot Chat, Claude Code, Cursor Agent) — see [README § Detection scope](README.md#detection-scope-and-limitations). 195 of 246 dogfood receipts attest `human` because these tools don't add `Co-authored-by` trailers. | S-01 (evasion-by-default) |
 | P1 | Integrate with GitHub Artifact Attestations API for immutable provenance | R-03 |
 | P2 | Add JSON Schema validation for receipt structure (structural validation beyond existing depth check) | D-07 |
 | P2 | Consider `resource.setrlimit` to cap memory/CPU in CLI process | D-02 |

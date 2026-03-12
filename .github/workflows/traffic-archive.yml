@@ -1,0 +1,80 @@
+# .github/workflows/traffic-archive.yml
+# ────────────────────────────────────────────────────────────────────
+# Archives GitHub traffic stats (clones + views) that are otherwise
+# lost after 14 days.  Pushes a cumulative JSONL ledger to the
+# `traffic-data` branch (never touches main).
+#
+# Requires: TRAFFIC_TOKEN (PAT with repo scope) — the default
+# GITHUB_TOKEN cannot read traffic API data.
+# ────────────────────────────────────────────────────────────────────
+name: traffic-archive
+
+on:
+  schedule:
+    - cron: "30 5 * * *"        # daily 05:30 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write                # push to traffic-data branch
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    if: github.repository == 'invariant-systems-ai/aiir'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: traffic-data
+          fetch-depth: 1
+        continue-on-error: true       # branch may not exist yet
+
+      - name: Initialise branch if missing
+        run: |
+          if ! git rev-parse --verify HEAD >/dev/null 2>&1; then
+            git checkout --orphan traffic-data
+            git rm -rf . 2>/dev/null || true
+            echo '# Traffic archive' > README.md
+            git add README.md
+            git commit -m "init traffic-data branch"
+          fi
+
+      - name: Fetch traffic stats
+        env:
+          GH_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p data
+          TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+          # Clones
+          CLONES=$(gh api repos/${{ github.repository }}/traffic/clones)
+          echo "$CLONES" | jq -c --arg ts "$TS" '{fetched_at: $ts, metric: "clones"} + .' \
+            >> data/clones.jsonl
+
+          # Views
+          VIEWS=$(gh api repos/${{ github.repository }}/traffic/views)
+          echo "$VIEWS" | jq -c --arg ts "$TS" '{fetched_at: $ts, metric: "views"} + .' \
+            >> data/views.jsonl
+
+          # Referrers
+          REFS=$(gh api repos/${{ github.repository }}/traffic/popular/referrers)
+          echo "$REFS" | jq -c --arg ts "$TS" '{fetched_at: $ts, metric: "referrers", data: .}' \
+            >> data/referrers.jsonl
+
+          # Stars / forks snapshot
+          gh api repos/${{ github.repository }} \
+            --jq "{fetched_at: \"$TS\", stars: .stargazers_count, forks: .forks_count, watchers: .subscribers_count}" \
+            >> data/engagement.jsonl
+
+          echo "### Traffic snapshot $TS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Clones (14d): $(echo "$CLONES" | jq .count)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Views  (14d): $(echo "$VIEWS"  | jq .count)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit & push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet && echo "No new data" && exit 0
+          git commit -m "traffic: $(date -u +%Y-%m-%d)"
+          git push origin traffic-data

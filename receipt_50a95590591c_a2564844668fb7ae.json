@@ -1,0 +1,48 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "50a95590591cfd928f5c0de4431aefb5102940e8",
+    "tree_sha": "0d0a6408eedd09ca0d90698f9d92c8ce5c879219",
+    "parent_shas": [
+      "d85888a08d301f1f21a7b728a59b0938d46118e1"
+    ],
+    "author": {
+      "name": "InvariantSystems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T17:51:55-04:00"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-03-12T17:51:55-04:00"
+    },
+    "subject": "fix: honor review thread resolution in ai-gate (#51)",
+    "message_hash": "sha256:7780b7391e9e04000963332a2731fbb6032ce4c4f2f1577bed7e65d4533eccb1",
+    "diff_hash": "sha256:28bd55341708584067be9fa451ded82fae656696e4f66fb3483e7a73d6f61645",
+    "files_changed": 1,
+    "files": [
+      ".github/workflows/pr-auto-merge.yml"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.github"
+  },
+  "receipt_id": "g1-4844668fb7ae887db876619fd40e8c79",
+  "content_hash": "sha256:4844668fb7ae887db876619fd40e8c79db1847bf2221fe005438587943981168",
+  "timestamp": "2026-03-12T21:52:14Z",
+  "extensions": {}
+}

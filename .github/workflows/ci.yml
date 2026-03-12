@@ -45,7 +45,12 @@ jobs:
       - name: Install test dependencies
         run: pip install --require-hashes --no-deps -r .github/requirements/test.txt
 
+      - name: Fetch public site snapshot
+        run: python scripts/fetch_public_site_snapshot.py "${{ runner.temp }}/invariantsystems.io"
+
       - name: Run unit tests
+        env:
+          AIIR_SITE_DIR: ${{ runner.temp }}/invariantsystems.io
         run: python -m pytest tests/ -v --tb=short --ignore=tests/test_fuzz.py
 
   # Property-based fuzz tests (Hypothesis).  Pure-Python logic with zero
@@ -113,7 +118,12 @@ jobs:
       - name: Install dependencies
         run: pip install --require-hashes --no-deps -r .github/requirements/coverage.txt
 
+      - name: Fetch public site snapshot
+        run: python scripts/fetch_public_site_snapshot.py "${{ runner.temp }}/invariantsystems.io"
+
       - name: Run tests with coverage
+        env:
+          AIIR_SITE_DIR: ${{ runner.temp }}/invariantsystems.io
         run: |
           coverage run --source=aiir -m pytest tests/ --ignore=tests/test_fuzz.py -q --tb=short
           coverage report --show-missing

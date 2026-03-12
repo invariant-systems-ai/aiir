@@ -1,7 +1,8 @@
 # CODEOWNERS — require review for security-critical paths.
 # See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 #
-# The branch ruleset "main — production gate" enforces CODEOWNERS review.
+# Ownership intent is tracked here; merge enforcement is defined separately in
+# .github/rulesets/main-production-gate.json.
 # Dependabot PRs are auto-approved for minor/patch updates.
 
 # Default: all changes require review from an org owner

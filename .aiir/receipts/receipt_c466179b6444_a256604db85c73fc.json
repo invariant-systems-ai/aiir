@@ -1,0 +1,52 @@
+{
+  "type": "aiir.commit_receipt",
+  "schema": "aiir/commit_receipt.v2",
+  "version": "1.2.5",
+  "commit": {
+    "sha": "c466179b6444220217197840b945564a79f8e224",
+    "tree_sha": "9198b043a7c6af4c09a89d4c22ba607a04643a09",
+    "parent_shas": [
+      "51d4c408eaafbdf60d3b1a74b03340add3548e51"
+    ],
+    "author": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T09:33:50-04:00"
+    },
+    "committer": {
+      "name": "Invariant Systems",
+      "email": "noah@invariantsystems.io",
+      "date": "2026-03-12T09:33:50-04:00"
+    },
+    "subject": "docs: honest detection-scope narrative across all public surfaces",
+    "message_hash": "sha256:d63d0ba6b2d79e9164f3828ce71429b0b62f96fdb0cd198cde45bf4429bc467d",
+    "diff_hash": "sha256:54855c32d5e4f654008aff882e76d85647938209982e94a490497230320a7090",
+    "files_changed": 3,
+    "files": [
+      "README.md",
+      "SPEC.md",
+      "THREAT_MODEL.md"
+    ]
+  },
+  "ai_attestation": {
+    "is_ai_authored": false,
+    "signals_detected": [],
+    "signal_count": 0,
+    "is_bot_authored": false,
+    "bot_signals_detected": [],
+    "bot_signal_count": 0,
+    "authorship_class": "human",
+    "detection_method": "heuristic_v2"
+  },
+  "provenance": {
+    "repository": "https://github.com/invariant-systems-ai/aiir.git",
+    "tool": "https://github.com/invariant-systems-ai/aiir@1.2.5",
+    "generator": "aiir.cli"
+  },
+  "receipt_id": "g1-604db85c73fcb9a45cd8c03d79f068a0",
+  "content_hash": "sha256:604db85c73fcb9a45cd8c03d79f068a09f4260a1eb3d7d9e1bf58ee86e1a917e",
+  "timestamp": "2026-03-12T13:33:51Z",
+  "extensions": {
+    "instance_id": "8ef04f9d-e894-4d16-82a2-8a1655ac6295"
+  }
+}

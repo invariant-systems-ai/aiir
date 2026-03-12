@@ -2,7 +2,7 @@
 
 **Title:** Show HN: AIIR – Cryptographic receipts for AI-assisted git commits (zero deps, Apache 2.0)
 
-**URL:** https://github.com/invariant-systems-ai/aiir
+**URL:** <https://github.com/invariant-systems-ai/aiir>
 
 **Text:**
 
@@ -12,7 +12,7 @@ I built AIIR (AI Integrity Receipts) — an open-source tool that generates cont
 
     pip install aiir && cd your-repo && aiir --pretty
 
-Zero dependencies. Python 3.9+. Your last commit now has a tamper-evident receipt in `.aiir/receipts.jsonl`. Also on PyPI: https://pypi.org/project/aiir/
+Zero dependencies. Python 3.9+. Your last commit now has a tamper-evident receipt in `.aiir/receipts.jsonl`. Also on PyPI: <https://pypi.org/project/aiir/>
 
 The problem: AI writes a growing share of production code — Copilot, ChatGPT, Claude, Cursor — but git log doesn't distinguish human from machine. When your auditor asks "which commits involved AI?", you're grepping commit messages and hoping.
 

@@ -25,4 +25,3 @@ It runs as a CLI, GitHub Action (uses: invariant-systems-ai/aiir@v1), GitLab CI/
 The EU AI Act (entered into force August 2024) is making this more concrete — GPAI transparency obligations applied from August 2025, and the broader transparency and high-risk rules phase in through 2026–2027. But even without a compliance driver, having a machine-readable record of which commits involved AI tools is useful for any team that ships code.
 
 Feedback welcome on the receipt schema and policy model. The spec is in SPEC.md.
-Feedback welcome on the receipt schema and policy model. The spec is in SPEC.md.

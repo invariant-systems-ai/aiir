@@ -22,7 +22,7 @@ aiir --pretty
 
 Each receipt is a JSON object containing the commit metadata (SHA, author, date, file list), a diff hash, and an `ai_attestation` block that records detected signals. The core fields are serialized in a canonical order, then SHA-256 hashed to produce a `content_hash`. The `receipt_id` is derived from that hash. Change any field and the hash breaks — that's the tamper-detection guarantee.
 
-Receipts append to `.aiir/receipts.jsonl` — an append-only JSONL ledger with automatic deduplication (same commit = same content hash = no duplicate). An index file maps commit SHAs to receipt offsets for O(1) lookup.
+Receipts append to `.aiir/receipts.jsonl` — an append-only JSONL ledger with automatic deduplication (same commit = same content hash = no duplicate). An index file (`.aiir/index.json`) maps commit SHAs to their `receipt_id` and ledger line number for effectively O(1) lookup, deduplication, and stats.
 
 Detection is signal-based, not stylistic: Co-authored-by trailers (Copilot, Claude, etc.), known bot account patterns, commit message markers. The threat model is explicit — AIIR records what's *declared*, not what's *true*. A developer who strips Co-authored-by trailers before committing will produce a receipt that says "no AI detected." The receipt is honest about its inputs; it doesn't claim omniscience. (See THREAT_MODEL.md in the repo.)
 

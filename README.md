@@ -111,6 +111,16 @@ This aligns directly with [SLSA](https://slsa.dev), [Sigstore](https://sigstore.
 **For security teams**: Get policy-evaluated verification results as signed attestations.
 **For auditors**: Query the JSONL ledger or VSA artifacts — every claim is cryptographically verifiable.
 
+### Repo-Tracked GitHub Policy
+
+The GitHub-hosted `main` branch ruleset is tracked in
+[`.github/rulesets/main-production-gate.json`](.github/rulesets/main-production-gate.json)
+so merge policy is reviewable in git instead of living only in the GitHub UI.
+Apply it with [`scripts/sync-github-ruleset.sh`](scripts/sync-github-ruleset.sh).
+
+The current solo-maintainer mode keeps core CI required on `main` while not
+requiring a second human approval or resolved review threads.
+
 ---
 
 ## Try It
@@ -943,7 +953,7 @@ Three presets:
 | `balanced` | Soft-fail | Recommended | 80% | Most teams — catches issues without blocking |
 | `permissive` | Warn-only | Optional | 100% | Early adoption, experimentation |
 
-Per-receipt checks: signing status, provenance repository, authorship class, schema validity.  
+Per-receipt checks: signing status, provenance repository, authorship class, schema validity.
 Aggregate checks: AI commit percentage cap.
 
 Commit `.aiir/policy.json` to your repo so every contributor and CI run uses the same rules.

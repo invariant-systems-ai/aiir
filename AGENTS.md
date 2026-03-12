@@ -62,8 +62,10 @@ pre-commit install && pre-commit install --hook-type post-commit --hook-type pre
    - `quality-ok` — mypy, markdownlint, link-check, spelling, hadolint, yamllint, SPDX
    - `security-ok` — gitleaks, bandit, semgrep, ruff, pip-audit, license-check
    - `ai-gate` — Copilot review + all three gates above
-7. **Do not merge without human approval.** Auto-merge is only enabled after
-   Copilot review + CI pass + human CODEOWNER approval.
+7. **Merge policy is defined by the tracked GitHub ruleset** in
+   [`.github/rulesets/main-production-gate.json`](.github/rulesets/main-production-gate.json).
+   The current solo-maintainer mode requires core CI to pass and uses squash-only
+   merges on `main`; a second human approval is not currently required.
 
 ---
 
@@ -130,6 +132,19 @@ This repo mirrors to GitHub (primary) and GitLab. See `.local/AGENTS.md`
 (workstation-only, gitignored) for the dual-push commands and GitLab
 branch protection API details. If `.local/AGENTS.md` is not present, ask
 the developer — never hardcode GitLab credentials or tokens.
+
+## §7.1 — Ruleset Source Of Truth
+
+GitHub branch protection and rulesets are hosted settings, but the intended
+`main` branch policy is tracked in
+[`/.github/rulesets/main-production-gate.json`](.github/rulesets/main-production-gate.json).
+Apply that file with:
+
+```bash
+scripts/sync-github-ruleset.sh
+```
+
+Review policy changes in git before applying them to GitHub.
 
 ---
 

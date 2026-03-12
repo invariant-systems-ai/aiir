@@ -22,6 +22,10 @@
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12134/badge)](https://www.bestpractices.dev/projects/12134)
 [![Standards Readiness](https://img.shields.io/badge/Standards--Readiness-68.9%2F100-orange)](docs/standards-readiness.md)
 [![AIIR Receipted](https://img.shields.io/badge/AIIR-Receipted%20✓-blue)](https://github.com/invariant-systems-ai/aiir)
+[![GitHub stars](https://img.shields.io/github/stars/invariant-systems-ai/aiir?style=social)](https://github.com/invariant-systems-ai/aiir/stargazers)
+
+> **Using AIIR?** Please [★ star this repo](https://github.com/invariant-systems-ai/aiir/stargazers) — it helps others discover the project and signals community support.
+> Citing in research or policy? See the [**Cite this repository**](https://github.com/invariant-systems-ai/aiir) button on GitHub (powered by `CITATION.cff`).
 
 <p align="center">
   <img src="docs/demo.svg" alt="AIIR terminal demo — pip install aiir && aiir --pretty" width="720">
@@ -1067,7 +1071,13 @@ AIIR publishes a formal specification and machine-readable schema for third-part
 
 Built by [Invariant Systems, Inc.](https://invariantsystems.io)
 
-**License**: Apache-2.0 — See [LICENSE](LICENSE)
+**License**: Apache-2.0 — See [LICENSE](LICENSE).
+Apache-2.0 **requires** derivative works to preserve the [NOTICE](NOTICE) file
+and include attribution.  If you use AIIR in your project, keep the NOTICE and
+credit Invariant Systems.
+
+**Citing AIIR**: Use the **Cite this repository** button on GitHub or see
+[CITATION.cff](CITATION.cff).
 
 **Trademarks**: "AIIR", "AI Integrity Receipts", and "Invariant Systems"
 are trademarks of Invariant Systems, Inc. See [TRADEMARK.md](TRADEMARK.md).

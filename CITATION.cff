@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://citation-file-format.github.io/1.2.0/schema.json
+cff-version: 1.2.0
+title: "AIIR — AI Integrity Receipts"
+message: >-
+  If you use AIIR in your research or tooling, please cite it using
+  the metadata in this file.
+type: software
+authors:
+  - name: "Invariant Systems, Inc."
+    website: "https://invariantsystems.io"
+  - given-names: Noah
+    family-names: Hall
+    affiliation: "Invariant Systems, Inc."
+    email: noah@invariantsystems.io
+repository-code: "https://github.com/invariant-systems-ai/aiir"
+url: "https://invariantsystems.io"
+abstract: >-
+  Generate, verify, and attest cryptographic receipts for commits with
+  declared AI involvement.  Release verification with SLSA-compatible
+  Verification Summary Attestation (VSA).  Zero dependencies.
+keywords:
+  - ai-integrity
+  - receipts
+  - attestation
+  - slsa
+  - supply-chain-security
+  - eu-ai-act
+  - compliance
+license: Apache-2.0
+version: 1.2.5
+date-released: "2026-03-11"

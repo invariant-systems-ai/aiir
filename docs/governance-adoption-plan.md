@@ -82,7 +82,7 @@ This is pure documentation of existing dogfooding, not new engineering.
 **Content outline**:
 
 - How AIIR generates a receipt for every commit (GitHub Action + GitLab CI)
-- Receipt verification in CI pipeline (38 checks, 0 false positives in N releases)
+- Receipt verification in CI pipeline (36 checks, 0 false positives in N releases)
 - File permission hardening story (PR #32)
 - Metrics: receipts generated, verification throughput, zero-dependency advantage
 

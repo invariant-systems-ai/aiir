@@ -104,11 +104,12 @@ class TestWebsiteHTMLIntegrity(unittest.TestCase):
         }
         self.assertEqual(pages, expected, f"Missing pages: {expected - pages}")
 
-    def test_nav_consistency_8_links(self):
-        """Every main page header <nav> has exactly 8 links."""
+    def test_nav_consistency_9_links(self):
+        """Every main page header <nav> has exactly 9 links."""
         expected_hrefs = {
             "/docs",
             "/verify",
+            "/demo",
             "/integrations",
             "/spec",
             "/pricing",
@@ -123,8 +124,8 @@ class TestWebsiteHTMLIntegrity(unittest.TestCase):
             hrefs = re.findall(r'href="([^"]*)"', nav_html)
             self.assertEqual(
                 len(hrefs),
-                8,
-                f"{page.name}: expected 8 nav links, got {len(hrefs)}: {hrefs}",
+                9,
+                f"{page.name}: expected 9 nav links, got {len(hrefs)}: {hrefs}",
             )
             # Check essential internal links are present
             href_set = set(hrefs)
@@ -138,7 +139,7 @@ class TestWebsiteHTMLIntegrity(unittest.TestCase):
     def test_footer_consistency(self):
         """Main pages keep the expected footer link count per page."""
         expected_counts = {
-            "index.html": 13,
+            "index.html": 14,
         }
         for page in _main_pages():
             content = _read(page)
@@ -147,7 +148,7 @@ class TestWebsiteHTMLIntegrity(unittest.TestCase):
             )
             self.assertIsNotNone(footer_match, f"{page.name}: no footer-links found")
             hrefs = re.findall(r'href="([^"]*)"', footer_match.group(1))
-            expected_count = expected_counts.get(page.name, 12)
+            expected_count = expected_counts.get(page.name, 13)
             self.assertEqual(
                 len(hrefs),
                 expected_count,
@@ -977,36 +978,130 @@ class TestErrorPage(unittest.TestCase):
 class TestStatsJSON(unittest.TestCase):
     """stats.json claims are plausible and consistent."""
 
+    def _stats_payload(self) -> dict:
+        data = json.loads(_read(SITE_DIR / "stats.json"))
+        self.assertIsInstance(
+            data,
+            dict,
+            "stats.json top-level value must be a JSON object",
+        )
+        self.assertIn(
+            "stats",
+            data,
+            'stats.json missing top-level "stats" key',
+        )
+        self.assertIsInstance(
+            data["stats"],
+            dict,
+            'stats.json "stats" value must be a JSON object',
+        )
+        self.assertIn("version", data)
+        self.assertIn("updated", data)
+        return data
+
+    def _stats(self) -> dict:
+        return self._stats_payload()["stats"]
+
     def test_stats_json_valid(self):
-        stats = json.loads(_read(SITE_DIR / "stats.json"))
-        self.assertIn("version", stats)
-        self.assertIn("stats", stats)
-        self.assertIn("updated", stats)
+        self._stats_payload()
 
     def test_zero_dependencies(self):
-        stats = json.loads(_read(SITE_DIR / "stats.json"))
+        stats = self._stats()
         self.assertEqual(
-            stats["stats"]["dependencies"],
+            stats["dependencies"],
             0,
             "stats.json claims non-zero dependencies",
         )
 
     def test_test_count_plausible(self):
         """Test count should be at least 1000 (currently 1111)."""
-        stats = json.loads(_read(SITE_DIR / "stats.json"))
+        stats = self._stats()
         self.assertGreaterEqual(
-            stats["stats"]["tests"],
+            stats["tests"],
             1000,
-            f"stats.json test count suspiciously low: {stats['stats']['tests']}",
+            f"stats.json test count suspiciously low: {stats['tests']}",
         )
 
     def test_mcp_tests_positive(self):
-        stats = json.loads(_read(SITE_DIR / "stats.json"))
+        stats = self._stats()
         self.assertGreater(
-            stats["stats"]["mcp_tests"],
+            stats["mcp_tests"],
             0,
             "stats.json claims zero MCP tests",
         )
+
+    def test_site_metric_fallbacks_match_stats_json(self):
+        stats = self._stats()
+        self.assertIn("tests", stats)
+        self.assertIn("ci_jobs", stats)
+        self.assertIn("unit_tests", stats)
+
+        index = _read(SITE_DIR / "index.html")
+        self.assertIn(
+            f'id="stat-tests">{stats["tests"]}<',
+            index,
+            "index.html fallback test count drifted from stats.json",
+        )
+        self.assertIn(
+            f'id="stat-ci">{stats["ci_jobs"]}<',
+            index,
+            "index.html fallback CI count drifted from stats.json",
+        )
+
+        about = _read(SITE_DIR / "about.html")
+        self.assertIn(
+            f'data-stat="tests">{stats["tests"]}<',
+            about,
+            "about.html fallback test count drifted from stats.json",
+        )
+
+        security = _read(SITE_DIR / "security.html")
+        self.assertIn(
+            f'data-stat-inline="unit_tests" data-stat-suffix=" tests">{stats["unit_tests"]} tests<',
+            security,
+            "security.html fallback unit test count drifted from stats.json",
+        )
+
+    def test_site_metric_copy_uses_dynamic_bindings(self):
+        index = _read(SITE_DIR / "index.html")
+        self.assertIn(
+            'data-stat-inline="tests" data-stat-suffix=" tests"',
+            index,
+            "index.html standards copy must bind test count to stats.json",
+        )
+        self.assertIn(
+            'data-stat-inline="ci_jobs"',
+            index,
+            "index.html proof copy must bind CI count to stats.json",
+        )
+        self.assertIn(
+            'data-stat-inline="required_gates"',
+            index,
+            "index.html proof copy must bind required gate count to stats.json",
+        )
+
+        security = _read(SITE_DIR / "security.html")
+        self.assertIn(
+            'data-stat-inline="ci_jobs"',
+            security,
+            "security.html CI copy must bind CI count to stats.json",
+        )
+        self.assertIn(
+            'data-stat-inline="required_gates"',
+            security,
+            "security.html CI copy must bind required gate count to stats.json",
+        )
+
+    def test_no_stale_test_counts_on_public_site(self):
+        stale_counts = ("1,856 tests", "1856 tests", "1856 TESTS PASSING")
+        for page_name in ("index.html", "about.html", "security.html"):
+            content = _read(SITE_DIR / page_name)
+            for stale in stale_counts:
+                self.assertNotIn(
+                    stale,
+                    content,
+                    f"{page_name} still contains stale public test count: {stale}",
+                )
 
 
 if __name__ == "__main__":

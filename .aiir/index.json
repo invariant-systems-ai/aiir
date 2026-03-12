@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "receipt_count": 250,
+  "receipt_count": 251,
   "ai_commit_count": 9,
   "bot_commit_count": 42,
   "ai_percentage": 3.6,
   "first_receipt": "2026-03-12T12:13:52Z",
-  "latest_timestamp": "2026-01-01T00:00:00Z",
+  "latest_timestamp": "2026-03-12T15:24:36Z",
   "unique_authors": 3,
   "commits": {
     "eb762766586412bb3531241e83b367e7c0393d4b": {
@@ -2007,6 +2007,14 @@
       "authorship_class": "human",
       "author": "",
       "line": 250
+    },
+    "a829b48f369b3dde9959cf82f1fc1a378b125d5e": {
+      "receipt_id": "g1-48885a24bf0977dcf1ca32d0332a66f7",
+      "ai": false,
+      "bot": false,
+      "authorship_class": "human",
+      "author": "noah@invariantsystems.io",
+      "line": 251
     }
   }
 }

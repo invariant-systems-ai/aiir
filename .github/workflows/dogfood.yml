@@ -150,11 +150,14 @@ jobs:
             exit 0
           fi
 
-          gh api "repos/invariant-systems-ai/invariantsystems.io/dispatches" \
+          if ! gh api "repos/invariant-systems-ai/invariantsystems.io/dispatches" \
             -f event_type=receipts-publish \
             -f "client_payload[source_repo]=${GITHUB_REPOSITORY}" \
             -f "client_payload[source_branch]=main" \
-            -f "client_payload[source_sha]=${GITHUB_SHA}"
+            -f "client_payload[source_sha]=${GITHUB_SHA}"; then
+            echo "::warning::Failed to dispatch receipts-publish to invariantsystems.io — website receipts index will refresh on schedule"
+            exit 0
+          fi
 
           echo "✅ Dispatched receipts-publish to invariantsystems.io"
 
